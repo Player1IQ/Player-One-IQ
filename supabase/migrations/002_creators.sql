@@ -1,28 +1,5 @@
--- Run this in the Supabase SQL Editor (Dashboard → SQL → New query)
+-- Migration: add creators table (run if organizations already exists)
 
-create table if not exists public.organizations (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade not null unique,
-  name text not null,
-  type text not null,
-  created_at timestamptz default now() not null
-);
-
-alter table public.organizations enable row level security;
-
-create policy "Users can view their own organization"
-  on public.organizations for select
-  using (auth.uid() = user_id);
-
-create policy "Users can insert their own organization"
-  on public.organizations for insert
-  with check (auth.uid() = user_id);
-
-create policy "Users can update their own organization"
-  on public.organizations for update
-  using (auth.uid() = user_id);
-
--- Creators (scoped to organization)
 create table if not exists public.creators (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid references public.organizations(id) on delete cascade not null,
@@ -41,6 +18,11 @@ create index if not exists creators_organization_id_idx
   on public.creators (organization_id);
 
 alter table public.creators enable row level security;
+
+drop policy if exists "Users can view org creators" on public.creators;
+drop policy if exists "Users can insert org creators" on public.creators;
+drop policy if exists "Users can update org creators" on public.creators;
+drop policy if exists "Users can delete org creators" on public.creators;
 
 create policy "Users can view org creators"
   on public.creators for select

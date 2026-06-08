@@ -1,8 +1,10 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CreatorsPageClient } from "@/components/creators/CreatorsPageClient";
-import { creators } from "@/lib/creators";
+import { getCreators } from "@/lib/creators/queries";
 
-export default function CreatorsPage() {
+export default async function CreatorsPage() {
+  const creators = await getCreators();
+
   return (
     <DashboardLayout
       title="Creators"

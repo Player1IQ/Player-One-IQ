@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import { CreatorRosterTable } from "./CreatorRosterTable";
-import { AddCreatorModal } from "./AddCreatorModal";
+import { CreatorFormModal } from "./CreatorFormModal";
 
 interface CreatorsPageClientProps {
   creators: Creator[];
@@ -17,8 +17,11 @@ export function CreatorsPageClient({ creators }: CreatorsPageClientProps) {
   const filtered = creators.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.displayName.toLowerCase().includes(search.toLowerCase()) ||
-      c.primaryPlatform.toLowerCase().includes(search.toLowerCase())
+      (c.email?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
+      c.primaryPlatform.toLowerCase().includes(search.toLowerCase()) ||
+      c.socialHandles.some((h) =>
+        h.handle.toLowerCase().includes(search.toLowerCase())
+      )
   );
 
   return (
@@ -59,7 +62,7 @@ export function CreatorsPageClient({ creators }: CreatorsPageClientProps) {
 
       <CreatorRosterTable creators={filtered} />
 
-      <AddCreatorModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <CreatorFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   );
 }

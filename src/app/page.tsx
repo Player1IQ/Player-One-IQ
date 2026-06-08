@@ -1,43 +1,49 @@
+import Link from "next/link";
 import { Users, Building2, FileText, DollarSign } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
+import { getCreators } from "@/lib/creators/queries";
+import { StatusBadge } from "@/components/creators/StatusBadge";
 
-const stats = [
-  {
-    title: "Active Creators",
-    value: "128",
-    change: "+12%",
-    trend: "up" as const,
-    icon: Users,
-    iconColor: "bg-violet-500/10 text-violet-400 ring-violet-500/20",
-  },
-  {
-    title: "Active Sponsors",
-    value: "47",
-    change: "+8%",
-    trend: "up" as const,
-    icon: Building2,
-    iconColor: "bg-purple-500/10 text-purple-400 ring-purple-500/20",
-  },
-  {
-    title: "Active Contracts",
-    value: "93",
-    change: "+5%",
-    trend: "up" as const,
-    icon: FileText,
-    iconColor: "bg-fuchsia-500/10 text-fuchsia-400 ring-fuchsia-500/20",
-  },
-  {
-    title: "Monthly Revenue",
-    value: "$284K",
-    change: "+18%",
-    trend: "up" as const,
-    icon: DollarSign,
-    iconColor: "bg-accent/10 text-accent-light ring-accent/20",
-  },
-];
+export default async function DashboardPage() {
+  const creators = await getCreators();
+  const activeCreators = creators.filter((c) => c.status === "active");
 
-export default function DashboardPage() {
+  const stats = [
+    {
+      title: "Active Creators",
+      value: String(activeCreators.length),
+      change: `${creators.length} total`,
+      trend: "up" as const,
+      icon: Users,
+      iconColor: "bg-violet-500/10 text-violet-400 ring-violet-500/20",
+    },
+    {
+      title: "Active Sponsors",
+      value: "47",
+      change: "+8%",
+      trend: "up" as const,
+      icon: Building2,
+      iconColor: "bg-purple-500/10 text-purple-400 ring-purple-500/20",
+    },
+    {
+      title: "Active Contracts",
+      value: "93",
+      change: "+5%",
+      trend: "up" as const,
+      icon: FileText,
+      iconColor: "bg-fuchsia-500/10 text-fuchsia-400 ring-fuchsia-500/20",
+    },
+    {
+      title: "Monthly Revenue",
+      value: "$284K",
+      change: "+18%",
+      trend: "up" as const,
+      icon: DollarSign,
+      iconColor: "bg-accent/10 text-accent-light ring-accent/20",
+    },
+  ];
+
   return (
     <DashboardLayout
       title="Dashboard"
@@ -63,11 +69,6 @@ export default function DashboardPage() {
                 action: "New contract signed",
                 detail: "Nike × @CreatorMike",
                 time: "2 hours ago",
-              },
-              {
-                action: "Creator onboarded",
-                detail: "@SarahStreams joined",
-                time: "5 hours ago",
               },
               {
                 action: "Sponsor renewal",
@@ -97,36 +98,55 @@ export default function DashboardPage() {
         </section>
 
         <section className="rounded-xl border border-border bg-surface-raised p-6">
-          <h2 className="text-base font-semibold text-white">
-            Top Performing Creators
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">By revenue this month</p>
-          <ul className="mt-6 space-y-4">
-            {[
-              { name: "@CreatorMike", revenue: "$42,800", growth: "+24%" },
-              { name: "@SarahStreams", revenue: "$38,200", growth: "+19%" },
-              { name: "@GamePro", revenue: "$31,500", growth: "+15%" },
-              { name: "@TechVibes", revenue: "$28,900", growth: "+11%" },
-            ].map((creator, i) => (
-              <li
-                key={creator.name}
-                className="flex items-center gap-4 border-b border-border-subtle pb-4 last:border-0 last:pb-0"
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent-light">
-                  {i + 1}
-                </span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-200">
-                    {creator.name}
-                  </p>
-                  <p className="text-xs text-gray-500">{creator.revenue}</p>
-                </div>
-                <span className="text-xs font-medium text-emerald-400">
-                  {creator.growth}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-white">
+                Your Creators
+              </h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Recently added to your roster
+              </p>
+            </div>
+            <Link
+              href="/creators"
+              className="text-xs font-medium text-accent-light hover:text-white"
+            >
+              View all
+            </Link>
+          </div>
+          {creators.length === 0 ? (
+            <p className="mt-6 text-sm text-gray-500">
+              No creators yet.{" "}
+              <Link href="/creators" className="text-accent-light hover:underline">
+                Add your first creator
+              </Link>
+            </p>
+          ) : (
+            <ul className="mt-6 space-y-4">
+              {creators.slice(0, 5).map((creator) => (
+                <li
+                  key={creator.id}
+                  className="flex items-center gap-4 border-b border-border-subtle pb-4 last:border-0 last:pb-0"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-xs font-bold text-accent-light">
+                    {creator.avatarInitials}
+                  </div>
+                  <div className="flex-1">
+                    <Link
+                      href={`/creators/${creator.id}`}
+                      className="text-sm font-medium text-gray-200 hover:text-accent-light"
+                    >
+                      {creator.name}
+                    </Link>
+                    <p className="text-xs text-gray-500">
+                      {creator.primaryPlatform}
+                    </p>
+                  </div>
+                  <StatusBadge status={creator.status} />
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
     </DashboardLayout>

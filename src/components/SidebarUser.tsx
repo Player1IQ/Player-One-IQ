@@ -20,10 +20,10 @@ export function SidebarUser() {
     const supabase = createClient();
     if (!supabase) return;
 
-    async function loadUser() {
+    async function loadUser(client: NonNullable<ReturnType<typeof createClient>>) {
       const {
         data: { user },
-      } = await supabase.auth.getUser();
+      } = await client.auth.getUser();
 
       if (user?.email) {
         setEmail(user.email);
@@ -41,7 +41,7 @@ export function SidebarUser() {
         if (orgNameMeta) {
           setOrgName(orgNameMeta);
         } else {
-          const { data: org } = await supabase
+          const { data: org } = await client
             .from("organizations")
             .select("name")
             .eq("user_id", user.id)
@@ -51,7 +51,7 @@ export function SidebarUser() {
       }
     }
 
-    loadUser();
+    loadUser(supabase);
   }, [configured]);
 
   return (

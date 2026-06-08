@@ -1,17 +1,22 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   ArrowLeft,
   Mail,
-  MapPin,
   Calendar,
-  ExternalLink,
-  TrendingUp,
-  TrendingDown,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
+import { formatCreatorDate } from "@/lib/creators";
+import { deleteCreator } from "@/app/creators/actions";
 import { CreatorAvatar } from "./CreatorAvatar";
 import { StatusBadge } from "./StatusBadge";
 import { PlatformBadge } from "./PlatformBadge";
+import { CreatorFormModal } from "./CreatorFormModal";
 
 interface CreatorProfileProps {
   creator: Creator;
@@ -38,15 +43,61 @@ function Section({
 }
 
 export function CreatorProfile({ creator }: CreatorProfileProps) {
+  const router = useRouter();
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    if (
+      !confirm(
+        `Remove ${creator.name} from your roster? This cannot be undone.`
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    const result = await deleteCreator(creator.id);
+    if (result.error) {
+      alert(result.error);
+      setDeleting(false);
+      return;
+    }
+    router.push("/creators");
+    router.refresh();
+  }
+
+  const primaryHandle = creator.socialHandles.find(
+    (h) => h.platform === creator.primaryPlatform
+  );
+
   return (
     <div className="space-y-6">
-      <Link
-        href="/creators"
-        className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Creators
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link
+          href="/creators"
+          className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Creators
+        </Link>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setEditOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300 transition-colors hover:border-accent/30 hover:text-accent-light"
+          >
+            <Pencil className="h-4 w-4" />
+            Edit
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="inline-flex items-center gap-2 rounded-lg border border-red-500/20 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4" />
+            {deleting ? "Removing..." : "Remove"}
+          </button>
+        </div>
+      </div>
 
       <div className="flex items-start gap-5 rounded-xl border border-border bg-surface-raised p-6">
         <CreatorAvatar
@@ -59,10 +110,12 @@ export function CreatorProfile({ creator }: CreatorProfileProps) {
             <h2 className="text-2xl font-bold text-white">{creator.name}</h2>
             <StatusBadge status={creator.status} />
           </div>
-          <p className="mt-1 text-accent-light">{creator.displayName}</p>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-400">
-            {creator.bio}
-          </p>
+          {primaryHandle && (
+            <p className="mt-1 text-accent-light">{primaryHandle.handle}</p>
+          )}
+          <div className="mt-3">
+            <PlatformBadge platform={creator.primaryPlatform} />
+          </div>
         </div>
       </div>
 
@@ -73,21 +126,18 @@ export function CreatorProfile({ creator }: CreatorProfileProps) {
               <Mail className="h-4 w-4 text-gray-500" />
               <div>
                 <dt className="text-xs text-gray-500">Email</dt>
-                <dd className="text-sm text-gray-200">{creator.email}</dd>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <MapPin className="h-4 w-4 text-gray-500" />
-              <div>
-                <dt className="text-xs text-gray-500">Location</dt>
-                <dd className="text-sm text-gray-200">{creator.location}</dd>
+                <dd className="text-sm text-gray-200">
+                  {creator.email ?? "—"}
+                </dd>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-gray-500" />
               <div>
-                <dt className="text-xs text-gray-500">Joined</dt>
-                <dd className="text-sm text-gray-200">{creator.joinedDate}</dd>
+                <dt className="text-xs text-gray-500">Added</dt>
+                <dd className="text-sm text-gray-200">
+                  {formatCreatorDate(creator.createdAt)}
+                </dd>
               </div>
             </div>
             <div>
@@ -96,141 +146,46 @@ export function CreatorProfile({ creator }: CreatorProfileProps) {
                 <PlatformBadge platform={creator.primaryPlatform} />
               </dd>
             </div>
-            <div>
-              <dt className="text-xs text-gray-500">Active Sponsors</dt>
-              <dd className="mt-1 text-sm font-medium text-gray-200">
-                {creator.activeSponsors}
-              </dd>
-            </div>
           </dl>
         </Section>
 
         <Section
-          title="Social Media Accounts"
-          description="Connected platforms and follower counts"
+          title="Social Handles"
+          description="Connected platform handles"
         >
-          <ul className="space-y-3">
-            {creator.socialAccounts.map((account) => (
-              <li
-                key={account.platform}
-                className="flex items-center justify-between rounded-lg border border-border-subtle bg-surface px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <PlatformBadge platform={account.platform} />
-                  <div>
-                    <p className="text-sm font-medium text-gray-200">
-                      {account.handle}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {account.followers} followers
-                    </p>
-                  </div>
-                </div>
-                <a
-                  href={account.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-accent/10 hover:text-accent-light"
+          {creator.socialHandles.length === 0 ? (
+            <p className="text-sm text-gray-500">No social handles added.</p>
+          ) : (
+            <ul className="space-y-3">
+              {creator.socialHandles.map((handle, i) => (
+                <li
+                  key={`${handle.platform}-${i}`}
+                  className="flex items-center gap-3 rounded-lg border border-border-subtle bg-surface px-4 py-3"
                 >
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              </li>
-            ))}
-          </ul>
+                  <PlatformBadge platform={handle.platform} />
+                  <p className="text-sm font-medium text-gray-200">
+                    {handle.handle}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
         </Section>
       </div>
 
-      <Section
-        title="Performance Metrics"
-        description="Key stats for the current period"
-      >
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {creator.metrics.map((metric) => {
-            const TrendIcon =
-              metric.trend === "up" ? TrendingUp : TrendingDown;
-            const trendColor =
-              metric.trend === "up" ? "text-emerald-400" : "text-red-400";
-
-            return (
-              <div
-                key={metric.label}
-                className="rounded-lg border border-border-subtle bg-surface px-4 py-4"
-              >
-                <p className="text-xs font-medium text-gray-500">
-                  {metric.label}
-                </p>
-                <p className="mt-1 text-2xl font-bold text-white">
-                  {metric.value}
-                </p>
-                <div
-                  className={`mt-1 flex items-center gap-1 text-xs ${trendColor}`}
-                >
-                  <TrendIcon className="h-3.5 w-3.5" />
-                  {metric.change}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Section>
-
-      <Section
-        title="Sponsorship History"
-        description="Past and current brand partnerships"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-border text-gray-400">
-                <th className="pb-3 font-medium">Sponsor</th>
-                <th className="pb-3 font-medium">Campaign</th>
-                <th className="pb-3 font-medium">Value</th>
-                <th className="pb-3 font-medium">Status</th>
-                <th className="pb-3 font-medium">Period</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-subtle">
-              {creator.sponsorshipHistory.map((deal) => (
-                <tr key={deal.id}>
-                  <td className="py-3 font-medium text-gray-200">
-                    {deal.sponsor}
-                  </td>
-                  <td className="py-3 text-gray-400">{deal.campaign}</td>
-                  <td className="py-3 font-medium text-gray-200">
-                    {deal.value}
-                  </td>
-                  <td className="py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${
-                        deal.status === "active"
-                          ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
-                          : deal.status === "pending"
-                            ? "bg-amber-500/10 text-amber-400 ring-amber-500/20"
-                            : "bg-gray-500/10 text-gray-400 ring-gray-500/20"
-                      }`}
-                    >
-                      {deal.status.charAt(0).toUpperCase() +
-                        deal.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="py-3 text-gray-500">
-                    {deal.startDate}
-                    {deal.endDate ? ` – ${deal.endDate}` : ""}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Section>
-
-      <Section title="Internal Notes" description="Team-only notes and context">
+      <Section title="Notes" description="Internal notes and context">
         <div className="rounded-lg border border-border-subtle bg-surface px-4 py-4">
           <p className="text-sm leading-relaxed text-gray-300">
-            {creator.internalNotes}
+            {creator.notes?.trim() || "No notes yet."}
           </p>
         </div>
       </Section>
+
+      <CreatorFormModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        creator={creator}
+      />
     </div>
   );
 }
