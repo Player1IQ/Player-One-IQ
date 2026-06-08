@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Search, Building2, Handshake, DollarSign } from "lucide-react";
 import type { Sponsor } from "@/lib/sponsors";
 import { SponsorTable } from "./SponsorTable";
-import { AddSponsorModal } from "./AddSponsorModal";
+import { SponsorFormModal } from "./SponsorFormModal";
 
 interface SponsorsPageClientProps {
   sponsors: Sponsor[];
@@ -63,9 +63,11 @@ export function SponsorsPageClient({ sponsors }: SponsorsPageClientProps) {
             </div>
           </div>
           <p className="mt-3 text-3xl font-bold tracking-tight text-white">
-            $664K
+            {sponsors.length === 0 ? "—" : "$0"}
           </p>
-          <p className="mt-1 text-xs text-gray-500">Lifetime partner spend</p>
+          <p className="mt-1 text-xs text-gray-500">
+            Tracked when contracts are added
+          </p>
         </div>
       </div>
 
@@ -99,7 +101,7 @@ export function SponsorsPageClient({ sponsors }: SponsorsPageClientProps) {
 
       <SponsorTable sponsors={filtered} />
 
-      <AddSponsorModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <SponsorFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </>
   );
 }

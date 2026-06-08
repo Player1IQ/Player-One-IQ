@@ -1,8 +1,10 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SponsorsPageClient } from "@/components/sponsors/SponsorsPageClient";
-import { sponsors } from "@/lib/sponsors";
+import { getSponsors } from "@/lib/sponsors/queries";
 
-export default function SponsorsPage() {
+export default async function SponsorsPage() {
+  const sponsors = await getSponsors();
+
   return (
     <DashboardLayout
       title="Sponsors"

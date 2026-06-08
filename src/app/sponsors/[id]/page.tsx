@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SponsorDetail } from "@/components/sponsors/SponsorDetail";
-import { getSponsorById } from "@/lib/sponsors";
+import { getSponsorById } from "@/lib/sponsors/queries";
 
 interface SponsorDetailPageProps {
   params: Promise<{ id: string }>;
@@ -11,7 +11,7 @@ export default async function SponsorDetailPage({
   params,
 }: SponsorDetailPageProps) {
   const { id } = await params;
-  const sponsor = getSponsorById(id);
+  const sponsor = await getSponsorById(id);
 
   if (!sponsor) {
     notFound();

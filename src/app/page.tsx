@@ -3,11 +3,16 @@ import { Users, Building2, FileText, DollarSign } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
 import { getCreators } from "@/lib/creators/queries";
+import { getSponsors } from "@/lib/sponsors/queries";
 import { StatusBadge } from "@/components/creators/StatusBadge";
 
 export default async function DashboardPage() {
-  const creators = await getCreators();
+  const [creators, sponsors] = await Promise.all([
+    getCreators(),
+    getSponsors(),
+  ]);
   const activeCreators = creators.filter((c) => c.status === "active");
+  const activeSponsors = sponsors.filter((s) => s.status === "active");
 
   const stats = [
     {
@@ -20,8 +25,8 @@ export default async function DashboardPage() {
     },
     {
       title: "Active Sponsors",
-      value: "47",
-      change: "+8%",
+      value: String(activeSponsors.length),
+      change: `${sponsors.length} total`,
       trend: "up" as const,
       icon: Building2,
       iconColor: "bg-purple-500/10 text-purple-400 ring-purple-500/20",
