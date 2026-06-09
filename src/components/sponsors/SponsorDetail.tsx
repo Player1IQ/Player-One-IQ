@@ -102,7 +102,7 @@ export function SponsorDetail({ sponsor }: SponsorDetailProps) {
     }
     setDeleting(true);
     const result = await deleteSponsor(sponsor.id);
-    if (result.error) {
+    if ("error" in result && result.error) {
       alert(result.error);
       setDeleting(false);
       return;

@@ -7,14 +7,14 @@ import {
 
 interface ContractSummaryCardsProps {
   activeCount: number;
-  pendingCount: number;
+  negotiatingCount: number;
   expiringSoonCount: number;
   totalValueDisplay: string;
 }
 
 export function ContractSummaryCards({
   activeCount,
-  pendingCount,
+  negotiatingCount,
   expiringSoonCount,
   totalValueDisplay,
 }: ContractSummaryCardsProps) {
@@ -28,9 +28,9 @@ export function ContractSummaryCards({
       iconColor: "text-emerald-400",
     },
     {
-      label: "Pending Contracts",
-      value: pendingCount,
-      sub: "Awaiting signature",
+      label: "In Pipeline",
+      value: negotiatingCount,
+      sub: "Draft & negotiating",
       icon: Clock,
       iconBg: "bg-amber-500/10 ring-amber-500/20",
       iconColor: "text-amber-400",
@@ -46,7 +46,7 @@ export function ContractSummaryCards({
     {
       label: "Total Contract Value",
       value: totalValueDisplay,
-      sub: "Active + pending pipeline",
+      sub: "Active + pipeline",
       icon: DollarSign,
       iconBg: "bg-accent/10 ring-accent/20",
       iconColor: "text-accent-light",

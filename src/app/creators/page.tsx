@@ -1,6 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CreatorsPageClient } from "@/components/creators/CreatorsPageClient";
 import { getCreators } from "@/lib/creators/queries";
+import { isSeedEnabled } from "@/lib/seed/constants";
 
 export default async function CreatorsPage() {
   const creators = await getCreators();
@@ -10,7 +11,10 @@ export default async function CreatorsPage() {
       title="Creators"
       description="Manage your creator roster and partnerships"
     >
-      <CreatorsPageClient creators={creators} />
+      <CreatorsPageClient
+        creators={creators}
+        showSeedButton={isSeedEnabled()}
+      />
     </DashboardLayout>
   );
 }

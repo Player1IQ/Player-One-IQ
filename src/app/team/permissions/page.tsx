@@ -1,6 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PermissionsPageClient } from "@/components/team/PermissionsPageClient";
-import { activityLog } from "@/lib/team";
 
 export default function PermissionsPage() {
   return (
@@ -8,7 +7,7 @@ export default function PermissionsPage() {
       title="Permissions"
       description="Role-based access control for your organization"
     >
-      <PermissionsPageClient activity={activityLog} />
+      <PermissionsPageClient />
     </DashboardLayout>
   );
 }

@@ -30,7 +30,7 @@ export function CreatorRosterTable({ creators }: CreatorRosterTableProps) {
     const result = await deleteCreator(id);
     setDeletingId(null);
     setOpenMenu(null);
-    if (result.error) {
+    if ("error" in result && result.error) {
       alert(result.error);
       return;
     }

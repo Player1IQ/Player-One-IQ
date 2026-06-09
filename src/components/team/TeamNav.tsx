@@ -17,7 +17,9 @@ export function TeamNav() {
       {tabs.map((tab) => {
         const isActive =
           tab.href === "/team"
-            ? pathname === "/team" || pathname.startsWith("/team/tm-")
+            ? pathname === "/team" ||
+              (pathname.startsWith("/team/") &&
+                !pathname.startsWith("/team/permissions"))
             : pathname === tab.href;
         const Icon = tab.icon;
 

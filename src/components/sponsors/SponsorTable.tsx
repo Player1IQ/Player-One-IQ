@@ -29,7 +29,7 @@ export function SponsorTable({ sponsors }: SponsorTableProps) {
     const result = await deleteSponsor(id);
     setDeletingId(null);
     setOpenMenu(null);
-    if (result.error) {
+    if ("error" in result && result.error) {
       alert(result.error);
       return;
     }

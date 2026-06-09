@@ -1,709 +1,207 @@
 export type ContractStatus =
-  | "active"
-  | "pending"
-  | "expired"
   | "draft"
-  | "completed";
+  | "negotiating"
+  | "active"
+  | "completed"
+  | "expired"
+  | "cancelled";
 
-export interface TimelineEvent {
-  date: string;
-  title: string;
-  description: string;
-  type: "milestone" | "payment" | "deliverable" | "renewal" | "signed";
-}
+export const contractStatuses: ContractStatus[] = [
+  "draft",
+  "negotiating",
+  "active",
+  "completed",
+  "expired",
+  "cancelled",
+];
 
-export interface Deliverable {
+export interface ContractRow {
   id: string;
-  title: string;
-  dueDate: string;
-  completed: boolean;
-}
-
-export interface ContractAttachment {
-  id: string;
-  name: string;
-  size: string;
-  uploadedAt: string;
-  type: "pdf" | "doc" | "image" | "other";
+  organization_id: string;
+  creator_id: string;
+  sponsor_id: string;
+  contract_name: string;
+  contract_value: number;
+  contract_status: ContractStatus;
+  start_date: string | null;
+  end_date: string | null;
+  deliverables: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  creators?: { name: string } | { name: string }[] | null;
+  sponsors?: { company_name: string } | { company_name: string }[] | null;
 }
 
 export interface Contract {
   id: string;
-  name: string;
-  creator: string;
+  organizationId: string;
   creatorId: string;
-  sponsor: string;
   sponsorId: string;
-  value: number;
+  creatorName: string;
+  sponsorName: string;
+  contractName: string;
+  contractValue: number;
   valueDisplay: string;
+  status: ContractStatus;
+  startDate: string | null;
+  endDate: string | null;
+  startDateDisplay: string;
+  endDateDisplay: string;
+  deliverables: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ContractInput {
+  creatorId: string;
+  sponsorId: string;
+  contractName: string;
+  contractValue: number;
   status: ContractStatus;
   startDate: string;
   endDate: string;
-  renewalDate?: string;
-  expirationDate: string;
-  description: string;
-  timeline: TimelineEvent[];
-  deliverables: Deliverable[];
-  attachments: ContractAttachment[];
-  internalNotes: string;
+  deliverables: string;
+  notes: string;
 }
 
-export const contracts: Contract[] = [
-  {
-    id: "ctr-nk-mike-2026",
-    name: "Air Max Gaming Collection",
-    creator: "@CreatorMike",
-    creatorId: "creator-mike",
-    sponsor: "Nike",
-    sponsorId: "nike",
-    value: 28000,
-    valueDisplay: "$28,000",
-    status: "active",
-    startDate: "Mar 1, 2026",
-    endDate: "Sep 30, 2026",
-    renewalDate: "Aug 1, 2026",
-    expirationDate: "Sep 30, 2026",
-    description:
-      "Six-month integrated sponsorship featuring Air Max Gaming Collection product placements, dedicated review video, and 4 sponsored stream segments.",
-    timeline: [
-      {
-        date: "Feb 15, 2026",
-        title: "Contract Signed",
-        description: "Fully executed agreement received from Nike legal.",
-        type: "signed",
-      },
-      {
-        date: "Mar 1, 2026",
-        title: "Campaign Kickoff",
-        description: "Creator onboarding and product shipment completed.",
-        type: "milestone",
-      },
-      {
-        date: "Mar 15, 2026",
-        title: "First Payment — 50%",
-        description: "$14,000 disbursed upon contract activation.",
-        type: "payment",
-      },
-      {
-        date: "Apr 20, 2026",
-        title: "Review Video Delivered",
-        description: "15-min Air Max Gaming review published to YouTube.",
-        type: "deliverable",
-      },
-      {
-        date: "Aug 1, 2026",
-        title: "Renewal Discussion",
-        description: "Scheduled check-in with Nike partnerships team.",
-        type: "renewal",
-      },
-      {
-        date: "Sep 30, 2026",
-        title: "Contract End",
-        description: "Final deliverable due and contract closes.",
-        type: "milestone",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d1",
-        title: "Unboxing & first impressions video",
-        dueDate: "Mar 20, 2026",
-        completed: true,
-      },
-      {
-        id: "d2",
-        title: "4× sponsored Twitch stream segments (30 min each)",
-        dueDate: "Jun 30, 2026",
-        completed: true,
-      },
-      {
-        id: "d3",
-        title: "Dedicated YouTube review (10+ min)",
-        dueDate: "Apr 30, 2026",
-        completed: true,
-      },
-      {
-        id: "d4",
-        title: "3× Instagram story placements",
-        dueDate: "Jul 15, 2026",
-        completed: false,
-      },
-      {
-        id: "d5",
-        title: "End-of-campaign performance report",
-        dueDate: "Sep 30, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [
-      {
-        id: "a1",
-        name: "Nike_AirMax_Gaming_SOW.pdf",
-        size: "2.4 MB",
-        uploadedAt: "Feb 10, 2026",
-        type: "pdf",
-      },
-      {
-        id: "a2",
-        name: "Signed_Contract_Nike_CreatorMike.pdf",
-        size: "1.8 MB",
-        uploadedAt: "Feb 15, 2026",
-        type: "pdf",
-      },
-      {
-        id: "a3",
-        name: "Brand_Guidelines_2026.pdf",
-        size: "5.1 MB",
-        uploadedAt: "Feb 16, 2026",
-        type: "pdf",
-      },
-    ],
-    internalNotes:
-      "High-value flagship deal. Nike wants Q3 renewal — prep deck by July. Creator exceeded view targets on review video (+34% vs. guarantee).",
-  },
-  {
-    id: "ctr-rb-sarah-2026",
-    name: "Q2 Stream Partnership",
-    creator: "@SarahStreams",
-    creatorId: "sarah-streams",
-    sponsor: "Red Bull",
-    sponsorId: "red-bull",
-    value: 22000,
-    valueDisplay: "$22,000",
-    status: "active",
-    startDate: "Apr 1, 2026",
-    endDate: "Jun 30, 2026",
-    renewalDate: "Jun 1, 2026",
-    expirationDate: "Jun 30, 2026",
-    description:
-      "Quarterly stream partnership with Red Bull branding across 12 dedicated streams and community event co-hosting.",
-    timeline: [
-      {
-        date: "Mar 20, 2026",
-        title: "Contract Signed",
-        description: "Agreement executed by both parties.",
-        type: "signed",
-      },
-      {
-        date: "Apr 1, 2026",
-        title: "Campaign Start",
-        description: "Red Bull assets and promo codes distributed.",
-        type: "milestone",
-      },
-      {
-        date: "May 15, 2026",
-        title: "Mid-Campaign Check-in",
-        description: "Performance review — on track for all KPIs.",
-        type: "milestone",
-      },
-      {
-        date: "Jun 1, 2026",
-        title: "Renewal Window Opens",
-        description: "Red Bull expressed interest in Q3 extension.",
-        type: "renewal",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d6",
-        title: "12× branded stream overlays",
-        dueDate: "Jun 30, 2026",
-        completed: true,
-      },
-      {
-        id: "d7",
-        title: "Community giveaway event co-host",
-        dueDate: "May 30, 2026",
-        completed: true,
-      },
-      {
-        id: "d8",
-        title: "2× TikTok cross-promotion clips",
-        dueDate: "Jun 15, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [
-      {
-        id: "a4",
-        name: "RedBull_Q2_Stream_Agreement.pdf",
-        size: "1.2 MB",
-        uploadedAt: "Mar 18, 2026",
-        type: "pdf",
-      },
-    ],
-    internalNotes:
-      "Expiring end of June — renewal conversation with Tomás Herrera scheduled for Jun 5. Strong engagement metrics.",
-  },
-  {
-    id: "ctr-lg-mike-2026",
-    name: "G Pro X Superlight 2 Launch",
-    creator: "@CreatorMike",
-    creatorId: "creator-mike",
-    sponsor: "Logitech",
-    sponsorId: "logitech",
-    value: 15000,
-    valueDisplay: "$15,000",
-    status: "active",
-    startDate: "Jan 15, 2026",
-    endDate: "Dec 31, 2026",
-    renewalDate: "Nov 1, 2026",
-    expirationDate: "Dec 31, 2026",
-    description:
-      "Year-long ambassador deal for Logitech G Pro X Superlight 2 mouse launch with quarterly content deliverables.",
-    timeline: [
-      {
-        date: "Jan 10, 2026",
-        title: "Contract Signed",
-        description: "Annual agreement executed.",
-        type: "signed",
-      },
-      {
-        date: "Jan 15, 2026",
-        title: "Product Seeding",
-        description: "Full peripheral kit shipped to creator.",
-        type: "milestone",
-      },
-      {
-        date: "Apr 1, 2026",
-        title: "Q1 Deliverables Approved",
-        description: "All Q1 content signed off by Logitech.",
-        type: "deliverable",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d9",
-        title: "Launch day unboxing stream",
-        dueDate: "Jan 20, 2026",
-        completed: true,
-      },
-      {
-        id: "d10",
-        title: "Q2 setup tour video",
-        dueDate: "Jun 30, 2026",
-        completed: false,
-      },
-      {
-        id: "d11",
-        title: "Q3 competitive gameplay series (3 episodes)",
-        dueDate: "Sep 30, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [
-      {
-        id: "a5",
-        name: "Logitech_GPro_Ambassador_2026.pdf",
-        size: "3.0 MB",
-        uploadedAt: "Jan 8, 2026",
-        type: "pdf",
-      },
-    ],
-    internalNotes:
-      "Steady annual deal. Emily Park is responsive — flag any deliverable delays early.",
-  },
-  {
-    id: "ctr-rz-gamepro-2026",
-    name: "Peripheral Launch Series",
-    creator: "@GamePro",
-    creatorId: "game-pro",
-    sponsor: "Razer",
-    sponsorId: "razer",
-    value: 14000,
-    valueDisplay: "$14,000",
-    status: "active",
-    startDate: "May 1, 2026",
-    endDate: "Aug 31, 2026",
-    expirationDate: "Aug 31, 2026",
-    description:
-      "Summer peripheral launch campaign featuring Razer keyboard and headset across esports content.",
-    timeline: [
-      {
-        date: "Apr 22, 2026",
-        title: "Contract Signed",
-        description: "Fast-track approval — 9 day turnaround.",
-        type: "signed",
-      },
-      {
-        date: "May 1, 2026",
-        title: "Campaign Launch",
-        description: "Products received and first content scheduled.",
-        type: "milestone",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d12",
-        title: "Product review video",
-        dueDate: "May 20, 2026",
-        completed: true,
-      },
-      {
-        id: "d13",
-        title: "Tournament coverage with Razer branding",
-        dueDate: "Jul 31, 2026",
-        completed: false,
-      },
-      {
-        id: "d14",
-        title: "Social media asset pack (6 posts)",
-        dueDate: "Aug 15, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [
-      {
-        id: "a6",
-        name: "Razer_Launch_Series_SOW.pdf",
-        size: "1.5 MB",
-        uploadedAt: "Apr 20, 2026",
-        type: "pdf",
-      },
-    ],
-    internalNotes:
-      "David Okonkwo managing directly. Creator delivered review early — strong relationship builder for future Razer deals.",
-  },
-  {
-    id: "ctr-ss-techvibes-2026",
-    name: "Galaxy Unpacked Coverage",
-    creator: "@TechVibes",
-    creatorId: "tech-vibes",
-    sponsor: "Samsung",
-    sponsorId: "samsung",
-    value: 20000,
-    valueDisplay: "$20,000",
-    status: "pending",
-    startDate: "Jun 15, 2026",
-    endDate: "Aug 15, 2026",
-    expirationDate: "Aug 15, 2026",
-    description:
-      "Samsung Galaxy Unpacked event coverage package — live reaction, hands-on review, and short-form content burst.",
-    timeline: [
-      {
-        date: "May 28, 2026",
-        title: "Proposal Sent",
-        description: "SOW submitted to Samsung influencer team.",
-        type: "milestone",
-      },
-      {
-        date: "Jun 1, 2026",
-        title: "Legal Review",
-        description: "Contract in Samsung legal queue.",
-        type: "milestone",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d15",
-        title: "Live Unpacked reaction stream",
-        dueDate: "Jun 20, 2026",
-        completed: false,
-      },
-      {
-        id: "d16",
-        title: "Hands-on review (YouTube + TikTok)",
-        dueDate: "Jul 1, 2026",
-        completed: false,
-      },
-      {
-        id: "d17",
-        title: "5× TikTok short-form clips",
-        dueDate: "Jul 15, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [
-      {
-        id: "a7",
-        name: "Samsung_Galaxy_SOW_Draft.pdf",
-        size: "980 KB",
-        uploadedAt: "May 25, 2026",
-        type: "pdf",
-      },
-    ],
-    internalNotes:
-      "Awaiting Samsung legal sign-off. Jennifer Liu is champion — expect 2–3 more weeks. Do not brief creator until executed.",
-  },
-  {
-    id: "ctr-nk-gamepro-2026",
-    name: "Jordan Brand Stream Series",
-    creator: "@GamePro",
-    creatorId: "game-pro",
-    sponsor: "Nike",
-    sponsorId: "nike",
-    value: 35000,
-    valueDisplay: "$35,000",
-    status: "pending",
-    startDate: "Jul 1, 2026",
-    endDate: "Oct 31, 2026",
-    expirationDate: "Oct 31, 2026",
-    description:
-      "Jordan Brand gaming crossover campaign targeting esports audience with limited-edition collab merchandise.",
-    timeline: [
-      {
-        date: "Jun 1, 2026",
-        title: "Term Sheet Agreed",
-        description: "Commercial terms finalized with Nike.",
-        type: "milestone",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d18",
-        title: "Collab reveal stream",
-        dueDate: "Jul 10, 2026",
-        completed: false,
-      },
-      {
-        id: "d19",
-        title: "Esports tournament sponsorship segment",
-        dueDate: "Sep 1, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [],
-    internalNotes:
-      "Largest pending deal in pipeline. Marcus Webb leading from Nike side. Priority close by mid-June.",
-  },
-  {
-    id: "ctr-rb-mike-2026",
-    name: "Red Bull Gaming Sphere",
-    creator: "@CreatorMike",
-    creatorId: "creator-mike",
-    sponsor: "Red Bull",
-    sponsorId: "red-bull",
-    value: 40000,
-    valueDisplay: "$40,000",
-    status: "active",
-    startDate: "May 1, 2026",
-    endDate: "Nov 30, 2026",
-    renewalDate: "Oct 1, 2026",
-    expirationDate: "Nov 30, 2026",
-    description:
-      "Flagship Red Bull Gaming Sphere ambassador program — event appearances, content series, and exclusive activations.",
-    timeline: [
-      {
-        date: "Apr 15, 2026",
-        title: "Contract Signed",
-        description: "Multi-month ambassador agreement executed.",
-        type: "signed",
-      },
-      {
-        date: "May 1, 2026",
-        title: "Program Launch",
-        description: "Gaming Sphere branding live across channels.",
-        type: "milestone",
-      },
-      {
-        date: "May 15, 2026",
-        title: "First Payment — 40%",
-        description: "$16,000 disbursed on activation.",
-        type: "payment",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d20",
-        title: "Gaming Sphere launch announcement",
-        dueDate: "May 5, 2026",
-        completed: true,
-      },
-      {
-        id: "d21",
-        title: "2× event appearances",
-        dueDate: "Nov 1, 2026",
-        completed: false,
-      },
-      {
-        id: "d22",
-        title: "Monthly content series (6 episodes)",
-        dueDate: "Nov 30, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [
-      {
-        id: "a8",
-        name: "RedBull_GamingSphere_Ambassador.pdf",
-        size: "4.2 MB",
-        uploadedAt: "Apr 12, 2026",
-        type: "pdf",
-      },
-      {
-        id: "a9",
-        name: "Event_Schedule_2026.xlsx",
-        size: "340 KB",
-        uploadedAt: "Apr 14, 2026",
-        type: "other",
-      },
-    ],
-    internalNotes:
-      "Top-tier deal for CreatorMike. Coordinate travel for event appearances with Red Bull events team.",
-  },
-  {
-    id: "ctr-ad-gamepro-q1",
-    name: "Creator Deliverables Q1",
-    creator: "@GamePro",
-    creatorId: "game-pro",
-    sponsor: "Adidas",
-    sponsorId: "adidas",
-    value: 18000,
-    valueDisplay: "$18,000",
-    status: "completed",
-    startDate: "Jan 1, 2026",
-    endDate: "Mar 31, 2026",
-    expirationDate: "Mar 31, 2026",
-    description:
-      "Q1 Adidas creator deliverables package — completed successfully with renewal discussions underway.",
-    timeline: [
-      {
-        date: "Dec 20, 2025",
-        title: "Contract Signed",
-        description: "Q1 agreement executed.",
-        type: "signed",
-      },
-      {
-        date: "Mar 31, 2026",
-        title: "All Deliverables Approved",
-        description: "Campaign closed — all KPIs met.",
-        type: "deliverable",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d23",
-        title: "Brand integration video",
-        dueDate: "Feb 28, 2026",
-        completed: true,
-      },
-      {
-        id: "d24",
-        title: "Social content pack",
-        dueDate: "Mar 15, 2026",
-        completed: true,
-      },
-    ],
-    attachments: [
-      {
-        id: "a10",
-        name: "Adidas_Q1_Completion_Report.pdf",
-        size: "1.1 MB",
-        uploadedAt: "Apr 1, 2026",
-        type: "pdf",
-      },
-    ],
-    internalNotes:
-      "Completed ahead of schedule. Sophie Laurent interested in Q3 renewal — prepare proposal.",
-  },
-  {
-    id: "ctr-nk-sarah-pending",
-    name: "Nike Training Creator Push",
-    creator: "@SarahStreams",
-    creatorId: "sarah-streams",
-    sponsor: "Nike",
-    sponsorId: "nike",
-    value: 18000,
-    valueDisplay: "$18,000",
-    status: "pending",
-    startDate: "Jul 1, 2026",
-    endDate: "Dec 31, 2026",
-    expirationDate: "Dec 31, 2026",
-    description:
-      "Second-half Nike Training line integration targeting fitness-gaming crossover audience.",
-    timeline: [
-      {
-        date: "Jun 1, 2026",
-        title: "Proposal Submitted",
-        description: "Awaiting Nike internal approval.",
-        type: "milestone",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d25",
-        title: "Training line integration streams (8×)",
-        dueDate: "Dec 31, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [
-      {
-        id: "a11",
-        name: "Nike_Training_Proposal_Draft.pdf",
-        size: "2.0 MB",
-        uploadedAt: "May 30, 2026",
-        type: "pdf",
-      },
-    ],
-    internalNotes: "Pipeline deal — lower priority than Jordan Brand series for same creator roster.",
-  },
-  {
-    id: "ctr-lg-techvibes-pending",
-    name: "Stream Setup Showcase",
-    creator: "@TechVibes",
-    creatorId: "tech-vibes",
-    sponsor: "Logitech",
-    sponsorId: "logitech",
-    value: 12000,
-    valueDisplay: "$12,000",
-    status: "pending",
-    startDate: "Jun 20, 2026",
-    endDate: "Sep 30, 2026",
-    expirationDate: "Sep 30, 2026",
-    description:
-      "Streaming setup tour featuring Logitech peripherals for tech-focused audience.",
-    timeline: [
-      {
-        date: "Jun 5, 2026",
-        title: "Verbal Agreement",
-        description: "Emily Park confirmed intent — paperwork pending.",
-        type: "milestone",
-      },
-    ],
-    deliverables: [
-      {
-        id: "d26",
-        title: "Full setup tour video",
-        dueDate: "Jul 30, 2026",
-        completed: false,
-      },
-    ],
-    attachments: [],
-    internalNotes:
-      "Dependent on TechVibes Samsung deal timing — coordinate so campaigns don't conflict.",
-  },
-];
-
-export function getContractById(id: string): Contract | undefined {
-  return contracts.find((c) => c.id === id);
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
 }
 
-function parseExpirationDate(dateStr: string): Date {
-  return new Date(dateStr);
+export function formatContractDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso + (iso.includes("T") ? "" : "T00:00:00")).toLocaleDateString(
+    "en-US",
+    { month: "short", day: "numeric", year: "numeric" }
+  );
 }
 
-export function isExpiringSoon(contract: Contract, withinDays = 45): boolean {
-  if (contract.status !== "active") return false;
-  const exp = parseExpirationDate(contract.expirationDate);
-  const now = new Date("2026-06-08");
-  const diff = (exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+function relationName(
+  relation: { name?: string; company_name?: string } | { name?: string; company_name?: string }[] | null | undefined,
+  field: "name" | "company_name"
+): string {
+  if (!relation) return "Unknown";
+  const row = Array.isArray(relation) ? relation[0] : relation;
+  if (!row) return "Unknown";
+  return (field === "name" ? row.name : row.company_name) ?? "Unknown";
+}
+
+export function mapContractRow(row: ContractRow): Contract {
+  const value = Number(row.contract_value) || 0;
+
+  return {
+    id: row.id,
+    organizationId: row.organization_id,
+    creatorId: row.creator_id,
+    sponsorId: row.sponsor_id,
+    creatorName: relationName(row.creators, "name"),
+    sponsorName: relationName(row.sponsors, "company_name"),
+    contractName: row.contract_name,
+    contractValue: value,
+    valueDisplay: formatCurrency(value),
+    status: row.contract_status,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    startDateDisplay: formatContractDate(row.start_date),
+    endDateDisplay: formatContractDate(row.end_date),
+    deliverables: row.deliverables ?? "",
+    notes: row.notes ?? "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function isExpiringSoon(
+  contract: Contract,
+  withinDays = 45,
+  now = new Date()
+): boolean {
+  if (contract.status !== "active" || !contract.endDate) return false;
+  const end = new Date(contract.endDate + "T00:00:00");
+  const diff = (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
   return diff >= 0 && diff <= withinDays;
 }
 
-export function getContractStats() {
+export function getContractStats(contracts: Contract[]) {
   const active = contracts.filter((c) => c.status === "active");
-  const pending = contracts.filter((c) => c.status === "pending");
+  const negotiating = contracts.filter(
+    (c) => c.status === "negotiating" || c.status === "draft"
+  );
   const expiringSoon = contracts.filter((c) => isExpiringSoon(c));
-  const totalValue = contracts
-    .filter((c) => c.status === "active" || c.status === "pending")
-    .reduce((sum, c) => sum + c.value, 0);
+  const pipeline = contracts.filter(
+    (c) =>
+      c.status === "active" ||
+      c.status === "negotiating" ||
+      c.status === "draft"
+  );
+  const totalValue = pipeline.reduce((sum, c) => sum + c.contractValue, 0);
 
   return {
     activeCount: active.length,
-    pendingCount: pending.length,
+    negotiatingCount: negotiating.length,
     expiringSoonCount: expiringSoon.length,
     totalValue,
-    totalValueDisplay: `$${(totalValue / 1000).toFixed(0)}K`,
+    totalValueDisplay: formatCurrency(totalValue),
   };
+}
+
+function monthsBetween(start: Date, end: Date): number {
+  const months =
+    (end.getFullYear() - start.getFullYear()) * 12 +
+    (end.getMonth() - start.getMonth()) +
+    1;
+  return Math.max(1, months);
+}
+
+export function getMonthlyRevenue(contracts: Contract[], now = new Date()): number {
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  return contracts
+    .filter((c) => c.status === "active" && c.startDate && c.endDate)
+    .reduce((sum, contract) => {
+      const start = new Date(contract.startDate! + "T00:00:00");
+      const end = new Date(contract.endDate! + "T00:00:00");
+      if (end < monthStart || start > monthEnd) return sum;
+
+      const monthlyValue =
+        contract.contractValue / monthsBetween(start, end);
+      return sum + monthlyValue;
+    }, 0);
+}
+
+export function getUpcomingExpirations(
+  contracts: Contract[],
+  withinDays = 45,
+  now = new Date()
+): Contract[] {
+  return contracts
+    .filter((c) => isExpiringSoon(c, withinDays, now))
+    .sort((a, b) => {
+      if (!a.endDate || !b.endDate) return 0;
+      return a.endDate.localeCompare(b.endDate);
+    });
+}
+
+export function formatRelativeTime(iso: string): string {
+  const date = new Date(iso);
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }

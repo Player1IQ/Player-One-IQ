@@ -16,14 +16,31 @@ export async function getOrganizationForUser(): Promise<Organization | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data, error } = await supabase
+  const { data: ownedOrg } = await supabase
     .from("organizations")
     .select("id, name, type, created_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (error || !data) return null;
-  return data;
+  if (ownedOrg) return ownedOrg;
+
+  const { data: membership } = await supabase
+    .from("team_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (!membership?.organization_id) return null;
+
+  const { data: org, error } = await supabase
+    .from("organizations")
+    .select("id, name, type, created_at")
+    .eq("id", membership.organization_id)
+    .maybeSingle();
+
+  if (error || !org) return null;
+  return org;
 }
 
 export async function getOrganizationId(): Promise<string | null> {

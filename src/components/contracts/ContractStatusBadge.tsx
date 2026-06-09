@@ -1,19 +1,21 @@
 import type { ContractStatus } from "@/lib/contracts";
 
 const statusStyles: Record<ContractStatus, string> = {
-  active: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
-  pending: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
-  expired: "bg-red-500/10 text-red-400 ring-red-500/20",
   draft: "bg-gray-500/10 text-gray-400 ring-gray-500/20",
+  negotiating: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
+  active: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
   completed: "bg-sky-500/10 text-sky-400 ring-sky-500/20",
+  expired: "bg-red-500/10 text-red-400 ring-red-500/20",
+  cancelled: "bg-zinc-500/10 text-zinc-400 ring-zinc-500/20",
 };
 
 const statusLabels: Record<ContractStatus, string> = {
-  active: "Active",
-  pending: "Pending",
-  expired: "Expired",
   draft: "Draft",
+  negotiating: "Negotiating",
+  active: "Active",
   completed: "Completed",
+  expired: "Expired",
+  cancelled: "Cancelled",
 };
 
 interface ContractStatusBadgeProps {

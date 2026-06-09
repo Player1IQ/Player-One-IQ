@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { requireWriteAccess } from "@/lib/permissions";
 import {
   type CreatorInput,
   platforms,
@@ -23,6 +24,9 @@ function validateInput(input: CreatorInput) {
 }
 
 export async function createCreator(input: CreatorInput) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
   const error = validateInput(input);
   if (error) return { error };
 
@@ -54,6 +58,9 @@ export async function createCreator(input: CreatorInput) {
 }
 
 export async function updateCreator(id: string, input: CreatorInput) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
   const error = validateInput(input);
   if (error) return { error };
 
@@ -85,6 +92,9 @@ export async function updateCreator(id: string, input: CreatorInput) {
 }
 
 export async function deleteCreator(id: string) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 

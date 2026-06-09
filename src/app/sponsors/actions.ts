@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { requireWriteAccess } from "@/lib/permissions";
 import {
   type SponsorInput,
   industries,
@@ -70,6 +71,9 @@ function toDbPayload(input: SponsorInput) {
 }
 
 export async function createSponsor(input: SponsorInput) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
   const error = validateInput(input);
   if (error) return { error };
 
@@ -96,6 +100,9 @@ export async function createSponsor(input: SponsorInput) {
 }
 
 export async function updateSponsor(id: string, input: SponsorInput) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
   const error = validateInput(input);
   if (error) return { error };
 
@@ -122,6 +129,9 @@ export async function updateSponsor(id: string, input: SponsorInput) {
 }
 
 export async function deleteSponsor(id: string) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 

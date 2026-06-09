@@ -48,6 +48,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith(route)
   );
   const isOrgSetup = pathname.startsWith("/organization-setup");
+  const isInviteRoute = pathname.startsWith("/invite/");
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
@@ -57,29 +58,51 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user) {
-    const { data: organization, error: orgError } = await supabase
-      .from("organizations")
-      .select("id")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const [{ data: organization }, { data: membership }] = await Promise.all([
+      supabase
+        .from("organizations")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("team_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle(),
+    ]);
 
-    if (!orgError) {
-      const hasOrganization = !!organization;
+    const hasOrganization = !!organization || !!membership;
 
-      if (!hasOrganization && !isOrgSetup) {
+    if (!hasOrganization && !isOrgSetup && !isInviteRoute) {
+      const { data: pendingInvite } = await supabase
+        .from("team_invitations")
+        .select("token")
+        .eq("status", "pending")
+        .ilike("email", user.email ?? "")
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (pendingInvite?.token) {
         const url = request.nextUrl.clone();
-        url.pathname = "/organization-setup";
+        url.pathname = `/invite/${pendingInvite.token}`;
         return NextResponse.redirect(url);
       }
 
-      if (
-        hasOrganization &&
-        (isOrgSetup || AUTH_ONLY_ROUTES.includes(pathname))
-      ) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/";
-        return NextResponse.redirect(url);
-      }
+      const url = request.nextUrl.clone();
+      url.pathname = "/organization-setup";
+      return NextResponse.redirect(url);
+    }
+
+    if (
+      hasOrganization &&
+      (isOrgSetup || AUTH_ONLY_ROUTES.includes(pathname))
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
     }
   }
 

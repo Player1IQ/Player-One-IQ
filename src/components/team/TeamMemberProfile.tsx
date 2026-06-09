@@ -1,22 +1,33 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   ArrowLeft,
   Mail,
-  Phone,
   Calendar,
-  Users,
-  Building2,
-  FileText,
+  Pencil,
+  UserX,
   Shield,
 } from "lucide-react";
-import type { TeamMember } from "@/lib/team";
-import { permissionMatrix, permissions } from "@/lib/team";
+import {
+  type TeamMember,
+  type TeamRole,
+  permissionMatrix,
+  permissions,
+  roleLabels,
+} from "@/lib/team";
+import { removeTeamMember } from "@/app/team/actions";
 import { TeamMemberAvatar } from "./TeamMemberAvatar";
 import { RoleBadge } from "./RoleBadge";
 import { MemberStatusBadge } from "./MemberStatusBadge";
+import { EditRoleModal } from "./EditRoleModal";
 
 interface TeamMemberProfileProps {
   member: TeamMember;
+  canManageTeam: boolean;
+  currentUserRole: TeamRole | null;
 }
 
 function Section({
@@ -39,159 +50,162 @@ function Section({
   );
 }
 
-export function TeamMemberProfile({ member }: TeamMemberProfileProps) {
+export function TeamMemberProfile({
+  member,
+  canManageTeam,
+  currentUserRole,
+}: TeamMemberProfileProps) {
+  const router = useRouter();
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   const memberPermissions = permissionMatrix[member.role];
+  const canEdit =
+    canManageTeam &&
+    member.role !== "owner" &&
+    !(currentUserRole === "admin" && member.role === "admin");
+  const canRemove = canEdit;
+
+  async function handleRemove() {
+    if (!confirm(`Remove ${member.email} from your team?`)) return;
+    setDeleting(true);
+    const result = await removeTeamMember(member.id);
+    if ("error" in result && result.error) {
+      alert(result.error);
+      setDeleting(false);
+      return;
+    }
+    router.push("/team");
+    router.refresh();
+  }
 
   return (
-    <div className="space-y-6">
-      <Link
-        href="/team"
-        className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Team
-      </Link>
+    <>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <Link
+            href="/team"
+            className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Team
+          </Link>
+          {canManageTeam && (canEdit || canRemove) && (
+            <div className="flex gap-2">
+              {canEdit && (
+                <button
+                  onClick={() => setEditOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-surface-overlay hover:text-white"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Edit Role
+                </button>
+              )}
+              {canRemove && (
+                <button
+                  onClick={handleRemove}
+                  disabled={deleting}
+                  className="inline-flex items-center gap-2 rounded-lg border border-red-500/30 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <UserX className="h-4 w-4" />
+                  Remove
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
-      <div className="relative overflow-hidden rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
-        <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/5" />
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start">
-          <TeamMemberAvatar
-            initials={member.avatarInitials}
-            color={member.avatarColor}
-            size="lg"
-          />
-          <div className="flex-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-2xl font-bold text-white">{member.name}</h2>
-              <MemberStatusBadge status={member.status} />
+        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
+          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-accent/5" />
+          <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start">
+            <TeamMemberAvatar
+              initials={member.avatarInitials}
+              color={member.avatarColor}
+              size="lg"
+            />
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="text-2xl font-bold text-white">{member.name}</h2>
+                <MemberStatusBadge status={member.status} />
+              </div>
+              <p className="mt-1 text-gray-400">{member.email}</p>
+              <div className="mt-3">
+                <RoleBadge role={member.role} />
+              </div>
             </div>
-            <p className="mt-1 text-gray-400">{member.email}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <RoleBadge role={member.role} />
-              <span className="text-sm text-gray-500">{member.department}</span>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+              <Mail className="h-3.5 w-3.5" />
+              Email
             </div>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-gray-400">
-              {member.bio}
+            <p className="mt-2 text-sm font-medium text-white">{member.email}</p>
+          </div>
+          <div className="rounded-xl border border-border bg-surface-raised p-4">
+            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+              <Calendar className="h-3.5 w-3.5" />
+              Joined
+            </div>
+            <p className="mt-2 text-sm font-medium text-white">
+              {member.joinedDate}
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-surface-raised p-4">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-gray-500">
-            <Users className="h-3.5 w-3.5" />
-            Assigned Creators
-          </div>
-          <p className="mt-2 text-2xl font-bold text-white">
-            {member.assignedCreators}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface-raised p-4">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-gray-500">
-            <Building2 className="h-3.5 w-3.5" />
-            Assigned Sponsors
-          </div>
-          <p className="mt-2 text-2xl font-bold text-white">
-            {member.assignedSponsors}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface-raised p-4">
-          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-gray-500">
-            <FileText className="h-3.5 w-3.5" />
-            Assigned Contracts
-          </div>
-          <p className="mt-2 text-2xl font-bold text-white">
-            {member.assignedContracts}
-          </p>
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Section title="Contact Information">
-          <dl className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-gray-500" />
-              <div>
-                <dt className="text-xs text-gray-500">Email</dt>
-                <dd className="text-sm text-gray-200">{member.email}</dd>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Phone className="h-4 w-4 text-gray-500" />
-              <div>
-                <dt className="text-xs text-gray-500">Phone</dt>
-                <dd className="text-sm text-gray-200">{member.phone}</dd>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <div>
-                <dt className="text-xs text-gray-500">Joined</dt>
-                <dd className="text-sm text-gray-200">{member.joinedDate}</dd>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <div>
-                <dt className="text-xs text-gray-500">Last Login</dt>
-                <dd className="text-sm text-gray-200">{member.lastLogin}</dd>
-              </div>
-            </div>
-          </dl>
-        </Section>
 
         <Section
-          title="Role Permissions"
-          description={`Access granted via ${member.role} role`}
+          title="Permissions"
+          description={`Access granted by the ${roleLabels[member.role]} role`}
         >
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {permissions.map((perm) => {
               const level = memberPermissions[perm.key];
               return (
                 <li
                   key={perm.key}
-                  className="flex items-center justify-between rounded-lg border border-border-subtle bg-surface px-4 py-2.5"
+                  className="flex items-center justify-between rounded-lg border border-border-subtle bg-surface px-4 py-3"
                 >
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-3.5 w-3.5 text-gray-500" />
-                    <span className="text-sm text-gray-300">{perm.label}</span>
+                  <div className="flex items-center gap-3">
+                    <Shield className="h-4 w-4 text-gray-500" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-200">
+                        {perm.label}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {perm.description}
+                      </p>
+                    </div>
                   </div>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${
+                    className={`text-xs font-medium ${
                       level === "full"
-                        ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
-                        : level === "limited"
-                          ? "bg-amber-500/10 text-amber-400 ring-amber-500/20"
-                          : "bg-gray-500/10 text-gray-500 ring-gray-500/20"
+                        ? "text-emerald-400"
+                        : level === "read"
+                          ? "text-sky-400"
+                          : "text-gray-500"
                     }`}
                   >
                     {level === "full"
-                      ? "Full"
-                      : level === "limited"
-                        ? "Limited"
-                        : "None"}
+                      ? "Full access"
+                      : level === "read"
+                        ? "Read only"
+                        : "No access"}
                   </span>
                 </li>
               );
             })}
           </ul>
-          <Link
-            href="/team/permissions"
-            className="mt-4 inline-flex text-sm text-accent-light transition-colors hover:text-white"
-          >
-            View full permission matrix →
-          </Link>
         </Section>
       </div>
 
-      <Section title="Internal Notes" description="Team-only context">
-        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-4">
-          <p className="text-sm leading-relaxed text-gray-300">
-            {member.internalNotes}
-          </p>
-        </div>
-      </Section>
-    </div>
+      <EditRoleModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        member={member}
+        currentUserRole={currentUserRole}
+      />
+    </>
   );
 }

@@ -57,7 +57,7 @@ export function CreatorProfile({ creator }: CreatorProfileProps) {
     }
     setDeleting(true);
     const result = await deleteCreator(creator.id);
-    if (result.error) {
+    if ("error" in result && result.error) {
       alert(result.error);
       setDeleting(false);
       return;

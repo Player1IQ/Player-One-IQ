@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { TeamMemberProfile } from "@/components/team/TeamMemberProfile";
-import { getTeamMemberById } from "@/lib/team";
+import { getTeamMemberById } from "@/lib/team/queries";
+import { getCurrentUserRole } from "@/lib/permissions";
+import { canManageTeam, roleLabels } from "@/lib/team";
 
 interface TeamMemberPageProps {
   params: Promise<{ id: string }>;
@@ -9,15 +11,25 @@ interface TeamMemberPageProps {
 
 export default async function TeamMemberPage({ params }: TeamMemberPageProps) {
   const { id } = await params;
-  const member = getTeamMemberById(id);
+  const [member, currentUserRole] = await Promise.all([
+    getTeamMemberById(id),
+    getCurrentUserRole(),
+  ]);
 
-  if (!member) {
+  if (!member || member.isInvitation) {
     notFound();
   }
 
   return (
-    <DashboardLayout title={member.name} description={member.role}>
-      <TeamMemberProfile member={member} />
+    <DashboardLayout
+      title={member.name}
+      description={roleLabels[member.role]}
+    >
+      <TeamMemberProfile
+        member={member}
+        canManageTeam={canManageTeam(currentUserRole)}
+        currentUserRole={currentUserRole}
+      />
     </DashboardLayout>
   );
 }

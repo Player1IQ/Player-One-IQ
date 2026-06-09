@@ -1,14 +1,25 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { TeamPageClient } from "@/components/team/TeamPageClient";
-import { teamMembers, activityLog } from "@/lib/team";
+import { getTeamMembers } from "@/lib/team/queries";
+import { getCurrentUserRole } from "@/lib/permissions";
+import { canManageTeam } from "@/lib/team";
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const [members, currentUserRole] = await Promise.all([
+    getTeamMembers(),
+    getCurrentUserRole(),
+  ]);
+
   return (
     <DashboardLayout
       title="Team"
       description="Manage team members, roles, and permissions"
     >
-      <TeamPageClient members={teamMembers} activity={activityLog} />
+      <TeamPageClient
+        members={members}
+        canManageTeam={canManageTeam(currentUserRole)}
+        currentUserRole={currentUserRole}
+      />
     </DashboardLayout>
   );
 }
