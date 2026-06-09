@@ -9,11 +9,13 @@ import { SeedTestDataButton } from "@/components/dev/SeedTestDataButton";
 
 interface CreatorsPageClientProps {
   creators: Creator[];
+  canWrite?: boolean;
   showSeedButton?: boolean;
 }
 
 export function CreatorsPageClient({
   creators,
+  canWrite = true,
   showSeedButton = false,
 }: CreatorsPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -43,14 +45,16 @@ export function CreatorsPageClient({
           />
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {showSeedButton && <SeedTestDataButton />}
-          <button
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
-          >
-            <Plus className="h-4 w-4" />
-            Add Creator
-          </button>
+          {showSeedButton && canWrite && <SeedTestDataButton />}
+          {canWrite && (
+            <button
+              onClick={() => setModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
+            >
+              <Plus className="h-4 w-4" />
+              Add Creator
+            </button>
+          )}
         </div>
       </div>
 
@@ -68,9 +72,11 @@ export function CreatorsPageClient({
         </span>
       </div>
 
-      <CreatorRosterTable creators={filtered} />
+      <CreatorRosterTable creators={filtered} canWrite={canWrite} />
 
-      <CreatorFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      {canWrite && (
+        <CreatorFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      )}
     </>
   );
 }

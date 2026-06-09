@@ -215,6 +215,10 @@ create policy "Invitees can accept invitations"
   using (
     status = 'pending'
     and lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  )
+  with check (
+    status in ('accepted', 'expired')
+    and lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
   );
 
 -- ---------------------------------------------------------------------------

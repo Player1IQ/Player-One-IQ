@@ -1,5 +1,9 @@
 import { Sidebar } from "./Sidebar";
 import { SupabaseConfigBanner } from "@/components/auth/SupabaseConfigBanner";
+import { MessageNotifications } from "@/components/messages/MessageNotifications";
+import { PendingInviteBannerWrapper } from "@/components/team/PendingInviteBannerWrapper";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { getSearchIndex } from "@/lib/search/queries";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -8,12 +12,14 @@ interface DashboardLayoutProps {
   headerActions?: React.ReactNode;
 }
 
-export function DashboardLayout({
+export async function DashboardLayout({
   children,
   title,
   description,
   headerActions,
 }: DashboardLayoutProps) {
+  const searchIndex = await getSearchIndex();
+
   return (
     <div className="min-h-screen bg-surface">
       <Sidebar />
@@ -27,6 +33,7 @@ export function DashboardLayout({
               )}
             </div>
             <div className="flex items-center gap-3">
+              <GlobalSearch items={searchIndex} />
               {headerActions}
               <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent-light ring-1 ring-accent/20">
                 <span className="h-1.5 w-1.5 rounded-full bg-accent-light" />
@@ -37,8 +44,10 @@ export function DashboardLayout({
         </header>
         <main className="p-8">
           <SupabaseConfigBanner />
+          <PendingInviteBannerWrapper />
           {children}
         </main>
+        <MessageNotifications />
       </div>
     </div>
   );

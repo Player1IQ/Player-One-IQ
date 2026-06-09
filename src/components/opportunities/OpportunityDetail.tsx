@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   ArrowLeft,
+  Building2,
   Calendar,
   DollarSign,
   Pencil,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Opportunity, OpportunityApplication } from "@/lib/opportunities";
+import type { Sponsor } from "@/lib/sponsors";
 import {
   closeOpportunity,
   deleteOpportunity,
@@ -29,11 +31,14 @@ import { OpportunityFormModal } from "./OpportunityFormModal";
 import { ApplyModal } from "./ApplyModal";
 import { PlatformBadge } from "@/components/creators/PlatformBadge";
 import { IndustryBadge } from "@/components/sponsors/IndustryBadge";
+import { DealRoomButton } from "@/components/messages/DealRoomButton";
+import { ApplicationContractLink } from "./ApplicationContractLink";
 
 interface OpportunityDetailProps {
   opportunity: Opportunity;
   applications: OpportunityApplication[];
   creators: Creator[];
+  sponsors: Sponsor[];
   canManage: boolean;
   canApply: boolean;
 }
@@ -42,6 +47,7 @@ export function OpportunityDetail({
   opportunity,
   applications,
   creators,
+  sponsors,
   canManage,
   canApply,
 }: OpportunityDetailProps) {
@@ -54,6 +60,10 @@ export function OpportunityDetail({
     canApply &&
     opportunity.status === "open" &&
     creators.length > 0;
+
+  const acceptedContract = applications.find(
+    (app) => app.status === "accepted" && app.contractId
+  );
 
   async function handleClose() {
     if (!confirm("Close this opportunity? No new applications will be accepted.")) return;
@@ -88,8 +98,18 @@ export function OpportunityDetail({
           ? await rejectApplication(id)
           : await markApplicationUnderReview(id);
 
-    if ("error" in result && result.error) alert(result.error);
-    else router.refresh();
+    if ("error" in result && result.error) {
+      alert(result.error);
+      return;
+    }
+
+    if (action === "accept" && "contractId" in result && result.contractId) {
+      router.push(`/contracts/${result.contractId}`);
+      router.refresh();
+      return;
+    }
+
+    router.refresh();
   }
 
   return (
@@ -103,7 +123,8 @@ export function OpportunityDetail({
             <ArrowLeft className="h-4 w-4" />
             Back to Opportunities
           </Link>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <DealRoomButton type="opportunity" relatedId={opportunity.id} />
             {canApplyNow && (
               <button
                 onClick={() => setApplyOpen(true)}
@@ -159,12 +180,34 @@ export function OpportunityDetail({
               <DollarSign className="h-4 w-4 text-accent-light" />
               {opportunity.budgetDisplay}
             </span>
+            {opportunity.sponsorId && opportunity.sponsorName && (
+              <Link
+                href={`/sponsors/${opportunity.sponsorId}`}
+                className="inline-flex items-center gap-2 text-gray-300 hover:text-accent-light"
+              >
+                <Building2 className="h-4 w-4 text-accent-light" />
+                {opportunity.sponsorName}
+              </Link>
+            )}
             <span className="inline-flex items-center gap-2 text-gray-400">
               <Calendar className="h-4 w-4" />
               Deadline: {opportunity.applicationDeadlineDisplay}
             </span>
           </div>
         </div>
+
+        {acceptedContract?.contractId && (
+          <section className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+            <p className="text-sm text-emerald-300">
+              This opportunity has been filled. A draft contract was created for{" "}
+              {acceptedContract.creatorName}.
+            </p>
+            <ApplicationContractLink
+              contractId={acceptedContract.contractId}
+              className="mt-2"
+            />
+          </section>
+        )}
 
         {opportunity.deliverables && (
           <section className="rounded-xl border border-border bg-surface-raised p-6">
@@ -212,7 +255,12 @@ export function OpportunityDetail({
                         Proposed: {app.proposedRateDisplay}
                       </p>
                     </div>
-                    <ApplicationStatusBadge status={app.status} />
+                    <div className="flex flex-col items-end gap-2">
+                      <ApplicationStatusBadge status={app.status} />
+                      {app.contractId && (
+                        <ApplicationContractLink contractId={app.contractId} />
+                      )}
+                    </div>
                   </div>
                   {app.coverMessage && (
                     <p className="mt-3 text-sm text-gray-400">{app.coverMessage}</p>
@@ -256,6 +304,7 @@ export function OpportunityDetail({
         open={editOpen}
         onClose={() => setEditOpen(false)}
         opportunity={opportunity}
+        sponsors={sponsors}
       />
       <ApplyModal
         open={applyOpen}

@@ -5,21 +5,43 @@ import {
   DollarSign,
 } from "lucide-react";
 
+export type ContractSummaryFilter =
+  | "active"
+  | "pipeline"
+  | "expiring"
+  | "overdue"
+  | null;
+
 interface ContractSummaryCardsProps {
   activeCount: number;
   negotiatingCount: number;
   expiringSoonCount: number;
+  overdueCount?: number;
   totalValueDisplay: string;
+  activeFilter?: ContractSummaryFilter;
+  onFilterChange?: (filter: ContractSummaryFilter) => void;
 }
 
 export function ContractSummaryCards({
   activeCount,
   negotiatingCount,
   expiringSoonCount,
+  overdueCount = 0,
   totalValueDisplay,
+  activeFilter = null,
+  onFilterChange,
 }: ContractSummaryCardsProps) {
-  const cards = [
+  const cards: {
+    key: ContractSummaryFilter;
+    label: string;
+    value: string | number;
+    sub: string;
+    icon: typeof FileText;
+    iconBg: string;
+    iconColor: string;
+  }[] = [
     {
+      key: "active",
       label: "Active Contracts",
       value: activeCount,
       sub: "Currently in progress",
@@ -28,6 +50,7 @@ export function ContractSummaryCards({
       iconColor: "text-emerald-400",
     },
     {
+      key: "pipeline",
       label: "In Pipeline",
       value: negotiatingCount,
       sub: "Draft & negotiating",
@@ -36,6 +59,7 @@ export function ContractSummaryCards({
       iconColor: "text-amber-400",
     },
     {
+      key: "expiring",
       label: "Expiring Soon",
       value: expiringSoonCount,
       sub: "Within 45 days",
@@ -44,6 +68,7 @@ export function ContractSummaryCards({
       iconColor: "text-orange-400",
     },
     {
+      key: null,
       label: "Total Contract Value",
       value: totalValueDisplay,
       sub: "Active + pipeline",
@@ -53,14 +78,39 @@ export function ContractSummaryCards({
     },
   ];
 
+  if (overdueCount > 0) {
+    cards.splice(3, 0, {
+      key: "overdue",
+      label: "Overdue",
+      value: overdueCount,
+      sub: "Past end date, still active",
+      icon: AlertTriangle,
+      iconBg: "bg-red-500/10 ring-red-500/20",
+      iconColor: "text-red-400",
+    });
+  }
+
   return (
     <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
+        const isActive = card.key !== null && activeFilter === card.key;
+        const isClickable = Boolean(onFilterChange && card.key);
+
         return (
-          <div
+          <button
             key={card.label}
-            className="group relative overflow-hidden rounded-xl border border-border bg-surface-raised p-5 transition-colors hover:border-accent/30"
+            type="button"
+            onClick={() => {
+              if (!onFilterChange || !card.key) return;
+              onFilterChange(isActive ? null : card.key);
+            }}
+            disabled={!isClickable}
+            className={`group relative w-full overflow-hidden rounded-xl border bg-surface-raised p-5 text-left transition-colors ${
+              isActive
+                ? "border-accent/50 ring-1 ring-accent/30"
+                : "border-border hover:border-accent/30"
+            } ${isClickable ? "cursor-pointer" : "cursor-default"}`}
           >
             <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-accent/5 transition-transform group-hover:scale-110" />
             <div className="relative flex items-center justify-between">
@@ -75,7 +125,7 @@ export function ContractSummaryCards({
               {card.value}
             </p>
             <p className="relative mt-1 text-xs text-gray-500">{card.sub}</p>
-          </div>
+          </button>
         );
       })}
     </div>

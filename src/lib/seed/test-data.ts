@@ -59,9 +59,13 @@ export function getSeedSponsorRow(organizationId: string) {
   };
 }
 
-export function getSeedOpportunityRow(organizationId: string) {
+export function getSeedOpportunityRow(
+  organizationId: string,
+  sponsorId: string
+) {
   return {
     organization_id: organizationId,
+    sponsor_id: sponsorId,
     title: `${SEED_TITLE_PREFIX} Summer Gaming Sponsorship`,
     description:
       "Looking for gaming creators for a 3-month brand integration campaign. Includes dedicated videos and social posts.",

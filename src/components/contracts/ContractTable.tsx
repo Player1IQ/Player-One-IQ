@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
-import { type Contract, isExpiringSoon } from "@/lib/contracts";
+import {
+  type Contract,
+  isContractOverdue,
+  isExpiringSoon,
+} from "@/lib/contracts";
 import { deleteContract } from "@/app/contracts/actions";
 import { ContractStatusBadge } from "./ContractStatusBadge";
 import { ContractFormModal } from "./ContractFormModal";
@@ -15,12 +19,14 @@ interface ContractTableProps {
   contracts: Contract[];
   creators: Creator[];
   sponsors: Sponsor[];
+  canWrite?: boolean;
 }
 
 export function ContractTable({
   contracts,
   creators,
   sponsors,
+  canWrite = true,
 }: ContractTableProps) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -78,14 +84,17 @@ export function ContractTable({
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
                   End Date
                 </th>
-                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Actions
-                </th>
+                {canWrite && (
+                  <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
               {contracts.map((contract) => {
                 const expiring = isExpiringSoon(contract);
+                const overdue = isContractOverdue(contract);
 
                 return (
                   <tr
@@ -100,7 +109,12 @@ export function ContractTable({
                         <p className="font-semibold text-gray-100 transition-colors group-hover:text-accent-light">
                           {contract.contractName}
                         </p>
-                        {expiring && (
+                        {overdue && (
+                          <span className="mt-1 inline-flex items-center text-xs text-red-400">
+                            Overdue
+                          </span>
+                        )}
+                        {expiring && !overdue && (
                           <span className="mt-1 inline-flex items-center text-xs text-orange-400">
                             Expiring soon
                           </span>
@@ -134,68 +148,72 @@ export function ContractTable({
                     <td className="px-6 py-4">
                       <span
                         className={
-                          expiring
-                            ? "font-medium text-orange-400"
-                            : "text-gray-400"
+                          overdue
+                            ? "font-medium text-red-400"
+                            : expiring
+                              ? "font-medium text-orange-400"
+                              : "text-gray-400"
                         }
                       >
                         {contract.endDateDisplay}
                       </span>
                     </td>
-                    <td className="relative px-6 py-4">
-                      <button
-                        onClick={() =>
-                          setOpenMenu(
-                            openMenu === contract.id ? null : contract.id
-                          )
-                        }
-                        className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-all hover:bg-surface-overlay hover:text-gray-200 group-hover:opacity-100"
-                        disabled={deletingId === contract.id}
-                        aria-label="Actions"
-                      >
-                        <MoreHorizontal className="h-5 w-5" />
-                      </button>
-                      {openMenu === contract.id && (
-                        <>
-                          <div
-                            className="fixed inset-0 z-10"
-                            onClick={() => setOpenMenu(null)}
-                          />
-                          <div className="absolute right-6 top-12 z-20 w-44 rounded-lg border border-border bg-surface-overlay py-1 shadow-xl ring-1 ring-white/5">
-                            <Link
-                              href={`/contracts/${contract.id}`}
-                              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                    {canWrite && (
+                      <td className="relative px-6 py-4">
+                        <button
+                          onClick={() =>
+                            setOpenMenu(
+                              openMenu === contract.id ? null : contract.id
+                            )
+                          }
+                          className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-all hover:bg-surface-overlay hover:text-gray-200 group-hover:opacity-100"
+                          disabled={deletingId === contract.id}
+                          aria-label="Actions"
+                        >
+                          <MoreHorizontal className="h-5 w-5" />
+                        </button>
+                        {openMenu === contract.id && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-10"
                               onClick={() => setOpenMenu(null)}
-                            >
-                              <Eye className="h-4 w-4" />
-                              View Contract
-                            </Link>
-                            <button
-                              onClick={() => {
-                                setEditingContract(contract);
-                                setOpenMenu(null);
-                              }}
-                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
-                            >
-                              <Pencil className="h-4 w-4" />
-                              Edit
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleDelete(
-                                  contract.id,
-                                  contract.contractName
-                                )
-                              }
-                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </td>
+                            />
+                            <div className="absolute right-6 top-12 z-20 w-44 rounded-lg border border-border bg-surface-overlay py-1 shadow-xl ring-1 ring-white/5">
+                              <Link
+                                href={`/contracts/${contract.id}`}
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                                onClick={() => setOpenMenu(null)}
+                              >
+                                <Eye className="h-4 w-4" />
+                                View Contract
+                              </Link>
+                              <button
+                                onClick={() => {
+                                  setEditingContract(contract);
+                                  setOpenMenu(null);
+                                }}
+                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                              >
+                                <Pencil className="h-4 w-4" />
+                                Edit
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDelete(
+                                    contract.id,
+                                    contract.contractName
+                                  )
+                                }
+                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -204,13 +222,15 @@ export function ContractTable({
         </div>
       </div>
 
-      <ContractFormModal
-        open={!!editingContract}
-        onClose={() => setEditingContract(null)}
-        contract={editingContract}
-        creators={creators}
-        sponsors={sponsors}
-      />
+      {canWrite && (
+        <ContractFormModal
+          open={!!editingContract}
+          onClose={() => setEditingContract(null)}
+          contract={editingContract}
+          creators={creators}
+          sponsors={sponsors}
+        />
+      )}
     </>
   );
 }

@@ -10,6 +10,7 @@ import {
   applicationStatusLabels,
 } from "@/lib/opportunities";
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
+import { ApplicationContractLink } from "./ApplicationContractLink";
 
 interface ApplicationsPageClientProps {
   applications: OpportunityApplication[];
@@ -85,6 +86,7 @@ export function ApplicationsPageClient({
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase text-gray-500">Proposed Rate</th>
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase text-gray-500">Status</th>
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase text-gray-500">Applied</th>
+                <th className="px-6 py-3.5 text-xs font-semibold uppercase text-gray-500">Contract</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
@@ -111,6 +113,13 @@ export function ApplicationsPageClient({
                     <ApplicationStatusBadge status={app.status} />
                   </td>
                   <td className="px-6 py-4 text-gray-500">{app.createdAtDisplay}</td>
+                  <td className="px-6 py-4">
+                    {app.contractId ? (
+                      <ApplicationContractLink contractId={app.contractId} />
+                    ) : (
+                      <span className="text-gray-600">—</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

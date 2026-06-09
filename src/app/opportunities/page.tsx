@@ -1,11 +1,13 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OpportunitiesPageClient } from "@/components/opportunities/OpportunitiesPageClient";
 import { getOpportunities } from "@/lib/opportunities/queries";
+import { getSponsors } from "@/lib/sponsors/queries";
 import { getCurrentUserRole, canManageOpportunities } from "@/lib/permissions";
 
 export default async function OpportunitiesPage() {
-  const [opportunities, role] = await Promise.all([
+  const [opportunities, sponsors, role] = await Promise.all([
     getOpportunities(),
+    getSponsors(),
     getCurrentUserRole(),
   ]);
 
@@ -16,6 +18,7 @@ export default async function OpportunitiesPage() {
     >
       <OpportunitiesPageClient
         opportunities={opportunities}
+        sponsors={sponsors}
         canManage={canManageOpportunities(role)}
       />
     </DashboardLayout>

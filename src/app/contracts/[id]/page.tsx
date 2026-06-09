@@ -4,6 +4,7 @@ import { ContractDetail } from "@/components/contracts/ContractDetail";
 import { getContractById } from "@/lib/contracts/queries";
 import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
+import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
 
 interface ContractDetailPageProps {
   params: Promise<{ id: string }>;
@@ -13,10 +14,11 @@ export default async function ContractDetailPage({
   params,
 }: ContractDetailPageProps) {
   const { id } = await params;
-  const [contract, creators, sponsors] = await Promise.all([
+  const [contract, creators, sponsors, role] = await Promise.all([
     getContractById(id),
     getCreators(),
     getSponsors(),
+    getCurrentUserRole(),
   ]);
 
   if (!contract) {
@@ -32,6 +34,7 @@ export default async function ContractDetailPage({
         contract={contract}
         creators={creators}
         sponsors={sponsors}
+        canWrite={canWriteData(role)}
       />
     </DashboardLayout>
   );

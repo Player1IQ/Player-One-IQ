@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Mail, Shield } from "lucide-react";
 import { roleLabels } from "@/lib/team";
 import { acceptInvitation } from "@/app/team/actions";
+import { getErrorMessage } from "@/lib/safe-action";
 
 interface AcceptInviteClientProps {
   token: string;
@@ -36,14 +37,19 @@ export function AcceptInviteClient({
   async function handleAccept() {
     setError("");
     setLoading(true);
-    const result = await acceptInvitation(token);
-    if ("error" in result && result.error) {
-      setError(result.error);
+    try {
+      const result = await acceptInvitation(token);
+      if ("error" in result && result.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      setError(getErrorMessage(err));
       setLoading(false);
-      return;
     }
-    router.push("/");
-    router.refresh();
   }
 
   if (status !== "pending" || expired) {
@@ -101,11 +107,28 @@ export function AcceptInviteClient({
             this invitation.
           </p>
           <a
-            href={`/login?redirect=/invite/${token}`}
+            href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}`}
             className="flex w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
           >
             Sign in to accept
           </a>
+          <a
+            href={`/signup?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}`}
+            className="flex w-full items-center justify-center rounded-lg border border-border py-2.5 text-sm font-medium text-gray-300 hover:bg-surface-overlay"
+          >
+            Create account
+          </a>
+          <p className="text-center text-xs text-gray-500">
+            Already tried signing up? Use{" "}
+            <a
+              href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}`}
+              className="text-accent-light hover:underline"
+            >
+              Sign in
+            </a>{" "}
+            instead — signup sends a confirmation email and can hit rate limits
+            during testing.
+          </p>
         </div>
       ) : emailMismatch ? (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
@@ -114,6 +137,7 @@ export function AcceptInviteClient({
         </div>
       ) : (
         <button
+          type="button"
           onClick={handleAccept}
           disabled={loading}
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-dark disabled:opacity-50"

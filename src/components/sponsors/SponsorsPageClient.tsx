@@ -8,9 +8,13 @@ import { SponsorFormModal } from "./SponsorFormModal";
 
 interface SponsorsPageClientProps {
   sponsors: Sponsor[];
+  canWrite?: boolean;
 }
 
-export function SponsorsPageClient({ sponsors }: SponsorsPageClientProps) {
+export function SponsorsPageClient({
+  sponsors,
+  canWrite = true,
+}: SponsorsPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -82,13 +86,15 @@ export function SponsorsPageClient({ sponsors }: SponsorsPageClientProps) {
             className="w-full rounded-lg border border-border bg-surface-raised py-2.5 pl-10 pr-4 text-sm text-gray-200 placeholder:text-gray-600 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
           />
         </div>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
-        >
-          <Plus className="h-4 w-4" />
-          Add Sponsor
-        </button>
+        {canWrite && (
+          <button
+            onClick={() => setModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
+          >
+            <Plus className="h-4 w-4" />
+            Add Sponsor
+          </button>
+        )}
       </div>
 
       <div className="mb-4 flex items-center gap-4 text-sm text-gray-500">
@@ -99,9 +105,11 @@ export function SponsorsPageClient({ sponsors }: SponsorsPageClientProps) {
         </span>
       </div>
 
-      <SponsorTable sponsors={filtered} />
+      <SponsorTable sponsors={filtered} canWrite={canWrite} />
 
-      <SponsorFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      {canWrite && (
+        <SponsorFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      )}
     </>
   );
 }

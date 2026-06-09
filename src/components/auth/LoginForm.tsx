@@ -5,14 +5,22 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { formatAuthError } from "@/lib/auth/errors";
+import { getErrorMessage } from "@/lib/safe-action";
 import { AuthInput } from "./AuthInput";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
+  const inviteEmail = searchParams.get("email");
+  const signupHref = redirect
+    ? `/signup?redirect=${encodeURIComponent(redirect)}${inviteEmail ? `&email=${encodeURIComponent(inviteEmail)}` : ""}`
+    : inviteEmail
+      ? `/signup?email=${encodeURIComponent(inviteEmail)}`
+      : "/signup";
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(inviteEmail ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,19 +39,24 @@ export function LoginForm() {
       return;
     }
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    if (authError) {
-      setError(authError.message);
+      if (authError) {
+        setError(formatAuthError(authError.message));
+        setLoading(false);
+        return;
+      }
+
+      router.push(redirect);
+      router.refresh();
+    } catch (err) {
+      setError(formatAuthError(getErrorMessage(err)));
       setLoading(false);
-      return;
     }
-
-    router.push(redirect);
-    router.refresh();
   }
 
   return (
@@ -106,7 +119,7 @@ export function LoginForm() {
       <p className="text-center text-sm text-gray-500">
         Don&apos;t have an account?{" "}
         <Link
-          href="/signup"
+          href={signupHref}
           className="font-medium text-accent-light transition-colors hover:text-white"
         >
           Create account

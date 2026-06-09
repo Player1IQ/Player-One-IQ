@@ -16,6 +16,8 @@ import {
   Trash2,
 } from "lucide-react";
 import type { Sponsor } from "@/lib/sponsors";
+import type { Contract } from "@/lib/contracts";
+import { RelatedContractsSection } from "@/components/contracts/RelatedContractsSection";
 import { deleteSponsor } from "@/app/sponsors/actions";
 import { SponsorLogo } from "./SponsorLogo";
 import { SponsorStatusBadge } from "./SponsorStatusBadge";
@@ -24,6 +26,8 @@ import { SponsorFormModal } from "./SponsorFormModal";
 
 interface SponsorDetailProps {
   sponsor: Sponsor;
+  contracts?: Contract[];
+  canWrite?: boolean;
 }
 
 function Section({
@@ -83,13 +87,17 @@ function ContactCard({
   );
 }
 
-export function SponsorDetail({ sponsor }: SponsorDetailProps) {
+export function SponsorDetail({
+  sponsor,
+  contracts = [],
+  canWrite = true,
+}: SponsorDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const activeDealsList = sponsor.deals.filter(
-    (d) => d.status === "active" || d.status === "pending"
+  const activeContracts = contracts.filter(
+    (c) => c.status === "active" || c.status === "negotiating" || c.status === "draft"
   );
 
   async function handleDelete() {
@@ -122,23 +130,25 @@ export function SponsorDetail({ sponsor }: SponsorDetailProps) {
             <ArrowLeft className="h-4 w-4" />
             Back to Sponsors
           </Link>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setEditOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-surface-overlay hover:text-white"
-            >
-              <Pencil className="h-4 w-4" />
-              Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="inline-flex items-center gap-2 rounded-lg border border-red-500/30 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
-            >
-              <Trash2 className="h-4 w-4" />
-              Remove
-            </button>
-          </div>
+          {canWrite && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEditOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-surface-overlay hover:text-white"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 rounded-lg border border-red-500/30 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" />
+                Remove
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="relative overflow-hidden rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
@@ -233,7 +243,7 @@ export function SponsorDetail({ sponsor }: SponsorDetailProps) {
               <div>
                 <dt className="text-xs text-gray-500">Active Deals</dt>
                 <dd className="mt-1 text-2xl font-bold text-white">
-                  {sponsor.activeDeals}
+                  {activeContracts.length}
                 </dd>
               </div>
             </dl>
@@ -259,56 +269,13 @@ export function SponsorDetail({ sponsor }: SponsorDetailProps) {
         </div>
 
         <Section
-          title="Active Deals"
-          description="Current and pending creator partnerships"
+          title="Contracts"
+          description="Sponsorship agreements with this sponsor"
         >
-          {activeDealsList.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border-subtle py-10 text-center">
-              <p className="text-sm text-gray-500">
-                No active deals yet. Deals will appear here when contracts are
-                added.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {activeDealsList.map((deal) => (
-                <div
-                  key={deal.id}
-                  className="rounded-lg border border-border-subtle bg-surface p-4 transition-colors hover:border-accent/30"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-gray-100">
-                        {deal.campaign}
-                      </p>
-                      <p className="mt-1 text-sm text-gray-500">
-                        with {deal.creator}
-                      </p>
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${
-                        deal.status === "active"
-                          ? "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
-                          : "bg-amber-500/10 text-amber-400 ring-amber-500/20"
-                      }`}
-                    >
-                      {deal.status.charAt(0).toUpperCase() +
-                        deal.status.slice(1)}
-                    </span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between border-t border-border-subtle pt-3">
-                    <span className="text-lg font-bold text-white">
-                      {deal.value}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {deal.startDate}
-                      {deal.endDate ? ` – ${deal.endDate}` : ""}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <RelatedContractsSection
+            contracts={contracts}
+            emptyMessage="No contracts linked to this sponsor yet."
+          />
         </Section>
 
         {sponsor.internalNotes && (

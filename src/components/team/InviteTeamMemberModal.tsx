@@ -25,6 +25,8 @@ export function InviteTeamMemberModal({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const [copied, setCopied] = useState(false);
 
   if (!open) return null;
@@ -34,6 +36,8 @@ export function InviteTeamMemberModal({
     setRole("viewer");
     setError("");
     setInviteLink("");
+    setEmailSent(false);
+    setEmailError("");
     setCopied(false);
     onClose();
   }
@@ -52,8 +56,15 @@ export function InviteTeamMemberModal({
     }
 
     if ("token" in result && result.token) {
-      const link = `${window.location.origin}/invite/${result.token}`;
+      const link =
+        "inviteUrl" in result && result.inviteUrl
+          ? result.inviteUrl
+          : `${window.location.origin}/invite/${result.token}`;
       setInviteLink(link);
+      setEmailSent(Boolean("emailSent" in result && result.emailSent));
+      setEmailError(
+        "emailError" in result && result.emailError ? result.emailError : ""
+      );
       router.refresh();
     }
 
@@ -91,8 +102,15 @@ export function InviteTeamMemberModal({
         {inviteLink ? (
           <div className="space-y-4 p-6">
             <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-              Invitation created! Share this link with {email}:
+              {emailSent
+                ? `Invitation email sent to ${email}.`
+                : `Invitation created! Share this link with ${email}:`}
             </div>
+            {emailError && (
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                Could not send email: {emailError}. Copy the link below instead.
+              </div>
+            )}
             <div className="flex gap-2">
               <input
                 readOnly

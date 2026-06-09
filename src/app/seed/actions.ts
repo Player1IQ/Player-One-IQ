@@ -65,6 +65,8 @@ export async function seedTestData(): Promise<
     result.created.creators = 3;
   }
 
+  let sponsorId: string | null = null;
+
   const { data: existingSponsors } = await supabase
     .from("sponsors")
     .select("id")
@@ -73,13 +75,30 @@ export async function seedTestData(): Promise<
 
   if (existingSponsors?.length) {
     result.skipped.sponsors = true;
+    sponsorId = existingSponsors[0].id;
   } else {
-    const { error } = await supabase
+    const { data: insertedSponsor, error } = await supabase
       .from("sponsors")
-      .insert(getSeedSponsorRow(organizationId));
+      .insert(getSeedSponsorRow(organizationId))
+      .select("id")
+      .single();
 
     if (error) return { error: error.message };
     result.created.sponsors = 1;
+    sponsorId = insertedSponsor.id;
+  }
+
+  if (!sponsorId) {
+    const { data: fallbackSponsor } = await supabase
+      .from("sponsors")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("status", "active")
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    sponsorId = fallbackSponsor?.id ?? null;
   }
 
   const { data: existingOpportunities } = await supabase
@@ -93,10 +112,12 @@ export async function seedTestData(): Promise<
 
   if (hasSeedOpportunity) {
     result.skipped.opportunities = true;
+  } else if (!sponsorId) {
+    return { error: "Seed sponsor is required before creating an opportunity." };
   } else {
     const { error } = await supabase
       .from("opportunities")
-      .insert(getSeedOpportunityRow(organizationId));
+      .insert(getSeedOpportunityRow(organizationId, sponsorId));
 
     if (error) return { error: error.message };
     result.created.opportunities = 1;

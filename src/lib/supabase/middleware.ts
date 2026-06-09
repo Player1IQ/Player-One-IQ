@@ -58,7 +58,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user) {
-    const [{ data: organization }, { data: membership }] = await Promise.all([
+    const [{ data: organization }, { data: memberships }] = await Promise.all([
       supabase
         .from("organizations")
         .select("id")
@@ -68,29 +68,35 @@ export async function updateSession(request: NextRequest) {
         .from("team_members")
         .select("organization_id")
         .eq("user_id", user.id)
-        .eq("status", "active")
-        .maybeSingle(),
+        .eq("status", "active"),
     ]);
 
-    const hasOrganization = !!organization || !!membership;
+    const memberOrgIds = new Set(
+      (memberships ?? []).map((row) => row.organization_id)
+    );
+    const hasOrganization = !!organization || memberOrgIds.size > 0;
+
+    const { data: pendingInvite } = await supabase
+      .from("team_invitations")
+      .select("token, organization_id")
+      .eq("status", "pending")
+      .ilike("email", user.email ?? "")
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const needsToAcceptInvite =
+      pendingInvite?.token &&
+      !memberOrgIds.has(pendingInvite.organization_id);
+
+    if (needsToAcceptInvite && !isInviteRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/invite/${pendingInvite.token}`;
+      return NextResponse.redirect(url);
+    }
 
     if (!hasOrganization && !isOrgSetup && !isInviteRoute) {
-      const { data: pendingInvite } = await supabase
-        .from("team_invitations")
-        .select("token")
-        .eq("status", "pending")
-        .ilike("email", user.email ?? "")
-        .gt("expires_at", new Date().toISOString())
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (pendingInvite?.token) {
-        const url = request.nextUrl.clone();
-        url.pathname = `/invite/${pendingInvite.token}`;
-        return NextResponse.redirect(url);
-      }
-
       const url = request.nextUrl.clone();
       url.pathname = "/organization-setup";
       return NextResponse.redirect(url);

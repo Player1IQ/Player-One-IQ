@@ -12,7 +12,7 @@ import {
   opportunityPlatforms,
   opportunityStatusLabels,
 } from "@/lib/opportunities";
-import type { Industry } from "@/lib/sponsors";
+import type { Industry, Sponsor } from "@/lib/sponsors";
 import type { Platform } from "@/lib/creators";
 import {
   createOpportunity,
@@ -23,12 +23,14 @@ interface OpportunityFormModalProps {
   open: boolean;
   onClose: () => void;
   opportunity?: Opportunity | null;
+  sponsors: Sponsor[];
 }
 
 function toInput(opportunity: Opportunity): OpportunityInput {
   return {
     title: opportunity.title,
     description: opportunity.description,
+    sponsorId: opportunity.sponsorId ?? "",
     budget: opportunity.budget,
     category: opportunity.category,
     platform: opportunity.platform,
@@ -38,9 +40,10 @@ function toInput(opportunity: Opportunity): OpportunityInput {
   };
 }
 
-const defaultInput = (): OpportunityInput => ({
+const defaultInput = (sponsorId = ""): OpportunityInput => ({
   title: "",
   description: "",
+  sponsorId,
   budget: null,
   category: "Gaming",
   platform: "YouTube",
@@ -53,19 +56,24 @@ export function OpportunityFormModal({
   open,
   onClose,
   opportunity,
+  sponsors,
 }: OpportunityFormModalProps) {
   const router = useRouter();
   const isEdit = !!opportunity;
-  const [form, setForm] = useState<OpportunityInput>(defaultInput());
+  const activeSponsors = sponsors.filter((sponsor) => sponsor.status === "active");
+  const defaultSponsorId = activeSponsors[0]?.id ?? "";
+  const [form, setForm] = useState<OpportunityInput>(defaultInput(defaultSponsorId));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setForm(opportunity ? toInput(opportunity) : defaultInput());
+      setForm(
+        opportunity ? toInput(opportunity) : defaultInput(defaultSponsorId)
+      );
       setError("");
     }
-  }, [open, opportunity]);
+  }, [open, opportunity, defaultSponsorId]);
 
   if (!open) return null;
 
@@ -125,6 +133,38 @@ export function OpportunityFormModal({
               placeholder="Q3 Gaming Campaign"
               className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200"
             />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-300">Sponsor</label>
+            {activeSponsors.length === 0 ? (
+              <p className="text-sm text-amber-400">
+                Add an active sponsor before creating an opportunity.
+              </p>
+            ) : (
+              <select
+                value={form.sponsorId}
+                onChange={(e) => {
+                  const sponsor = activeSponsors.find(
+                    (item) => item.id === e.target.value
+                  );
+                  setForm({
+                    ...form,
+                    sponsorId: e.target.value,
+                    category: sponsor?.industry ?? form.category,
+                  });
+                }}
+                required
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200"
+              >
+                <option value="">Select a sponsor</option>
+                {activeSponsors.map((sponsor) => (
+                  <option key={sponsor.id} value={sponsor.id}>
+                    {sponsor.companyName} ({sponsor.industry})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div>
@@ -232,7 +272,7 @@ export function OpportunityFormModal({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || activeSponsors.length === 0 || !form.sponsorId}
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}

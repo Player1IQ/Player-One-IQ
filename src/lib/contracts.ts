@@ -15,6 +15,47 @@ export const contractStatuses: ContractStatus[] = [
   "cancelled",
 ];
 
+export const contractStatusLabels: Record<ContractStatus, string> = {
+  draft: "Draft",
+  negotiating: "Negotiating",
+  active: "Active",
+  completed: "Completed",
+  expired: "Expired",
+  cancelled: "Cancelled",
+};
+
+export const allowedStatusTransitions: Record<ContractStatus, ContractStatus[]> =
+  {
+    draft: ["negotiating", "active", "cancelled"],
+    negotiating: ["draft", "active", "cancelled"],
+    active: ["completed", "expired", "cancelled"],
+    completed: [],
+    expired: [],
+    cancelled: [],
+  };
+
+export function getAllowedStatusTransitions(
+  status: ContractStatus
+): ContractStatus[] {
+  return allowedStatusTransitions[status] ?? [];
+}
+
+export function getSelectableStatuses(
+  current: ContractStatus,
+  isNew: boolean
+): ContractStatus[] {
+  if (isNew) return contractStatuses;
+  return [current, ...getAllowedStatusTransitions(current)];
+}
+
+export function canTransitionContractStatus(
+  from: ContractStatus,
+  to: ContractStatus
+): boolean {
+  if (from === to) return true;
+  return getAllowedStatusTransitions(from).includes(to);
+}
+
 export interface ContractRow {
   id: string;
   organization_id: string;
@@ -27,6 +68,8 @@ export interface ContractRow {
   end_date: string | null;
   deliverables: string | null;
   notes: string | null;
+  source_opportunity_id: string | null;
+  source_application_id: string | null;
   created_at: string;
   updated_at: string;
   creators?: { name: string } | { name: string }[] | null;
@@ -50,6 +93,8 @@ export interface Contract {
   endDateDisplay: string;
   deliverables: string;
   notes: string;
+  sourceOpportunityId: string | null;
+  sourceApplicationId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -112,9 +157,20 @@ export function mapContractRow(row: ContractRow): Contract {
     endDateDisplay: formatContractDate(row.end_date),
     deliverables: row.deliverables ?? "",
     notes: row.notes ?? "",
+    sourceOpportunityId: row.source_opportunity_id ?? null,
+    sourceApplicationId: row.source_application_id ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+export function isContractOverdue(
+  contract: Contract,
+  now = new Date()
+): boolean {
+  if (contract.status !== "active" || !contract.endDate) return false;
+  const end = new Date(contract.endDate + "T00:00:00");
+  return end.getTime() < now.getTime();
 }
 
 export function isExpiringSoon(
@@ -123,6 +179,7 @@ export function isExpiringSoon(
   now = new Date()
 ): boolean {
   if (contract.status !== "active" || !contract.endDate) return false;
+  if (isContractOverdue(contract, now)) return false;
   const end = new Date(contract.endDate + "T00:00:00");
   const diff = (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
   return diff >= 0 && diff <= withinDays;
@@ -134,6 +191,7 @@ export function getContractStats(contracts: Contract[]) {
     (c) => c.status === "negotiating" || c.status === "draft"
   );
   const expiringSoon = contracts.filter((c) => isExpiringSoon(c));
+  const overdue = contracts.filter((c) => isContractOverdue(c));
   const pipeline = contracts.filter(
     (c) =>
       c.status === "active" ||
@@ -146,6 +204,7 @@ export function getContractStats(contracts: Contract[]) {
     activeCount: active.length,
     negotiatingCount: negotiating.length,
     expiringSoonCount: expiringSoon.length,
+    overdueCount: overdue.length,
     totalValue,
     totalValueDisplay: formatCurrency(totalValue),
   };
@@ -159,21 +218,43 @@ function monthsBetween(start: Date, end: Date): number {
   return Math.max(1, months);
 }
 
+export function getContractMonthlyValue(contract: Contract, now = new Date()): number {
+  if (contract.status !== "active" || contract.contractValue <= 0) return 0;
+
+  if (contract.startDate && contract.endDate) {
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const start = new Date(contract.startDate + "T00:00:00");
+    const end = new Date(contract.endDate + "T00:00:00");
+
+    if (end < monthStart || start > monthEnd) return 0;
+
+    return contract.contractValue / monthsBetween(start, end);
+  }
+
+  // Active contract without dates: estimate as value spread over 12 months.
+  return contract.contractValue / 12;
+}
+
 export function getMonthlyRevenue(contracts: Contract[], now = new Date()): number {
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return contracts.reduce(
+    (sum, contract) => sum + getContractMonthlyValue(contract, now),
+    0
+  );
+}
 
-  return contracts
-    .filter((c) => c.status === "active" && c.startDate && c.endDate)
-    .reduce((sum, contract) => {
-      const start = new Date(contract.startDate! + "T00:00:00");
-      const end = new Date(contract.endDate! + "T00:00:00");
-      if (end < monthStart || start > monthEnd) return sum;
+export function getMonthlyRevenueSummary(
+  contracts: Contract[],
+  now = new Date()
+): { amount: number; activeContractCount: number } {
+  const activeContracts = contracts.filter(
+    (c) => c.status === "active" && c.contractValue > 0
+  );
 
-      const monthlyValue =
-        contract.contractValue / monthsBetween(start, end);
-      return sum + monthlyValue;
-    }, 0);
+  return {
+    amount: getMonthlyRevenue(contracts, now),
+    activeContractCount: activeContracts.length,
+  };
 }
 
 export function getUpcomingExpirations(
@@ -183,6 +264,18 @@ export function getUpcomingExpirations(
 ): Contract[] {
   return contracts
     .filter((c) => isExpiringSoon(c, withinDays, now))
+    .sort((a, b) => {
+      if (!a.endDate || !b.endDate) return 0;
+      return a.endDate.localeCompare(b.endDate);
+    });
+}
+
+export function getOverdueContracts(
+  contracts: Contract[],
+  now = new Date()
+): Contract[] {
+  return contracts
+    .filter((c) => isContractOverdue(c, now))
     .sort((a, b) => {
       if (!a.endDate || !b.endDate) return 0;
       return a.endDate.localeCompare(b.endDate);

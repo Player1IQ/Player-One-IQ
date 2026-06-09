@@ -1,10 +1,14 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CreatorsPageClient } from "@/components/creators/CreatorsPageClient";
 import { getCreators } from "@/lib/creators/queries";
+import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
 import { isSeedEnabled } from "@/lib/seed/constants";
 
 export default async function CreatorsPage() {
-  const creators = await getCreators();
+  const [creators, role] = await Promise.all([
+    getCreators(),
+    getCurrentUserRole(),
+  ]);
 
   return (
     <DashboardLayout
@@ -13,6 +17,7 @@ export default async function CreatorsPage() {
     >
       <CreatorsPageClient
         creators={creators}
+        canWrite={canWriteData(role)}
         showSeedButton={isSeedEnabled()}
       />
     </DashboardLayout>

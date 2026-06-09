@@ -14,9 +14,13 @@ import { CreatorFormModal } from "./CreatorFormModal";
 
 interface CreatorRosterTableProps {
   creators: Creator[];
+  canWrite?: boolean;
 }
 
-export function CreatorRosterTable({ creators }: CreatorRosterTableProps) {
+export function CreatorRosterTable({
+  creators,
+  canWrite = true,
+}: CreatorRosterTableProps) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [editingCreator, setEditingCreator] = useState<Creator | null>(null);
@@ -70,9 +74,11 @@ export function CreatorRosterTable({ creators }: CreatorRosterTableProps) {
                 <th className="px-6 py-3.5 font-medium text-gray-400">
                   Added
                 </th>
-                <th className="px-6 py-3.5 font-medium text-gray-400">
-                  Actions
-                </th>
+                {canWrite && (
+                  <th className="px-6 py-3.5 font-medium text-gray-400">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
@@ -112,56 +118,58 @@ export function CreatorRosterTable({ creators }: CreatorRosterTableProps) {
                   <td className="px-6 py-4 text-gray-400">
                     {formatCreatorDate(creator.createdAt)}
                   </td>
-                  <td className="relative px-6 py-4">
-                    <button
-                      onClick={() =>
-                        setOpenMenu(
-                          openMenu === creator.id ? null : creator.id
-                        )
-                      }
-                      className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-surface-overlay hover:text-gray-200"
-                      disabled={deletingId === creator.id}
-                    >
-                      <MoreHorizontal className="h-5 w-5" />
-                    </button>
-                    {openMenu === creator.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          onClick={() => setOpenMenu(null)}
-                        />
-                        <div className="absolute right-6 top-12 z-20 w-44 rounded-lg border border-border bg-surface-overlay py-1 shadow-xl">
-                          <Link
-                            href={`/creators/${creator.id}`}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                  {canWrite && (
+                    <td className="relative px-6 py-4">
+                      <button
+                        onClick={() =>
+                          setOpenMenu(
+                            openMenu === creator.id ? null : creator.id
+                          )
+                        }
+                        className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-surface-overlay hover:text-gray-200"
+                        disabled={deletingId === creator.id}
+                      >
+                        <MoreHorizontal className="h-5 w-5" />
+                      </button>
+                      {openMenu === creator.id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-10"
                             onClick={() => setOpenMenu(null)}
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Profile
-                          </Link>
-                          <button
-                            onClick={() => {
-                              setEditingCreator(creator);
-                              setOpenMenu(null);
-                            }}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleDelete(creator.id, creator.name)
-                            }
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Remove
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </td>
+                          />
+                          <div className="absolute right-6 top-12 z-20 w-44 rounded-lg border border-border bg-surface-overlay py-1 shadow-xl">
+                            <Link
+                              href={`/creators/${creator.id}`}
+                              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                              onClick={() => setOpenMenu(null)}
+                            >
+                              <Eye className="h-4 w-4" />
+                              View Profile
+                            </Link>
+                            <button
+                              onClick={() => {
+                                setEditingCreator(creator);
+                                setOpenMenu(null);
+                              }}
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleDelete(creator.id, creator.name)
+                              }
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remove
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -169,11 +177,13 @@ export function CreatorRosterTable({ creators }: CreatorRosterTableProps) {
         </div>
       </div>
 
-      <CreatorFormModal
-        open={!!editingCreator}
-        onClose={() => setEditingCreator(null)}
-        creator={editingCreator}
-      />
+      {canWrite && (
+        <CreatorFormModal
+          open={!!editingCreator}
+          onClose={() => setEditingCreator(null)}
+          creator={editingCreator}
+        />
+      )}
     </>
   );
 }

@@ -14,14 +14,17 @@ import { OpportunityStatusBadge } from "./OpportunityStatusBadge";
 import { OpportunityFormModal } from "./OpportunityFormModal";
 import { PlatformBadge } from "@/components/creators/PlatformBadge";
 import { IndustryBadge } from "@/components/sponsors/IndustryBadge";
+import type { Sponsor } from "@/lib/sponsors";
 
 interface OpportunitiesPageClientProps {
   opportunities: Opportunity[];
+  sponsors: Sponsor[];
   canManage: boolean;
 }
 
 export function OpportunitiesPageClient({
   opportunities,
+  sponsors,
   canManage,
 }: OpportunitiesPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
@@ -39,7 +42,8 @@ export function OpportunitiesPageClient({
         o.title.toLowerCase().includes(query) ||
         o.description.toLowerCase().includes(query) ||
         o.category.toLowerCase().includes(query) ||
-        o.platform.toLowerCase().includes(query);
+        o.platform.toLowerCase().includes(query) ||
+        (o.sponsorName?.toLowerCase().includes(query) ?? false);
       const matchesStatus = statusFilter === "all" || o.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -140,6 +144,12 @@ export function OpportunitiesPageClient({
                 <IndustryBadge industry={opportunity.category} />
                 <PlatformBadge platform={opportunity.platform} />
               </div>
+              {opportunity.sponsorName && (
+                <p className="mt-3 text-sm text-gray-400">
+                  Sponsor:{" "}
+                  <span className="text-gray-300">{opportunity.sponsorName}</span>
+                </p>
+              )}
               <div className="mt-4 flex items-center justify-between text-sm">
                 <span className="font-semibold text-white">
                   {opportunity.budgetDisplay}
@@ -157,7 +167,11 @@ export function OpportunitiesPageClient({
         </div>
       )}
 
-      <OpportunityFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <OpportunityFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        sponsors={sponsors}
+      />
     </>
   );
 }

@@ -1,8 +1,34 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SeedTestDataButton } from "@/components/dev/SeedTestDataButton";
+import { SettingsPageClient } from "@/components/settings/SettingsPageClient";
+import {
+  getOrganizationForUser,
+  getOrganizationMemberCount,
+} from "@/lib/organization/queries";
+import {
+  canManageSettings,
+  canViewSettings,
+  getCurrentUserRole,
+} from "@/lib/permissions";
 import { isSeedEnabled } from "@/lib/seed/constants";
 
-export default function SettingsPage() {
+function formatCreatedAt(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+export default async function SettingsPage() {
+  const [organization, role, memberCount] = await Promise.all([
+    getOrganizationForUser(),
+    getCurrentUserRole(),
+    getOrganizationMemberCount(),
+  ]);
+
+  const canView = canViewSettings(role);
+  const canEdit = canManageSettings(role);
   const showDevTools = isSeedEnabled();
 
   return (
@@ -10,25 +36,22 @@ export default function SettingsPage() {
       title="Settings"
       description="Configure your workspace preferences"
     >
-      {showDevTools ? (
-        <div className="space-y-6">
-          <section>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-              Development
-            </h2>
-            <div className="mt-4">
-              <SeedTestDataButton variant="card" />
-            </div>
-          </section>
-        </div>
-      ) : (
-        <div className="flex min-h-[400px] items-center justify-center rounded-xl border border-dashed border-border bg-surface-raised">
-          <div className="text-center">
-            <p className="text-lg font-medium text-gray-300">Settings</p>
-            <p className="mt-1 text-sm text-gray-500">Coming soon</p>
-          </div>
-        </div>
-      )}
+      <SettingsPageClient
+        organizationName={organization?.name ?? ""}
+        organizationType={organization?.type ?? ""}
+        memberCount={memberCount}
+        createdAtDisplay={
+          organization?.created_at
+            ? formatCreatedAt(organization.created_at)
+            : "—"
+        }
+        canEdit={canEdit}
+        canView={canView}
+        showDevTools={showDevTools}
+        devTools={
+          showDevTools ? <SeedTestDataButton variant="card" /> : undefined
+        }
+      />
     </DashboardLayout>
   );
 }

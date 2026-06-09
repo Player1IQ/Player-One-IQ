@@ -1,38 +1,42 @@
-import { type LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
+import Link from "next/link";
+import { type LucideIcon } from "lucide-react";
 
 interface StatCardProps {
   title: string;
   value: string;
-  change: string;
-  trend: "up" | "down";
+  subtitle?: string;
+  href?: string;
   icon: LucideIcon;
   iconColor: string;
+  highlight?: boolean;
 }
 
 export function StatCard({
   title,
   value,
-  change,
-  trend,
+  subtitle,
+  href,
   icon: Icon,
   iconColor,
+  highlight = false,
 }: StatCardProps) {
-  const TrendIcon = trend === "up" ? TrendingUp : TrendingDown;
-  const trendColor = trend === "up" ? "text-emerald-400" : "text-red-400";
-
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-border bg-surface-raised p-6 transition-colors hover:border-accent/30 hover:bg-surface-overlay">
+  const content = (
+    <div
+      className={`group relative overflow-hidden rounded-xl border bg-surface-raised p-6 transition-colors ${
+        highlight
+          ? "border-orange-500/30 hover:border-orange-500/50"
+          : "border-border hover:border-accent/30 hover:bg-surface-overlay"
+      } ${href ? "cursor-pointer" : ""}`}
+    >
       <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-accent/5 transition-transform group-hover:scale-110" />
 
       <div className="relative flex items-start justify-between">
         <div className="space-y-3">
           <p className="text-sm font-medium text-gray-400">{title}</p>
           <p className="text-3xl font-bold tracking-tight text-white">{value}</p>
-          <div className={`flex items-center gap-1 text-sm ${trendColor}`}>
-            <TrendIcon className="h-4 w-4" />
-            <span>{change}</span>
-            <span className="text-gray-500">vs last month</span>
-          </div>
+          {subtitle && (
+            <p className="text-sm text-gray-500">{subtitle}</p>
+          )}
         </div>
 
         <div
@@ -43,4 +47,10 @@ export function StatCard({
       </div>
     </div>
   );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+
+  return content;
 }

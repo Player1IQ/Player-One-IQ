@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Gamepad2 } from "lucide-react";
 import { navItems } from "@/lib/navigation";
 import { SidebarUser } from "@/components/SidebarUser";
+import { UnreadBadge } from "@/components/messages/UnreadBadge";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -48,7 +49,8 @@ export function Sidebar() {
                     : "text-gray-500 group-hover:text-gray-300"
                 }`}
               />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.showUnreadBadge && <UnreadBadge />}
             </Link>
           );
         })}

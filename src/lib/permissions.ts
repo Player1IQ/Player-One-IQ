@@ -4,7 +4,10 @@ import {
   type TeamRole,
   canManageTeam,
   canWriteData,
+  permissionMatrix,
 } from "@/lib/team";
+
+export { canWriteData };
 
 export async function getCurrentUserRole(): Promise<TeamRole | null> {
   const supabase = await createClient();
@@ -87,6 +90,27 @@ export async function requireApplicationAccess(): Promise<
   if (!canApplyToOpportunities(role)) {
     return {
       error: "You do not have permission to submit applications.",
+    };
+  }
+  return null;
+}
+
+export function canViewSettings(role: TeamRole | null): boolean {
+  if (!role) return false;
+  return permissionMatrix[role].settings !== "none";
+}
+
+export function canManageSettings(role: TeamRole | null): boolean {
+  return canManageTeam(role);
+}
+
+export async function requireSettingsManageAccess(): Promise<
+  { error: string } | null
+> {
+  const role = await getCurrentUserRole();
+  if (!canManageSettings(role)) {
+    return {
+      error: "You do not have permission to update organization settings.",
     };
   }
   return null;

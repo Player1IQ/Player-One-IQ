@@ -13,9 +13,13 @@ import { SponsorFormModal } from "./SponsorFormModal";
 
 interface SponsorTableProps {
   sponsors: Sponsor[];
+  canWrite?: boolean;
 }
 
-export function SponsorTable({ sponsors }: SponsorTableProps) {
+export function SponsorTable({
+  sponsors,
+  canWrite = true,
+}: SponsorTableProps) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
@@ -72,9 +76,11 @@ export function SponsorTable({ sponsors }: SponsorTableProps) {
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Status
                 </th>
-                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Actions
-                </th>
+                {canWrite && (
+                  <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
@@ -125,57 +131,59 @@ export function SponsorTable({ sponsors }: SponsorTableProps) {
                   <td className="px-6 py-4">
                     <SponsorStatusBadge status={sponsor.status} />
                   </td>
-                  <td className="relative px-6 py-4">
-                    <button
-                      onClick={() =>
-                        setOpenMenu(
-                          openMenu === sponsor.id ? null : sponsor.id
-                        )
-                      }
-                      className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-all hover:bg-surface-overlay hover:text-gray-200 group-hover:opacity-100"
-                      disabled={deletingId === sponsor.id}
-                      aria-label="Actions"
-                    >
-                      <MoreHorizontal className="h-5 w-5" />
-                    </button>
-                    {openMenu === sponsor.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          onClick={() => setOpenMenu(null)}
-                        />
-                        <div className="absolute right-6 top-12 z-20 w-44 rounded-lg border border-border bg-surface-overlay py-1 shadow-xl ring-1 ring-white/5">
-                          <Link
-                            href={`/sponsors/${sponsor.id}`}
-                            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                  {canWrite && (
+                    <td className="relative px-6 py-4">
+                      <button
+                        onClick={() =>
+                          setOpenMenu(
+                            openMenu === sponsor.id ? null : sponsor.id
+                          )
+                        }
+                        className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-all hover:bg-surface-overlay hover:text-gray-200 group-hover:opacity-100"
+                        disabled={deletingId === sponsor.id}
+                        aria-label="Actions"
+                      >
+                        <MoreHorizontal className="h-5 w-5" />
+                      </button>
+                      {openMenu === sponsor.id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-10"
                             onClick={() => setOpenMenu(null)}
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </Link>
-                          <button
-                            onClick={() => {
-                              setEditingSponsor(sponsor);
-                              setOpenMenu(null);
-                            }}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
-                          >
-                            <Pencil className="h-4 w-4" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleDelete(sponsor.id, sponsor.companyName)
-                            }
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Remove
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </td>
+                          />
+                          <div className="absolute right-6 top-12 z-20 w-44 rounded-lg border border-border bg-surface-overlay py-1 shadow-xl ring-1 ring-white/5">
+                            <Link
+                              href={`/sponsors/${sponsor.id}`}
+                              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                              onClick={() => setOpenMenu(null)}
+                            >
+                              <Eye className="h-4 w-4" />
+                              View Details
+                            </Link>
+                            <button
+                              onClick={() => {
+                                setEditingSponsor(sponsor);
+                                setOpenMenu(null);
+                              }}
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleDelete(sponsor.id, sponsor.companyName)
+                              }
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Remove
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -183,11 +191,13 @@ export function SponsorTable({ sponsors }: SponsorTableProps) {
         </div>
       </div>
 
-      <SponsorFormModal
-        open={!!editingSponsor}
-        onClose={() => setEditingSponsor(null)}
-        sponsor={editingSponsor}
-      />
+      {canWrite && (
+        <SponsorFormModal
+          open={!!editingSponsor}
+          onClose={() => setEditingSponsor(null)}
+          sponsor={editingSponsor}
+        />
+      )}
     </>
   );
 }

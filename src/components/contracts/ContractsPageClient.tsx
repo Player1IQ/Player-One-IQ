@@ -7,10 +7,16 @@ import type { Sponsor } from "@/lib/sponsors";
 import {
   type Contract,
   type ContractStatus,
+  contractStatusLabels,
   contractStatuses,
   getContractStats,
+  isContractOverdue,
+  isExpiringSoon,
 } from "@/lib/contracts";
-import { ContractSummaryCards } from "./ContractSummaryCards";
+import {
+  ContractSummaryCards,
+  type ContractSummaryFilter,
+} from "./ContractSummaryCards";
 import { ContractTable } from "./ContractTable";
 import { ContractFormModal } from "./ContractFormModal";
 
@@ -21,26 +27,24 @@ interface ContractsPageClientProps {
   contracts: Contract[];
   creators: Creator[];
   sponsors: Sponsor[];
+  canWrite?: boolean;
+  initialSummaryFilter?: ContractSummaryFilter;
 }
-
-const statusLabels: Record<ContractStatus, string> = {
-  draft: "Draft",
-  negotiating: "Negotiating",
-  active: "Active",
-  completed: "Completed",
-  expired: "Expired",
-  cancelled: "Cancelled",
-};
 
 export function ContractsPageClient({
   contracts,
   creators,
   sponsors,
+  canWrite = true,
+  initialSummaryFilter = null,
 }: ContractsPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ContractStatus | "all">(
     "all"
+  );
+  const [summaryFilter, setSummaryFilter] = useState<ContractSummaryFilter>(
+    initialSummaryFilter
   );
   const [sortField, setSortField] = useState<SortField>("startDate");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -60,7 +64,15 @@ export function ContractsPageClient({
       const matchesStatus =
         statusFilter === "all" || c.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      const matchesSummary =
+        !summaryFilter ||
+        (summaryFilter === "active" && c.status === "active") ||
+        (summaryFilter === "pipeline" &&
+          (c.status === "draft" || c.status === "negotiating")) ||
+        (summaryFilter === "expiring" && isExpiringSoon(c)) ||
+        (summaryFilter === "overdue" && isContractOverdue(c));
+
+      return matchesSearch && matchesStatus && matchesSummary;
     });
 
     result = [...result].sort((a, b) => {
@@ -83,7 +95,7 @@ export function ContractsPageClient({
     });
 
     return result;
-  }, [contracts, search, statusFilter, sortField, sortDir]);
+  }, [contracts, search, statusFilter, summaryFilter, sortField, sortDir]);
 
   return (
     <>
@@ -91,7 +103,10 @@ export function ContractsPageClient({
         activeCount={stats.activeCount}
         negotiatingCount={stats.negotiatingCount}
         expiringSoonCount={stats.expiringSoonCount}
+        overdueCount={stats.overdueCount}
         totalValueDisplay={stats.totalValueDisplay}
+        activeFilter={summaryFilter}
+        onFilterChange={setSummaryFilter}
       />
 
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -117,7 +132,7 @@ export function ContractsPageClient({
             <option value="all">All statuses</option>
             {contractStatuses.map((s) => (
               <option key={s} value={s}>
-                {statusLabels[s]}
+                {contractStatusLabels[s]}
               </option>
             ))}
           </select>
@@ -144,13 +159,15 @@ export function ContractsPageClient({
             <option value="status-desc">Status: Z–A</option>
           </select>
 
-          <button
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
-          >
-            <Plus className="h-4 w-4" />
-            New Contract
-          </button>
+          {canWrite && (
+            <button
+              onClick={() => setModalOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
+            >
+              <Plus className="h-4 w-4" />
+              New Contract
+            </button>
+          )}
         </div>
       </div>
 
@@ -164,14 +181,17 @@ export function ContractsPageClient({
         contracts={filtered}
         creators={creators}
         sponsors={sponsors}
+        canWrite={canWrite}
       />
 
-      <ContractFormModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        creators={creators}
-        sponsors={sponsors}
-      />
+      {canWrite && (
+        <ContractFormModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          creators={creators}
+          sponsors={sponsors}
+        />
+      )}
     </>
   );
 }

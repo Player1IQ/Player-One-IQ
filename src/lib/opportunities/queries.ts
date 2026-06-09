@@ -9,6 +9,28 @@ import {
   type OpportunityRow,
 } from "@/lib/opportunities";
 
+async function getContractIdsByApplicationIds(
+  applicationIds: string[]
+): Promise<Record<string, string>> {
+  if (applicationIds.length === 0) return {};
+
+  const supabase = await createClient();
+  if (!supabase) return {};
+
+  const { data } = await supabase
+    .from("contracts")
+    .select("id, source_application_id")
+    .in("source_application_id", applicationIds);
+
+  const map: Record<string, string> = {};
+  for (const row of data ?? []) {
+    if (row.source_application_id) {
+      map[row.source_application_id] = row.id;
+    }
+  }
+  return map;
+}
+
 async function countApplicationsByOpportunity(
   opportunityIds: string[]
 ): Promise<Record<string, number>> {
@@ -38,7 +60,7 @@ export async function getOpportunities(): Promise<Opportunity[]> {
 
   const { data, error } = await supabase
     .from("opportunities")
-    .select("*")
+    .select("*, sponsors ( company_name )")
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });
 
@@ -63,7 +85,7 @@ export async function getOpportunityById(
 
   const { data, error } = await supabase
     .from("opportunities")
-    .select("*")
+    .select("*, sponsors ( company_name )")
     .eq("id", id)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -103,7 +125,13 @@ export async function getApplicationsForOpportunity(
     .order("created_at", { ascending: false });
 
   if (error || !data) return [];
-  return (data as ApplicationRow[]).map(mapApplicationRow);
+
+  const rows = data as ApplicationRow[];
+  const contractIds = await getContractIdsByApplicationIds(
+    rows.map((row) => row.id)
+  );
+
+  return rows.map((row) => mapApplicationRow(row, contractIds[row.id] ?? null));
 }
 
 export async function getAllApplications(): Promise<OpportunityApplication[]> {
@@ -133,7 +161,13 @@ export async function getAllApplications(): Promise<OpportunityApplication[]> {
     .order("created_at", { ascending: false });
 
   if (error || !data) return [];
-  return (data as ApplicationRow[]).map(mapApplicationRow);
+
+  const rows = data as ApplicationRow[];
+  const contractIds = await getContractIdsByApplicationIds(
+    rows.map((row) => row.id)
+  );
+
+  return rows.map((row) => mapApplicationRow(row, contractIds[row.id] ?? null));
 }
 
 export async function getOpportunityActivity(limit = 5) {

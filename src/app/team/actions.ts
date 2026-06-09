@@ -1,8 +1,11 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getOrganizationId } from "@/lib/organization/queries";
+import { getOrganizationForUser, getOrganizationId } from "@/lib/organization/queries";
+import { getAppOrigin } from "@/lib/email/app-url";
+import { sendTeamInviteEmail } from "@/lib/email/team-invite";
 import {
   requireTeamManageAccess,
   getCurrentUserRole,
@@ -12,6 +15,29 @@ import {
   invitableRoles,
   roleLabels,
 } from "@/lib/team";
+
+async function dispatchTeamInviteEmail(params: {
+  email: string;
+  role: TeamRole;
+  token: string;
+  inviterEmail?: string | null;
+  isResend?: boolean;
+}) {
+  const org = await getOrganizationForUser();
+  const origin = await getAppOrigin();
+  const inviteUrl = `${origin}/invite/${params.token}`;
+
+  const emailResult = await sendTeamInviteEmail({
+    to: params.email,
+    inviteUrl,
+    organizationName: org?.name ?? "Your organization",
+    role: params.role,
+    inviterEmail: params.inviterEmail,
+    isResend: params.isResend,
+  });
+
+  return { inviteUrl, ...emailResult };
+}
 
 async function logTeamActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -92,15 +118,29 @@ export async function inviteTeamMember(email: string, role: TeamRole) {
 
   if (error) return { error: error.message };
 
+  const emailDispatch = await dispatchTeamInviteEmail({
+    email: normalizedEmail,
+    role,
+    token: data.token,
+    inviterEmail: user.email,
+  });
+
   await logTeamActivity(
     supabase,
     organizationId,
-    "Team invitation sent",
-    `${normalizedEmail} invited as ${roleLabels[role]}`
+    emailDispatch.sent ? "Team invitation emailed" : "Team invitation sent",
+    emailDispatch.sent
+      ? `${normalizedEmail} invited as ${roleLabels[role]} (email sent)`
+      : `${normalizedEmail} invited as ${roleLabels[role]}`
   );
 
   revalidatePath("/team");
-  return { token: data.token };
+  return {
+    token: data.token,
+    inviteUrl: emailDispatch.inviteUrl,
+    emailSent: emailDispatch.sent,
+    emailError: emailDispatch.error,
+  };
 }
 
 export async function updateTeamMemberRole(
@@ -225,6 +265,77 @@ export async function removeTeamMember(memberId: string) {
   return { success: true };
 }
 
+export async function resendInvitation(invitationId: string) {
+  const permError = await requireTeamManageAccess();
+  if (permError) return permError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: invite, error: fetchError } = await supabase
+    .from("team_invitations")
+    .select("id, email, role, status")
+    .eq("id", invitationId)
+    .eq("organization_id", organizationId)
+    .eq("status", "pending")
+    .maybeSingle();
+
+  if (fetchError || !invite) {
+    return { error: "Pending invitation not found." };
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  const { data, error } = await supabase
+    .from("team_invitations")
+    .update({
+      token: randomUUID(),
+      expires_at: expiresAt.toISOString(),
+    })
+    .eq("id", invitationId)
+    .eq("organization_id", organizationId)
+    .eq("status", "pending")
+    .select("token")
+    .single();
+
+  if (error || !data) return { error: error?.message ?? "Failed to resend invitation." };
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const emailDispatch = await dispatchTeamInviteEmail({
+    email: invite.email,
+    role: invite.role as TeamRole,
+    token: data.token,
+    inviterEmail: user?.email,
+    isResend: true,
+  });
+
+  await logTeamActivity(
+    supabase,
+    organizationId,
+    emailDispatch.sent ? "Invitation resent by email" : "Invitation resent",
+    emailDispatch.sent
+      ? `New invite emailed to ${invite.email}`
+      : `New link generated for ${invite.email}`,
+    "updated"
+  );
+
+  revalidatePath("/team");
+  return {
+    token: data.token,
+    email: invite.email,
+    inviteUrl: emailDispatch.inviteUrl,
+    emailSent: emailDispatch.sent,
+    emailError: emailDispatch.error,
+  };
+}
+
 export async function revokeInvitation(invitationId: string) {
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
@@ -343,6 +454,7 @@ export async function acceptInvitation(token: string) {
   );
 
   revalidatePath("/team");
+  revalidatePath("/messages");
   revalidatePath("/");
   return { success: true };
 }

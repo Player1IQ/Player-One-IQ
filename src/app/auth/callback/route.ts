@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getPendingInvitationForUser } from "@/lib/team/queries";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -13,6 +14,13 @@ export async function GET(request: Request) {
     }
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      if (next.startsWith("/organization-setup")) {
+        const pendingToken = await getPendingInvitationForUser();
+        if (pendingToken) {
+          return NextResponse.redirect(`${origin}/invite/${pendingToken}`);
+        }
+      }
+
       return NextResponse.redirect(`${origin}${next}`);
     }
   }

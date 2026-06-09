@@ -59,12 +59,62 @@ export async function getInvitationByToken(
   const supabase = await createClient();
   if (!supabase) return null;
 
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(token)) return null;
+
+  const { data, error } = await supabase.rpc("get_invitation_by_token", {
+    p_token: token,
+  });
+
+  if (error || !data?.length) return null;
+
+  const row = data[0] as {
+    id: string;
+    email: string;
+    role: string;
+    status: string;
+    expires_at: string;
+    organization_name: string;
+  };
+
+  return {
+    id: row.id,
+    email: row.email,
+    role: row.role,
+    organizationName: row.organization_name ?? "Organization",
+    status: row.status,
+    expiresAt: row.expires_at,
+  };
+}
+
+export async function getPendingInvitationForUser(): Promise<string | null> {
+  const invite = await getPendingInvitationDetails();
+  return invite?.token ?? null;
+}
+
+export async function getPendingInvitationDetails(): Promise<{
+  token: string;
+  email: string;
+  role: string;
+  organizationName: string;
+} | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return null;
+
   const { data, error } = await supabase
     .from("team_invitations")
-    .select(
-      "id, email, role, status, expires_at, organizations ( name )"
-    )
-    .eq("token", token)
+    .select("token, email, role, organizations ( name )")
+    .eq("status", "pending")
+    .ilike("email", user.email)
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (error || !data) return null;
@@ -74,33 +124,9 @@ export async function getInvitationByToken(
     : data.organizations;
 
   return {
-    id: data.id,
+    token: data.token,
     email: data.email,
     role: data.role,
     organizationName: (org as { name: string } | null)?.name ?? "Organization",
-    status: data.status,
-    expiresAt: data.expires_at,
   };
-}
-
-export async function getPendingInvitationForUser(): Promise<string | null> {
-  const supabase = await createClient();
-  if (!supabase) return null;
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user?.email) return null;
-
-  const { data } = await supabase
-    .from("team_invitations")
-    .select("token")
-    .eq("status", "pending")
-    .ilike("email", user.email)
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  return data?.token ?? null;
 }

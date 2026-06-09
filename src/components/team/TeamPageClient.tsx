@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { type TeamMember, type TeamRole, getTeamStats } from "@/lib/team";
 import { TeamNav } from "./TeamNav";
-import { TeamSummaryCards } from "./TeamSummaryCards";
+import { TeamSummaryCards, type TeamStatusFilter } from "./TeamSummaryCards";
 import { TeamTable } from "./TeamTable";
 import { InviteTeamMemberModal } from "./InviteTeamMemberModal";
 
@@ -21,14 +21,22 @@ export function TeamPageClient({
 }: TeamPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TeamStatusFilter>("all");
   const stats = getTeamStats(members);
 
-  const filtered = members.filter(
-    (m) =>
+  const filtered = members.filter((m) => {
+    const matchesSearch =
       m.name.toLowerCase().includes(search.toLowerCase()) ||
       m.email.toLowerCase().includes(search.toLowerCase()) ||
-      m.role.toLowerCase().includes(search.toLowerCase())
-  );
+      m.role.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && m.status === "active" && !m.isInvitation) ||
+      (statusFilter === "pending" && (m.status === "pending" || m.isInvitation));
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <>
@@ -39,6 +47,8 @@ export function TeamPageClient({
         activeCount={stats.activeCount}
         pendingCount={stats.pendingCount}
         assignedRolesCount={stats.assignedRolesCount}
+        activeFilter={statusFilter}
+        onFilterChange={setStatusFilter}
       />
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -63,10 +73,21 @@ export function TeamPageClient({
         )}
       </div>
 
-      <div className="mb-4 text-sm text-gray-500">
-        Showing{" "}
-        <span className="font-medium text-gray-300">{filtered.length}</span> of{" "}
-        {members.length} members
+      <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+        <span>
+          Showing{" "}
+          <span className="font-medium text-gray-300">{filtered.length}</span> of{" "}
+          {members.length} members
+        </span>
+        {statusFilter !== "all" && (
+          <button
+            type="button"
+            onClick={() => setStatusFilter("all")}
+            className="rounded-full border border-border px-2.5 py-0.5 text-xs text-accent-light hover:border-accent/40"
+          >
+            Clear filter
+          </button>
+        )}
       </div>
 
       <TeamTable

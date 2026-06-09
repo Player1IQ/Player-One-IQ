@@ -6,6 +6,7 @@ import {
   getApplicationsForOpportunity,
 } from "@/lib/opportunities/queries";
 import { getCreators } from "@/lib/creators/queries";
+import { getSponsors } from "@/lib/sponsors/queries";
 import {
   getCurrentUserRole,
   canManageOpportunities,
@@ -20,10 +21,11 @@ export default async function OpportunityDetailPage({
   params,
 }: OpportunityDetailPageProps) {
   const { id } = await params;
-  const [opportunity, applications, creators, role] = await Promise.all([
+  const [opportunity, applications, creators, sponsors, role] = await Promise.all([
     getOpportunityById(id),
     getApplicationsForOpportunity(id),
     getCreators(),
+    getSponsors(),
     getCurrentUserRole(),
   ]);
 
@@ -38,6 +40,7 @@ export default async function OpportunityDetailPage({
         opportunity={opportunity}
         applications={applications}
         creators={creators}
+        sponsors={sponsors}
         canManage={canManageOpportunities(role)}
         canApply={canApplyToOpportunities(role)}
       />

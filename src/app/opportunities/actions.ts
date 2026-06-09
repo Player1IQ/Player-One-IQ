@@ -20,6 +20,7 @@ import {
   applicationStatusLabels,
 } from "@/lib/opportunities";
 import type { ActivityAction } from "@/lib/activity/queries";
+import { createDraftContractFromApplication } from "@/lib/opportunities/contract-from-application";
 
 async function logOpportunityActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -41,8 +42,26 @@ async function logOpportunityActivity(
   });
 }
 
+async function validateSponsorId(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  organizationId: string,
+  sponsorId: string
+): Promise<string | null> {
+  const { data: sponsor } = await supabase
+    .from("sponsors")
+    .select("id")
+    .eq("id", sponsorId)
+    .eq("organization_id", organizationId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (!sponsor) return "Sponsor not found in your organization.";
+  return null;
+}
+
 function validateOpportunityInput(input: OpportunityInput) {
   if (!input.title.trim()) return "Title is required.";
+  if (!input.sponsorId) return "Sponsor is required.";
   if (!opportunityCategories.includes(input.category)) return "Invalid category.";
   if (!opportunityPlatforms.includes(input.platform)) return "Invalid platform.";
   if (!opportunityStatuses.includes(input.status)) return "Invalid status.";
@@ -53,6 +72,7 @@ function toOpportunityPayload(input: OpportunityInput) {
   return {
     title: input.title.trim(),
     description: input.description.trim() || null,
+    sponsor_id: input.sponsorId,
     budget: input.budget,
     category: input.category,
     platform: input.platform,
@@ -74,6 +94,13 @@ export async function createOpportunity(input: OpportunityInput) {
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
+
+  const sponsorError = await validateSponsorId(
+    supabase,
+    organizationId,
+    input.sponsorId
+  );
+  if (sponsorError) return { error: sponsorError };
 
   const { data, error: insertError } = await supabase
     .from("opportunities")
@@ -119,6 +146,13 @@ export async function updateOpportunity(id: string, input: OpportunityInput) {
     .maybeSingle();
 
   if (!existing) return { error: "Opportunity not found." };
+
+  const sponsorError = await validateSponsorId(
+    supabase,
+    organizationId,
+    input.sponsorId
+  );
+  if (sponsorError) return { error: sponsorError };
 
   const { error: updateError } = await supabase
     .from("opportunities")
@@ -342,6 +376,8 @@ export async function updateApplicationStatus(
 
   if (updateError) return { error: updateError.message };
 
+  let contractId: string | undefined;
+
   if (status === "accepted") {
     await supabase
       .from("opportunities")
@@ -354,6 +390,18 @@ export async function updateApplicationStatus(
       .eq("opportunity_id", application.opportunity_id)
       .neq("id", applicationId)
       .in("status", ["applied", "under_review"]);
+
+    const contractResult = await createDraftContractFromApplication(
+      supabase,
+      organizationId,
+      applicationId
+    );
+
+    if ("error" in contractResult) {
+      return { error: contractResult.error };
+    }
+
+    contractId = contractResult.contractId;
   }
 
   await logOpportunityActivity(supabase, organizationId, {
@@ -366,8 +414,10 @@ export async function updateApplicationStatus(
   revalidatePath("/opportunities");
   revalidatePath(`/opportunities/${application.opportunity_id}`);
   revalidatePath("/opportunities/applications");
+  revalidatePath("/contracts");
+  if (contractId) revalidatePath(`/contracts/${contractId}`);
   revalidatePath("/");
-  return { success: true };
+  return { success: true, contractId };
 }
 
 export async function acceptApplication(applicationId: string) {

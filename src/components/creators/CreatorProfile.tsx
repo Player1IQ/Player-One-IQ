@@ -11,15 +11,24 @@ import {
   Trash2,
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
+import type { Contract } from "@/lib/contracts";
+import { RelatedContractsSection } from "@/components/contracts/RelatedContractsSection";
 import { formatCreatorDate } from "@/lib/creators";
 import { deleteCreator } from "@/app/creators/actions";
 import { CreatorAvatar } from "./CreatorAvatar";
 import { StatusBadge } from "./StatusBadge";
 import { PlatformBadge } from "./PlatformBadge";
 import { CreatorFormModal } from "./CreatorFormModal";
+import { CreatorPlatformAccounts } from "./CreatorPlatformAccounts";
+import { CreatorIncomeOverview } from "./CreatorIncomeOverview";
+import type { CreatorPlatformAccount, CreatorRevenueEntry } from "@/lib/creator-revenue";
 
 interface CreatorProfileProps {
   creator: Creator;
+  contracts?: Contract[];
+  platformAccounts?: CreatorPlatformAccount[];
+  revenueEntries?: CreatorRevenueEntry[];
+  canWrite?: boolean;
 }
 
 function Section({
@@ -42,7 +51,13 @@ function Section({
   );
 }
 
-export function CreatorProfile({ creator }: CreatorProfileProps) {
+export function CreatorProfile({
+  creator,
+  contracts = [],
+  platformAccounts = [],
+  revenueEntries = [],
+  canWrite = true,
+}: CreatorProfileProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -80,23 +95,25 @@ export function CreatorProfile({ creator }: CreatorProfileProps) {
           <ArrowLeft className="h-4 w-4" />
           Back to Creators
         </Link>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setEditOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300 transition-colors hover:border-accent/30 hover:text-accent-light"
-          >
-            <Pencil className="h-4 w-4" />
-            Edit
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="inline-flex items-center gap-2 rounded-lg border border-red-500/20 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
-          >
-            <Trash2 className="h-4 w-4" />
-            {deleting ? "Removing..." : "Remove"}
-          </button>
-        </div>
+        {canWrite && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => setEditOpen(true)}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300 transition-colors hover:border-accent/30 hover:text-accent-light"
+            >
+              <Pencil className="h-4 w-4" />
+              Edit
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="inline-flex items-center gap-2 rounded-lg border border-red-500/20 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+            >
+              <Trash2 className="h-4 w-4" />
+              {deleting ? "Removing..." : "Remove"}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex items-start gap-5 rounded-xl border border-border bg-surface-raised p-6">
@@ -172,6 +189,38 @@ export function CreatorProfile({ creator }: CreatorProfileProps) {
           )}
         </Section>
       </div>
+
+      <Section
+        title="Income Overview"
+        description="Combined platform and sponsorship revenue for this month"
+      >
+        <CreatorIncomeOverview
+          contracts={contracts}
+          revenueEntries={revenueEntries}
+        />
+      </Section>
+
+      <Section
+        title="Connected Platforms"
+        description="Social and streaming accounts used to track ad, sub, and tip income"
+      >
+        <CreatorPlatformAccounts
+          creator={creator}
+          accounts={platformAccounts}
+          revenueEntries={revenueEntries}
+          canWrite={canWrite}
+        />
+      </Section>
+
+      <Section
+        title="Contracts"
+        description="Sponsorship agreements for this creator"
+      >
+        <RelatedContractsSection
+          contracts={contracts}
+          emptyMessage="No contracts linked to this creator yet."
+        />
+      </Section>
 
       <Section title="Notes" description="Internal notes and context">
         <div className="rounded-lg border border-border-subtle bg-surface px-4 py-4">

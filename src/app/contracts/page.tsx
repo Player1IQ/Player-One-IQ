@@ -3,12 +3,23 @@ import { ContractsPageClient } from "@/components/contracts/ContractsPageClient"
 import { getContracts } from "@/lib/contracts/queries";
 import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
+import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
 
-export default async function ContractsPage() {
-  const [contracts, creators, sponsors] = await Promise.all([
+interface ContractsPageProps {
+  searchParams: Promise<{ filter?: string }>;
+}
+
+export default async function ContractsPage({ searchParams }: ContractsPageProps) {
+  const { filter } = await searchParams;
+  const initialSummaryFilter =
+    filter === "expiring" || filter === "overdue" || filter === "active" || filter === "pipeline"
+      ? filter
+      : null;
+  const [contracts, creators, sponsors, role] = await Promise.all([
     getContracts(),
     getCreators(),
     getSponsors(),
+    getCurrentUserRole(),
   ]);
 
   return (
@@ -20,6 +31,8 @@ export default async function ContractsPage() {
         contracts={contracts}
         creators={creators}
         sponsors={sponsors}
+        canWrite={canWriteData(role)}
+        initialSummaryFilter={initialSummaryFilter}
       />
     </DashboardLayout>
   );

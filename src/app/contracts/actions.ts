@@ -8,6 +8,8 @@ import {
   type ContractInput,
   contractStatuses,
   type ContractStatus,
+  contractStatusLabels,
+  canTransitionContractStatus,
 } from "@/lib/contracts";
 import type { ActivityAction } from "@/lib/activity/queries";
 
@@ -92,15 +94,6 @@ function toDbPayload(input: ContractInput) {
   };
 }
 
-const statusLabels: Record<ContractStatus, string> = {
-  draft: "Draft",
-  negotiating: "Negotiating",
-  active: "Active",
-  completed: "Completed",
-  expired: "Expired",
-  cancelled: "Cancelled",
-};
-
 export async function createContract(input: ContractInput) {
   const permError = await requireWriteAccess();
   if (permError) return permError;
@@ -179,6 +172,16 @@ export async function updateContract(id: string, input: ContractInput) {
     return { error: "Contract not found." };
   }
 
+  const previousStatus = existing.contract_status as ContractStatus;
+  if (
+    previousStatus !== input.status &&
+    !canTransitionContractStatus(previousStatus, input.status)
+  ) {
+    return {
+      error: `Cannot change status from ${contractStatusLabels[previousStatus]} to ${contractStatusLabels[input.status]}.`,
+    };
+  }
+
   const { error: updateError } = await supabase
     .from("contracts")
     .update({
@@ -190,8 +193,7 @@ export async function updateContract(id: string, input: ContractInput) {
 
   if (updateError) return { error: updateError.message };
 
-  const statusChanged =
-    existing.contract_status !== input.status;
+  const statusChanged = previousStatus !== input.status;
 
   await logActivity(supabase, organizationId, {
     entityType: "contract",
@@ -201,7 +203,7 @@ export async function updateContract(id: string, input: ContractInput) {
       ? "Contract status changed"
       : "Contract updated",
     detail: statusChanged
-      ? `${existing.contract_name}: ${statusLabels[existing.contract_status as ContractStatus]} → ${statusLabels[input.status]}`
+      ? `${existing.contract_name}: ${contractStatusLabels[previousStatus]} → ${contractStatusLabels[input.status]}`
       : input.contractName.trim(),
     metadata: {
       previousStatus: existing.contract_status,
@@ -212,6 +214,76 @@ export async function updateContract(id: string, input: ContractInput) {
   revalidatePath("/contracts");
   revalidatePath(`/contracts/${id}`);
   revalidatePath("/");
+  return { success: true };
+}
+
+export async function updateContractStatus(
+  id: string,
+  newStatus: ContractStatus
+) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  if (!contractStatuses.includes(newStatus)) {
+    return { error: "Invalid contract status." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("contracts")
+    .select("contract_name, contract_status")
+    .eq("id", id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (fetchError || !existing) {
+    return { error: "Contract not found." };
+  }
+
+  const previousStatus = existing.contract_status as ContractStatus;
+  if (previousStatus === newStatus) {
+    return { success: true };
+  }
+
+  if (!canTransitionContractStatus(previousStatus, newStatus)) {
+    return {
+      error: `Cannot change status from ${contractStatusLabels[previousStatus]} to ${contractStatusLabels[newStatus]}.`,
+    };
+  }
+
+  const { error: updateError } = await supabase
+    .from("contracts")
+    .update({
+      contract_status: newStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("organization_id", organizationId);
+
+  if (updateError) return { error: updateError.message };
+
+  await logActivity(supabase, organizationId, {
+    entityType: "contract",
+    entityId: id,
+    action: "status_changed",
+    summary: "Contract status changed",
+    detail: `${existing.contract_name}: ${contractStatusLabels[previousStatus]} → ${contractStatusLabels[newStatus]}`,
+    metadata: {
+      previousStatus,
+      newStatus,
+    },
+  });
+
+  revalidatePath("/contracts");
+  revalidatePath(`/contracts/${id}`);
+  revalidatePath("/");
+  revalidatePath(`/creators`);
+  revalidatePath(`/sponsors`);
   return { success: true };
 }
 

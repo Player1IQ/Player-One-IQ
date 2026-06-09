@@ -30,6 +30,7 @@ export const opportunityPlatforms: Platform[] = platforms;
 export interface OpportunityRow {
   id: string;
   organization_id: string;
+  sponsor_id: string | null;
   title: string;
   description: string | null;
   budget: number | null;
@@ -40,6 +41,7 @@ export interface OpportunityRow {
   status: OpportunityStatus;
   created_at: string;
   updated_at: string;
+  sponsors?: { company_name: string } | { company_name: string }[] | null;
 }
 
 export interface ApplicationRow {
@@ -57,6 +59,8 @@ export interface ApplicationRow {
 export interface Opportunity {
   id: string;
   organizationId: string;
+  sponsorId: string | null;
+  sponsorName: string | null;
   title: string;
   description: string;
   budget: number | null;
@@ -85,11 +89,13 @@ export interface OpportunityApplication {
   status: ApplicationStatus;
   createdAt: string;
   createdAtDisplay: string;
+  contractId: string | null;
 }
 
 export interface OpportunityInput {
   title: string;
   description: string;
+  sponsorId: string;
   budget: number | null;
   category: Industry;
   platform: Platform;
@@ -140,9 +146,13 @@ export function mapOpportunityRow(
     ? (row.platform as Platform)
     : "YouTube";
 
+  const sponsor = relationField(row.sponsors);
+
   return {
     id: row.id,
     organizationId: row.organization_id,
+    sponsorId: row.sponsor_id,
+    sponsorName: sponsor?.company_name ?? null,
     title: row.title,
     description: row.description ?? "",
     budget: row.budget !== null ? Number(row.budget) : null,
@@ -159,7 +169,10 @@ export function mapOpportunityRow(
   };
 }
 
-export function mapApplicationRow(row: ApplicationRow): OpportunityApplication {
+export function mapApplicationRow(
+  row: ApplicationRow,
+  contractId: string | null = null
+): OpportunityApplication {
   const creator = relationField(row.creators);
   const opportunity = relationField(row.opportunities);
   const rate =
@@ -178,6 +191,7 @@ export function mapApplicationRow(row: ApplicationRow): OpportunityApplication {
     status: row.status,
     createdAt: row.created_at,
     createdAtDisplay: formatOpportunityDate(row.created_at),
+    contractId,
   };
 }
 

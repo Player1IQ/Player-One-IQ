@@ -9,7 +9,8 @@ import {
   type Contract,
   type ContractInput,
   type ContractStatus,
-  contractStatuses,
+  contractStatusLabels,
+  getSelectableStatuses,
 } from "@/lib/contracts";
 import { createContract, updateContract } from "@/app/contracts/actions";
 
@@ -224,9 +225,12 @@ export function ContractFormModal({
                 }
                 className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
               >
-                {contractStatuses.map((s) => (
+                {getSelectableStatuses(
+                  contract?.status ?? "draft",
+                  !contract
+                ).map((s) => (
                   <option key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                    {contractStatusLabels[s]}
                   </option>
                 ))}
               </select>

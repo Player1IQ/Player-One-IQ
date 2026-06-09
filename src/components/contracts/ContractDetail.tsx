@@ -15,15 +15,22 @@ import {
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
-import { type Contract, isExpiringSoon } from "@/lib/contracts";
+import {
+  type Contract,
+  isContractOverdue,
+  isExpiringSoon,
+} from "@/lib/contracts";
 import { deleteContract } from "@/app/contracts/actions";
 import { ContractStatusBadge } from "./ContractStatusBadge";
 import { ContractFormModal } from "./ContractFormModal";
+import { ContractWorkflowActions } from "./ContractWorkflowActions";
+import { DealRoomButton } from "@/components/messages/DealRoomButton";
 
 interface ContractDetailProps {
   contract: Contract;
   creators: Creator[];
   sponsors: Sponsor[];
+  canWrite?: boolean;
 }
 
 function Section({
@@ -50,11 +57,13 @@ export function ContractDetail({
   contract,
   creators,
   sponsors,
+  canWrite = true,
 }: ContractDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const expiring = isExpiringSoon(contract);
+  const overdue = isContractOverdue(contract);
 
   async function handleDelete() {
     if (
@@ -86,32 +95,70 @@ export function ContractDetail({
             <ArrowLeft className="h-4 w-4" />
             Back to Contracts
           </Link>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setEditOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-surface-overlay hover:text-white"
-            >
-              <Pencil className="h-4 w-4" />
-              Edit
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="inline-flex items-center gap-2 rounded-lg border border-red-500/30 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </button>
+          <div className="flex flex-wrap gap-2">
+            <DealRoomButton type="contract" relatedId={contract.id} />
+            {canWrite && (
+              <>
+                <button
+                  onClick={() => setEditOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-surface-overlay hover:text-white"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="inline-flex items-center gap-2 rounded-lg border border-red-500/30 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {expiring && (
+        {overdue && (
+          <div className="flex items-center gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-red-400" />
+            <p className="text-sm text-red-200">
+              This contract ended on {contract.endDateDisplay} but is still
+              marked active. Mark it expired or extend the end date.
+            </p>
+          </div>
+        )}
+
+        {expiring && !overdue && (
           <div className="flex items-center gap-3 rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3">
             <AlertTriangle className="h-5 w-5 shrink-0 text-orange-400" />
             <p className="text-sm text-orange-200">
               This contract expires on {contract.endDateDisplay}. Consider
               starting renewal discussions.
             </p>
+          </div>
+        )}
+
+        {contract.sourceOpportunityId && (
+          <div className="rounded-lg border border-border bg-surface-overlay/40 px-4 py-3 text-sm text-gray-400">
+            Created from an accepted opportunity application.{" "}
+            <Link
+              href={`/opportunities/${contract.sourceOpportunityId}`}
+              className="font-medium text-accent-light hover:text-white"
+            >
+              View opportunity
+            </Link>
+            {contract.sourceApplicationId && (
+              <>
+                {" · "}
+                <Link
+                  href="/opportunities/applications"
+                  className="font-medium text-accent-light hover:text-white"
+                >
+                  View applications
+                </Link>
+              </>
+            )}
           </div>
         )}
 
@@ -169,12 +216,25 @@ export function ContractDetail({
               End Date
             </div>
             <p
-              className={`mt-2 text-lg font-semibold ${expiring ? "text-orange-400" : "text-white"}`}
+              className={`mt-2 text-lg font-semibold ${
+                overdue
+                  ? "text-red-400"
+                  : expiring
+                    ? "text-orange-400"
+                    : "text-white"
+              }`}
             >
               {contract.endDateDisplay}
             </p>
           </div>
         </div>
+
+        <Section
+          title="Contract Workflow"
+          description="Advance this contract through your deal pipeline"
+        >
+          <ContractWorkflowActions contract={contract} canWrite={canWrite} />
+        </Section>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Section title="Contract Information">
