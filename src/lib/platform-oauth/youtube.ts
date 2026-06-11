@@ -7,6 +7,8 @@ export interface YouTubeSyncResult {
   displayName: string;
   advertisement: number;
   other: number;
+  /** Set when the channel connects but revenue metrics are unavailable. */
+  revenueWarning?: string;
 }
 
 export async function getYouTubeAuthorizeUrl(state: string): Promise<string> {
@@ -20,6 +22,7 @@ export async function getYouTubeAuthorizeUrl(state: string): Promise<string> {
     response_type: "code",
     scope: [
       "https://www.googleapis.com/auth/yt-analytics.readonly",
+      "https://www.googleapis.com/auth/yt-analytics-monetary.readonly",
       "https://www.googleapis.com/auth/youtube.readonly",
     ].join(" "),
     access_type: "offline",
@@ -130,17 +133,15 @@ export async function syncYouTubeRevenue(
     error?: { message?: string };
   };
 
-  if (!reportResponse.ok) {
-    throw new Error(
-      reportBody.error?.message ??
-        "YouTube Analytics is unavailable for this channel. The channel may need to be in the YouTube Partner Program."
-    );
-  }
-
   let advertisement = 0;
   let totalRevenue = 0;
+  let revenueWarning: string | undefined;
 
-  if (reportBody.rows?.[0] && reportBody.columnHeaders) {
+  if (!reportResponse.ok) {
+    revenueWarning =
+      reportBody.error?.message ??
+      "Revenue sync unavailable. The channel may need monetization (YouTube Partner Program) or the monetary analytics scope.";
+  } else if (reportBody.rows?.[0] && reportBody.columnHeaders) {
     const metrics = reportBody.columnHeaders.map((header) => header.name);
     const row = reportBody.rows[0];
     const revenueIndex = metrics.indexOf("estimatedRevenue");
@@ -157,5 +158,6 @@ export async function syncYouTubeRevenue(
     displayName,
     advertisement,
     other,
+    revenueWarning,
   };
 }

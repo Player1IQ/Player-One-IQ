@@ -136,10 +136,13 @@ export async function syncCreatorPlatformAccountById(
     let handle = "";
     let displayName = "";
 
+    let revenueWarning: string | undefined;
+
     if (platform === "YouTube") {
       const result = await syncYouTubeRevenue(freshTokens.access_token);
       handle = result.handle;
       displayName = result.displayName;
+      revenueWarning = result.revenueWarning;
 
       await saveApiRevenueEntry(supabase, {
         organizationId: row.organization_id,
@@ -241,7 +244,7 @@ export async function syncCreatorPlatformAccountById(
         connection_status: "connected_oauth",
         oauth_metadata: freshTokens,
         last_synced_at: new Date().toISOString(),
-        sync_error: null,
+        sync_error: revenueWarning ?? null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", row.id)
