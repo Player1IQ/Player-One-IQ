@@ -32,11 +32,15 @@ async function saveRevenueEntry(
 ) {
   const { data: existing } = await supabase
     .from("creator_revenue_entries")
-    .select("id")
+    .select("id, source")
     .eq("platform_account_id", params.platformAccountId)
     .eq("revenue_type", params.revenueType)
     .eq("period_month", params.periodMonth)
     .maybeSingle();
+
+  if (existing?.source === "api_sync") {
+    return null;
+  }
 
   if (params.amount <= 0) {
     if (existing) {
@@ -186,6 +190,8 @@ export async function disconnectCreatorPlatformAccount(accountId: string) {
     .from("creator_platform_accounts")
     .update({
       connection_status: "disconnected",
+      oauth_metadata: {},
+      sync_error: null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", accountId)
@@ -245,18 +251,87 @@ export async function upsertCreatorPlatformRevenue(
   return { success: true };
 }
 
-export async function requestPlatformOAuthSync(
-  accountId: string,
-  platform: Platform
-) {
+export async function syncCreatorPlatformAccount(accountId: string) {
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
-  void accountId;
-  void platform;
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { syncCreatorPlatformAccountById } = await import(
+    "@/lib/platform-oauth/sync-account"
+  );
+
+  const result = await syncCreatorPlatformAccountById(accountId, organizationId);
+
+  if ("error" in result) return { error: result.error };
+
+  const supabase = await createClient();
+  if (supabase) {
+    const { data: account } = await supabase
+      .from("creator_platform_accounts")
+      .select("creator_id")
+      .eq("id", accountId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (account?.creator_id) {
+      revalidatePath(`/creators/${account.creator_id}`);
+    }
+  }
+
+  revalidatePath("/");
+  revalidatePath("/creators");
+  return { success: true };
+}
+
+export async function syncAllCreatorOAuthAccounts(creatorId: string) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const { data: accounts } = await supabase
+    .from("creator_platform_accounts")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("creator_id", creatorId)
+    .eq("connection_status", "connected_oauth");
+
+  const { syncCreatorPlatformAccountById } = await import(
+    "@/lib/platform-oauth/sync-account"
+  );
+
+  let synced = 0;
+  const errors: string[] = [];
+
+  for (const account of accounts ?? []) {
+    const result = await syncCreatorPlatformAccountById(
+      account.id,
+      organizationId
+    );
+    if ("error" in result) {
+      errors.push(result.error);
+    } else {
+      synced += 1;
+    }
+  }
+
+  revalidatePath(`/creators/${creatorId}`);
+  revalidatePath("/");
+  revalidatePath("/creators");
+
+  if (synced === 0 && errors.length > 0) {
+    return { error: errors[0] };
+  }
 
   return {
-    error:
-      "Automatic platform sync requires OAuth app credentials (YouTube, Twitch, etc.). Connect accounts manually for now, or add API keys to enable sync.",
+    success: true,
+    synced,
+    failed: errors.length,
   };
 }

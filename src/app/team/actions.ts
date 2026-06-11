@@ -7,7 +7,9 @@ import { getOrganizationForUser, getOrganizationId } from "@/lib/organization/qu
 import { getAppOrigin } from "@/lib/email/app-url";
 import { sendTeamInviteEmail } from "@/lib/email/team-invite";
 import {
+  requireFeatureAccess,
   requireTeamManageAccess,
+  requireUsageWithinLimit,
   getCurrentUserRole,
 } from "@/lib/permissions";
 import {
@@ -75,6 +77,25 @@ export async function inviteTeamMember(email: string, role: TeamRole) {
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
+
+  const featureError = await requireFeatureAccess(
+    "team_management",
+    "Team management"
+  );
+  if (featureError) return featureError;
+
+  const { count: teamCount } = await supabase
+    .from("team_members")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .eq("status", "active");
+
+  const limitError = await requireUsageWithinLimit(
+    "team_members",
+    teamCount ?? 0,
+    "team members"
+  );
+  if (limitError) return limitError;
 
   const {
     data: { user },

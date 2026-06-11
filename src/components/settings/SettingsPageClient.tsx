@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Users } from "lucide-react";
+import { Bell, CreditCard, Users } from "lucide-react";
 import { OrganizationSettingsForm } from "./OrganizationSettingsForm";
 
 interface SettingsPageClientProps {
@@ -13,6 +13,7 @@ interface SettingsPageClientProps {
   canView: boolean;
   showDevTools: boolean;
   devTools?: React.ReactNode;
+  platformSync?: React.ReactNode;
 }
 
 export function SettingsPageClient({
@@ -24,6 +25,7 @@ export function SettingsPageClient({
   canView,
   showDevTools,
   devTools,
+  platformSync,
 }: SettingsPageClientProps) {
   if (!canView) {
     return (
@@ -80,6 +82,28 @@ export function SettingsPageClient({
               className="mt-3 inline-block text-sm font-medium text-accent-light hover:text-white"
             >
               Open Team settings
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {platformSync}
+
+      <section className="rounded-xl border border-border bg-surface-raised p-6">
+        <div className="flex items-start gap-3">
+          <CreditCard className="mt-0.5 h-5 w-5 text-accent-light" />
+          <div>
+            <h2 className="text-base font-semibold text-white">
+              Billing & subscription
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              View your plan, usage limits, and upgrade options.
+            </p>
+            <Link
+              href="/billing"
+              className="mt-3 inline-block text-sm font-medium text-accent-light hover:text-white"
+            >
+              Open Billing
             </Link>
           </div>
         </div>

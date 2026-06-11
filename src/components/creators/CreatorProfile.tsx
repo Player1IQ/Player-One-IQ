@@ -22,13 +22,24 @@ import { CreatorFormModal } from "./CreatorFormModal";
 import { CreatorPlatformAccounts } from "./CreatorPlatformAccounts";
 import { CreatorIncomeOverview } from "./CreatorIncomeOverview";
 import type { CreatorPlatformAccount, CreatorRevenueEntry } from "@/lib/creator-revenue";
+import {
+  platformOAuthDescription,
+  type OAuthPlatformUi,
+} from "@/lib/platform-oauth/config";
+import { CreatorOAuthBanner } from "./CreatorOAuthBanner";
+import { CreatorContentCoach } from "./CreatorContentCoach";
 
 interface CreatorProfileProps {
   creator: Creator;
   contracts?: Contract[];
   platformAccounts?: CreatorPlatformAccount[];
   revenueEntries?: CreatorRevenueEntry[];
+  oauthPlatformUi?: OAuthPlatformUi[];
+  oauthSuccess?: string | null;
+  oauthError?: string | null;
   canWrite?: boolean;
+  canUseContentAi?: boolean;
+  aiMode?: "live" | "demo";
 }
 
 function Section({
@@ -56,8 +67,16 @@ export function CreatorProfile({
   contracts = [],
   platformAccounts = [],
   revenueEntries = [],
+  oauthPlatformUi = [],
+  oauthSuccess = null,
+  oauthError = null,
   canWrite = true,
+  canUseContentAi = false,
+  aiMode = "demo",
 }: CreatorProfileProps) {
+  const connectedOAuthPlatforms = platformAccounts
+    .filter((account) => account.connectionStatus === "connected_oauth")
+    .map((account) => account.platform);
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -87,6 +106,8 @@ export function CreatorProfile({
 
   return (
     <div className="space-y-6">
+      <CreatorOAuthBanner success={oauthSuccess} error={oauthError} />
+
       <div className="flex items-center justify-between">
         <Link
           href="/creators"
@@ -201,13 +222,28 @@ export function CreatorProfile({
       </Section>
 
       <Section
+        title="AI Content Coach"
+        description="Cross-platform recommendations from connected accounts"
+      >
+        <CreatorContentCoach
+          creatorId={creator.id}
+          creatorName={creator.name}
+          connectedOAuthPlatforms={connectedOAuthPlatforms}
+          oauthPlatformUi={oauthPlatformUi}
+          canUseAi={canUseContentAi}
+          aiMode={aiMode}
+        />
+      </Section>
+
+      <Section
         title="Connected Platforms"
-        description="Social and streaming accounts used to track ad, sub, and tip income"
+        description={platformOAuthDescription(oauthPlatformUi)}
       >
         <CreatorPlatformAccounts
           creator={creator}
           accounts={platformAccounts}
           revenueEntries={revenueEntries}
+          oauthPlatformUi={oauthPlatformUi}
           canWrite={canWrite}
         />
       </Section>

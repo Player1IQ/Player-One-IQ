@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { TeamPageClient } from "@/components/team/TeamPageClient";
 import { getTeamMembers } from "@/lib/team/queries";
 import { getCurrentUserRole } from "@/lib/permissions";
@@ -15,11 +16,13 @@ export default async function TeamPage() {
       title="Team"
       description="Manage team members, roles, and permissions"
     >
-      <TeamPageClient
-        members={members}
-        canManageTeam={canManageTeam(currentUserRole)}
-        currentUserRole={currentUserRole}
-      />
+      <SubscriptionPageGate required="team_management" featureLabel="Team management">
+        <TeamPageClient
+          members={members}
+          canManageTeam={canManageTeam(currentUserRole)}
+          currentUserRole={currentUserRole}
+        />
+      </SubscriptionPageGate>
     </DashboardLayout>
   );
 }

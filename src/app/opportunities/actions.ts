@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
   requireApplicationAccess,
+  requireFeatureAccess,
   requireOpportunityManageAccess,
 } from "@/lib/permissions";
 import {
@@ -85,6 +86,12 @@ function toOpportunityPayload(input: OpportunityInput) {
 export async function createOpportunity(input: OpportunityInput) {
   const permError = await requireOpportunityManageAccess();
   if (permError) return permError;
+
+  const featureError = await requireFeatureAccess(
+    "create_opportunities",
+    "Create opportunities"
+  );
+  if (featureError) return featureError;
 
   const error = validateOpportunityInput(input);
   if (error) return { error };

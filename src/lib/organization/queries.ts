@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getActiveOrganizationIdCookie } from "./context";
 
 export interface Organization {
   id: string;
@@ -7,41 +8,102 @@ export interface Organization {
   created_at: string;
 }
 
-export async function getOrganizationForUser(): Promise<Organization | null> {
+export type OrganizationRole = "owner" | "admin" | "manager" | "viewer";
+
+export interface UserOrganization {
+  id: string;
+  name: string;
+  type: string;
+  role: OrganizationRole;
+}
+
+function mapMembershipOrg(
+  row: {
+    organization_id: string;
+    role: string;
+    organizations:
+      | { id: string; name: string; type: string }
+      | { id: string; name: string; type: string }[]
+      | null;
+  }
+): UserOrganization | null {
+  const org = Array.isArray(row.organizations)
+    ? row.organizations[0]
+    : row.organizations;
+
+  if (!org) return null;
+
+  return {
+    id: org.id,
+    name: org.name,
+    type: org.type,
+    role: row.role as OrganizationRole,
+  };
+}
+
+export async function getUserOrganizations(): Promise<UserOrganization[]> {
   const supabase = await createClient();
-  if (!supabase) return null;
+  if (!supabase) return [];
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null;
+  if (!user) return [];
 
-  const { data: membership } = await supabase
+  const { data: memberships } = await supabase
     .from("team_members")
-    .select("organization_id")
+    .select("organization_id, role, organizations(id, name, type)")
     .eq("user_id", user.id)
-    .eq("status", "active")
-    .order("joined_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .eq("status", "active");
 
-  if (membership?.organization_id) {
-    const { data: org, error } = await supabase
-      .from("organizations")
-      .select("id, name, type, created_at")
-      .eq("id", membership.organization_id)
-      .maybeSingle();
+  const byId = new Map<string, UserOrganization>();
 
-    if (!error && org) return org;
+  for (const row of memberships ?? []) {
+    const mapped = mapMembershipOrg(row);
+    if (mapped) byId.set(mapped.id, mapped);
   }
 
   const { data: ownedOrg } = await supabase
     .from("organizations")
-    .select("id, name, type, created_at")
+    .select("id, name, type")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  return ownedOrg ?? null;
+  if (ownedOrg && !byId.has(ownedOrg.id)) {
+    byId.set(ownedOrg.id, {
+      id: ownedOrg.id,
+      name: ownedOrg.name,
+      type: ownedOrg.type,
+      role: "owner",
+    });
+  }
+
+  return Array.from(byId.values()).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
+}
+
+export async function getOrganizationForUser(): Promise<Organization | null> {
+  const organizations = await getUserOrganizations();
+  if (organizations.length === 0) return null;
+
+  const activeId = await getActiveOrganizationIdCookie();
+  const selected =
+    (activeId ? organizations.find((org) => org.id === activeId) : null) ??
+    organizations.find((org) => org.role === "owner") ??
+    organizations[0];
+
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const { data: org, error } = await supabase
+    .from("organizations")
+    .select("id, name, type, created_at")
+    .eq("id", selected.id)
+    .maybeSingle();
+
+  if (error || !org) return null;
+  return org;
 }
 
 export async function getOrganizationId(): Promise<string | null> {

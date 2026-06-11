@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireWriteAccess } from "@/lib/permissions";
+import {
+  requireFeatureAccess,
+  requireUsageWithinLimit,
+  requireWriteAccess,
+} from "@/lib/permissions";
 import {
   type CreatorInput,
   platforms,
@@ -35,6 +39,24 @@ export async function createCreator(input: CreatorInput) {
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
+
+  const featureError = await requireFeatureAccess(
+    "creator_profiles",
+    "Creator profiles"
+  );
+  if (featureError) return featureError;
+
+  const { count: creatorCount } = await supabase
+    .from("creators")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId);
+
+  const limitError = await requireUsageWithinLimit(
+    "creators",
+    creatorCount ?? 0,
+    "creator profiles"
+  );
+  if (limitError) return limitError;
 
   const { data, error: insertError } = await supabase
     .from("creators")

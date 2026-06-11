@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { ContractsPageClient } from "@/components/contracts/ContractsPageClient";
 import { getContracts } from "@/lib/contracts/queries";
 import { getCreators } from "@/lib/creators/queries";
@@ -27,13 +28,15 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
       title="Contracts"
       description="Manage sponsorship agreements and deliverables"
     >
-      <ContractsPageClient
-        contracts={contracts}
-        creators={creators}
-        sponsors={sponsors}
-        canWrite={canWriteData(role)}
-        initialSummaryFilter={initialSummaryFilter}
-      />
+      <SubscriptionPageGate required="contracts" featureLabel="Contracts">
+        <ContractsPageClient
+          contracts={contracts}
+          creators={creators}
+          sponsors={sponsors}
+          canWrite={canWriteData(role)}
+          initialSummaryFilter={initialSummaryFilter}
+        />
+      </SubscriptionPageGate>
     </DashboardLayout>
   );
 }

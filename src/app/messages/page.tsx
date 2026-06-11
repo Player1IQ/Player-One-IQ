@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { MessagesInboxClient } from "@/components/messages/MessagesInboxClient";
 import {
   getConversations,
@@ -18,15 +19,17 @@ export default async function MessagesPage() {
       title="Messages"
       description="Inbox, deal rooms, and team conversations"
     >
-      {currentUserId ? (
-        <MessagesInboxClient
-          conversations={conversations}
-          users={users}
-          currentUserId={currentUserId}
-        />
-      ) : (
-        <p className="text-sm text-gray-500">Sign in to view messages.</p>
-      )}
+      <SubscriptionPageGate required="messaging" featureLabel="Messaging">
+        {currentUserId ? (
+          <MessagesInboxClient
+            conversations={conversations}
+            users={users}
+            currentUserId={currentUserId}
+          />
+        ) : (
+          <p className="text-sm text-gray-500">Sign in to view messages.</p>
+        )}
+      </SubscriptionPageGate>
     </DashboardLayout>
   );
 }

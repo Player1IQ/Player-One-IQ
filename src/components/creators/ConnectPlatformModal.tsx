@@ -5,12 +5,16 @@ import { useRouter } from "next/navigation";
 import { X, Loader2 } from "lucide-react";
 import { platforms, type Creator, type Platform } from "@/lib/creators";
 import { connectCreatorPlatformAccount } from "@/app/creators/revenue-actions";
+import { hasAvailablePlatformOAuth } from "@/lib/platform-oauth/config";
+import { isOAuthPlatform, type OAuthPlatformUi } from "@/lib/platform-oauth/types";
+import { OAuthPlatformActions } from "./OAuthPlatformActions";
 
 interface ConnectPlatformModalProps {
   open: boolean;
   onClose: () => void;
   creator: Creator;
   connectedPlatforms: Platform[];
+  oauthPlatformUi?: OAuthPlatformUi[];
 }
 
 export function ConnectPlatformModal({
@@ -18,6 +22,7 @@ export function ConnectPlatformModal({
   onClose,
   creator,
   connectedPlatforms,
+  oauthPlatformUi = [],
 }: ConnectPlatformModalProps) {
   const router = useRouter();
   const [platform, setPlatform] = useState<Platform>("YouTube");
@@ -124,6 +129,17 @@ export function ConnectPlatformModal({
                   </option>
                 ))}
               </select>
+              {isOAuthPlatform(platform) && (
+                <div className="mt-3">
+                  <OAuthPlatformActions
+                    creatorId={creator.id}
+                    platforms={oauthPlatformUi.filter(
+                      (entry) => entry.platform === platform
+                    )}
+                    layout="stack"
+                  />
+                </div>
+              )}
             </div>
 
             <div>
@@ -144,8 +160,9 @@ export function ConnectPlatformModal({
                 This month&apos;s income (optional)
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                Enter manual figures now. Automatic API sync can be enabled later
-                with platform OAuth.
+                {hasAvailablePlatformOAuth(oauthPlatformUi)
+                  ? "Enter figures manually, or connect YouTube/Twitch above to sync automatically."
+                  : "Enter figures manually until platform OAuth is configured."}
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <div>

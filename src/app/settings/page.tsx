@@ -1,6 +1,11 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SeedTestDataButton } from "@/components/dev/SeedTestDataButton";
+import { DeployChecklistCard } from "@/components/settings/DeployChecklistCard";
+import { PlatformSyncCard } from "@/components/settings/PlatformSyncCard";
 import { SettingsPageClient } from "@/components/settings/SettingsPageClient";
+import { isPlatformOAuthFeatureEnabled } from "@/lib/platform-oauth/config";
+import { createClient } from "@/lib/supabase/server";
+import { getOrganizationId } from "@/lib/organization/queries";
 import {
   getOrganizationForUser,
   getOrganizationMemberCount,
@@ -20,16 +25,35 @@ function formatCreatedAt(iso: string): string {
   });
 }
 
+async function getOAuthConnectedAccountCount(): Promise<number> {
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return 0;
+
+  const supabase = await createClient();
+  if (!supabase) return 0;
+
+  const { count } = await supabase
+    .from("creator_platform_accounts")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .eq("connection_status", "connected_oauth");
+
+  return count ?? 0;
+}
+
 export default async function SettingsPage() {
-  const [organization, role, memberCount] = await Promise.all([
-    getOrganizationForUser(),
-    getCurrentUserRole(),
-    getOrganizationMemberCount(),
-  ]);
+  const [organization, role, memberCount, oauthConnectedCount] =
+    await Promise.all([
+      getOrganizationForUser(),
+      getCurrentUserRole(),
+      getOrganizationMemberCount(),
+      getOAuthConnectedAccountCount(),
+    ]);
 
   const canView = canViewSettings(role);
   const canEdit = canManageSettings(role);
   const showDevTools = isSeedEnabled();
+  const oauthEnabled = isPlatformOAuthFeatureEnabled();
 
   return (
     <DashboardLayout
@@ -50,6 +74,18 @@ export default async function SettingsPage() {
         showDevTools={showDevTools}
         devTools={
           showDevTools ? <SeedTestDataButton variant="card" /> : undefined
+        }
+        platformSync={
+          canView ? (
+            <>
+              <DeployChecklistCard />
+              <PlatformSyncCard
+                oauthEnabled={oauthEnabled}
+                connectedCount={oauthConnectedCount}
+                canManage={canEdit}
+              />
+            </>
+          ) : undefined
         }
       />
     </DashboardLayout>

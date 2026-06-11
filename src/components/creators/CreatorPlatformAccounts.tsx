@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Link2, Loader2, Pencil, Plus, Unlink } from "lucide-react";
+import { Link2, Loader2, Pencil, Plus, RefreshCw, Unlink } from "lucide-react";
+import type { OAuthPlatformUi } from "@/lib/platform-oauth/config";
+import { OAuthPlatformActions } from "./OAuthPlatformActions";
 import type { Creator } from "@/lib/creators";
 import {
   connectionStatusLabel,
@@ -11,6 +13,8 @@ import {
 } from "@/lib/creator-revenue";
 import {
   disconnectCreatorPlatformAccount,
+  syncAllCreatorOAuthAccounts,
+  syncCreatorPlatformAccount,
   upsertCreatorPlatformRevenue,
 } from "@/app/creators/revenue-actions";
 import { PlatformBadge } from "./PlatformBadge";
@@ -20,6 +24,7 @@ interface CreatorPlatformAccountsProps {
   creator: Creator;
   accounts: CreatorPlatformAccount[];
   revenueEntries: CreatorRevenueEntry[];
+  oauthPlatformUi?: OAuthPlatformUi[];
   canWrite?: boolean;
 }
 
@@ -38,6 +43,8 @@ function getAccountRevenue(
       accountEntries.find((e) => e.revenueType === "subscription")?.amount ?? 0,
     donations:
       accountEntries.find((e) => e.revenueType === "donations")?.amount ?? 0,
+    other:
+      accountEntries.find((e) => e.revenueType === "other")?.amount ?? 0,
   };
 }
 
@@ -45,6 +52,7 @@ export function CreatorPlatformAccounts({
   creator,
   accounts,
   revenueEntries,
+  oauthPlatformUi = [],
   canWrite = true,
 }: CreatorPlatformAccountsProps) {
   const router = useRouter();
@@ -86,6 +94,40 @@ export function CreatorPlatformAccounts({
     router.refresh();
   }
 
+  const oauthAccountCount = accounts.filter(
+    (account) => account.connectionStatus === "connected_oauth"
+  ).length;
+
+  async function handleSyncAll() {
+    setLoadingId("all");
+    setError("");
+
+    const result = await syncAllCreatorOAuthAccounts(creator.id);
+    setLoadingId(null);
+
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+
+    router.refresh();
+  }
+
+  async function handleSync(accountId: string) {
+    setLoadingId(accountId);
+    setError("");
+
+    const result = await syncCreatorPlatformAccount(accountId);
+    setLoadingId(null);
+
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+
+    router.refresh();
+  }
+
   async function handleDisconnect(accountId: string) {
     if (!confirm("Disconnect this platform account?")) return;
     setLoadingId(accountId);
@@ -113,17 +155,39 @@ export function CreatorPlatformAccounts({
               No platform accounts connected yet.
             </p>
             {canWrite && (
-              <button
-                onClick={() => setConnectOpen(true)}
-                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
-              >
-                <Plus className="h-4 w-4" />
-                Connect platform
-              </button>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                <button
+                  onClick={() => setConnectOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
+                >
+                  <Plus className="h-4 w-4" />
+                  Connect manually
+                </button>
+                <OAuthPlatformActions
+                  creatorId={creator.id}
+                  platforms={oauthPlatformUi}
+                />
+              </div>
             )}
           </div>
         ) : (
           <>
+            {canWrite && oauthAccountCount > 1 ? (
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSyncAll}
+                  disabled={loadingId === "all"}
+                  className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs text-gray-300 hover:text-white"
+                >
+                  {loadingId === "all" ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  )}
+                  Sync all OAuth accounts
+                </button>
+              </div>
+            ) : null}
             <ul className="space-y-3">
               {accounts.map((account) => {
                 const revenue = getAccountRevenue(account.id, revenueEntries);
@@ -144,10 +208,41 @@ export function CreatorPlatformAccounts({
                           <p className="text-xs text-gray-500">
                             {connectionStatusLabel(account.connectionStatus)}
                           </p>
+                          {account.syncError && (
+                            <p className="mt-1 text-xs text-red-400">
+                              {account.syncError}
+                            </p>
+                          )}
+                          {account.lastSyncedAt && (
+                            <p className="mt-1 text-xs text-gray-600">
+                              Last synced{" "}
+                              {new Date(account.lastSyncedAt).toLocaleString()}
+                            </p>
+                          )}
+                          {account.platform === "Twitch" &&
+                          account.connectionStatus === "connected_oauth" ? (
+                            <p className="mt-1 text-xs text-gray-600">
+                              Sub revenue is estimated from active subscriptions.
+                            </p>
+                          ) : null}
                         </div>
                       </div>
                       {canWrite && (
                         <div className="flex gap-2">
+                          {account.connectionStatus === "connected_oauth" && (
+                            <button
+                              onClick={() => handleSync(account.id)}
+                              disabled={loadingId === account.id}
+                              className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs text-gray-300 hover:text-white"
+                            >
+                              {loadingId === account.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <RefreshCw className="h-3.5 w-3.5" />
+                              )}
+                              Sync now
+                            </button>
+                          )}
                           <button
                             onClick={() =>
                               isEditing
@@ -228,6 +323,14 @@ export function CreatorPlatformAccounts({
                             ${revenue.donations.toLocaleString()}
                           </span>
                         </span>
+                        {revenue.other > 0 ? (
+                          <span className="text-gray-400">
+                            Other:{" "}
+                            <span className="text-gray-200">
+                              ${revenue.other.toLocaleString()}
+                            </span>
+                          </span>
+                        ) : null}
                       </div>
                     )}
                   </li>
@@ -253,6 +356,7 @@ export function CreatorPlatformAccounts({
         onClose={() => setConnectOpen(false)}
         creator={creator}
         connectedPlatforms={accounts.map((account) => account.platform)}
+        oauthPlatformUi={oauthPlatformUi}
       />
     </>
   );

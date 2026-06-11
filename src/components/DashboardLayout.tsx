@@ -3,7 +3,12 @@ import { SupabaseConfigBanner } from "@/components/auth/SupabaseConfigBanner";
 import { MessageNotifications } from "@/components/messages/MessageNotifications";
 import { PendingInviteBannerWrapper } from "@/components/team/PendingInviteBannerWrapper";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
+import {
+  getOrganizationForUser,
+  getUserOrganizations,
+} from "@/lib/organization/queries";
 import { getSearchIndex } from "@/lib/search/queries";
+import { getSubscriptionContext } from "@/lib/subscription/queries";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -18,11 +23,20 @@ export async function DashboardLayout({
   description,
   headerActions,
 }: DashboardLayoutProps) {
-  const searchIndex = await getSearchIndex();
-
+  const [searchIndex, subscriptionContext, organizations, activeOrganization] =
+    await Promise.all([
+      getSearchIndex(),
+      getSubscriptionContext(),
+      getUserOrganizations(),
+      getOrganizationForUser(),
+    ]);
   return (
     <div className="min-h-screen bg-surface">
-      <Sidebar />
+      <Sidebar
+        enabledFeatures={Array.from(subscriptionContext.features)}
+        organizations={organizations}
+        activeOrganizationId={activeOrganization?.id ?? null}
+      />
       <div className="pl-64">
         <header className="sticky top-0 z-20 border-b border-border bg-surface/80 backdrop-blur-md">
           <div className="flex h-16 items-center justify-between px-8">
