@@ -1,13 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   CreditCard,
   FileText,
   Receipt,
   Sparkles,
 } from "lucide-react";
-import { changeSubscriptionPlan } from "@/lib/subscription/actions";
+import { useSearchParams } from "next/navigation";
+import {
+  openStripeCustomerPortal,
+  selectBillingPlan,
+} from "@/lib/billing/stripe-actions";
 import { SubscriptionPlanCard } from "@/components/subscription/SubscriptionPlanCard";
 import { UsageMeter } from "@/components/subscription/UsageMeter";
 import type {
@@ -37,14 +41,26 @@ export function BillingPageClient({
   tierPlans,
   canManage,
 }: BillingPageClientProps) {
+  const searchParams = useSearchParams();
   const [billingInterval, setBillingInterval] =
     useState<BillingInterval>("monthly");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [pendingPlan, setPendingPlan] = useState<PlanCode | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [portalPending, startPortalTransition] = useTransition();
 
   const currentPlan = subscription?.plan;
+  const hasStripeCustomer = Boolean(subscription?.stripeCustomerId);
+
+  useEffect(() => {
+    const checkout = searchParams.get("checkout");
+    if (checkout === "success") {
+      setMessage("Payment successful. Your plan will update in a few seconds.");
+    } else if (checkout === "canceled") {
+      setMessage("Checkout canceled. No changes were made.");
+    }
+  }, [searchParams]);
 
   function handlePlanChange(planCode: PlanCode) {
     if (!canManage) return;
@@ -53,13 +69,36 @@ export function BillingPageClient({
     setPendingPlan(planCode);
 
     startTransition(async () => {
-      const result = await changeSubscriptionPlan(planCode, billingInterval);
+      const result = await selectBillingPlan(planCode, billingInterval);
       setPendingPlan(null);
+
       if ("error" in result && result.error) {
         setError(result.error);
         return;
       }
-      setMessage(`Plan updated. Stripe checkout will be connected in a future release.`);
+
+      if ("checkoutUrl" in result && result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+        return;
+      }
+
+      if ("success" in result && result.success) {
+        setMessage(`Plan updated to ${planCode.replace(/_/g, " ")}.`);
+      }
+    });
+  }
+
+  function handleManageBilling() {
+    setError("");
+    startPortalTransition(async () => {
+      const result = await openStripeCustomerPortal();
+      if ("error" in result && result.error) {
+        setError(result.error);
+        return;
+      }
+      if ("portalUrl" in result && result.portalUrl) {
+        window.location.href = result.portalUrl;
+      }
     });
   }
 
@@ -125,6 +164,17 @@ export function BillingPageClient({
             </div>
           </div>
 
+          {canManage && hasStripeCustomer ? (
+            <button
+              type="button"
+              onClick={handleManageBilling}
+              disabled={portalPending}
+              className="mt-4 rounded-lg border border-border px-4 py-2 text-sm text-gray-200 hover:border-accent/30"
+            >
+              {portalPending ? "Opening portal..." : "Manage payment & invoices"}
+            </button>
+          ) : null}
+
           {!canManage ? (
             <p className="mt-4 text-sm text-gray-500">
               Only organization owners and admins can change plans.
@@ -157,7 +207,7 @@ export function BillingPageClient({
               Available plans
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              Compare plans in your tier. Payment processing via Stripe coming soon.
+              Paid plans checkout securely via Stripe.
             </p>
           </div>
           <div className="flex rounded-lg border border-border p-1">
@@ -193,7 +243,7 @@ export function BillingPageClient({
       </section>
 
       <section className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-xl border border-dashed border-border bg-surface-raised p-6">
+        <div className="rounded-xl border border-border bg-surface-raised p-6">
           <div className="flex items-start gap-3">
             <CreditCard className="h-5 w-5 text-gray-500" />
             <div>
@@ -201,17 +251,25 @@ export function BillingPageClient({
                 Payment method
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                Stripe payment method management will appear here once billing is
-                connected.
+                {hasStripeCustomer
+                  ? "Update your card and payment details in the Stripe customer portal."
+                  : "Subscribe to a paid plan to add a payment method."}
               </p>
-              <span className="mt-3 inline-block rounded-full bg-surface px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                Coming soon
-              </span>
+              {canManage && hasStripeCustomer ? (
+                <button
+                  type="button"
+                  onClick={handleManageBilling}
+                  disabled={portalPending}
+                  className="mt-3 text-sm text-accent-light hover:underline"
+                >
+                  Open billing portal
+                </button>
+              ) : null}
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-dashed border-border bg-surface-raised p-6">
+        <div className="rounded-xl border border-border bg-surface-raised p-6">
           <div className="flex items-start gap-3">
             <Receipt className="h-5 w-5 text-gray-500" />
             <div>
@@ -219,13 +277,21 @@ export function BillingPageClient({
                 Invoice history
               </h2>
               <p className="mt-1 text-sm text-gray-500">
-                Past invoices and receipts will be listed here after Stripe
-                integration.
+                {hasStripeCustomer
+                  ? "View receipts and past invoices in the Stripe customer portal."
+                  : "Invoices appear after your first paid subscription."}
               </p>
-              <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
-                <FileText className="h-4 w-4" />
-                No invoices yet
-              </div>
+              {hasStripeCustomer ? (
+                <div className="mt-4 flex items-center gap-2 text-sm text-gray-400">
+                  <FileText className="h-4 w-4" />
+                  Managed by Stripe
+                </div>
+              ) : (
+                <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+                  <FileText className="h-4 w-4" />
+                  No invoices yet
+                </div>
+              )}
             </div>
           </div>
         </div>

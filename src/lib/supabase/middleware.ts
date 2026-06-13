@@ -10,6 +10,8 @@ const PUBLIC_ROUTES = [
   "/terms",
   "/privacy",
   "/welcome",
+  "/api/billing/webhook",
+  "/api/health",
 ];
 
 const AUTH_ONLY_ROUTES = ["/login", "/signup", "/forgot-password"];

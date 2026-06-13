@@ -180,6 +180,23 @@ export function formatPlanPrice(cents: number, interval: "monthly" | "yearly") {
   return interval === "yearly" ? `${amount}/yr` : `${amount}/mo`;
 }
 
+export function planPriceCents(
+  plan: SubscriptionPlan,
+  billingInterval: "monthly" | "yearly"
+): number {
+  if (billingInterval === "yearly" && plan.priceYearlyCents !== null) {
+    return plan.priceYearlyCents;
+  }
+  return plan.priceMonthlyCents;
+}
+
+export function planRequiresStripeCheckout(
+  plan: SubscriptionPlan,
+  billingInterval: "monthly" | "yearly"
+): boolean {
+  return planPriceCents(plan, billingInterval) > 0;
+}
+
 export function plansInTierGroup(
   plans: SubscriptionPlan[],
   tierGroup: TierGroup
