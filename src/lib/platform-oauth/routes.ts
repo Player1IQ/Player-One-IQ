@@ -12,13 +12,17 @@ import {
   exchangeInstagramCode,
   getInstagramAuthorizeUrl,
 } from "./instagram";
-import { exchangeTikTokCode, getTikTokAuthorizeUrl } from "./tiktok";
+import { exchangeTikTokCode, createTikTokPkcePair, getTikTokAuthorizeUrl } from "./tiktok";
 import { exchangeTwitchCode, getTwitchAuthorizeUrl } from "./twitch";
 import { exchangeYouTubeCode, getYouTubeAuthorizeUrl } from "./youtube";
 import { syncCreatorPlatformAccountById } from "./sync-account";
 import { getAppOrigin } from "@/lib/email/app-url";
 
-async function getAuthorizeUrl(platform: OAuthPlatform, state: string) {
+async function getAuthorizeUrl(
+  platform: OAuthPlatform,
+  state: string,
+  tiktokCodeChallenge?: string
+) {
   switch (platform) {
     case "YouTube":
       return getYouTubeAuthorizeUrl(state);
@@ -27,11 +31,18 @@ async function getAuthorizeUrl(platform: OAuthPlatform, state: string) {
     case "Instagram":
       return getInstagramAuthorizeUrl(state);
     case "TikTok":
-      return getTikTokAuthorizeUrl(state);
+      if (!tiktokCodeChallenge) {
+        throw new Error("TikTok OAuth requires PKCE.");
+      }
+      return getTikTokAuthorizeUrl(state, tiktokCodeChallenge);
   }
 }
 
-async function exchangeCode(platform: OAuthPlatform, code: string) {
+async function exchangeCode(
+  platform: OAuthPlatform,
+  code: string,
+  pkceVerifier?: string
+) {
   switch (platform) {
     case "YouTube":
       return exchangeYouTubeCode(code);
@@ -40,7 +51,10 @@ async function exchangeCode(platform: OAuthPlatform, code: string) {
     case "Instagram":
       return exchangeInstagramCode(code);
     case "TikTok":
-      return exchangeTikTokCode(code);
+      if (!pkceVerifier) {
+        throw new Error("TikTok OAuth session expired. Please try again.");
+      }
+      return exchangeTikTokCode(code, pkceVerifier);
   }
 }
 
@@ -97,7 +111,14 @@ export async function handlePlatformOAuthStart(
     return NextResponse.json({ error: "Creator not found." }, { status: 404 });
   }
 
-  const state = createOAuthState({ creatorId, organizationId, platform });
+  const tiktokPkce =
+    platform === "TikTok" ? createTikTokPkcePair() : null;
+  const state = createOAuthState({
+    creatorId,
+    organizationId,
+    platform,
+    pkceVerifier: tiktokPkce?.codeVerifier,
+  });
 
   await supabase.from("creator_platform_accounts").upsert(
     {
@@ -114,7 +135,11 @@ export async function handlePlatformOAuthStart(
     { onConflict: "creator_id,platform" }
   );
 
-  const authorizeUrl = await getAuthorizeUrl(platform, state);
+  const authorizeUrl = await getAuthorizeUrl(
+    platform,
+    state,
+    tiktokPkce?.codeChallenge
+  );
   return NextResponse.redirect(authorizeUrl);
 }
 
@@ -148,7 +173,7 @@ export async function handlePlatformOAuthCallback(
   }
 
   try {
-    const tokens = await exchangeCode(platform, code);
+    const tokens = await exchangeCode(platform, code, payload.pkceVerifier);
 
     const { data: account, error: accountError } = await supabase
       .from("creator_platform_accounts")

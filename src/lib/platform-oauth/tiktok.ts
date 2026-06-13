@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from "crypto";
 import { getOAuthRedirectUri } from "./redirect-uri";
 import type { OAuthTokens } from "./tokens";
 import { getTokenExpiry } from "./tokens";
@@ -17,7 +18,18 @@ function getTikTokCredentials() {
   return { clientKey, clientSecret };
 }
 
-export async function getTikTokAuthorizeUrl(state: string): Promise<string> {
+export function createTikTokPkcePair() {
+  const codeVerifier = randomBytes(32).toString("base64url");
+  const codeChallenge = createHash("sha256")
+    .update(codeVerifier)
+    .digest("base64url");
+  return { codeVerifier, codeChallenge };
+}
+
+export async function getTikTokAuthorizeUrl(
+  state: string,
+  codeChallenge: string
+): Promise<string> {
   const { clientKey } = getTikTokCredentials();
   const redirectUri = await getOAuthRedirectUri("TikTok");
   const params = new URLSearchParams({
@@ -26,12 +38,17 @@ export async function getTikTokAuthorizeUrl(state: string): Promise<string> {
     scope: "user.info.basic,video.list",
     response_type: "code",
     state,
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
   });
 
   return `https://www.tiktok.com/v2/auth/authorize/?${params.toString()}`;
 }
 
-export async function exchangeTikTokCode(code: string): Promise<OAuthTokens> {
+export async function exchangeTikTokCode(
+  code: string,
+  codeVerifier: string
+): Promise<OAuthTokens> {
   const { clientKey, clientSecret } = getTikTokCredentials();
   const redirectUri = await getOAuthRedirectUri("TikTok");
 
@@ -44,6 +61,7 @@ export async function exchangeTikTokCode(code: string): Promise<OAuthTokens> {
       code,
       grant_type: "authorization_code",
       redirect_uri: redirectUri,
+      code_verifier: codeVerifier,
     }),
   });
 
