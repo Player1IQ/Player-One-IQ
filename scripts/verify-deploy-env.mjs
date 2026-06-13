@@ -103,6 +103,21 @@ const checks = [
     required: false,
     hint: "Live AI (demo mode without it)",
   },
+  {
+    key: "STRIPE_SECRET_KEY",
+    required: false,
+    hint: "Stripe billing checkout",
+  },
+  {
+    key: "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+    required: false,
+    hint: "Stripe billing checkout",
+  },
+  {
+    key: "STRIPE_WEBHOOK_SECRET",
+    required: false,
+    hint: "Stripe subscription sync webhook",
+  },
 ];
 
 let failed = 0;
@@ -133,8 +148,8 @@ if (appUrl?.includes("localhost")) {
 }
 
 if (appUrl && !appUrl.includes("localhost")) {
-  console.log("\nProduction OAuth redirect URIs to register:\n");
-  for (const platform of ["youtube", "twitch", "instagram", "tiktok"]) {
+  console.log("\nProduction OAuth redirect URIs to register (v1 launch):\n");
+  for (const platform of ["youtube", "twitch"]) {
     console.log(`  ${appUrl}/api/platform-oauth/${platform}/callback`);
   }
   console.log("\nSupabase → Authentication → URL configuration:");

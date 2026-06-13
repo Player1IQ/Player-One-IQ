@@ -16,6 +16,9 @@ export const oauthPlatforms: OAuthPlatform[] = [
   "TikTok",
 ];
 
+/** Platforms enabled for public launch (v1). */
+export const launchOAuthPlatforms: OAuthPlatform[] = ["YouTube", "Twitch"];
+
 export function isOAuthPlatform(platform: Platform): platform is OAuthPlatform {
   return oauthPlatforms.includes(platform as OAuthPlatform);
 }

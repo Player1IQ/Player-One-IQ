@@ -5,6 +5,7 @@ import { requireWriteAccess } from "@/lib/permissions";
 import {
   isPlatformOAuthAvailable,
   isPlatformOAuthFeatureEnabled,
+  isPlatformOAuthLaunched,
   type OAuthPlatform,
 } from "./config";
 import { createOAuthState, verifyOAuthState } from "./state";
@@ -75,10 +76,10 @@ export async function handlePlatformOAuthStart(
   }
 
   if (!isPlatformOAuthAvailable(platform)) {
-    return NextResponse.json(
-      { error: `${platform} OAuth is not configured.` },
-      { status: 503 }
-    );
+    const message = isPlatformOAuthLaunched(platform)
+      ? `${platform} OAuth is not configured.`
+      : `${platform} is not available at launch yet.`;
+    return NextResponse.json({ error: message }, { status: 503 });
   }
 
   const { searchParams } = new URL(request.url);

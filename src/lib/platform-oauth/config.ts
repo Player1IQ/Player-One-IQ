@@ -1,12 +1,13 @@
 import {
   isOAuthPlatform,
+  launchOAuthPlatforms,
   oauthPlatforms,
   type OAuthPlatform,
   type OAuthPlatformUi,
 } from "./types";
 
 export type { OAuthPlatform, OAuthPlatformUi, OAuthPlatformUiStatus } from "./types";
-export { isOAuthPlatform, oauthPlatforms };
+export { isOAuthPlatform, launchOAuthPlatforms, oauthPlatforms };
 
 export function isPlatformOAuthFeatureEnabled(): boolean {
   return process.env.PLATFORM_OAUTH_ENABLED === "true";
@@ -44,9 +45,15 @@ export function isPlatformOAuthConfigured(platform: OAuthPlatform): boolean {
   return false;
 }
 
+export function isPlatformOAuthLaunched(platform: OAuthPlatform): boolean {
+  return launchOAuthPlatforms.includes(platform);
+}
+
 export function isPlatformOAuthAvailable(platform: OAuthPlatform): boolean {
   return (
-    isPlatformOAuthFeatureEnabled() && isPlatformOAuthConfigured(platform)
+    isPlatformOAuthLaunched(platform) &&
+    isPlatformOAuthFeatureEnabled() &&
+    isPlatformOAuthConfigured(platform)
   );
 }
 
@@ -60,10 +67,14 @@ export function getConfiguredOAuthPlatforms(): OAuthPlatform[] {
 }
 
 export function getOAuthPlatformUi(): OAuthPlatformUi[] {
-  return oauthPlatforms.map((platform) => ({
+  return launchOAuthPlatforms.map((platform) => ({
     platform,
     status: isPlatformOAuthAvailable(platform) ? "available" : "coming_soon",
   }));
+}
+
+export function getComingSoonOAuthPlatforms(): OAuthPlatform[] {
+  return oauthPlatforms.filter((platform) => !isPlatformOAuthLaunched(platform));
 }
 
 export function hasAvailablePlatformOAuth(
@@ -74,7 +85,7 @@ export function hasAvailablePlatformOAuth(
 
 export function platformOAuthDescription(platforms: OAuthPlatformUi[]): string {
   if (hasAvailablePlatformOAuth(platforms)) {
-    return "Connect platform APIs to sync profiles and revenue automatically, or add accounts manually.";
+    return "Connect YouTube or Twitch to sync profiles and revenue automatically, or add accounts manually.";
   }
-  return "Link platform accounts manually. API auto-sync unlocks when OAuth credentials are configured.";
+  return "Link platform accounts manually. YouTube and Twitch auto-sync unlock when OAuth is configured.";
 }

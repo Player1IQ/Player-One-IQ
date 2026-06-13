@@ -50,8 +50,8 @@ export function PlatformSyncCard({
             {oauthEnabled
               ? `${connectedCount} OAuth-connected account${
                   connectedCount === 1 ? "" : "s"
-                } in this workspace. Revenue refreshes daily when deployed to Vercel.`
-              : "Platform OAuth is disabled. Add credentials to enable automatic sync."}
+                } in this workspace. YouTube and Twitch sync daily on Vercel (6:00 UTC).`
+              : "Platform OAuth is disabled. Add YouTube and Twitch credentials to enable automatic sync."}
           </p>
 
           {canManage && oauthEnabled && connectedCount > 0 ? (
