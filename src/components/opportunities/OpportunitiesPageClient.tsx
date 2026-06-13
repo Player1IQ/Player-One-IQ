@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Briefcase } from "lucide-react";
+import { Plus, Briefcase, FileText, Users } from "lucide-react";
 import {
   type Opportunity,
   type OpportunityStatus,
@@ -14,7 +14,14 @@ import { OpportunityStatusBadge } from "./OpportunityStatusBadge";
 import { OpportunityFormModal } from "./OpportunityFormModal";
 import { PlatformBadge } from "@/components/creators/PlatformBadge";
 import { IndustryBadge } from "@/components/sponsors/IndustryBadge";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { Sponsor } from "@/lib/sponsors";
+
+const selectClassName =
+  "rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 backdrop-blur-sm focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30";
 
 interface OpportunitiesPageClientProps {
   opportunities: Opportunity[];
@@ -52,18 +59,24 @@ export function OpportunitiesPageClient({
   return (
     <>
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-surface-raised p-5">
-          <p className="text-sm text-gray-400">Open Opportunities</p>
-          <p className="mt-2 text-3xl font-bold text-white">{stats.openCount}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface-raised p-5">
-          <p className="text-sm text-gray-400">Total Opportunities</p>
-          <p className="mt-2 text-3xl font-bold text-white">{stats.totalCount}</p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface-raised p-5">
-          <p className="text-sm text-gray-400">Total Applications</p>
-          <p className="mt-2 text-3xl font-bold text-white">{stats.applicationCount}</p>
-        </div>
+        <MetricCard
+          title="Open Opportunities"
+          value={String(stats.openCount)}
+          icon={Briefcase}
+          iconColor="text-blue-400"
+        />
+        <MetricCard
+          title="Total Opportunities"
+          value={String(stats.totalCount)}
+          icon={FileText}
+          iconColor="text-accent-light"
+        />
+        <MetricCard
+          title="Total Applications"
+          value={String(stats.applicationCount)}
+          icon={Users}
+          iconColor="text-violet-400"
+        />
       </div>
 
       <div className="mb-4 flex items-center justify-between">
@@ -76,23 +89,20 @@ export function OpportunitiesPageClient({
       </div>
 
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative max-w-md flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search opportunities..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface-raised py-2.5 pl-10 pr-4 text-sm text-gray-200"
-          />
-        </div>
+        <Input
+          type="search"
+          placeholder="Search opportunities..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-md flex-1"
+        />
         <div className="flex flex-wrap gap-3">
           <select
             value={statusFilter}
             onChange={(e) =>
               setStatusFilter(e.target.value as OpportunityStatus | "all")
             }
-            className="rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-gray-200"
+            className={selectClassName}
           >
             <option value="all">All statuses</option>
             {opportunityStatuses.map((s) => (
@@ -102,34 +112,39 @@ export function OpportunitiesPageClient({
             ))}
           </select>
           {canManage && (
-            <button
-              onClick={() => setModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white"
-            >
+            <Button type="button" onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
               Create Opportunity
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex min-h-[280px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-raised">
-          <Briefcase className="h-10 w-10 text-gray-600" />
-          <p className="mt-4 text-sm font-medium text-gray-300">No opportunities yet</p>
-          <p className="mt-1 text-xs text-gray-500">
-            {canManage
+        <EmptyState
+          icon={Briefcase}
+          title="No opportunities yet"
+          description={
+            canManage
               ? "Create your first sponsorship opportunity."
-              : "Check back when opportunities are published."}
-          </p>
-        </div>
+              : "Check back when opportunities are published."
+          }
+          action={
+            canManage ? (
+              <Button type="button" size="sm" onClick={() => setModalOpen(true)}>
+                Create Opportunity
+              </Button>
+            ) : undefined
+          }
+          className="min-h-[280px]"
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {filtered.map((opportunity) => (
             <Link
               key={opportunity.id}
               href={`/opportunities/${opportunity.id}`}
-              className="group rounded-xl border border-border bg-surface-raised p-5 transition-colors hover:border-accent/30"
+              className="group rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-5 backdrop-blur-sm transition-colors hover:border-accent/20"
             >
               <div className="flex items-start justify-between gap-3">
                 <h3 className="font-semibold text-gray-100 group-hover:text-accent-light">

@@ -10,38 +10,11 @@ import {
   Users,
 } from "lucide-react";
 import type { MonthlyReportData } from "@/lib/reports/build";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 interface ReportsPageClientProps {
   report: MonthlyReportData;
-}
-
-function StatCard({
-  title,
-  value,
-  subtitle,
-  icon: Icon,
-}: {
-  title: string;
-  value: string;
-  subtitle: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <div className="rounded-xl border border-border bg-surface-raised p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-            {title}
-          </p>
-          <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-          <p className="mt-1 text-sm text-gray-500">{subtitle}</p>
-        </div>
-        <div className="rounded-lg bg-accent/10 p-2 ring-1 ring-accent/20">
-          <Icon className="h-5 w-5 text-accent-light" />
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export function ReportsPageClient({ report }: ReportsPageClientProps) {
@@ -50,34 +23,39 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
   );
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-xl border border-border bg-surface-raised px-5 py-4">
-        <p className="text-sm text-gray-400">
-          Monthly report for{" "}
-          <span className="font-medium text-white">{report.periodLabel}</span>
-        </p>
-      </div>
+    <div className="space-y-8 animate-fade-in">
+      <Card className="border-white/[0.06] bg-surface-raised/80">
+        <CardContent className="px-5 py-4">
+          <p className="text-sm text-gray-400">
+            Monthly report for{" "}
+            <span className="font-medium text-white">{report.periodLabel}</span>
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
+        <MetricCard
           title="Total revenue"
           value={report.revenue.totalDisplay}
           subtitle={report.revenue.subtitle}
           icon={DollarSign}
+          iconColor="text-accent-light"
         />
-        <StatCard
+        <MetricCard
           title="Contract pipeline"
           value={report.contractStats.totalValueDisplay}
           subtitle={`${report.contractStats.activeCount} active in pipeline`}
           icon={FileText}
+          iconColor="text-fuchsia-400"
         />
-        <StatCard
+        <MetricCard
           title="Opportunities"
           value={String(report.opportunityStats.openCount)}
           subtitle={`${report.opportunityStats.totalCount} total opportunities`}
           icon={Briefcase}
+          iconColor="text-blue-400"
         />
-        <StatCard
+        <MetricCard
           title="AI requests"
           value={String(aiRequestUsage?.count ?? 0)}
           subtitle={
@@ -86,93 +64,102 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
               : "Unlimited on your plan"
           }
           icon={Sparkles}
+          iconColor="text-violet-400"
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-border bg-surface-raised p-6">
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-accent-light" />
-            <h2 className="text-base font-semibold text-white">
-              Top creators by revenue
-            </h2>
-          </div>
-          {report.creatorLeaderboard.length === 0 ? (
-            <p className="mt-4 text-sm text-gray-500">
-              No creator revenue recorded this month yet.
-            </p>
-          ) : (
-            <div className="mt-4 space-y-3">
-              {report.creatorLeaderboard.slice(0, 8).map((row) => (
-                <Link
-                  key={row.id}
-                  href={`/creators/${row.id}`}
-                  className="flex items-center justify-between rounded-lg border border-border-subtle bg-surface px-4 py-3 hover:border-accent/20"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-white">{row.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {formatBreakdown(row.contractRevenue, row.platformRevenue)}
+        <Card className="border-white/[0.06] bg-surface-raised/80">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-accent-light" />
+              <CardTitle className="text-base">Top creators by revenue</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {report.creatorLeaderboard.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                No creator revenue recorded this month yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {report.creatorLeaderboard.slice(0, 8).map((row) => (
+                  <Link
+                    key={row.id}
+                    href={`/creators/${row.id}`}
+                    className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-surface px-4 py-3 transition-colors hover:border-accent/20"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-white">{row.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {formatBreakdown(row.contractRevenue, row.platformRevenue)}
+                      </p>
+                    </div>
+                    <p className="text-sm font-semibold text-accent-light">
+                      {row.totalDisplay}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-white/[0.06] bg-surface-raised/80">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-accent-light" />
+              <CardTitle className="text-base">Platform income</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {report.platformBreakdown.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                Connect creator platforms or sync OAuth accounts to see breakdown.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {report.platformBreakdown.map((row) => (
+                  <div
+                    key={row.platform}
+                    className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-surface px-4 py-3"
+                  >
+                    <p className="text-sm text-gray-300">{row.platform}</p>
+                    <p className="text-sm font-medium text-white">
+                      {row.totalDisplay}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold text-accent-light">
-                    {row.totalDisplay}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="rounded-xl border border-border bg-surface-raised p-6">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-accent-light" />
-            <h2 className="text-base font-semibold text-white">
-              Platform income
-            </h2>
-          </div>
-          {report.platformBreakdown.length === 0 ? (
-            <p className="mt-4 text-sm text-gray-500">
-              Connect creator platforms or sync OAuth accounts to see breakdown.
-            </p>
-          ) : (
-            <div className="mt-4 space-y-3">
-              {report.platformBreakdown.map((row) => (
-                <div
-                  key={row.platform}
-                  className="flex items-center justify-between rounded-lg border border-border-subtle bg-surface px-4 py-3"
-                >
-                  <p className="text-sm text-gray-300">{row.platform}</p>
-                  <p className="text-sm font-medium text-white">
-                    {row.totalDisplay}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {report.aiUsage.length > 0 ? (
-        <section className="rounded-xl border border-border bg-surface-raised p-6">
-          <h2 className="text-base font-semibold text-white">AI usage</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {report.aiUsage.map((entry) => (
-              <div
-                key={entry.assistantType}
-                className="rounded-lg border border-border-subtle bg-surface px-4 py-3"
-              >
-                <p className="text-xs uppercase tracking-wide text-gray-500">
-                  {entry.assistantType}
-                </p>
-                <p className="mt-1 text-lg font-semibold text-white">
-                  {entry.requestCount}
-                </p>
-                <p className="text-xs text-gray-500">requests this month</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <Card className="border-white/[0.06] bg-surface-raised/80">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">AI usage</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {report.aiUsage.map((entry) => (
+                <div
+                  key={entry.assistantType}
+                  className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3"
+                >
+                  <p className="text-xs uppercase tracking-wide text-gray-500">
+                    {entry.assistantType}
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-white">
+                    {entry.requestCount}
+                  </p>
+                  <p className="text-xs text-gray-500">requests this month</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ) : null}
     </div>
   );

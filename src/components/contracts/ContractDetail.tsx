@@ -43,7 +43,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
+    <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
       <h2 className="text-base font-semibold text-white">{title}</h2>
       {description && (
         <p className="mt-1 text-sm text-gray-500">{description}</p>
@@ -162,9 +162,8 @@ export function ContractDetail({
           </div>
         )}
 
-        <div className="relative overflow-hidden rounded-xl border border-border bg-surface-raised p-6 shadow-sm">
-          <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-accent/5" />
-          <div className="relative">
+        <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
+          <div>
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-2xl font-bold text-white">
                 {contract.contractName}

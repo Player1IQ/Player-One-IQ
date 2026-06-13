@@ -29,7 +29,7 @@ export function SettingsPageClient({
 }: SettingsPageClientProps) {
   if (!canView) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center rounded-xl border border-dashed border-border bg-surface-raised">
+      <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-surface-raised/40">
         <p className="text-sm text-gray-500">
           You do not have permission to view settings.
         </p>
@@ -39,19 +39,19 @@ export function SettingsPageClient({
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
-      <section className="rounded-xl border border-border bg-surface-raised p-6">
+      <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
         <h2 className="text-base font-semibold text-white">Organization</h2>
         <p className="mt-1 text-sm text-gray-500">
           Workspace name and type shown across your dashboard.
         </p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-border-subtle bg-surface px-4 py-3">
+          <div className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
             <p className="text-xs uppercase tracking-wide text-gray-500">
               Team members
             </p>
             <p className="mt-1 text-lg font-semibold text-white">{memberCount}</p>
           </div>
-          <div className="rounded-lg border border-border-subtle bg-surface px-4 py-3">
+          <div className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
             <p className="text-xs uppercase tracking-wide text-gray-500">
               Workspace since
             </p>
@@ -69,7 +69,7 @@ export function SettingsPageClient({
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-surface-raised p-6">
+      <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
         <div className="flex items-start gap-3">
           <Users className="mt-0.5 h-5 w-5 text-accent-light" />
           <div>
@@ -89,7 +89,7 @@ export function SettingsPageClient({
 
       {platformSync}
 
-      <section className="rounded-xl border border-border bg-surface-raised p-6">
+      <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
         <div className="flex items-start gap-3">
           <CreditCard className="mt-0.5 h-5 w-5 text-accent-light" />
           <div>
@@ -109,7 +109,7 @@ export function SettingsPageClient({
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-surface-raised p-6">
+      <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
         <div className="flex items-start gap-3">
           <Bell className="mt-0.5 h-5 w-5 text-accent-light" />
           <div>
