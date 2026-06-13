@@ -18,7 +18,7 @@ export function getLlmFallbackNotice(error: unknown): string {
   const text = errorToText(error);
 
   if (/insufficient_quota/i.test(text)) {
-    return "OpenAI billing quota exceeded. Showing sample results — check your OpenAI account billing settings.";
+    return "Live AI is off — the platform OpenAI account has no billing quota. This is not your plan request limit. Showing sample insights until platform billing is enabled.";
   }
   if (/\b429\b/.test(text) && /rate_limit/i.test(text)) {
     return "OpenAI rate limit reached. Showing sample results — try again in a moment.";
