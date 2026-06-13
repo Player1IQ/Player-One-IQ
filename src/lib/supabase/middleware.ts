@@ -7,6 +7,8 @@ const PUBLIC_ROUTES = [
   "/signup",
   "/forgot-password",
   "/auth/callback",
+  "/terms",
+  "/privacy",
 ];
 
 const AUTH_ONLY_ROUTES = ["/login", "/signup", "/forgot-password"];
