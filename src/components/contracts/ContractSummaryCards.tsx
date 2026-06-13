@@ -106,10 +106,10 @@ export function ContractSummaryCards({
               onFilterChange(isActive ? null : card.key);
             }}
             disabled={!isClickable}
-            className={`group relative w-full overflow-hidden rounded-xl border bg-surface-raised p-5 text-left transition-colors ${
+            className={`group relative w-full overflow-hidden rounded-2xl border bg-surface-raised/80 p-5 text-left backdrop-blur-sm transition-all duration-300 ${
               isActive
-                ? "border-accent/50 ring-1 ring-accent/30"
-                : "border-border hover:border-accent/30"
+                ? "border-accent/50 shadow-glow-active ring-1 ring-accent/30"
+                : "border-white/[0.06] hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-card-hover"
             } ${isClickable ? "cursor-pointer" : "cursor-default"}`}
           >
             <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-accent/5 transition-transform group-hover:scale-110" />

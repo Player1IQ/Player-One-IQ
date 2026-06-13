@@ -7,6 +7,8 @@ import { TeamNav } from "./TeamNav";
 import { TeamSummaryCards, type TeamStatusFilter } from "./TeamSummaryCards";
 import { TeamTable } from "./TeamTable";
 import { InviteTeamMemberModal } from "./InviteTeamMemberModal";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 interface TeamPageClientProps {
   members: TeamMember[];
@@ -39,7 +41,7 @@ export function TeamPageClient({
   });
 
   return (
-    <>
+    <div className="animate-fade-in">
       <TeamNav />
 
       <TeamSummaryCards
@@ -52,24 +54,20 @@ export function TeamPageClient({
       />
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-md flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input
+        <div className="max-w-md flex-1">
+          <Input
+            icon={<Search className="h-4 w-4" />}
             type="text"
             placeholder="Search by name, email, or role..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface-raised py-2.5 pl-10 pr-4 text-sm text-gray-200 placeholder:text-gray-600 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
           />
         </div>
         {canManageTeam && (
-          <button
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
-          >
+          <Button onClick={() => setModalOpen(true)}>
             <Plus className="h-4 w-4" />
             Invite Member
-          </button>
+          </Button>
         )}
       </div>
 
@@ -83,7 +81,7 @@ export function TeamPageClient({
           <button
             type="button"
             onClick={() => setStatusFilter("all")}
-            className="rounded-full border border-border px-2.5 py-0.5 text-xs text-accent-light hover:border-accent/40"
+            className="rounded-full border border-white/[0.08] px-2.5 py-0.5 text-xs text-accent-light hover:border-accent/40"
           >
             Clear filter
           </button>
@@ -100,6 +98,6 @@ export function TeamPageClient({
         open={modalOpen}
         onClose={() => setModalOpen(false)}
       />
-    </>
+    </div>
   );
 }

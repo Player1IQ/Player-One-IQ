@@ -53,7 +53,7 @@ export function SponsorTable({
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-border bg-surface-raised shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>

@@ -55,9 +55,9 @@ export function SidebarUser() {
   }, [configured]);
 
   return (
-    <div className="border-t border-border p-4">
-      <div className="flex items-center gap-3 rounded-lg bg-surface-overlay px-3 py-2.5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-muted text-xs font-bold text-white">
+    <div className="border-t border-white/[0.06] p-3">
+      <div className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2.5 ring-1 ring-white/[0.04]">
+        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-muted text-xs font-bold text-white shadow-glow-active">
           {initials}
         </div>
         <div className="min-w-0 flex-1">
@@ -70,7 +70,7 @@ export function SidebarUser() {
         </div>
       </div>
       {configured && (
-        <div className="mt-2">
+        <div className="mt-2 px-1">
           <SignOutButton />
         </div>
       )}

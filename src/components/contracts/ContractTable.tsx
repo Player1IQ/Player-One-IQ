@@ -20,6 +20,8 @@ interface ContractTableProps {
   creators: Creator[];
   sponsors: Sponsor[];
   canWrite?: boolean;
+  selectedId?: string | null;
+  onSelect?: (contract: Contract) => void;
 }
 
 export function ContractTable({
@@ -27,6 +29,8 @@ export function ContractTable({
   creators,
   sponsors,
   canWrite = true,
+  selectedId,
+  onSelect,
 }: ContractTableProps) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -61,7 +65,7 @@ export function ContractTable({
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-border bg-surface-raised shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -99,7 +103,10 @@ export function ContractTable({
                 return (
                   <tr
                     key={contract.id}
-                    className="group transition-colors hover:bg-accent/[0.03]"
+                    onClick={() => onSelect?.(contract)}
+                    className={`group cursor-pointer transition-colors hover:bg-accent/[0.04] ${
+                      selectedId === contract.id ? "bg-accent/[0.06]" : ""
+                    }`}
                   >
                     <td className="px-6 py-4">
                       <Link

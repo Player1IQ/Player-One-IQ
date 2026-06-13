@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface StatCardProps {
   title: string;
@@ -22,13 +23,15 @@ export function StatCard({
 }: StatCardProps) {
   const content = (
     <div
-      className={`group relative overflow-hidden rounded-xl border bg-surface-raised p-6 transition-colors ${
+      className={cn(
+        "group relative overflow-hidden rounded-2xl border bg-surface-raised/80 p-6 backdrop-blur-sm transition-all duration-300",
         highlight
           ? "border-orange-500/30 hover:border-orange-500/50"
-          : "border-border hover:border-accent/30 hover:bg-surface-overlay"
-      } ${href ? "cursor-pointer" : ""}`}
+          : "border-white/[0.06] hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-card-hover",
+        href && "cursor-pointer"
+      )}
     >
-      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-accent/5 transition-transform group-hover:scale-110" />
+      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-accent/5 transition-transform duration-500 group-hover:scale-125" />
 
       <div className="relative flex items-start justify-between">
         <div className="space-y-3">
@@ -40,7 +43,10 @@ export function StatCard({
         </div>
 
         <div
-          className={`flex h-11 w-11 items-center justify-center rounded-lg ring-1 ${iconColor}`}
+          className={cn(
+            "flex h-11 w-11 items-center justify-center rounded-xl ring-1",
+            iconColor
+          )}
         >
           <Icon className="h-5 w-5" />
         </div>

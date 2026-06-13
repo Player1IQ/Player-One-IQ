@@ -5,6 +5,9 @@ import { Plus, Search, Building2, Handshake, DollarSign } from "lucide-react";
 import type { Sponsor } from "@/lib/sponsors";
 import { SponsorTable } from "./SponsorTable";
 import { SponsorFormModal } from "./SponsorFormModal";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 interface SponsorsPageClientProps {
   sponsors: Sponsor[];
@@ -30,70 +33,46 @@ export function SponsorsPageClient({
   const totalDeals = sponsors.reduce((sum, s) => sum + s.activeDeals, 0);
 
   return (
-    <>
+    <div className="animate-fade-in">
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-border bg-surface-raised p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-400">Total Sponsors</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 ring-1 ring-accent/20">
-              <Building2 className="h-4 w-4 text-accent-light" />
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-bold tracking-tight text-white">
-            {sponsors.length}
-          </p>
-          <p className="mt-1 text-xs text-gray-500">
-            <span className="text-emerald-400">{activeCount}</span> active
-            partnerships
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface-raised p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-400">Active Deals</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500/10 ring-1 ring-purple-500/20">
-              <Handshake className="h-4 w-4 text-purple-400" />
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-bold tracking-tight text-white">
-            {totalDeals}
-          </p>
-          <p className="mt-1 text-xs text-gray-500">Across all sponsors</p>
-        </div>
-        <div className="rounded-xl border border-border bg-surface-raised p-5">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-400">Pipeline Value</p>
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20">
-              <DollarSign className="h-4 w-4 text-emerald-400" />
-            </div>
-          </div>
-          <p className="mt-3 text-3xl font-bold tracking-tight text-white">
-            {sponsors.length === 0 ? "—" : "$0"}
-          </p>
-          <p className="mt-1 text-xs text-gray-500">
-            Tracked when contracts are added
-          </p>
-        </div>
+        <MetricCard
+          title="Total Sponsors"
+          value={String(sponsors.length)}
+          subtitle={`${activeCount} active partnerships`}
+          icon={Building2}
+          iconColor="bg-accent/10 text-accent-light ring-accent/20"
+        />
+        <MetricCard
+          title="Active Deals"
+          value={String(totalDeals)}
+          subtitle="Across all sponsors"
+          icon={Handshake}
+          iconColor="bg-purple-500/10 text-purple-400 ring-purple-500/20"
+        />
+        <MetricCard
+          title="Pipeline Value"
+          value={sponsors.length === 0 ? "—" : "$0"}
+          subtitle="Tracked when contracts are added"
+          icon={DollarSign}
+          iconColor="bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
+        />
       </div>
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-md flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input
+        <div className="max-w-md flex-1">
+          <Input
+            icon={<Search className="h-4 w-4" />}
             type="text"
             placeholder="Search by company, industry, or contact..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface-raised py-2.5 pl-10 pr-4 text-sm text-gray-200 placeholder:text-gray-600 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
           />
         </div>
         {canWrite && (
-          <button
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
-          >
+          <Button onClick={() => setModalOpen(true)}>
             <Plus className="h-4 w-4" />
             Add Sponsor
-          </button>
+          </Button>
         )}
       </div>
 
@@ -110,6 +89,6 @@ export function SponsorsPageClient({
       {canWrite && (
         <SponsorFormModal open={modalOpen} onClose={() => setModalOpen(false)} />
       )}
-    </>
+    </div>
   );
 }

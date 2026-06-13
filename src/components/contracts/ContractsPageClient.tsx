@@ -19,6 +19,9 @@ import {
 } from "./ContractSummaryCards";
 import { ContractTable } from "./ContractTable";
 import { ContractFormModal } from "./ContractFormModal";
+import { ContractDetailPanel } from "./ContractDetailPanel";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 type SortField = "value" | "startDate" | "endDate" | "status";
 type SortDir = "asc" | "desc";
@@ -48,6 +51,9 @@ export function ContractsPageClient({
   );
   const [sortField, setSortField] = useState<SortField>("startDate");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(
+    null
+  );
 
   const stats = getContractStats(contracts);
 
@@ -110,14 +116,13 @@ export function ContractsPageClient({
       />
 
       <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative max-w-md flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input
+        <div className="max-w-md flex-1">
+          <Input
+            icon={<Search className="h-4 w-4" />}
             type="text"
             placeholder="Search contracts, creators, or sponsors..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface-raised py-2.5 pl-10 pr-4 text-sm text-gray-200 placeholder:text-gray-600 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
           />
         </div>
 
@@ -160,13 +165,10 @@ export function ContractsPageClient({
           </select>
 
           {canWrite && (
-            <button
-              onClick={() => setModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
-            >
+            <Button onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
               New Contract
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -177,12 +179,24 @@ export function ContractsPageClient({
         {contracts.length} contracts
       </div>
 
-      <ContractTable
-        contracts={filtered}
-        creators={creators}
-        sponsors={sponsors}
-        canWrite={canWrite}
-      />
+      <div className="flex gap-0 lg:gap-6">
+        <div className="min-w-0 flex-1">
+          <ContractTable
+            contracts={filtered}
+            creators={creators}
+            sponsors={sponsors}
+            canWrite={canWrite}
+            selectedId={selectedContract?.id}
+            onSelect={setSelectedContract}
+          />
+        </div>
+        {selectedContract && (
+          <ContractDetailPanel
+            contract={selectedContract}
+            onClose={() => setSelectedContract(null)}
+          />
+        )}
+      </div>
 
       {canWrite && (
         <ContractFormModal
