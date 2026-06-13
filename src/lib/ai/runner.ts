@@ -4,6 +4,7 @@ import {
   summarizeContextForPrompt,
 } from "./context";
 import { isAiLlmLive } from "./config";
+import { getLlmFallbackNotice } from "./llm-errors";
 import { runOpenAiAssistant } from "./llm";
 import { buildAiPrompt } from "./prompts";
 import type { AiActionType, AiAssistantResult } from "./types";
@@ -15,6 +16,7 @@ export interface AiRunOutput {
   mode: AiRunMode;
   tokensUsed: number;
   model: string | null;
+  fallbackNotice?: string;
 }
 
 export async function runAssistantAction(
@@ -55,6 +57,7 @@ export async function runAssistantAction(
       mode: "demo",
       tokensUsed: 0,
       model: null,
+      fallbackNotice: getLlmFallbackNotice(error),
     };
   }
 }

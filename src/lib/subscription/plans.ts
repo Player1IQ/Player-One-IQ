@@ -28,7 +28,7 @@ export const planCatalog: Record<
     ],
   },
   agency: {
-    limits: { creators: 25, team_members: null, opportunities: null, campaigns: null, ai_requests: 100 },
+    limits: { creators: 25, team_members: null, opportunities: null, campaigns: null, ai_requests: 200 },
     features: [
       "creator_profiles",
       "team_management",
@@ -43,7 +43,7 @@ export const planCatalog: Record<
     ],
   },
   agency_pro: {
-    limits: { creators: null, team_members: null, opportunities: null, campaigns: null, ai_requests: null },
+    limits: { creators: null, team_members: null, opportunities: null, campaigns: null, ai_requests: 500 },
     features: [
       "creator_profiles",
       "team_management",
@@ -104,7 +104,7 @@ export const planHighlights: Record<
     bullets: [
       "Unlimited opportunities",
       "Advanced analytics",
-      "AI growth & sponsorship tools",
+      "50 AI requests/month included",
       "Revenue forecasting & monthly reports",
     ],
   },
@@ -113,7 +113,7 @@ export const planHighlights: Record<
     bullets: [
       "Up to 25 creators",
       "Team, contracts & sponsor CRM",
-      "AI performance & matching",
+      "200 AI requests/month included",
       "Contract summaries",
     ],
   },
@@ -121,9 +121,9 @@ export const planHighlights: Record<
     tagline: "Scale without limits",
     bullets: [
       "Unlimited creators & team",
+      "500 AI requests/month included",
       "AI forecasting & deal recommendations",
-      "White-label options",
-      "API access",
+      "White-label options & API access",
     ],
   },
   sponsor: {
@@ -138,8 +138,8 @@ export const planHighlights: Record<
     tagline: "Maximize campaign ROI",
     bullets: [
       "Unlimited campaigns",
-      "AI creator discovery",
-      "Campaign recommendations",
+      "75 AI requests/month included",
+      "AI creator discovery & campaign recommendations",
       "AI ROI forecasting & advanced reporting",
     ],
   },

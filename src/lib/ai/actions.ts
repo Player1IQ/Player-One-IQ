@@ -7,6 +7,7 @@ import {
   requireFeatureAccess,
   requireUsageWithinLimit,
 } from "@/lib/permissions";
+import { aiFeatureKeys } from "@/lib/subscription/features";
 import {
   fetchCreatorContentSnapshots,
   getAnalyzablePlatforms,
@@ -23,24 +24,73 @@ import {
   summarizeContextForPrompt,
 } from "./context";
 import { isAiLlmLive } from "./config";
+import { getLlmFallbackNotice, isRecoverableLlmError } from "./llm-errors";
 import { runOpenAiAssistant } from "./llm";
-import { buildContentAnalysisPrompt } from "./prompts";
+import { buildContentAnalysisPrompt, buildQuestionPrompt } from "./prompts";
 import { runAssistantAction } from "./runner";
-import type { AiActionType } from "./types";
-import type { FeatureKey } from "@/lib/subscription/types";
+import type { AiActionType, AiAssistantResult } from "./types";
+import type { AiAssistantType, FeatureKey } from "@/lib/subscription/types";
+
+const MAX_QUESTION_LENGTH = 2000;
 
 const actionFeatureRequirements: Record<AiActionType, FeatureKey[]> = {
   analyze_performance: ["ai_growth", "ai_creator_performance"],
-  growth_recommendations: ["ai_growth"],
-  content_strategy: ["ai_growth"],
-  sponsorship_targets: ["ai_sponsorship"],
-  match_creators: ["ai_sponsorship_matching", "ai_creator_discovery"],
-  match_sponsors: ["ai_sponsorship_matching"],
-  rank_opportunities: ["ai_sponsorship_matching", "ai_campaign_recommendations"],
+  growth_recommendations: ["ai_growth", "ai_creator_performance"],
+  content_strategy: ["ai_growth", "ai_creator_performance"],
+  sponsorship_targets: [
+    "ai_sponsorship",
+    "ai_sponsorship_matching",
+    "ai_deal_recommendations",
+  ],
+  match_creators: [
+    "ai_sponsorship",
+    "ai_sponsorship_matching",
+    "ai_creator_discovery",
+  ],
+  match_sponsors: ["ai_sponsorship", "ai_sponsorship_matching"],
+  rank_opportunities: [
+    "ai_sponsorship",
+    "ai_sponsorship_matching",
+    "ai_campaign_recommendations",
+  ],
   forecast_earnings: ["revenue_forecasting", "ai_forecasting"],
   forecast_campaigns: ["ai_roi_forecasting", "ai_forecasting"],
   predict_contract_value: ["ai_deal_recommendations", "revenue_forecasting"],
 };
+
+function routeQuestionAssistantType(question: string): AiAssistantType {
+  const q = question.toLowerCase();
+  if (
+    /\b(sponsor|sponsorship|match|partner|opportunity|brand|campaign)\b/.test(q)
+  ) {
+    return "sponsorship";
+  }
+  if (
+    /\b(revenue|forecast|earnings|contract|deal|roi|payment)\b/.test(q)
+  ) {
+    return "revenue";
+  }
+  return "growth";
+}
+
+function generateQuestionDemoResult(
+  question: string,
+  assistantType: AiAssistantType
+): AiAssistantResult {
+  return {
+    assistantType,
+    generatedAt: new Date().toISOString(),
+    insights: [
+      {
+        id: "ask-1",
+        title: "Demo response",
+        summary: `You asked: "${question.slice(0, 120)}${question.length > 120 ? "…" : ""}" — In demo mode, answers are generic. Enable live AI to get personalized insights from your workspace data.`,
+        confidence: 0.6,
+        category: "general",
+      },
+    ],
+  };
+}
 
 function currentPeriodMonth(): string {
   const now = new Date();
@@ -93,6 +143,7 @@ export async function runAiAction(
     success: true,
     result: run.result,
     mode: run.mode,
+    fallbackNotice: run.fallbackNotice,
   };
 }
 
@@ -100,7 +151,10 @@ export async function runCreatorContentAnalysis(
   creatorId: string,
   scope: ContentAnalysisScope = "all"
 ) {
-  const permError = await requireFeatureAccess("ai_growth", "AI content analysis");
+  const permError = await requireFeatureAccess(
+    ["ai_growth", "ai_creator_performance"],
+    "AI content analysis"
+  );
   if (permError) return permError;
 
   const aiRequestCount = await getUsageMetricCount("ai_requests");
@@ -146,6 +200,7 @@ export async function runCreatorContentAnalysis(
   let tokensUsed = 0;
   let result;
   let analyzedPlatforms: string[] = [];
+  let fallbackNotice: string | undefined;
 
   try {
     if (isAiLlmLive()) {
@@ -194,9 +249,19 @@ export async function runCreatorContentAnalysis(
       });
     }
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Content analysis failed.";
-    return { error: message };
+    if (isAiLlmLive() && isRecoverableLlmError(error)) {
+      analyzedPlatforms =
+        scope === "all" ? connectedPlatforms : [scope];
+      result = generateAssistantResult("content_strategy", {
+        creatorName: creator.name,
+      });
+      mode = "demo";
+      fallbackNotice = getLlmFallbackNotice(error);
+    } else {
+      const message =
+        error instanceof Error ? error.message : "Content analysis failed.";
+      return { error: message };
+    }
   }
 
   await supabase.from("ai_usage_tracking").insert({
@@ -219,5 +284,98 @@ export async function runCreatorContentAnalysis(
   revalidatePath("/ai");
   revalidatePath("/billing");
 
-  return { success: true, result, mode, platforms: analyzedPlatforms };
+  return {
+    success: true,
+    result,
+    mode,
+    platforms: analyzedPlatforms,
+    fallbackNotice,
+  };
+}
+
+export async function runAiQuestion(question: string) {
+  const trimmed = question.trim();
+  if (!trimmed) {
+    return { error: "Please enter a question." };
+  }
+  if (trimmed.length > MAX_QUESTION_LENGTH) {
+    return {
+      error: `Questions must be ${MAX_QUESTION_LENGTH} characters or fewer.`,
+    };
+  }
+
+  const permError = await requireFeatureAccess(aiFeatureKeys, "AI tools");
+  if (permError) return permError;
+
+  const aiRequestCount = await getUsageMetricCount("ai_requests");
+  const limitError = await requireUsageWithinLimit(
+    "ai_requests",
+    aiRequestCount,
+    "AI requests this month"
+  );
+  if (limitError) return limitError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const assistantType = routeQuestionAssistantType(trimmed);
+  let mode: "live" | "demo" = "demo";
+  let tokensUsed = 0;
+  let model: string | null = null;
+  let result: AiAssistantResult;
+  let fallbackNotice: string | undefined;
+
+  try {
+    if (isAiLlmLive()) {
+      const workspace = await buildAiWorkspaceContext();
+      const contextJson = summarizeContextForPrompt(workspace);
+      const prompt = buildQuestionPrompt(trimmed, contextJson);
+      const llm = await runOpenAiAssistant({
+        system: prompt.system,
+        user: prompt.user,
+        assistantType,
+      });
+      result = llm.result;
+      tokensUsed = llm.tokensUsed;
+      model = llm.model;
+      mode = "live";
+    } else {
+      result = generateQuestionDemoResult(trimmed, assistantType);
+    }
+  } catch (error) {
+    if (isAiLlmLive() && isRecoverableLlmError(error)) {
+      result = generateQuestionDemoResult(trimmed, assistantType);
+      mode = "demo";
+      fallbackNotice = getLlmFallbackNotice(error);
+    } else {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to answer your question.";
+      return { error: message };
+    }
+  }
+
+  await supabase.from("ai_usage_tracking").insert({
+    organization_id: organizationId,
+    assistant_type: assistantType,
+    action: "ask_question",
+    tokens_used: tokensUsed,
+    period_month: currentPeriodMonth(),
+    metadata: {
+      mode,
+      model,
+      questionLength: trimmed.length,
+    },
+  });
+
+  await incrementUsageMetric("ai_requests");
+
+  revalidatePath("/ai");
+  revalidatePath("/billing");
+
+  return { success: true, result, mode, fallbackNotice };
 }

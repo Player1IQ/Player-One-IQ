@@ -93,3 +93,21 @@ Workspace data:
 ${contextJson}`,
   };
 }
+
+export function buildQuestionPrompt(
+  question: string,
+  contextJson: string
+): { system: string; user: string } {
+  return {
+    system: `You are Player One IQ, an expert advisor for gaming creators, agencies, and sponsors.
+Answer the user's question using only the provided workspace data. If data is sparse, state assumptions clearly and lower confidence scores.
+Be concise, practical, and specific to gaming/esports/creator economy.
+${responseSchema}`,
+    user: `User question: ${question}
+
+Workspace data:
+${contextJson}
+
+Provide a direct, helpful answer as structured insights.`,
+  };
+}

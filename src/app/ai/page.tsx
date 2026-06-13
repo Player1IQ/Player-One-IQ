@@ -29,6 +29,10 @@ export default async function AiPage() {
       <AiDashboardClient
         features={Array.from(context.features)}
         usage={aiData.usage}
+        aiRequestCount={
+          context.usage.find((row) => row.metricKey === "ai_requests")?.count ?? 0
+        }
+        aiRequestLimit={context.limits.ai_requests ?? null}
       />
     </DashboardLayout>
   );
