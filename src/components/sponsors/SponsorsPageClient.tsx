@@ -40,21 +40,21 @@ export function SponsorsPageClient({
           value={String(sponsors.length)}
           subtitle={`${activeCount} active partnerships`}
           icon={Building2}
-          iconColor="bg-accent/10 text-accent-light ring-accent/20"
+          iconColor="text-accent-light"
         />
         <MetricCard
           title="Active Deals"
           value={String(totalDeals)}
           subtitle="Across all sponsors"
           icon={Handshake}
-          iconColor="bg-purple-500/10 text-purple-400 ring-purple-500/20"
+          iconColor="text-purple-400"
         />
         <MetricCard
           title="Pipeline Value"
           value={sponsors.length === 0 ? "—" : "$0"}
           subtitle="Tracked when contracts are added"
           icon={DollarSign}
-          iconColor="bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
+          iconColor="text-emerald-400"
         />
       </div>
 

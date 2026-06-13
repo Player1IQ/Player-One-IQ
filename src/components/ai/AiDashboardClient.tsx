@@ -110,7 +110,7 @@ export function AiDashboardClient({ features, usage }: AiDashboardClientProps) {
           value={String(totalRequests)}
           subtitle="This billing period"
           icon={Sparkles}
-          iconColor="bg-accent/10 text-accent-light ring-accent/20"
+          iconColor="text-accent-light"
         />
         {usage.map((row) => (
           <MetricCard
@@ -119,7 +119,7 @@ export function AiDashboardClient({ features, usage }: AiDashboardClientProps) {
             value={String(row.requestCount)}
             subtitle="requests this month"
             icon={assistantIcons[row.assistantType as keyof typeof assistantIcons] ?? Zap}
-            iconColor="bg-violet-500/10 text-violet-400 ring-violet-500/20"
+            iconColor="text-violet-400"
           />
         ))}
       </div>

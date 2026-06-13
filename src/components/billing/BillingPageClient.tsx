@@ -178,7 +178,7 @@ export function BillingPageClient({
           value={String(totalAiRequests)}
           subtitle="This billing period"
           icon={Sparkles}
-          iconColor="bg-accent/10 text-accent-light ring-accent/20"
+          iconColor="text-accent-light"
         />
         <Card className="sm:col-span-1 lg:col-span-2">
           <CardHeader>

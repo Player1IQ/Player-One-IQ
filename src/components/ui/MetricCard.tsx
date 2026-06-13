@@ -8,6 +8,7 @@ interface MetricCardProps {
   subtitle?: string;
   href?: string;
   icon: LucideIcon;
+  /** Icon color class only, e.g. `text-accent-light` */
   iconColor?: string;
   trend?: { value: string; positive?: boolean };
   highlight?: boolean;
@@ -20,7 +21,7 @@ export function MetricCard({
   subtitle,
   href,
   icon: Icon,
-  iconColor = "bg-accent/10 text-accent-light ring-accent/20",
+  iconColor = "text-accent-light",
   trend,
   highlight = false,
   className,
@@ -28,23 +29,20 @@ export function MetricCard({
   const content = (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl border bg-surface-raised/80 p-6 backdrop-blur-sm transition-all duration-300",
+        "group rounded-2xl border bg-surface-raised/80 p-5 backdrop-blur-sm transition-colors duration-200",
         highlight
-          ? "border-orange-500/30 hover:border-orange-500/50 hover:shadow-orange-500/10"
-          : "border-white/[0.06] hover:-translate-y-0.5 hover:border-accent/20 hover:shadow-card-hover",
+          ? "border-orange-500/25 hover:border-orange-500/40"
+          : "border-white/[0.06] hover:border-white/[0.1]",
         href && "cursor-pointer",
         className
       )}
     >
-      <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-accent/5 transition-transform duration-500 group-hover:scale-125" />
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.02] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-
-      <div className="relative flex items-start justify-between gap-4">
-        <div className="space-y-2 min-w-0">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 space-y-2">
           <p className="text-sm font-medium text-gray-400">{title}</p>
           <p className="text-3xl font-bold tracking-tight text-white">{value}</p>
           {subtitle && (
-            <p className="text-sm text-gray-500 truncate">{subtitle}</p>
+            <p className="truncate text-sm text-gray-500">{subtitle}</p>
           )}
           {trend && (
             <p
@@ -57,13 +55,8 @@ export function MetricCard({
             </p>
           )}
         </div>
-        <div
-          className={cn(
-            "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1",
-            iconColor
-          )}
-        >
-          <Icon className="h-5 w-5" />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.03]">
+          <Icon className={cn("h-4 w-4", iconColor)} />
         </div>
       </div>
     </div>

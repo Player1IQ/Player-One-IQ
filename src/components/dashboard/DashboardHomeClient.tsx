@@ -183,7 +183,7 @@ export function DashboardHomeClient({
           subtitle={monthlyRevenue.subtitle}
           href="/creators"
           icon={DollarSign}
-          iconColor="bg-accent/10 text-accent-light ring-accent/20"
+          iconColor="text-accent-light"
         />
         <MetricCard
           title="Sponsorship Value"
@@ -191,7 +191,7 @@ export function DashboardHomeClient({
           subtitle={`${contractStats.activeCount} active contracts`}
           href="/contracts"
           icon={FileText}
-          iconColor="bg-fuchsia-500/10 text-fuchsia-400 ring-fuchsia-500/20"
+          iconColor="text-fuchsia-400"
         />
         <MetricCard
           title="Active Opportunities"
@@ -199,7 +199,7 @@ export function DashboardHomeClient({
           subtitle={`${opportunityStats.applicationCount} applications`}
           href="/opportunities"
           icon={Briefcase}
-          iconColor="bg-blue-500/10 text-blue-400 ring-blue-500/20"
+          iconColor="text-blue-400"
         />
         <MetricCard
           title="Creator Growth"
@@ -207,7 +207,7 @@ export function DashboardHomeClient({
           subtitle={`${creators.length} on roster`}
           href="/creators"
           icon={Users}
-          iconColor="bg-violet-500/10 text-violet-400 ring-violet-500/20"
+          iconColor="text-violet-400"
         />
       </div>
 
@@ -219,7 +219,7 @@ export function DashboardHomeClient({
           subtitle={`${totalSponsors} in pipeline`}
           href="/sponsors"
           icon={Building2}
-          iconColor="bg-purple-500/10 text-purple-400 ring-purple-500/20"
+          iconColor="text-purple-400"
         />
         <MetricCard
           title="Expiring Soon"
@@ -227,7 +227,7 @@ export function DashboardHomeClient({
           subtitle="Contracts ending in 45 days"
           href="/contracts?filter=expiring"
           icon={AlertTriangle}
-          iconColor="bg-orange-500/10 text-orange-400 ring-orange-500/20"
+          iconColor="text-orange-400"
           highlight={contractStats.expiringSoonCount > 0}
         />
         <MetricCard
@@ -236,7 +236,7 @@ export function DashboardHomeClient({
           subtitle={`${conversationCount} conversations`}
           href="/messages"
           icon={MessageSquare}
-          iconColor="bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
+          iconColor="text-emerald-400"
         />
         <MetricCard
           title="Platform Revenue"
@@ -244,7 +244,7 @@ export function DashboardHomeClient({
           subtitle={`${monthlyRevenue.connectedAccountCount} connected accounts`}
           href="/creators"
           icon={TrendingUp}
-          iconColor="bg-cyan-500/10 text-cyan-400 ring-cyan-500/20"
+          iconColor="text-cyan-400"
         />
       </div>
 

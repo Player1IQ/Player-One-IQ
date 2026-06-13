@@ -190,7 +190,7 @@ export function CreatorProfile({
           value={String(activeContracts.length)}
           subtitle={`${contracts.length} total`}
           icon={DollarSign}
-          iconColor="bg-accent/10 text-accent-light ring-accent/20"
+          iconColor="text-accent-light"
         />
         <MetricCard
           title="Contract Value"
@@ -201,21 +201,21 @@ export function CreatorProfile({
           }
           subtitle="Total pipeline value"
           icon={TrendingUp}
-          iconColor="bg-emerald-500/10 text-emerald-400 ring-emerald-500/20"
+          iconColor="text-emerald-400"
         />
         <MetricCard
           title="Platforms"
           value={String(platformAccounts.length)}
           subtitle={`${connectedOAuthPlatforms.length} OAuth connected`}
           icon={Users}
-          iconColor="bg-violet-500/10 text-violet-400 ring-violet-500/20"
+          iconColor="text-violet-400"
         />
         <MetricCard
           title="Member Since"
           value={formatCreatorDate(creator.createdAt).split(",")[0] ?? "—"}
           subtitle="On your roster"
           icon={Award}
-          iconColor="bg-amber-500/10 text-amber-400 ring-amber-500/20"
+          iconColor="text-amber-400"
         />
       </div>
 
