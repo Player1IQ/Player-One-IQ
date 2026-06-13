@@ -13,6 +13,8 @@ interface HealthResponse {
   stripeConfigured: boolean;
   stripeWebhookConfigured: boolean;
   resendConfigured: boolean;
+  openAiConfigured?: boolean;
+  openAiHealth?: "unconfigured" | "available" | "quota_exceeded" | "unavailable";
   appUrl: string | null;
 }
 
@@ -65,6 +67,14 @@ export function DeployChecklistCard() {
       label: "Team invite email (Resend)",
       done: health?.resendConfigured ?? false,
     },
+    {
+      label: "OpenAI API key (optional)",
+      done: health?.openAiConfigured ?? false,
+    },
+    {
+      label: "OpenAI live AI / billing active",
+      done: health?.openAiHealth === "available",
+    },
   ];
 
   const oauthBase = health?.appUrl?.replace(/\/$/, "");
@@ -103,6 +113,12 @@ export function DeployChecklistCard() {
               </li>
             ))}
           </ul>
+          {health?.openAiConfigured && health.openAiHealth === "quota_exceeded" ? (
+            <p className="mt-3 text-xs text-amber-400/90">
+              OpenAI key is set but billing has no quota — AI shows sample
+              insights until billing is enabled at platform.openai.com.
+            </p>
+          ) : null}
         </>
       )}
 

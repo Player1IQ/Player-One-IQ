@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { isAiLlmConfigured } from "@/lib/ai/config";
+import { getOpenAiHealth } from "@/lib/ai/openai-health";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
   isPlatformOAuthFeatureEnabled,
@@ -11,6 +13,8 @@ import {
 
 export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? null;
+  const openAiConfigured = isAiLlmConfigured();
+  const openAiHealth = openAiConfigured ? await getOpenAiHealth() : "unconfigured";
 
   return NextResponse.json({
     ok: true,
@@ -24,6 +28,8 @@ export async function GET() {
     resendConfigured: Boolean(
       process.env.RESEND_API_KEY && process.env.INVITE_EMAIL_FROM
     ),
+    openAiConfigured,
+    openAiHealth,
     appUrl,
   });
 }
