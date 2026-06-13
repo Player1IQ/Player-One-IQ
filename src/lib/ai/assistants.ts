@@ -143,6 +143,92 @@ export function generateAssistantResult(
   };
 }
 
+export function generateContractSummaryDemo(contract: {
+  contractName: string;
+  creatorName: string;
+  sponsorName: string;
+  status: string;
+  contractValue: number;
+}): AiAssistantResult {
+  const generatedAt = new Date().toISOString();
+  const valueDisplay = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(contract.contractValue);
+
+  const statusInsights: Record<string, { title: string; summary: string }> = {
+    draft: {
+      title: "Finalize deal terms",
+      summary: `"${contract.contractName}" is still a draft. Confirm deliverables, payment schedule, and exclusivity with ${contract.sponsorName} before moving to negotiation.`,
+    },
+    negotiating: {
+      title: "Close the gap on value",
+      summary: `Deal is in negotiation at ${valueDisplay}. Align ${contract.creatorName}'s rate expectations with ${contract.sponsorName}'s budget and document agreed changes in the deal room.`,
+    },
+    active: {
+      title: "Track deliverable execution",
+      summary: `Active deal worth ${valueDisplay} between ${contract.creatorName} and ${contract.sponsorName}. Monitor deliverable deadlines and flag any overdue items to the sponsor early.`,
+    },
+    completed: {
+      title: "Capture learnings",
+      summary: `Completed "${contract.contractName}" (${valueDisplay}). Review what worked with ${contract.sponsorName} and note renewal timing for ${contract.creatorName}'s pipeline.`,
+    },
+    expired: {
+      title: "Renewal opportunity",
+      summary: `Contract expired without renewal. Reach out to ${contract.sponsorName} with updated metrics for ${contract.creatorName} to reopen discussions.`,
+    },
+    cancelled: {
+      title: "Post-mortem",
+      summary: `Cancelled deal — document why terms with ${contract.sponsorName} did not close and whether ${contract.creatorName} should be pitched to alternative sponsors in the same category.`,
+    },
+  };
+
+  const statusInsight =
+    statusInsights[contract.status] ?? statusInsights.draft;
+
+  return {
+    assistantType: "revenue",
+    generatedAt,
+    insights: [
+      {
+        id: "contract-1",
+        title: "Deal overview",
+        summary: `"${contract.contractName}" — ${contract.creatorName} × ${contract.sponsorName}, ${contract.status} at ${valueDisplay}.`,
+        confidence: 0.85,
+        category: "terms",
+      },
+      {
+        id: "contract-2",
+        title: statusInsight.title,
+        summary: statusInsight.summary,
+        confidence: 0.78,
+        category: "next_steps",
+      },
+      {
+        id: "contract-3",
+        title: "Deliverable risk check",
+        summary:
+          contract.status === "active"
+            ? "Review open deliverables for overdue items. Proactive sponsor updates reduce payment delays and strengthen renewal odds."
+            : "Define deliverables with due dates before activation so both parties share clear milestones.",
+        confidence: 0.72,
+        category: "deliverables",
+      },
+      {
+        id: "contract-4",
+        title: "Negotiation watch",
+        summary:
+          contract.status === "negotiating" || contract.status === "draft"
+            ? `Confirm payment terms, usage rights, and termination clauses with ${contract.sponsorName} before signing.`
+            : "Key terms appear settled — focus on execution quality and sponsor reporting cadence.",
+        confidence: 0.7,
+        category: "negotiation",
+      },
+    ],
+  };
+}
+
 export const assistantDefinitions = [
   {
     type: "growth" as const,

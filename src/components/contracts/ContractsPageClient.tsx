@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
+import type { DeliverablesSummary } from "@/lib/contract-deliverables";
 import {
   type Contract,
   type ContractStatus,
@@ -30,6 +31,7 @@ interface ContractsPageClientProps {
   contracts: Contract[];
   creators: Creator[];
   sponsors: Sponsor[];
+  deliverableSummaries?: Record<string, DeliverablesSummary>;
   canWrite?: boolean;
   initialSummaryFilter?: ContractSummaryFilter;
 }
@@ -38,6 +40,7 @@ export function ContractsPageClient({
   contracts,
   creators,
   sponsors,
+  deliverableSummaries = {},
   canWrite = true,
   initialSummaryFilter = null,
 }: ContractsPageClientProps) {
@@ -193,6 +196,9 @@ export function ContractsPageClient({
         {selectedContract && (
           <ContractDetailPanel
             contract={selectedContract}
+            deliverablesSummary={
+              deliverableSummaries[selectedContract.id] ?? null
+            }
             onClose={() => setSelectedContract(null)}
           />
         )}

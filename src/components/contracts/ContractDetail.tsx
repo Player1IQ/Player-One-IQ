@@ -19,18 +19,27 @@ import {
   type Contract,
   isContractOverdue,
   isExpiringSoon,
+  type ContractNegotiationContext,
 } from "@/lib/contracts";
 import { deleteContract } from "@/app/contracts/actions";
 import { ContractStatusBadge } from "./ContractStatusBadge";
 import { ContractFormModal } from "./ContractFormModal";
 import { ContractWorkflowActions } from "./ContractWorkflowActions";
+import { ContractNegotiationPanel } from "./ContractNegotiationPanel";
+import { ContractDeliverablesPanel } from "./ContractDeliverablesPanel";
+import { ContractAiSummaryPanel } from "./ContractAiSummaryPanel";
 import { DealRoomButton } from "@/components/messages/DealRoomButton";
+import type { ContractDeliverable } from "@/lib/contract-deliverables";
 
 interface ContractDetailProps {
   contract: Contract;
   creators: Creator[];
   sponsors: Sponsor[];
+  negotiationContext: ContractNegotiationContext | null;
+  deliverables: ContractDeliverable[];
   canWrite?: boolean;
+  canUseAi?: boolean;
+  aiMode?: "live" | "demo";
 }
 
 function Section({
@@ -57,7 +66,11 @@ export function ContractDetail({
   contract,
   creators,
   sponsors,
+  negotiationContext,
+  deliverables,
   canWrite = true,
+  canUseAi = false,
+  aiMode = "demo",
 }: ContractDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -230,63 +243,78 @@ export function ContractDetail({
 
         <Section
           title="Contract Workflow"
-          description="Advance this contract through your deal pipeline"
+          description="Set deal value below, then advance when terms are agreed"
         >
-          <ContractWorkflowActions contract={contract} canWrite={canWrite} />
+          <ContractNegotiationPanel
+            contract={contract}
+            negotiationContext={negotiationContext}
+            canWrite={canWrite}
+          />
+          <div className="mt-5">
+            <ContractWorkflowActions contract={contract} canWrite={canWrite} />
+          </div>
         </Section>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Section title="Contract Information">
-            <dl className="space-y-4">
-              <div className="flex justify-between border-b border-border-subtle pb-3">
-                <dt className="text-sm text-gray-500">Creator</dt>
-                <dd>
-                  <Link
-                    href={`/creators/${contract.creatorId}`}
-                    className="text-sm font-medium text-accent-light hover:text-white"
-                  >
-                    {contract.creatorName}
-                  </Link>
-                </dd>
-              </div>
-              <div className="flex justify-between border-b border-border-subtle pb-3">
-                <dt className="text-sm text-gray-500">Sponsor</dt>
-                <dd>
-                  <Link
-                    href={`/sponsors/${contract.sponsorId}`}
-                    className="text-sm font-medium text-accent-light hover:text-white"
-                  >
-                    {contract.sponsorName}
-                  </Link>
-                </dd>
-              </div>
-              <div className="flex justify-between border-b border-border-subtle pb-3">
-                <dt className="text-sm text-gray-500">Contract Value</dt>
-                <dd className="text-sm font-semibold text-white">
-                  {contract.valueDisplay}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-sm text-gray-500">Status</dt>
-                <dd>
-                  <ContractStatusBadge status={contract.status} />
-                </dd>
-              </div>
-            </dl>
-          </Section>
+        <Section
+          title="AI Contract Summary"
+          description="Deal terms, deliverables, risks, and next steps"
+        >
+          <ContractAiSummaryPanel
+            contractId={contract.id}
+            contractName={contract.contractName}
+            creatorName={contract.creatorName}
+            sponsorName={contract.sponsorName}
+            status={contract.status}
+            contractValue={contract.contractValue}
+            canUseAi={canUseAi}
+            aiMode={aiMode}
+          />
+        </Section>
 
-          <Section title="Deliverables">
-            {contract.deliverables ? (
-              <div className="rounded-lg border border-border-subtle bg-surface px-4 py-4">
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-300">
-                  {contract.deliverables}
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">No deliverables listed.</p>
-            )}
-          </Section>
-        </div>
+        <Section title="Contract Information">
+          <dl className="space-y-4">
+            <div className="flex justify-between border-b border-border-subtle pb-3">
+              <dt className="text-sm text-gray-500">Creator</dt>
+              <dd>
+                <Link
+                  href={`/creators/${contract.creatorId}`}
+                  className="text-sm font-medium text-accent-light hover:text-white"
+                >
+                  {contract.creatorName}
+                </Link>
+              </dd>
+            </div>
+            <div className="flex justify-between border-b border-border-subtle pb-3">
+              <dt className="text-sm text-gray-500">Sponsor</dt>
+              <dd>
+                <Link
+                  href={`/sponsors/${contract.sponsorId}`}
+                  className="text-sm font-medium text-accent-light hover:text-white"
+                >
+                  {contract.sponsorName}
+                </Link>
+              </dd>
+            </div>
+            <div className="flex justify-between border-b border-border-subtle pb-3">
+              <dt className="text-sm text-gray-500">Contract Value</dt>
+              <dd className="text-sm font-semibold text-white">
+                {contract.valueDisplay}
+              </dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-sm text-gray-500">Status</dt>
+              <dd>
+                <ContractStatusBadge status={contract.status} />
+              </dd>
+            </div>
+          </dl>
+        </Section>
+
+        <ContractDeliverablesPanel
+          contractId={contract.id}
+          deliverables={deliverables}
+          canWrite={canWrite}
+        />
 
         {contract.notes && (
           <Section

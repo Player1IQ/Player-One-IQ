@@ -17,8 +17,10 @@ import { getConnectedOAuthPlatformsForCreator } from "@/lib/platform-oauth/accou
 import { getUsageMetricCount, incrementUsageMetric } from "@/lib/subscription/usage";
 import {
   generateAssistantResult,
+  generateContractSummaryDemo,
   getAssistantForAction,
 } from "./assistants";
+import { buildContractSummaryContext } from "./contract-context";
 import {
   buildAiWorkspaceContext,
   summarizeContextForPrompt,
@@ -26,7 +28,7 @@ import {
 import { isAiLlmLive } from "./config";
 import { getLlmFallbackNotice, isRecoverableLlmError } from "./llm-errors";
 import { runOpenAiAssistant } from "./llm";
-import { buildContentAnalysisPrompt, buildQuestionPrompt } from "./prompts";
+import { buildContentAnalysisPrompt, buildContractSummaryPrompt, buildQuestionPrompt } from "./prompts";
 import { runAssistantAction } from "./runner";
 import type { AiActionType, AiAssistantResult } from "./types";
 import type { AiAssistantType, FeatureKey } from "@/lib/subscription/types";
@@ -378,4 +380,100 @@ export async function runAiQuestion(question: string) {
   revalidatePath("/billing");
 
   return { success: true, result, mode, fallbackNotice };
+}
+
+export async function runContractSummary(contractId: string) {
+  const permError = await requireFeatureAccess(
+    ["ai_contract_summaries"],
+    "AI contract summaries"
+  );
+  if (permError) return permError;
+
+  const aiRequestCount = await getUsageMetricCount("ai_requests");
+  const limitError = await requireUsageWithinLimit(
+    "ai_requests",
+    aiRequestCount,
+    "AI requests this month"
+  );
+  if (limitError) return limitError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const contractContext = await buildContractSummaryContext(contractId);
+  if (!contractContext) return { error: "Contract not found." };
+
+  const { contract } = contractContext;
+  let mode: "live" | "demo" = "demo";
+  let tokensUsed = 0;
+  let result;
+  let fallbackNotice: string | undefined;
+
+  try {
+    if (isAiLlmLive()) {
+      const contextJson = JSON.stringify(contractContext, null, 2);
+      const prompt = buildContractSummaryPrompt(contextJson);
+      const llm = await runOpenAiAssistant({
+        system: prompt.system,
+        user: prompt.user,
+        assistantType: "revenue",
+      });
+      result = llm.result;
+      tokensUsed = llm.tokensUsed;
+      mode = "live";
+    } else {
+      result = generateContractSummaryDemo({
+        contractName: contract.name,
+        creatorName: contract.creatorName,
+        sponsorName: contract.sponsorName,
+        status: contract.status,
+        contractValue: contract.value,
+      });
+    }
+  } catch (error) {
+    if (isAiLlmLive() && isRecoverableLlmError(error)) {
+      result = generateContractSummaryDemo({
+        contractName: contract.name,
+        creatorName: contract.creatorName,
+        sponsorName: contract.sponsorName,
+        status: contract.status,
+        contractValue: contract.value,
+      });
+      mode = "demo";
+      fallbackNotice = getLlmFallbackNotice(error);
+    } else {
+      const message =
+        error instanceof Error ? error.message : "Contract summary failed.";
+      return { error: message };
+    }
+  }
+
+  await supabase.from("ai_usage_tracking").insert({
+    organization_id: organizationId,
+    assistant_type: "revenue",
+    action: "summarize_contract",
+    tokens_used: tokensUsed,
+    period_month: currentPeriodMonth(),
+    metadata: {
+      mode,
+      contractId,
+      contractStatus: contract.status,
+    },
+  });
+
+  await incrementUsageMetric("ai_requests");
+
+  revalidatePath(`/contracts/${contractId}`);
+  revalidatePath("/ai");
+  revalidatePath("/billing");
+
+  return {
+    success: true,
+    result,
+    mode,
+    fallbackNotice,
+  };
 }

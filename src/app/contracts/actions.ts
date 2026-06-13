@@ -10,7 +10,13 @@ import {
   type ContractStatus,
   contractStatusLabels,
   canTransitionContractStatus,
+  formatCurrency,
 } from "@/lib/contracts";
+import {
+  getOrCreateRelatedConversation,
+  sendMessage,
+} from "@/app/messages/actions";
+import { buildContractNegotiationMessage } from "@/lib/contracts/negotiation-message";
 import type { ActivityAction } from "@/lib/activity/queries";
 
 async function logActivity(
@@ -285,6 +291,120 @@ export async function updateContractStatus(
   revalidatePath(`/creators`);
   revalidatePath(`/sponsors`);
   return { success: true };
+}
+
+export async function updateContractDealTerms(
+  id: string,
+  contractValue: number,
+  negotiationNote?: string
+) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  if (!Number.isFinite(contractValue) || contractValue < 0) {
+    return { error: "Contract value must be zero or greater." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("contracts")
+    .select(
+      `contract_name, contract_status, contract_value, notes,
+      creators ( name ),
+      sponsors ( company_name )`
+    )
+    .eq("id", id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (fetchError || !existing) {
+    return { error: "Contract not found." };
+  }
+
+  const status = existing.contract_status as ContractStatus;
+  if (status !== "draft" && status !== "negotiating") {
+    return {
+      error: "Deal terms can only be updated while the contract is draft or negotiating.",
+    };
+  }
+
+  const previousValue = Number(existing.contract_value) || 0;
+  const trimmedNote = negotiationNote?.trim() ?? "";
+  let notes = existing.notes ?? "";
+
+  if (trimmedNote) {
+    const stamp = new Date().toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    const valueLine =
+      previousValue !== contractValue
+        ? `Value: ${formatCurrency(previousValue)} → ${formatCurrency(contractValue)}`
+        : `Value: ${formatCurrency(contractValue)}`;
+    notes = [notes, `[${stamp}] Negotiation\n${valueLine}\n${trimmedNote}`]
+      .filter(Boolean)
+      .join("\n\n");
+  }
+
+  const { error: updateError } = await supabase
+    .from("contracts")
+    .update({
+      contract_value: contractValue,
+      notes: notes || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("organization_id", organizationId);
+
+  if (updateError) return { error: updateError.message };
+
+  await logActivity(supabase, organizationId, {
+    entityType: "contract",
+    entityId: id,
+    action: "updated",
+    summary: "Contract deal terms updated",
+    detail: `${existing.contract_name}: ${formatCurrency(previousValue)} → ${formatCurrency(contractValue)}`,
+    metadata: { previousValue, contractValue },
+  });
+
+  let dealRoomId: string | undefined;
+  const creator = Array.isArray(existing.creators)
+    ? existing.creators[0]
+    : existing.creators;
+  const sponsor = Array.isArray(existing.sponsors)
+    ? existing.sponsors[0]
+    : existing.sponsors;
+
+  const room = await getOrCreateRelatedConversation("contract", id);
+  if (!("error" in room) && room.id) {
+    const message = buildContractNegotiationMessage({
+      contractName: existing.contract_name,
+      sponsorName: sponsor?.company_name ?? "Sponsor",
+      creatorName: creator?.name ?? "Creator",
+      previousValue,
+      contractValue,
+      status,
+      negotiationNote: trimmedNote || undefined,
+    });
+    const sent = await sendMessage(room.id, message);
+    if (!("error" in sent)) {
+      dealRoomId = room.id;
+    }
+  }
+
+  revalidatePath("/contracts");
+  revalidatePath(`/contracts/${id}`);
+  revalidatePath("/messages");
+  revalidatePath("/");
+  return { success: true, dealRoomId };
 }
 
 export async function deleteContract(id: string) {

@@ -70,6 +70,27 @@ export async function getOrganizationRevenueEntries(
   return data.map(mapRevenueEntryRow);
 }
 
+export async function getOrganizationRevenueEntriesForMonths(
+  monthKeys: string[]
+): Promise<CreatorRevenueEntry[]> {
+  if (monthKeys.length === 0) return [];
+
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const { data, error } = await supabase
+    .from("creator_revenue_entries")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .in("period_month", monthKeys);
+
+  if (error || !data) return [];
+  return data.map(mapRevenueEntryRow);
+}
+
 export async function getConnectedPlatformAccountCount(): Promise<number> {
   const supabase = await createClient();
   if (!supabase) return 0;

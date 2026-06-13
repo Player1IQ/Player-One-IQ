@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { mapContractRow, type Contract, type ContractRow } from "@/lib/contracts";
+import {
+  formatCurrency,
+  mapContractRow,
+  type Contract,
+  type ContractNegotiationContext,
+  type ContractRow,
+} from "@/lib/contracts";
 
 const contractSelect = `
   *,
@@ -41,4 +47,49 @@ export async function getContractById(id: string): Promise<Contract | null> {
 
   if (error || !data) return null;
   return mapContractRow(data as ContractRow);
+}
+
+export async function getContractNegotiationContext(
+  contract: Contract
+): Promise<ContractNegotiationContext | null> {
+  if (!contract.sourceApplicationId) return null;
+
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return null;
+
+  const { data } = await supabase
+    .from("opportunity_applications")
+    .select(
+      `proposed_rate, opportunities ( title, budget, organization_id )`
+    )
+    .eq("id", contract.sourceApplicationId)
+    .maybeSingle();
+
+  if (!data) return null;
+
+  const opportunity = Array.isArray(data.opportunities)
+    ? data.opportunities[0]
+    : data.opportunities;
+
+  if (!opportunity || opportunity.organization_id !== organizationId) {
+    return null;
+  }
+
+  const proposedRate =
+    data.proposed_rate !== null ? Number(data.proposed_rate) : null;
+  const opportunityBudget =
+    opportunity.budget !== null ? Number(opportunity.budget) : null;
+
+  return {
+    proposedRate,
+    proposedRateDisplay:
+      proposedRate !== null ? formatCurrency(proposedRate) : "—",
+    opportunityBudget,
+    opportunityBudgetDisplay:
+      opportunityBudget !== null ? formatCurrency(opportunityBudget) : "—",
+    opportunityTitle: opportunity.title ?? null,
+  };
 }

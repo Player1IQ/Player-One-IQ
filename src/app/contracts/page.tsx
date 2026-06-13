@@ -2,6 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { ContractsPageClient } from "@/components/contracts/ContractsPageClient";
 import { getContracts } from "@/lib/contracts/queries";
+import { getDeliverablesSummariesForContracts } from "@/lib/contract-deliverables/queries";
 import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
 import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
@@ -23,6 +24,10 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
     getCurrentUserRole(),
   ]);
 
+  const deliverableSummaries = await getDeliverablesSummariesForContracts(
+    contracts.map((c) => c.id)
+  );
+
   return (
     <DashboardLayout
       title="Contracts"
@@ -33,6 +38,7 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
           contracts={contracts}
           creators={creators}
           sponsors={sponsors}
+          deliverableSummaries={deliverableSummaries}
           canWrite={canWriteData(role)}
           initialSummaryFilter={initialSummaryFilter}
         />

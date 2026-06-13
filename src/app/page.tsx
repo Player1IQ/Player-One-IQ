@@ -17,11 +17,20 @@ import {
 } from "@/lib/contracts";
 import {
   getConnectedPlatformAccountCount,
-  getOrganizationRevenueEntries,
+  getOrganizationRevenueEntriesForMonths,
 } from "@/lib/creator-revenue/queries";
+import { getCurrentPeriodMonth } from "@/lib/creator-revenue";
 import { getDashboardRevenueSummary } from "@/lib/revenue/summary";
+import {
+  buildCreatorGrowthData,
+  buildRevenueTrendData,
+  getLastNMonthKeys,
+  groupRevenueEntriesByMonth,
+} from "@/lib/dashboard/charts";
 
 export default async function DashboardPage() {
+  const monthKeys = getLastNMonthKeys(6).map((month) => month.key);
+
   const [
     creators,
     sponsors,
@@ -40,7 +49,7 @@ export default async function DashboardPage() {
     getConversations(),
     getUnreadMessageCount(),
     getRecentActivity(10),
-    getOrganizationRevenueEntries(),
+    getOrganizationRevenueEntriesForMonths(monthKeys),
     getConnectedPlatformAccountCount(),
   ]);
 
@@ -48,11 +57,20 @@ export default async function DashboardPage() {
   const activeCreators = creators.filter((c) => c.status === "active");
   const activeSponsors = sponsors.filter((s) => s.status === "active");
   const contractStats = getContractStats(contracts);
+  const currentMonth = getCurrentPeriodMonth();
+  const currentMonthEntries = platformRevenueEntries.filter(
+    (entry) => entry.periodMonth === currentMonth
+  );
   const monthlyRevenue = getDashboardRevenueSummary(
     contracts,
-    platformRevenueEntries,
+    currentMonthEntries,
     connectedAccountCount
   );
+  const entriesByMonth = groupRevenueEntriesByMonth(platformRevenueEntries);
+  const revenueTrend = buildRevenueTrendData(contracts, entriesByMonth).map(
+    ({ month, contract, platform }) => ({ month, contract, platform })
+  );
+  const creatorGrowth = buildCreatorGrowthData(creators);
   const upcomingExpirations = getUpcomingExpirations(contracts);
   const overdueContracts = getOverdueContracts(contracts);
 
@@ -74,6 +92,8 @@ export default async function DashboardPage() {
         activity={activity}
         upcomingExpirations={upcomingExpirations}
         overdueContracts={overdueContracts}
+        revenueTrend={revenueTrend}
+        creatorGrowth={creatorGrowth}
       />
     </DashboardLayout>
   );

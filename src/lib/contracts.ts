@@ -111,6 +111,14 @@ export interface ContractInput {
   notes: string;
 }
 
+export interface ContractNegotiationContext {
+  proposedRate: number | null;
+  proposedRateDisplay: string;
+  opportunityBudget: number | null;
+  opportunityBudgetDisplay: string;
+  opportunityTitle: string | null;
+}
+
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",

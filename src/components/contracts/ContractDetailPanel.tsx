@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { X, Calendar, DollarSign, FileText, User, Building2 } from "lucide-react";
 import type { Contract } from "@/lib/contracts";
+import type { DeliverablesSummary } from "@/lib/contract-deliverables";
 import { ContractStatusBadge } from "./ContractStatusBadge";
+import { ContractDeliverablesSummary } from "./ContractDeliverablesPanel";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -15,20 +17,38 @@ import {
 
 interface ContractDetailPanelProps {
   contract: Contract | null;
+  deliverablesSummary?: DeliverablesSummary | null;
   onClose: () => void;
 }
 
 export function ContractDetailPanel({
   contract,
+  deliverablesSummary,
   onClose,
 }: ContractDetailPanelProps) {
   if (!contract) return null;
 
   const overdue = isContractOverdue(contract);
   const expiring = isExpiringSoon(contract);
-  const deliverableLines = contract.deliverables
-    ? contract.deliverables.split("\n").filter(Boolean)
-    : [];
+  const textDeliverableCount = contract.deliverables
+    ? contract.deliverables.split("\n").filter(Boolean).length
+    : 0;
+  const summary =
+    deliverablesSummary && deliverablesSummary.total > 0
+      ? deliverablesSummary
+      : textDeliverableCount > 0
+        ? {
+            total: textDeliverableCount,
+            completed: 0,
+            progressPercent: 0,
+            nextDue: null,
+          }
+        : null;
+  const nextDueTitle =
+    summary?.nextDue?.title ??
+    (textDeliverableCount > 0 && !summary?.nextDue
+      ? contract.deliverables!.split("\n").find((l) => l.trim())?.trim()
+      : null);
 
   return (
     <div className="fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-white/[0.06] bg-surface-raised/95 shadow-2xl backdrop-blur-xl animate-slide-up lg:static lg:max-w-sm lg:animate-none">
@@ -127,21 +147,14 @@ export function ContractDetailPanel({
             </CardTitle>
           </CardHeader>
           <CardContent className="!pt-0">
-            {deliverableLines.length === 0 ? (
-              <p className="text-sm text-gray-500">No deliverables defined yet.</p>
-            ) : (
-              <ul className="space-y-2">
-                {deliverableLines.map((line, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-gray-300"
-                  >
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                    {line}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ContractDeliverablesSummary
+              completed={summary?.completed ?? 0}
+              total={summary?.total ?? 0}
+              progressPercent={summary?.progressPercent ?? 0}
+              nextDueTitle={nextDueTitle}
+              nextDueDateDisplay={summary?.nextDue?.dueDateDisplay}
+              nextDueOverdue={summary?.nextDue?.isOverdue}
+            />
           </CardContent>
         </Card>
 

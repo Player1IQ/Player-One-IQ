@@ -1,28 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { fetchUnreadMessageCount } from "@/app/messages/actions";
-import { useUnreadRealtime } from "@/hooks/useMessageRealtime";
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
 
 export function UnreadBadge() {
-  const [count, setCount] = useState(0);
-
-  const refresh = useCallback(async () => {
-    try {
-      const next = await fetchUnreadMessageCount();
-      setCount(next);
-    } catch {
-      // Ignore badge refresh failures (e.g. signed out, network blip).
-    }
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  useUnreadRealtime(() => {
-    void refresh();
-  });
+  const { count } = useUnreadMessageCount();
 
   if (count <= 0) return null;
 

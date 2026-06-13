@@ -88,7 +88,7 @@ export async function createOpportunity(input: OpportunityInput) {
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess(
-    "create_opportunities",
+    ["create_opportunities", "opportunity_management"],
     "Create opportunities"
   );
   if (featureError) return featureError;

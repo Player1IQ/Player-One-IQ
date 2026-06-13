@@ -11,9 +11,6 @@ import {
   Pencil,
   Trash2,
   XCircle,
-  Check,
-  X,
-  Eye,
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Opportunity, OpportunityApplication } from "@/lib/opportunities";
@@ -21,9 +18,6 @@ import type { Sponsor } from "@/lib/sponsors";
 import {
   closeOpportunity,
   deleteOpportunity,
-  acceptApplication,
-  rejectApplication,
-  markApplicationUnderReview,
 } from "@/app/opportunities/actions";
 import { OpportunityStatusBadge } from "./OpportunityStatusBadge";
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
@@ -33,6 +27,7 @@ import { PlatformBadge } from "@/components/creators/PlatformBadge";
 import { IndustryBadge } from "@/components/sponsors/IndustryBadge";
 import { DealRoomButton } from "@/components/messages/DealRoomButton";
 import { ApplicationContractLink } from "./ApplicationContractLink";
+import { ApplicationReviewActions } from "./ApplicationReviewActions";
 
 interface OpportunityDetailProps {
   opportunity: Opportunity;
@@ -84,31 +79,6 @@ export function OpportunityDetail({
       return;
     }
     router.push("/opportunities");
-    router.refresh();
-  }
-
-  async function handleApplicationAction(
-    id: string,
-    action: "accept" | "reject" | "review"
-  ) {
-    const result =
-      action === "accept"
-        ? await acceptApplication(id)
-        : action === "reject"
-          ? await rejectApplication(id)
-          : await markApplicationUnderReview(id);
-
-    if ("error" in result && result.error) {
-      alert(result.error);
-      return;
-    }
-
-    if (action === "accept" && "contractId" in result && result.contractId) {
-      router.push(`/contracts/${result.contractId}`);
-      router.refresh();
-      return;
-    }
-
     router.refresh();
   }
 
@@ -265,34 +235,14 @@ export function OpportunityDetail({
                   {app.coverMessage && (
                     <p className="mt-3 text-sm text-gray-400">{app.coverMessage}</p>
                   )}
-                  {canManage &&
-                    (app.status === "applied" || app.status === "under_review") && (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {app.status === "applied" && (
-                          <button
-                            onClick={() => handleApplicationAction(app.id, "review")}
-                            className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs text-gray-300"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            Under Review
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleApplicationAction(app.id, "accept")}
-                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-400"
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleApplicationAction(app.id, "reject")}
-                          className="inline-flex items-center gap-1 rounded-lg bg-red-500/10 px-2.5 py-1 text-xs text-red-400"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                          Reject
-                        </button>
-                      </div>
-                    )}
+                  {canManage ? (
+                    <ApplicationReviewActions
+                      applicationId={app.id}
+                      status={app.status}
+                      size="sm"
+                      onError={(message) => alert(message)}
+                    />
+                  ) : null}
                 </li>
               ))}
             </ul>

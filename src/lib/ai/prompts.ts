@@ -94,6 +94,27 @@ ${contextJson}`,
   };
 }
 
+export function buildContractSummaryPrompt(
+  contractContextJson: string
+): { system: string; user: string } {
+  return {
+    system: `You are Player One IQ, a contract analyst for gaming creator agencies.
+Summarize the deal: key terms, deliverable status, risks, recommended next actions, and negotiation state.
+Use only the provided contract data. Lower confidence when data is sparse or the deal is early-stage.
+Be concise, practical, and specific to gaming/esports sponsorship deals.
+Respond with JSON only:
+{
+  "insights": [
+    { "id": "string", "title": "string", "summary": "string", "confidence": 0.0-1.0, "category": "terms|deliverables|risk|negotiation|next_steps" }
+  ]
+}`,
+    user: `Contract data:
+${contractContextJson}
+
+Provide 3–5 insights covering deal terms, deliverable progress, risks, negotiation gaps, and clear next steps for the agency team.`,
+  };
+}
+
 export function buildQuestionPrompt(
   question: string,
   contextJson: string

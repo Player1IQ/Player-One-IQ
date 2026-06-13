@@ -195,6 +195,19 @@ export function mapApplicationRow(
   };
 }
 
+export function getApplicationStats(applications: OpportunityApplication[]) {
+  return {
+    total: applications.length,
+    applied: applications.filter((a) => a.status === "applied").length,
+    underReview: applications.filter((a) => a.status === "under_review").length,
+    accepted: applications.filter((a) => a.status === "accepted").length,
+    rejected: applications.filter((a) => a.status === "rejected").length,
+    needsAction: applications.filter(
+      (a) => a.status === "applied" || a.status === "under_review"
+    ).length,
+  };
+}
+
 export function getOpportunityStats(opportunities: Opportunity[]) {
   return {
     openCount: opportunities.filter((o) => o.status === "open").length,

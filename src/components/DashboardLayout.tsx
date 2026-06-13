@@ -1,5 +1,6 @@
 import { DashboardShell } from "./DashboardShell";
 import { SupabaseConfigBanner } from "@/components/auth/SupabaseConfigBanner";
+import { MessageNotificationBell } from "@/components/messages/MessageNotificationBell";
 import { MessageNotifications } from "@/components/messages/MessageNotifications";
 import { PendingInviteBannerWrapper } from "@/components/team/PendingInviteBannerWrapper";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
@@ -41,6 +42,8 @@ export async function DashboardLayout({
       getOrganizationForUser(),
     ]);
 
+  const messagingEnabled = subscriptionContext.features.has("messaging");
+
   const header = (
     <header className="sticky top-0 z-20 hidden border-b border-white/[0.06] bg-surface/80 backdrop-blur-xl lg:block">
       <div className="flex h-16 items-center justify-between px-8">
@@ -53,6 +56,7 @@ export async function DashboardLayout({
           )}
         </div>
         <div className="flex items-center gap-3">
+          <MessageNotificationBell messagingEnabled={messagingEnabled} />
           <GlobalSearch items={searchIndex} />
           {headerActions}
           <div className="hidden items-center gap-2 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs text-gray-400 xl:flex">
@@ -80,6 +84,7 @@ export async function DashboardLayout({
     <>
       <DashboardShell
         enabledFeatures={Array.from(subscriptionContext.features)}
+        messagingEnabled={messagingEnabled}
         organizations={organizations}
         activeOrganizationId={activeOrganization?.id ?? null}
         header={header}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { MessageNotificationBell } from "@/components/messages/MessageNotificationBell";
 import { Sidebar } from "./Sidebar";
 import type { FeatureKey } from "@/lib/subscription/types";
 import type { UserOrganization } from "@/lib/organization/queries";
@@ -10,6 +11,7 @@ interface DashboardShellProps {
   children: React.ReactNode;
   header: React.ReactNode;
   enabledFeatures?: FeatureKey[];
+  messagingEnabled?: boolean;
   organizations?: UserOrganization[];
   activeOrganizationId?: string | null;
 }
@@ -18,6 +20,7 @@ export function DashboardShell({
   children,
   header,
   enabledFeatures,
+  messagingEnabled = true,
   organizations,
   activeOrganizationId,
 }: DashboardShellProps) {
@@ -62,6 +65,10 @@ export function DashboardShell({
             )}
           </button>
           <span className="text-sm font-semibold text-white">Player One IQ</span>
+          <MessageNotificationBell
+            messagingEnabled={messagingEnabled}
+            className="ml-auto"
+          />
         </div>
 
         {header}

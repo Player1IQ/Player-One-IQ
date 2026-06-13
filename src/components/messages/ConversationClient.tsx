@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, Send } from "lucide-react";
 import type { Conversation, Message } from "@/lib/messages";
 import { ConversationTypeBadge } from "./ConversationTypeBadge";
 import { markConversationRead, sendMessage } from "@/app/messages/actions";
+import { MESSAGES_UNREAD_CHANGED_EVENT } from "@/hooks/useUnreadMessageCount";
 import { useMessageRealtime } from "@/hooks/useMessageRealtime";
 
 interface ConversationClientProps {
@@ -38,7 +39,11 @@ export function ConversationClient({
   }, [initialMessages]);
 
   useEffect(() => {
-    void markConversationRead(conversation.id);
+    void markConversationRead(conversation.id).then((result) => {
+      if ("success" in result) {
+        window.dispatchEvent(new CustomEvent(MESSAGES_UNREAD_CHANGED_EVENT));
+      }
+    });
   }, [conversation.id]);
 
   useEffect(() => {

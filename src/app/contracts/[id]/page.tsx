@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ContractDetail } from "@/components/contracts/ContractDetail";
-import { getContractById } from "@/lib/contracts/queries";
+import { isAiLlmLive } from "@/lib/ai/config";
+import { getContractById, getContractNegotiationContext } from "@/lib/contracts/queries";
+import { getDeliverablesForContract } from "@/lib/contract-deliverables/queries";
 import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
 import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import { getSubscriptionContext } from "@/lib/subscription/queries";
+import { hasFeature } from "@/lib/subscription/features";
 
 interface ContractDetailPageProps {
   params: Promise<{ id: string }>;
@@ -14,16 +18,21 @@ export default async function ContractDetailPage({
   params,
 }: ContractDetailPageProps) {
   const { id } = await params;
-  const [contract, creators, sponsors, role] = await Promise.all([
-    getContractById(id),
-    getCreators(),
-    getSponsors(),
-    getCurrentUserRole(),
-  ]);
+  const [contract, creators, sponsors, role, deliverables, subscription] =
+    await Promise.all([
+      getContractById(id),
+      getCreators(),
+      getSponsors(),
+      getCurrentUserRole(),
+      getDeliverablesForContract(id),
+      getSubscriptionContext(),
+    ]);
 
   if (!contract) {
     notFound();
   }
+
+  const negotiationContext = await getContractNegotiationContext(contract);
 
   return (
     <DashboardLayout
@@ -34,7 +43,11 @@ export default async function ContractDetailPage({
         contract={contract}
         creators={creators}
         sponsors={sponsors}
+        negotiationContext={negotiationContext}
+        deliverables={deliverables}
         canWrite={canWriteData(role)}
+        canUseAi={hasFeature(subscription.features, "ai_contract_summaries")}
+        aiMode={isAiLlmLive() ? "live" : "demo"}
       />
     </DashboardLayout>
   );

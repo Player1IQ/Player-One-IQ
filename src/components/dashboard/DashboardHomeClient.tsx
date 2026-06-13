@@ -45,6 +45,17 @@ interface ActivityItem {
   timeAgo: string;
 }
 
+interface RevenueTrendPoint {
+  month: string;
+  contract: number;
+  platform: number;
+}
+
+interface CreatorGrowthPoint {
+  month: string;
+  creators: number;
+}
+
 interface DashboardHomeClientProps {
   creators: Creator[];
   activeCreators: Creator[];
@@ -62,6 +73,8 @@ interface DashboardHomeClientProps {
   activity: ActivityItem[];
   upcomingExpirations: Contract[];
   overdueContracts: Contract[];
+  revenueTrend: RevenueTrendPoint[];
+  creatorGrowth: CreatorGrowthPoint[];
 }
 
 function activityLabel(
@@ -132,42 +145,13 @@ export function DashboardHomeClient({
   activity,
   upcomingExpirations,
   overdueContracts,
+  revenueTrend,
+  creatorGrowth,
 }: DashboardHomeClientProps) {
-  const revenueChartData = [
-    {
-      month: "Jan",
-      revenue: monthlyRevenue.contractRevenue * 0.7,
-      platform: monthlyRevenue.platformRevenue * 0.6,
-    },
-    {
-      month: "Feb",
-      revenue: monthlyRevenue.contractRevenue * 0.8,
-      platform: monthlyRevenue.platformRevenue * 0.75,
-    },
-    {
-      month: "Mar",
-      revenue: monthlyRevenue.contractRevenue * 0.85,
-      platform: monthlyRevenue.platformRevenue * 0.9,
-    },
-    {
-      month: "Apr",
-      revenue: monthlyRevenue.contractRevenue * 0.95,
-      platform: monthlyRevenue.platformRevenue * 0.95,
-    },
-    {
-      month: "May",
-      revenue: monthlyRevenue.contractRevenue,
-      platform: monthlyRevenue.platformRevenue,
-    },
-  ];
-
-  const growthChartData = [
-    { month: "Jan", creators: Math.max(1, activeCreators.length - 4) },
-    { month: "Feb", creators: Math.max(1, activeCreators.length - 3) },
-    { month: "Mar", creators: Math.max(1, activeCreators.length - 2) },
-    { month: "Apr", creators: Math.max(1, activeCreators.length - 1) },
-    { month: "May", creators: activeCreators.length },
-  ];
+  const hasRevenueTrend = revenueTrend.some(
+    (point) => point.contract > 0 || point.platform > 0
+  );
+  const hasCreatorGrowth = creatorGrowth.some((point) => point.creators > 0);
 
   const topCreators = [...creators]
     .sort((a, b) => (a.name > b.name ? 1 : -1))
@@ -254,68 +238,88 @@ export function DashboardHomeClient({
           <CardHeader>
             <CardTitle>Revenue Overview</CardTitle>
             <CardDescription>
-              Contract & platform revenue trend
+              Contract & platform revenue — last 6 months
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueChartData}>
-                  <defs>
-                    <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                  <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={chartTooltipStyle} />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#7C3AED"
-                    fill="url(#revenueGrad)"
-                    strokeWidth={2}
-                    name="Contracts"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="platform"
-                    stroke="#A78BFA"
-                    fill="transparent"
-                    strokeWidth={2}
-                    strokeDasharray="4 4"
-                    name="Platform"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            {hasRevenueTrend ? (
+              <div className="h-64 min-h-[16rem] min-w-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={revenueTrend}>
+                    <defs>
+                      <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={chartTooltipStyle} />
+                    <Area
+                      type="monotone"
+                      dataKey="contract"
+                      stroke="#7C3AED"
+                      fill="url(#revenueGrad)"
+                      strokeWidth={2}
+                      name="Contracts"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="platform"
+                      stroke="#A78BFA"
+                      fill="transparent"
+                      strokeWidth={2}
+                      strokeDasharray="4 4"
+                      name="Platform"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <EmptyState
+                icon={LineChart}
+                title="No revenue trend yet"
+                description="Add contracts or connect platforms to see trends"
+                className="min-h-[16rem]"
+              />
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Creator Growth</CardTitle>
-            <CardDescription>Active creators over time</CardDescription>
+            <CardDescription>
+              Cumulative creators on roster — last 6 months
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={growthChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                  <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={chartTooltipStyle} />
-                  <Bar
-                    dataKey="creators"
-                    fill="#7C3AED"
-                    radius={[6, 6, 0, 0]}
-                    name="Creators"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {hasCreatorGrowth ? (
+              <div className="h-64 min-h-[16rem] min-w-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={creatorGrowth}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <Tooltip contentStyle={chartTooltipStyle} />
+                    <Bar
+                      dataKey="creators"
+                      fill="#7C3AED"
+                      radius={[6, 6, 0, 0]}
+                      name="Creators"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <EmptyState
+                icon={Users}
+                title="No creators yet"
+                description="Add creators to your roster to see growth over time"
+                className="min-h-[16rem]"
+              />
+            )}
           </CardContent>
         </Card>
       </div>

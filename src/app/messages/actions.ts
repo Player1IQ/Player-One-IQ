@@ -8,6 +8,7 @@ import {
   getOrganizationUsers,
   getConversationById,
   findConversationByRelated,
+  getConversations,
 } from "@/lib/messages/queries";
 import {
   type ConversationType,
@@ -367,6 +368,37 @@ export async function fetchMessageNotificationDetails(
     senderName: displayNameForUser(message.sender_id, usersById),
     preview: truncatePreview(message.content),
   };
+}
+
+export type UnreadConversationPreview = {
+  id: string;
+  title: string;
+  subtitle: string;
+  lastMessage: string | null;
+  unreadCount: number;
+  updatedAtDisplay: string;
+};
+
+export async function fetchUnreadConversationPreviews(): Promise<
+  UnreadConversationPreview[]
+> {
+  const conversations = await getConversations();
+
+  return conversations
+    .filter((conversation) => conversation.unreadCount > 0)
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    )
+    .slice(0, 5)
+    .map((conversation) => ({
+      id: conversation.id,
+      title: conversation.title,
+      subtitle: conversation.subtitle,
+      lastMessage: conversation.lastMessage,
+      unreadCount: conversation.unreadCount,
+      updatedAtDisplay: conversation.updatedAtDisplay,
+    }));
 }
 
 export async function fetchUnreadMessageCount() {
