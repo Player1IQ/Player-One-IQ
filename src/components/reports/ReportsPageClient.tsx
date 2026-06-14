@@ -10,6 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import type { MonthlyReportData } from "@/lib/reports/build";
+import { ExportReportMenu } from "@/components/reports/ExportReportMenu";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
@@ -25,11 +26,12 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
   return (
     <div className="space-y-8 animate-fade-in">
       <Card className="border-white/[0.06] bg-surface-raised/80">
-        <CardContent className="px-5 py-4">
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <p className="text-sm text-gray-400">
             Monthly report for{" "}
             <span className="font-medium text-white">{report.periodLabel}</span>
           </p>
+          <ExportReportMenu canExport variant="page" />
         </CardContent>
       </Card>
 
