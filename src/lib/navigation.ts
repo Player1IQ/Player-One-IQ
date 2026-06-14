@@ -9,6 +9,7 @@ export type NavIconName =
   | "dashboard"
   | "users"
   | "building"
+  | "target"
   | "file-text"
   | "briefcase"
   | "message-square"
@@ -39,6 +40,12 @@ export const navItems: NavItem[] = [
     href: "/sponsors",
     icon: "building",
     requiredFeature: navFeatureRequirements["/sponsors"],
+  },
+  {
+    label: "Campaigns",
+    href: "/campaigns",
+    icon: "target",
+    requiredFeature: navFeatureRequirements["/campaigns"],
   },
   {
     label: "Contracts",

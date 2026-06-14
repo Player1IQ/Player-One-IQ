@@ -13,7 +13,6 @@ import {
   TrendingUp,
   DollarSign,
   Award,
-  BarChart3,
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Contract } from "@/lib/contracts";
@@ -33,9 +32,10 @@ import {
 } from "@/lib/platform-oauth/config";
 import { CreatorOAuthBanner } from "./CreatorOAuthBanner";
 import { CreatorContentCoach } from "./CreatorContentCoach";
+import { CreatorAudienceGrowth } from "./CreatorAudienceGrowth";
+import type { CreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { MetricCard } from "@/components/ui/MetricCard";
 
 interface CreatorProfileProps {
@@ -49,6 +49,9 @@ interface CreatorProfileProps {
   canWrite?: boolean;
   canUseContentAi?: boolean;
   aiMode?: "live" | "demo";
+  audienceAnalytics?: CreatorAudienceAnalytics;
+  canViewAnalytics?: boolean;
+  canViewAdvancedAnalytics?: boolean;
 }
 
 function Section({
@@ -82,6 +85,9 @@ export function CreatorProfile({
   canWrite = true,
   canUseContentAi = false,
   aiMode = "demo",
+  audienceAnalytics,
+  canViewAnalytics = false,
+  canViewAdvancedAnalytics = false,
 }: CreatorProfileProps) {
   const connectedOAuthPlatforms = platformAccounts
     .filter((account) => account.connectionStatus === "connected_oauth")
@@ -219,46 +225,20 @@ export function CreatorProfile({
         />
       </div>
 
-      {/* Audience chart placeholder */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-accent-light" />
-            <CardTitle>Audience & Growth</CardTitle>
-          </div>
-          <CardDescription>
-            Connect platform accounts to see audience analytics
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {platformAccounts.length === 0 ? (
-            <div className="flex h-32 items-center justify-center rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02]">
-              <p className="text-sm text-gray-500">
-                No platform data available — connect accounts below
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-3 sm:grid-cols-3">
-              {platformAccounts.map((account) => (
-                <div
-                  key={account.id}
-                  className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-                >
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                    {account.platform}
-                  </p>
-                  <p className="mt-2 text-lg font-bold text-white capitalize">
-                    {account.connectionStatus.replace(/_/g, " ")}
-                  </p>
-                  <Badge variant="accent" className="mt-2">
-                    Connected
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <CreatorAudienceGrowth
+        analytics={
+          audienceAnalytics ?? {
+            platformBreakdown: [],
+            contentTrend: [],
+            totalViews: 0,
+            totalContent: 0,
+            hasOAuthContent: false,
+            connectedOAuthCount: connectedOAuthPlatforms.length,
+          }
+        }
+        canViewAnalytics={canViewAnalytics}
+        canViewAdvancedAnalytics={canViewAdvancedAnalytics}
+      />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Creator Information">

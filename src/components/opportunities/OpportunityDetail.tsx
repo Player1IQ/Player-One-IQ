@@ -11,6 +11,8 @@ import {
   Pencil,
   Trash2,
   XCircle,
+  Users,
+  Briefcase,
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Opportunity, OpportunityApplication } from "@/lib/opportunities";
@@ -28,6 +30,10 @@ import { IndustryBadge } from "@/components/sponsors/IndustryBadge";
 import { DealRoomButton } from "@/components/messages/DealRoomButton";
 import { ApplicationContractLink } from "./ApplicationContractLink";
 import { ApplicationReviewActions } from "./ApplicationReviewActions";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 interface OpportunityDetailProps {
   opportunity: Opportunity;
@@ -36,6 +42,26 @@ interface OpportunityDetailProps {
   sponsors: Sponsor[];
   canManage: boolean;
   canApply: boolean;
+}
+
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        {description && <CardDescription>{description}</CardDescription>}
+      </CardHeader>
+      <CardContent className="pt-0">{children}</CardContent>
+    </Card>
+  );
 }
 
 export function OpportunityDetail({
@@ -59,6 +85,9 @@ export function OpportunityDetail({
   const acceptedContract = applications.find(
     (app) => app.status === "accepted" && app.contractId
   );
+  const pendingCount = applications.filter(
+    (a) => a.status === "applied" || a.status === "under_review"
+  ).length;
 
   async function handleClose() {
     if (!confirm("Close this opportunity? No new applications will be accepted.")) return;
@@ -84,11 +113,11 @@ export function OpportunityDetail({
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <Link
             href="/opportunities"
-            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-accent-light"
+            className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Opportunities
@@ -96,78 +125,103 @@ export function OpportunityDetail({
           <div className="flex flex-wrap gap-2">
             <DealRoomButton type="opportunity" relatedId={opportunity.id} />
             {canApplyNow && (
-              <button
-                onClick={() => setApplyOpen(true)}
-                className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white"
-              >
+              <Button size="sm" onClick={() => setApplyOpen(true)}>
                 Apply
-              </button>
+              </Button>
             )}
             {canManage && (
               <>
-                <button
-                  onClick={() => setEditOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm text-gray-300"
-                >
+                <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
                   <Pencil className="h-4 w-4" />
                   Edit
-                </button>
+                </Button>
                 {opportunity.status === "open" && (
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleClose}
                     disabled={loading}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-1.5 text-sm text-amber-400"
+                    className="border-amber-500/30 text-amber-400 hover:border-amber-500/50"
                   >
                     <XCircle className="h-4 w-4" />
                     Close
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={handleDelete}
                   disabled={loading}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-1.5 text-sm text-red-400"
                 >
                   <Trash2 className="h-4 w-4" />
                   Delete
-                </button>
+                </Button>
               </>
             )}
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface-raised p-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-bold text-white">{opportunity.title}</h2>
-            <OpportunityStatusBadge status={opportunity.status} />
-            <IndustryBadge industry={opportunity.category} />
-            <PlatformBadge platform={opportunity.platform} />
-          </div>
-          <p className="mt-4 text-sm leading-relaxed text-gray-400">
-            {opportunity.description || "No description provided."}
-          </p>
-          <div className="mt-5 flex flex-wrap gap-6 text-sm">
-            <span className="inline-flex items-center gap-2 text-gray-300">
-              <DollarSign className="h-4 w-4 text-accent-light" />
-              {opportunity.budgetDisplay}
-            </span>
-            {opportunity.sponsorId && opportunity.sponsorName && (
-              <Link
-                href={`/sponsors/${opportunity.sponsorId}`}
-                className="inline-flex items-center gap-2 text-gray-300 hover:text-accent-light"
-              >
-                <Building2 className="h-4 w-4 text-accent-light" />
-                {opportunity.sponsorName}
-              </Link>
-            )}
-            <span className="inline-flex items-center gap-2 text-gray-400">
-              <Calendar className="h-4 w-4" />
-              Deadline: {opportunity.applicationDeadlineDisplay}
-            </span>
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-surface-raised to-surface" />
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
+          <div className="relative px-6 py-8 sm:px-8">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-3xl font-bold text-white">{opportunity.title}</h2>
+              <OpportunityStatusBadge status={opportunity.status} />
+              <IndustryBadge industry={opportunity.category} />
+              <PlatformBadge platform={opportunity.platform} />
+            </div>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-gray-400">
+              {opportunity.description || "No description provided."}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-6 text-sm">
+              <span className="inline-flex items-center gap-2 text-gray-300">
+                <DollarSign className="h-4 w-4 text-accent-light" />
+                {opportunity.budgetDisplay}
+              </span>
+              {opportunity.sponsorId && opportunity.sponsorName && (
+                <Link
+                  href={`/sponsors/${opportunity.sponsorId}`}
+                  className="inline-flex items-center gap-2 text-gray-300 transition-colors hover:text-accent-light"
+                >
+                  <Building2 className="h-4 w-4 text-accent-light" />
+                  {opportunity.sponsorName}
+                </Link>
+              )}
+              <span className="inline-flex items-center gap-2 text-gray-400">
+                <Calendar className="h-4 w-4" />
+                Deadline: {opportunity.applicationDeadlineDisplay}
+              </span>
+            </div>
           </div>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-3">
+          <MetricCard
+            title="Applications"
+            value={String(applications.length)}
+            subtitle={`${pendingCount} pending review`}
+            icon={Users}
+            iconColor="text-violet-400"
+          />
+          <MetricCard
+            title="Budget"
+            value={opportunity.budgetDisplay}
+            subtitle="Proposed sponsorship"
+            icon={DollarSign}
+            iconColor="text-emerald-400"
+          />
+          <MetricCard
+            title="Status"
+            value={opportunity.status.replace(/_/g, " ")}
+            subtitle="Current opportunity state"
+            icon={Briefcase}
+            iconColor="text-blue-400"
+          />
+        </div>
+
         {acceptedContract?.contractId && (
-          <section className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
             <p className="text-sm text-emerald-300">
               This opportunity has been filled. A draft contract was created for{" "}
               {acceptedContract.creatorName}.
@@ -176,42 +230,42 @@ export function OpportunityDetail({
               contractId={acceptedContract.contractId}
               className="mt-2"
             />
-          </section>
+          </div>
         )}
 
         {opportunity.deliverables && (
-          <section className="rounded-xl border border-border bg-surface-raised p-6">
-            <h3 className="text-base font-semibold text-white">Deliverables</h3>
-            <p className="mt-3 whitespace-pre-wrap text-sm text-gray-300">
+          <Section title="Deliverables">
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-300">
               {opportunity.deliverables}
             </p>
-          </section>
+          </Section>
         )}
 
-        <section className="rounded-xl border border-border bg-surface-raised p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-semibold text-white">Applicants</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {applications.length} application{applications.length !== 1 ? "s" : ""}
-              </p>
-            </div>
+        <Section
+          title="Applicants"
+          description={`${applications.length} application${applications.length !== 1 ? "s" : ""}`}
+        >
+          <div className="mb-4 flex justify-end">
             <Link
               href="/opportunities/applications"
               className="text-xs text-accent-light hover:text-white"
             >
-              View all
+              View all applications →
             </Link>
           </div>
 
           {applications.length === 0 ? (
-            <p className="mt-6 text-sm text-gray-500">No applications yet.</p>
+            <EmptyState
+              icon={Users}
+              title="No applications yet"
+              description="Creators can apply when this opportunity is open."
+            />
           ) : (
-            <ul className="mt-6 space-y-4">
+            <ul className="space-y-4">
               {applications.map((app) => (
                 <li
                   key={app.id}
-                  className="rounded-lg border border-border-subtle bg-surface p-4"
+                  className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -247,7 +301,7 @@ export function OpportunityDetail({
               ))}
             </ul>
           )}
-        </section>
+        </Section>
       </div>
 
       <OpportunityFormModal

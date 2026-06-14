@@ -98,6 +98,7 @@ export const navFeatureRequirements: Record<string, NavFeatureRequirement> = {
     "sponsor_crm",
   ],
   "/sponsors": ["sponsor_crm"],
+  "/campaigns": ["campaign_tracking"],
   "/contracts": ["contracts"],
   "/opportunities": [
     "apply_opportunities",
