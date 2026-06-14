@@ -53,7 +53,7 @@ export function ExportReportMenu({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  function runExport(mode: "csv" | "pdf") {
+  function runCsvExport() {
     setError("");
     startTransition(async () => {
       const result = await fetchMonthlyReportExport();
@@ -64,16 +64,12 @@ export function ExportReportMenu({
       if (!("report" in result) || !result.report) return;
 
       try {
-        if (mode === "csv") {
-          const csv = reportToCsv(result.report, result.organizationName);
-          downloadTextFile(
-            reportCsvFilename(result.report.periodLabel),
-            csv,
-            "text/csv;charset=utf-8"
-          );
-        } else {
-          openPrintableReport(result.report, result.organizationName);
-        }
+        const csv = reportToCsv(result.report, result.organizationName);
+        downloadTextFile(
+          reportCsvFilename(result.report.periodLabel),
+          csv,
+          "text/csv;charset=utf-8"
+        );
         setOpen(false);
       } catch (exportError) {
         setError(
@@ -145,7 +141,7 @@ export function ExportReportMenu({
           </div>
           <button
             type="button"
-            onClick={() => runExport("csv")}
+            onClick={() => runCsvExport()}
             disabled={isPending}
             className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-300 transition-colors hover:bg-white/[0.04]"
           >
