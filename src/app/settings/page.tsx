@@ -3,6 +3,9 @@ import { SeedTestDataButton } from "@/components/dev/SeedTestDataButton";
 import { DeployChecklistCard } from "@/components/settings/DeployChecklistCard";
 import { PlatformSyncCard } from "@/components/settings/PlatformSyncCard";
 import { SettingsPageClient } from "@/components/settings/SettingsPageClient";
+import { AiIntegrationCard } from "@/components/settings/AiIntegrationCard";
+import { getAiIntegrationForSettings } from "@/lib/ai/credentials";
+import { isAiCredentialsEncryptionConfigured } from "@/lib/ai/credentials-crypto";
 import { isPlatformOAuthFeatureEnabled } from "@/lib/platform-oauth/config";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
@@ -52,6 +55,7 @@ export default async function SettingsPage() {
 
   const canView = canViewSettings(role);
   const canEdit = canManageSettings(role);
+  const aiIntegration = canView ? await getAiIntegrationForSettings() : null;
   const showDevTools = isSeedEnabled();
   const oauthEnabled = isPlatformOAuthFeatureEnabled();
 
@@ -79,6 +83,14 @@ export default async function SettingsPage() {
           canView ? (
             <>
               <DeployChecklistCard />
+              <AiIntegrationCard
+                integration={aiIntegration}
+                encryptionConfigured={isAiCredentialsEncryptionConfigured()}
+                platformFallbackConfigured={Boolean(
+                  process.env.OPENAI_API_KEY?.trim()
+                )}
+                canManage={canEdit}
+              />
               <PlatformSyncCard
                 oauthEnabled={oauthEnabled}
                 connectedCount={oauthConnectedCount}

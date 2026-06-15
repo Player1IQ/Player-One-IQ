@@ -25,11 +25,11 @@ import {
   buildAiWorkspaceContext,
   summarizeContextForPrompt,
 } from "./context";
-import { isAiLlmLive } from "./config";
+import { isAiFeatureEnabled } from "./config";
+import { canRunLiveAi } from "./credentials";
 import { getLlmFallbackNotice, isRecoverableLlmError } from "./llm-errors";
-import { runOpenAiAssistant } from "./llm";
 import { buildContentAnalysisPrompt, buildContractSummaryPrompt, buildQuestionPrompt } from "./prompts";
-import { runAssistantAction } from "./runner";
+import { executeLiveAiPrompt, runAssistantAction } from "./runner";
 import type { AiActionType, AiAssistantResult } from "./types";
 import type { AiAssistantType, FeatureKey } from "@/lib/subscription/types";
 
@@ -205,7 +205,7 @@ export async function runCreatorContentAnalysis(
   let fallbackNotice: string | undefined;
 
   try {
-    if (isAiLlmLive()) {
+    if (isAiFeatureEnabled() && (await canRunLiveAi(organizationId))) {
       const [snapshots, workspace] = await Promise.all([
         fetchCreatorContentSnapshots(creatorId, scope),
         buildAiWorkspaceContext(),
@@ -235,14 +235,22 @@ export async function runCreatorContentAnalysis(
         analyzable,
         summarizeContextForPrompt(workspace)
       );
-      const llm = await runOpenAiAssistant({
+      const live = await executeLiveAiPrompt({
         system: prompt.system,
         user: prompt.user,
         assistantType: "growth",
       });
-      result = llm.result;
-      tokensUsed = llm.tokensUsed;
-      mode = "live";
+      if (live.ok) {
+        result = live.result;
+        tokensUsed = live.tokensUsed;
+        mode = "live";
+      } else {
+        analyzedPlatforms =
+          scope === "all" ? connectedPlatforms : [scope];
+        result = generateAssistantResult("content_strategy", {
+          creatorName: creator.name,
+        });
+      }
     } else {
       analyzedPlatforms =
         scope === "all" ? connectedPlatforms : [scope];
@@ -251,7 +259,7 @@ export async function runCreatorContentAnalysis(
       });
     }
   } catch (error) {
-    if (isAiLlmLive() && isRecoverableLlmError(error)) {
+    if ((await canRunLiveAi(organizationId)) && isRecoverableLlmError(error)) {
       analyzedPlatforms =
         scope === "all" ? connectedPlatforms : [scope];
       result = generateAssistantResult("content_strategy", {
@@ -331,24 +339,28 @@ export async function runAiQuestion(question: string) {
   let fallbackNotice: string | undefined;
 
   try {
-    if (isAiLlmLive()) {
+    if (isAiFeatureEnabled() && (await canRunLiveAi(organizationId))) {
       const workspace = await buildAiWorkspaceContext();
       const contextJson = summarizeContextForPrompt(workspace);
       const prompt = buildQuestionPrompt(trimmed, contextJson);
-      const llm = await runOpenAiAssistant({
+      const live = await executeLiveAiPrompt({
         system: prompt.system,
         user: prompt.user,
         assistantType,
       });
-      result = llm.result;
-      tokensUsed = llm.tokensUsed;
-      model = llm.model;
-      mode = "live";
+      if (live.ok) {
+        result = live.result;
+        tokensUsed = live.tokensUsed;
+        model = live.model;
+        mode = "live";
+      } else {
+        result = generateQuestionDemoResult(trimmed, assistantType);
+      }
     } else {
       result = generateQuestionDemoResult(trimmed, assistantType);
     }
   } catch (error) {
-    if (isAiLlmLive() && isRecoverableLlmError(error)) {
+    if ((await canRunLiveAi(organizationId)) && isRecoverableLlmError(error)) {
       result = generateQuestionDemoResult(trimmed, assistantType);
       mode = "demo";
       fallbackNotice = getLlmFallbackNotice(error);
@@ -413,17 +425,27 @@ export async function runContractSummary(contractId: string) {
   let fallbackNotice: string | undefined;
 
   try {
-    if (isAiLlmLive()) {
+    if (isAiFeatureEnabled() && (await canRunLiveAi(organizationId))) {
       const contextJson = JSON.stringify(contractContext, null, 2);
       const prompt = buildContractSummaryPrompt(contextJson);
-      const llm = await runOpenAiAssistant({
+      const live = await executeLiveAiPrompt({
         system: prompt.system,
         user: prompt.user,
         assistantType: "revenue",
       });
-      result = llm.result;
-      tokensUsed = llm.tokensUsed;
-      mode = "live";
+      if (live.ok) {
+        result = live.result;
+        tokensUsed = live.tokensUsed;
+        mode = "live";
+      } else {
+        result = generateContractSummaryDemo({
+          contractName: contract.name,
+          creatorName: contract.creatorName,
+          sponsorName: contract.sponsorName,
+          status: contract.status,
+          contractValue: contract.value,
+        });
+      }
     } else {
       result = generateContractSummaryDemo({
         contractName: contract.name,
@@ -434,7 +456,7 @@ export async function runContractSummary(contractId: string) {
       });
     }
   } catch (error) {
-    if (isAiLlmLive() && isRecoverableLlmError(error)) {
+    if ((await canRunLiveAi(organizationId)) && isRecoverableLlmError(error)) {
       result = generateContractSummaryDemo({
         contractName: contract.name,
         creatorName: contract.creatorName,

@@ -1,17 +1,25 @@
+import Link from "next/link";
 import { Sparkles, AlertCircle } from "lucide-react";
-import type { OpenAiHealth } from "@/lib/ai/openai-health";
+import type { AiLlmHealthState } from "@/lib/ai/llm-health";
 
 interface AiModeNoticeProps {
-  health: OpenAiHealth;
+  healthState: AiLlmHealthState;
   aiRequestCount?: number;
   aiRequestLimit?: number | null;
 }
 
+function providerLabel(provider: string | null): string {
+  if (provider === "anthropic") return "Anthropic";
+  if (provider === "openai") return "OpenAI";
+  return "AI provider";
+}
+
 export function AiModeNotice({
-  health,
+  healthState,
   aiRequestCount,
   aiRequestLimit,
 }: AiModeNoticeProps) {
+  const { health, source, provider } = healthState;
   const planUsage =
     aiRequestLimit != null && aiRequestCount != null
       ? `${aiRequestCount} of ${aiRequestLimit} included requests used this month`
@@ -24,11 +32,19 @@ export function AiModeNotice({
         <div className="text-sm text-gray-300">
           <p>
             <span className="font-medium text-emerald-400">Live AI</span> —
-            insights are generated from your workspace data using OpenAI.
+            insights are generated from your workspace data using{" "}
+            {providerLabel(provider)}
+            {source === "org" ? " (your workspace key)" : " (platform fallback)"}.
           </p>
           {planUsage ? (
             <p className="mt-1 text-xs text-gray-500">{planUsage}</p>
           ) : null}
+          <Link
+            href="/settings"
+            className="mt-2 inline-block text-xs text-gray-500 underline hover:text-gray-300"
+          >
+            Manage AI integration
+          </Link>
         </div>
       </div>
     );
@@ -41,9 +57,8 @@ export function AiModeNotice({
         <div className="text-sm text-amber-100">
           <p>
             <span className="font-medium text-amber-300">Sample insights</span>{" "}
-            — live AI is off because the platform OpenAI account has no billing
-            quota. This is{" "}
-            <span className="font-medium">not</span> your plan limit.
+            — live AI is off because your connected {providerLabel(provider)}{" "}
+            account has no billing quota.
           </p>
           {planUsage ? (
             <p className="mt-1 text-xs text-amber-200/80">
@@ -52,20 +67,23 @@ export function AiModeNotice({
             </p>
           ) : null}
           <p className="mt-2 text-xs text-amber-200/70">
-            Platform owners: add billing at{" "}
-            <a
-              href="https://platform.openai.com/settings/organization/billing"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              platform.openai.com
-            </a>
-            , or remove{" "}
-            <code className="rounded bg-black/20 px-1 py-0.5 text-[11px]">
-              OPENAI_API_KEY
-            </code>{" "}
-            from Vercel for demo-only mode.
+          {source === "org" ? (
+            <>
+              Update billing with your provider or reconnect a different key in{" "}
+              <Link href="/settings" className="underline hover:text-amber-50">
+                Settings → AI integration
+              </Link>
+              .
+            </>
+          ) : (
+            <>
+              Platform owners: add billing at your OpenAI account, or{" "}
+              <Link href="/settings" className="underline hover:text-amber-50">
+                connect a workspace key in Settings
+              </Link>
+              .
+            </>
+          )}
           </p>
         </div>
       </div>
@@ -88,14 +106,21 @@ export function AiModeNotice({
   return (
     <div className="mb-6 flex items-start gap-3 rounded-lg border border-border bg-surface-raised px-4 py-3">
       <Sparkles className="mt-0.5 h-4 w-4 text-gray-500" />
-      <p className="text-sm text-gray-400">
-        <span className="font-medium text-gray-300">Demo mode</span> — sample
-        responses until{" "}
-        <code className="rounded bg-surface px-1 py-0.5 text-xs text-accent-light">
-          OPENAI_API_KEY
-        </code>{" "}
-        is configured.
-      </p>
+      <div className="text-sm text-gray-400">
+        <p>
+          <span className="font-medium text-gray-300">Demo mode</span> — sample
+          responses until you connect an AI provider.
+        </p>
+        <p className="mt-2 text-xs text-gray-500">
+          Connect your OpenAI or Anthropic API key to enable live insights.
+        </p>
+        <Link
+          href="/settings"
+          className="mt-3 inline-flex rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-sm font-medium text-accent-light hover:bg-accent/20"
+        >
+          Connect AI provider in Settings
+        </Link>
+      </div>
     </div>
   );
 }

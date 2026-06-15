@@ -7,7 +7,8 @@ import {
   getCreatorPlatformAccounts,
   getCreatorRevenueEntries,
 } from "@/lib/creator-revenue/queries";
-import { isAiLlmLive } from "@/lib/ai/config";
+import { canRunLiveAi } from "@/lib/ai/credentials";
+import { getOrganizationId } from "@/lib/organization/queries";
 import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
 import { getOAuthPlatformUi } from "@/lib/platform-oauth/config";
 import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
@@ -48,6 +49,10 @@ export default async function CreatorDetailPage({
     notFound();
   }
 
+  const organizationId = await getOrganizationId();
+  const aiLive =
+    Boolean(organizationId) && (await canRunLiveAi(organizationId!));
+
   const subtitle =
     creator.socialHandles[0]?.handle ?? creator.email ?? undefined;
 
@@ -63,7 +68,7 @@ export default async function CreatorDetailPage({
         oauthError={oauthError ?? null}
         canWrite={canWriteData(role)}
         canUseContentAi={hasFeature(subscription.features, "ai_growth")}
-        aiMode={isAiLlmLive() ? "live" : "demo"}
+        aiMode={aiLive ? "live" : "demo"}
         audienceAnalytics={audienceAnalytics}
         canViewAnalytics={hasAnyFeature(subscription.features, [
           "limited_analytics",

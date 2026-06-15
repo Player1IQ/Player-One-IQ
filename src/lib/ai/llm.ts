@@ -1,11 +1,17 @@
-import { getOpenAiModel, isAiLlmConfigured } from "./config";
 import type { AiAssistantResult, AiForecast, AiMatchScore } from "./types";
 import type { AiAssistantType } from "@/lib/subscription/types";
+import type { ResolvedLlmConfig } from "./providers/types";
 
 export interface LlmRunResult {
   result: AiAssistantResult;
   tokensUsed: number;
   model: string;
+}
+
+export interface LlmAssistantParams {
+  system: string;
+  user: string;
+  assistantType: AiAssistantType;
 }
 
 function asInsightArray(value: unknown) {
@@ -77,11 +83,17 @@ function asForecastArray(value: unknown): AiForecast[] | undefined {
   return forecasts.length > 0 ? forecasts : undefined;
 }
 
-function parseAssistantResult(
+function extractJsonPayload(raw: string): string {
+  const trimmed = raw.trim();
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return fenced?.[1]?.trim() ?? trimmed;
+}
+
+export function parseAssistantResult(
   assistantType: AiAssistantType,
   raw: string
 ): AiAssistantResult {
-  const parsed = JSON.parse(raw) as Record<string, unknown>;
+  const parsed = JSON.parse(extractJsonPayload(raw)) as Record<string, unknown>;
   const insights = asInsightArray(parsed.insights);
 
   if (insights.length === 0) {
@@ -97,24 +109,18 @@ function parseAssistantResult(
   };
 }
 
-export async function runOpenAiAssistant(params: {
-  system: string;
-  user: string;
-  assistantType: AiAssistantType;
-}): Promise<LlmRunResult> {
-  if (!isAiLlmConfigured()) {
-    throw new Error("OpenAI API key is not configured.");
-  }
-
-  const model = getOpenAiModel();
+async function runOpenAiAssistantWithConfig(
+  config: ResolvedLlmConfig,
+  params: LlmAssistantParams
+): Promise<LlmRunResult> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${config.apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model,
+      model: config.model,
       temperature: 0.4,
       response_format: { type: "json_object" },
       messages: [
@@ -142,6 +148,134 @@ export async function runOpenAiAssistant(params: {
   return {
     result: parseAssistantResult(params.assistantType, content),
     tokensUsed: data.usage?.total_tokens ?? 0,
-    model,
+    model: config.model,
   };
+}
+
+async function runAnthropicAssistantWithConfig(
+  config: ResolvedLlmConfig,
+  params: LlmAssistantParams
+): Promise<LlmRunResult> {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": config.apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: config.model,
+      max_tokens: 4096,
+      temperature: 0.4,
+      system: params.system,
+      messages: [{ role: "user", content: params.user }],
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Anthropic request failed (${response.status}): ${body}`);
+  }
+
+  const data = (await response.json()) as {
+    content?: Array<{ type?: string; text?: string }>;
+    usage?: { input_tokens?: number; output_tokens?: number };
+    model?: string;
+  };
+
+  const content = data.content
+    ?.filter((block) => block.type === "text")
+    .map((block) => block.text ?? "")
+    .join("\n")
+    .trim();
+
+  if (!content) {
+    throw new Error("Anthropic returned an empty response.");
+  }
+
+  const inputTokens = data.usage?.input_tokens ?? 0;
+  const outputTokens = data.usage?.output_tokens ?? 0;
+
+  return {
+    result: parseAssistantResult(params.assistantType, content),
+    tokensUsed: inputTokens + outputTokens,
+    model: data.model ?? config.model,
+  };
+}
+
+export async function runLlmAssistant(
+  params: LlmAssistantParams,
+  config: ResolvedLlmConfig
+): Promise<LlmRunResult> {
+  if (config.provider === "anthropic") {
+    return runAnthropicAssistantWithConfig(config, params);
+  }
+  return runOpenAiAssistantWithConfig(config, params);
+}
+
+export async function probeLlmConfig(
+  config: ResolvedLlmConfig
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    if (config.provider === "anthropic") {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": config.apiKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: config.model,
+          max_tokens: 8,
+          messages: [{ role: "user", content: "ping" }],
+        }),
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(body);
+      }
+      return { ok: true };
+    }
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: config.model,
+        max_tokens: 1,
+        messages: [{ role: "user", content: "ping" }],
+      }),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(body);
+    }
+
+    return { ok: true };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Connection test failed.";
+    return { ok: false, error: message };
+  }
+}
+
+/** @deprecated Use runLlmAssistant with resolveLlmConfig instead */
+export async function runOpenAiAssistant(
+  params: LlmAssistantParams
+): Promise<LlmRunResult> {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error("OpenAI API key is not configured.");
+  }
+
+  const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+  return runOpenAiAssistantWithConfig(
+    { source: "platform", provider: "openai", apiKey, model },
+    params
+  );
 }

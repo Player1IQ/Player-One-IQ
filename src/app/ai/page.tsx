@@ -3,15 +3,17 @@ import { AiDashboardClient } from "@/components/ai/AiDashboardClient";
 import { AiModeNotice } from "@/components/ai/AiModeNotice";
 import { SubscriptionBanner } from "@/components/subscription/SubscriptionBanner";
 import { getAiDashboardData } from "@/lib/ai/queries";
-import { getOpenAiHealth } from "@/lib/ai/openai-health";
+import { getAiLlmHealth } from "@/lib/ai/llm-health";
+import { getOrganizationId } from "@/lib/organization/queries";
 import { hasAnyAiFeature } from "@/lib/subscription/features";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 
 export default async function AiPage() {
-  const [aiData, context, openAiHealth] = await Promise.all([
+  const organizationId = await getOrganizationId();
+  const [aiData, context, aiLlmHealth] = await Promise.all([
     getAiDashboardData(),
     getSubscriptionContext(),
-    getOpenAiHealth(),
+    getAiLlmHealth(organizationId),
   ]);
 
   const aiRequestCount =
@@ -31,7 +33,7 @@ export default async function AiPage() {
         />
       ) : null}
       <AiModeNotice
-        health={openAiHealth}
+        healthState={aiLlmHealth}
         aiRequestCount={aiRequestCount}
         aiRequestLimit={aiRequestLimit}
       />

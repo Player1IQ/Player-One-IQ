@@ -30,6 +30,9 @@ export async function GET() {
     ),
     openAiConfigured,
     openAiHealth,
+    aiCredentialsEncryptionConfigured: Boolean(
+      process.env.AI_CREDENTIALS_ENCRYPTION_KEY?.trim()
+    ),
     appUrl,
   });
 }

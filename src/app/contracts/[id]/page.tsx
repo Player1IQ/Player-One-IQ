@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ContractDetail } from "@/components/contracts/ContractDetail";
-import { isAiLlmLive } from "@/lib/ai/config";
+import { canRunLiveAi } from "@/lib/ai/credentials";
+import { getOrganizationId } from "@/lib/organization/queries";
 import { getContractById, getContractNegotiationContext } from "@/lib/contracts/queries";
 import { getDeliverablesForContract } from "@/lib/contract-deliverables/queries";
 import { getCreators } from "@/lib/creators/queries";
@@ -33,6 +34,9 @@ export default async function ContractDetailPage({
   }
 
   const negotiationContext = await getContractNegotiationContext(contract);
+  const organizationId = await getOrganizationId();
+  const aiLive =
+    Boolean(organizationId) && (await canRunLiveAi(organizationId!));
 
   return (
     <DashboardLayout
@@ -47,7 +51,7 @@ export default async function ContractDetailPage({
         deliverables={deliverables}
         canWrite={canWriteData(role)}
         canUseAi={hasFeature(subscription.features, "ai_contract_summaries")}
-        aiMode={isAiLlmLive() ? "live" : "demo"}
+        aiMode={aiLive ? "live" : "demo"}
       />
     </DashboardLayout>
   );
