@@ -129,6 +129,7 @@ export async function createCampaign(input: CampaignInput) {
   await incrementUsageMetric("campaigns");
 
   revalidatePath("/campaigns");
+  revalidatePath(`/campaigns/${data.id}`);
   revalidatePath("/sponsors");
   revalidatePath(`/sponsors/${input.sponsorId}`);
   revalidatePath("/");
@@ -180,8 +181,62 @@ export async function updateCampaign(id: string, input: CampaignInput) {
   if (updateError) return { error: updateError.message };
 
   revalidatePath("/campaigns");
+  revalidatePath(`/campaigns/${id}`);
   revalidatePath("/sponsors");
   revalidatePath(`/sponsors/${input.sponsorId}`);
+  return { success: true };
+}
+
+export async function updateCampaignStatus(
+  id: string,
+  status: CampaignInput["status"]
+) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess(
+    "campaign_tracking",
+    "Campaign tracking"
+  );
+  if (featureError) return featureError;
+
+  if (!campaignStatuses.includes(status)) {
+    return { error: "Invalid campaign status." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: existing, error: fetchError } = await supabase
+    .from("sponsor_campaigns")
+    .select("sponsor_id")
+    .eq("id", id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (fetchError) return { error: fetchError.message };
+  if (!existing) return { error: "Campaign not found." };
+
+  const { error: updateError } = await supabase
+    .from("sponsor_campaigns")
+    .update({
+      status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("organization_id", organizationId);
+
+  if (updateError) return { error: updateError.message };
+
+  revalidatePath("/campaigns");
+  revalidatePath(`/campaigns/${id}`);
+  revalidatePath("/sponsors");
+  if (existing.sponsor_id) {
+    revalidatePath(`/sponsors/${existing.sponsor_id}`);
+  }
   return { success: true };
 }
 
@@ -217,6 +272,7 @@ export async function deleteCampaign(id: string) {
   if (deleteError) return { error: deleteError.message };
 
   revalidatePath("/campaigns");
+  revalidatePath(`/campaigns/${id}`);
   revalidatePath("/sponsors");
   if (existing?.sponsor_id) {
     revalidatePath(`/sponsors/${existing.sponsor_id}`);

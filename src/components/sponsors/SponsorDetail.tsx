@@ -323,18 +323,20 @@ export function SponsorDetail({
             ) : (
               <ul className="space-y-3">
                 {campaigns.map((campaign) => (
-                  <li
-                    key={campaign.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
-                  >
-                    <div>
-                      <p className="font-medium text-gray-200">{campaign.name}</p>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        {campaign.budgetDisplay} · {campaign.startDateDisplay} –{" "}
-                        {campaign.endDateDisplay}
-                      </p>
-                    </div>
-                    <CampaignStatusBadge status={campaign.status} />
+                  <li key={campaign.id}>
+                    <Link
+                      href={`/campaigns/${campaign.id}`}
+                      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 transition-colors hover:border-accent/30 hover:bg-white/[0.04]"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-200">{campaign.name}</p>
+                        <p className="mt-0.5 text-xs text-gray-500">
+                          {campaign.budgetDisplay} · {campaign.startDateDisplay} –{" "}
+                          {campaign.endDateDisplay}
+                        </p>
+                      </div>
+                      <CampaignStatusBadge status={campaign.status} />
+                    </Link>
                   </li>
                 ))}
               </ul>

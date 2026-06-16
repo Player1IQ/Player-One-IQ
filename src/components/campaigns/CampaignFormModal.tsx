@@ -8,6 +8,7 @@ import {
   type CampaignInput,
   type CampaignStatus,
   campaignStatuses,
+  campaignStatusLabels,
 } from "@/lib/campaigns";
 import type { Sponsor } from "@/lib/sponsors";
 import type { Opportunity } from "@/lib/opportunities";
@@ -92,7 +93,11 @@ export function CampaignFormModal({
     }
 
     onClose();
-    router.refresh();
+    if (!isEdit && "id" in result && result.id) {
+      router.push(`/campaigns/${result.id}`);
+    } else {
+      router.refresh();
+    }
     setLoading(false);
   }
 
@@ -177,7 +182,7 @@ export function CampaignFormModal({
               >
                 {campaignStatuses.map((status) => (
                   <option key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    {campaignStatusLabels[status]}
                   </option>
                 ))}
               </select>
