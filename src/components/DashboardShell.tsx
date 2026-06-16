@@ -10,6 +10,7 @@ import type { UserOrganization } from "@/lib/organization/queries";
 interface DashboardShellProps {
   children: React.ReactNode;
   header: React.ReactNode;
+  mobileTitle?: string;
   mobileHeaderActions?: React.ReactNode;
   enabledFeatures?: FeatureKey[];
   messagingEnabled?: boolean;
@@ -20,6 +21,7 @@ interface DashboardShellProps {
 export function DashboardShell({
   children,
   header,
+  mobileTitle = "Player One IQ",
   mobileHeaderActions,
   enabledFeatures,
   messagingEnabled = true,
@@ -66,7 +68,9 @@ export function DashboardShell({
               <Menu className="h-5 w-5" />
             )}
           </button>
-          <span className="text-sm font-semibold text-white">Player One IQ</span>
+          <span className="min-w-0 truncate text-sm font-semibold text-white">
+            {mobileTitle}
+          </span>
           <div className="ml-auto flex items-center gap-1">
             {mobileHeaderActions}
             <MessageNotificationBell
