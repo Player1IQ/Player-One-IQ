@@ -41,19 +41,41 @@ export function SponsorTable({
   }
 
   if (sponsors.length === 0) {
-    return (
-      <div className="flex min-h-[280px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-raised">
-        <p className="text-sm font-medium text-gray-300">No sponsors yet</p>
-        <p className="mt-1 text-xs text-gray-500">
-          Add your first sponsor to get started.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm">
+      <div className="space-y-3 md:hidden">
+        {sponsors.map((sponsor) => (
+          <Link
+            key={sponsor.id}
+            href={`/sponsors/${sponsor.id}`}
+            className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-4 transition-colors hover:border-accent/30"
+          >
+            <SponsorLogo
+              initials={sponsor.logoInitials}
+              color={sponsor.logoColor}
+              size="sm"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-semibold text-gray-100">{sponsor.companyName}</p>
+                <SponsorStatusBadge status={sponsor.status} />
+              </div>
+              <p className="mt-1 text-sm text-gray-400">{sponsor.primaryContact.name}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <IndustryBadge industry={sponsor.industry} />
+                <span className="text-xs text-gray-500">
+                  {sponsor.activeDeals} deal{sponsor.activeDeals !== 1 ? "s" : ""}
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -191,13 +213,13 @@ export function SponsorTable({
         </div>
       </div>
 
-      {canWrite && (
+      {canWrite ? (
         <SponsorFormModal
           open={!!editingSponsor}
           onClose={() => setEditingSponsor(null)}
           sponsor={editingSponsor}
         />
-      )}
+      ) : null}
     </>
   );
 }

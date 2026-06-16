@@ -73,6 +73,7 @@ interface DashboardHomeClientProps {
   activity: ActivityItem[];
   upcomingExpirations: Contract[];
   overdueContracts: Contract[];
+  pendingApplications?: number;
   revenueTrend: RevenueTrendPoint[];
   creatorGrowth: CreatorGrowthPoint[];
 }
@@ -145,6 +146,7 @@ export function DashboardHomeClient({
   activity,
   upcomingExpirations,
   overdueContracts,
+  pendingApplications = 0,
   revenueTrend,
   creatorGrowth,
 }: DashboardHomeClientProps) {
@@ -153,12 +155,72 @@ export function DashboardHomeClient({
   );
   const hasCreatorGrowth = creatorGrowth.some((point) => point.creators > 0);
 
+  const attentionItems = [
+    overdueContracts.length > 0
+      ? {
+          label: `${overdueContracts.length} overdue contract${overdueContracts.length === 1 ? "" : "s"}`,
+          href: "/contracts?filter=overdue",
+          tone: "red" as const,
+        }
+      : null,
+    contractStats.expiringSoonCount > 0
+      ? {
+          label: `${contractStats.expiringSoonCount} contract${contractStats.expiringSoonCount === 1 ? "" : "s"} expiring soon`,
+          href: "/contracts?filter=expiring",
+          tone: "orange" as const,
+        }
+      : null,
+    pendingApplications > 0
+      ? {
+          label: `${pendingApplications} application${pendingApplications === 1 ? "" : "s"} to review`,
+          href: "/opportunities/applications",
+          tone: "amber" as const,
+        }
+      : null,
+    unreadMessages > 0
+      ? {
+          label: `${unreadMessages} unread message${unreadMessages === 1 ? "" : "s"}`,
+          href: "/messages",
+          tone: "accent" as const,
+        }
+      : null,
+  ].filter(Boolean) as Array<{
+    label: string;
+    href: string;
+    tone: "red" | "orange" | "amber" | "accent";
+  }>;
+
   const topCreators = [...creators]
     .sort((a, b) => (a.name > b.name ? 1 : -1))
     .slice(0, 5);
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {attentionItems.length > 0 ? (
+        <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-4 backdrop-blur-sm">
+          <p className="text-sm font-medium text-white">Needs attention</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {attentionItems.map((item) => (
+              <Link
+                key={item.href + item.label}
+                href={item.href}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  item.tone === "red"
+                    ? "border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20"
+                    : item.tone === "orange"
+                      ? "border-orange-500/30 bg-orange-500/10 text-orange-200 hover:bg-orange-500/20"
+                      : item.tone === "amber"
+                        ? "border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20"
+                        : "border-accent/30 bg-accent/10 text-accent-light hover:bg-accent/20"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {/* KPI Row */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard

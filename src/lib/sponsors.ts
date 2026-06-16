@@ -26,6 +26,13 @@ export const sponsorStatuses: SponsorStatus[] = [
   "negotiating",
 ];
 
+export const sponsorStatusLabels: Record<SponsorStatus, string> = {
+  active: "Active",
+  prospect: "Prospect",
+  negotiating: "Negotiating",
+  inactive: "Inactive",
+};
+
 export interface ContactInfo {
   name: string;
   title: string;
@@ -191,4 +198,60 @@ export function mapSponsorRow(row: SponsorRow): Sponsor {
     joinedDate: formatSponsorDate(row.created_at),
     internalNotes: row.internal_notes ?? "",
   };
+}
+
+export function getSponsorStats(sponsors: Sponsor[]) {
+  return {
+    totalCount: sponsors.length,
+    activeCount: sponsors.filter((s) => s.status === "active").length,
+    prospectCount: sponsors.filter((s) => s.status === "prospect").length,
+    negotiatingCount: sponsors.filter((s) => s.status === "negotiating").length,
+    inactiveCount: sponsors.filter((s) => s.status === "inactive").length,
+    totalActiveDeals: sponsors.reduce((sum, s) => sum + s.activeDeals, 0),
+  };
+}
+
+interface SponsorContractSlice {
+  sponsorId: string;
+  status: string;
+  contractValue: number;
+}
+
+export function enrichSponsorsWithContractStats<
+  T extends Sponsor,
+>(sponsors: T[], contracts: SponsorContractSlice[]): T[] {
+  return sponsors.map((sponsor) => {
+    const sponsorContracts = contracts.filter(
+      (contract) => contract.sponsorId === sponsor.id
+    );
+    const pipelineContracts = sponsorContracts.filter(
+      (contract) =>
+        contract.status === "active" ||
+        contract.status === "negotiating" ||
+        contract.status === "draft"
+    );
+
+    return {
+      ...sponsor,
+      activeDeals: pipelineContracts.length,
+      totalSpend: formatSponsorPipelineValue(
+        sponsorContracts
+          .filter(
+            (contract) =>
+              contract.status === "active" || contract.status === "negotiating"
+          )
+          .reduce((sum, contract) => sum + contract.contractValue, 0)
+      ),
+    };
+  });
+}
+
+function formatSponsorPipelineValue(value: number): string {
+  if (value <= 0) return "—";
+  return value.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
 }

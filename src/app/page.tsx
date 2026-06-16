@@ -5,7 +5,8 @@ import { getSponsors } from "@/lib/sponsors/queries";
 import { getContracts } from "@/lib/contracts/queries";
 import { getRecentActivity } from "@/lib/activity/queries";
 import { getOpportunities } from "@/lib/opportunities/queries";
-import { getOpportunityStats } from "@/lib/opportunities";
+import { getAllApplications } from "@/lib/opportunities/queries";
+import { getOpportunityStats, getApplicationStats } from "@/lib/opportunities";
 import {
   getConversations,
   getUnreadMessageCount,
@@ -41,6 +42,7 @@ export default async function DashboardPage() {
     activity,
     platformRevenueEntries,
     connectedAccountCount,
+    applications,
   ] = await Promise.all([
     getCreators(),
     getSponsors(),
@@ -51,9 +53,11 @@ export default async function DashboardPage() {
     getRecentActivity(10),
     getOrganizationRevenueEntriesForMonths(monthKeys),
     getConnectedPlatformAccountCount(),
+    getAllApplications(),
   ]);
 
   const opportunityStats = getOpportunityStats(opportunities);
+  const pendingApplications = getApplicationStats(applications).needsAction;
   const activeCreators = creators.filter((c) => c.status === "active");
   const activeSponsors = sponsors.filter((s) => s.status === "active");
   const contractStats = getContractStats(contracts);
@@ -92,6 +96,7 @@ export default async function DashboardPage() {
         activity={activity}
         upcomingExpirations={upcomingExpirations}
         overdueContracts={overdueContracts}
+        pendingApplications={pendingApplications}
         revenueTrend={revenueTrend}
         creatorGrowth={creatorGrowth}
       />
