@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Briefcase, FileText, Users } from "lucide-react";
+import { Plus, Search, Briefcase, FileText, Users } from "lucide-react";
 import {
   type Opportunity,
   type OpportunityStatus,
@@ -18,10 +18,21 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { cn } from "@/lib/utils";
 import type { Sponsor } from "@/lib/sponsors";
 
 const selectClassName =
   "rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 backdrop-blur-sm focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30";
+
+type StatusFilter = OpportunityStatus | "all";
+
+const quickFilters: Array<{ value: StatusFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "open", label: opportunityStatusLabels.open },
+  { value: "draft", label: opportunityStatusLabels.draft },
+  { value: "closed", label: opportunityStatusLabels.closed },
+  { value: "filled", label: opportunityStatusLabels.filled },
+];
 
 interface OpportunitiesPageClientProps {
   opportunities: Opportunity[];
@@ -38,9 +49,7 @@ export function OpportunitiesPageClient({
 }: OpportunitiesPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<OpportunityStatus | "all">(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   const stats = getOpportunityStats(opportunities);
 
@@ -52,20 +61,24 @@ export function OpportunitiesPageClient({
         o.description.toLowerCase().includes(query) ||
         o.category.toLowerCase().includes(query) ||
         o.platform.toLowerCase().includes(query) ||
+        opportunityStatusLabels[o.status].toLowerCase().includes(query) ||
         (o.sponsorName?.toLowerCase().includes(query) ?? false);
       const matchesStatus = statusFilter === "all" || o.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [opportunities, search, statusFilter]);
 
+  const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
+
   return (
-    <>
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+    <div className="animate-fade-in space-y-6">
+      <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard
           title="Open Opportunities"
           value={String(stats.openCount)}
+          subtitle={`${stats.draftCount} in draft`}
           icon={Briefcase}
-          iconColor="text-blue-400"
+          iconColor="text-emerald-400"
         />
         <MetricCard
           title="Total Opportunities"
@@ -81,7 +94,48 @@ export function OpportunitiesPageClient({
         />
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      {canManage && pendingReviewCount > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-amber-100">
+              {pendingReviewCount} application
+              {pendingReviewCount === 1 ? "" : "s"} waiting for review
+            </p>
+            <p className="mt-0.5 text-xs text-amber-200/80">
+              Accept applications to create contracts or reject to close the loop.
+            </p>
+          </div>
+          <Link
+            href="/opportunities/applications"
+            className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-500/20"
+          >
+            Review applications
+          </Link>
+        </div>
+      ) : null}
+
+      {canManage && stats.draftCount > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-500/25 bg-blue-500/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-blue-100">
+              {stats.draftCount} draft opportunit
+              {stats.draftCount === 1 ? "y" : "ies"} ready to publish
+            </p>
+            <p className="mt-0.5 text-xs text-blue-200/80">
+              Open an opportunity when you are ready for creators to apply.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("draft")}
+            className="shrink-0 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-100 transition-colors hover:bg-blue-500/20"
+          >
+            View drafts
+          </button>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/opportunities/applications"
           className="inline-flex items-center gap-2 text-sm text-accent-light hover:text-white"
@@ -96,19 +150,20 @@ export function OpportunitiesPageClient({
         </Link>
       </div>
 
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <Input
           type="search"
           placeholder="Search opportunities..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          icon={<Search className="h-4 w-4" />}
           className="max-w-md flex-1"
         />
         <div className="flex flex-wrap gap-3">
           <select
             value={statusFilter}
             onChange={(e) =>
-              setStatusFilter(e.target.value as OpportunityStatus | "all")
+              setStatusFilter(e.target.value as StatusFilter)
             }
             className={selectClassName}
           >
@@ -119,29 +174,70 @@ export function OpportunitiesPageClient({
               </option>
             ))}
           </select>
-          {canManage && (
+          {canManage ? (
             <Button type="button" onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
               Create Opportunity
             </Button>
-          )}
+          ) : null}
         </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {quickFilters.map((filter) => (
+          <button
+            key={filter.value}
+            type="button"
+            onClick={() => setStatusFilter(filter.value)}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              statusFilter === filter.value
+                ? "border-accent/40 bg-accent/15 text-accent-light"
+                : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
+            )}
+          >
+            {filter.label}
+            {filter.value === "open" && stats.openCount > 0 ? (
+              <span className="ml-1.5 text-emerald-400">({stats.openCount})</span>
+            ) : null}
+            {filter.value === "draft" && stats.draftCount > 0 ? (
+              <span className="ml-1.5 text-blue-400">({stats.draftCount})</span>
+            ) : null}
+          </button>
+        ))}
       </div>
 
       {filtered.length === 0 ? (
         <EmptyState
           icon={Briefcase}
-          title="No opportunities yet"
+          title={
+            opportunities.length === 0
+              ? "No opportunities yet"
+              : "No matching opportunities"
+          }
           description={
-            canManage
-              ? "Create your first sponsorship opportunity."
-              : "Check back when opportunities are published."
+            opportunities.length === 0
+              ? canManage
+                ? "Create your first sponsorship opportunity for creators to discover and apply."
+                : "Check back when opportunities are published."
+              : "Try a different search or status filter."
           }
           action={
-            canManage ? (
+            canManage && opportunities.length === 0 ? (
               <Button type="button" size="sm" onClick={() => setModalOpen(true)}>
                 Create Opportunity
               </Button>
+            ) : hasActiveFilters ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setStatusFilter("all");
+                }}
+                className="text-sm text-accent-light hover:text-white"
+              >
+                Clear filters
+              </button>
             ) : undefined
           }
           className="min-h-[280px]"
@@ -152,7 +248,7 @@ export function OpportunitiesPageClient({
             <Link
               key={opportunity.id}
               href={`/opportunities/${opportunity.id}`}
-              className="group rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-5 backdrop-blur-sm transition-colors hover:border-accent/20"
+              className="group rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-5 backdrop-blur-sm transition-colors hover:border-accent/20 hover:bg-white/[0.02]"
             >
               <div className="flex items-start justify-between gap-3">
                 <h3 className="font-semibold text-gray-100 group-hover:text-accent-light">
@@ -167,12 +263,12 @@ export function OpportunitiesPageClient({
                 <IndustryBadge industry={opportunity.category} />
                 <PlatformBadge platform={opportunity.platform} />
               </div>
-              {opportunity.sponsorName && (
+              {opportunity.sponsorName ? (
                 <p className="mt-3 text-sm text-gray-400">
                   Sponsor:{" "}
                   <span className="text-gray-300">{opportunity.sponsorName}</span>
                 </p>
-              )}
+              ) : null}
               <div className="mt-4 flex items-center justify-between text-sm">
                 <span className="font-semibold text-white">
                   {opportunity.budgetDisplay}
@@ -195,6 +291,6 @@ export function OpportunitiesPageClient({
         onClose={() => setModalOpen(false)}
         sponsors={sponsors}
       />
-    </>
+    </div>
   );
 }

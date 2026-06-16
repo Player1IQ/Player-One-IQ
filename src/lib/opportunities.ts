@@ -211,6 +211,9 @@ export function getApplicationStats(applications: OpportunityApplication[]) {
 export function getOpportunityStats(opportunities: Opportunity[]) {
   return {
     openCount: opportunities.filter((o) => o.status === "open").length,
+    draftCount: opportunities.filter((o) => o.status === "draft").length,
+    closedCount: opportunities.filter((o) => o.status === "closed").length,
+    filledCount: opportunities.filter((o) => o.status === "filled").length,
     totalCount: opportunities.length,
     applicationCount: opportunities.reduce(
       (sum, o) => sum + o.applicationCount,
