@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
+import type { DeliverablesSummary } from "@/lib/contract-deliverables";
 import {
   type Contract,
   isContractOverdue,
@@ -14,20 +15,48 @@ import {
 import { deleteContract } from "@/app/contracts/actions";
 import { ContractStatusBadge } from "./ContractStatusBadge";
 import { ContractFormModal } from "./ContractFormModal";
+import { cn } from "@/lib/utils";
 
 interface ContractTableProps {
   contracts: Contract[];
   creators: Creator[];
   sponsors: Sponsor[];
+  deliverableSummaries?: Record<string, DeliverablesSummary>;
   canWrite?: boolean;
   selectedId?: string | null;
   onSelect?: (contract: Contract) => void;
+}
+
+function DeliverableProgress({
+  summary,
+}: {
+  summary: DeliverablesSummary | undefined;
+}) {
+  if (!summary || summary.total === 0) {
+    return <span className="text-xs text-gray-600">—</span>;
+  }
+
+  return (
+    <div className="min-w-[88px]">
+      <p className="text-xs text-gray-400">
+        <span className="font-medium text-gray-300">{summary.completed}</span>/
+        {summary.total}
+      </p>
+      <div className="mt-1 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+        <div
+          className="h-full rounded-full bg-accent/70"
+          style={{ width: `${summary.progressPercent}%` }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export function ContractTable({
   contracts,
   creators,
   sponsors,
+  deliverableSummaries = {},
   canWrite = true,
   selectedId,
   onSelect,
@@ -52,20 +81,82 @@ export function ContractTable({
     router.refresh();
   }
 
-  if (contracts.length === 0) {
-    return (
-      <div className="flex min-h-[280px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-raised">
-        <p className="text-sm font-medium text-gray-300">No contracts yet</p>
-        <p className="mt-1 text-xs text-gray-500">
-          Create your first contract to get started.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm">
+      <div className="space-y-3 md:hidden">
+        {contracts.map((contract) => {
+          const expiring = isExpiringSoon(contract);
+          const overdue = isContractOverdue(contract);
+          const summary = deliverableSummaries[contract.id];
+
+          return (
+            <div
+              key={contract.id}
+              className={cn(
+                "rounded-2xl border bg-surface-raised/80 p-4 transition-colors",
+                selectedId === contract.id
+                  ? "border-accent/40 bg-accent/[0.04]"
+                  : "border-white/[0.06]"
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <Link
+                  href={`/contracts/${contract.id}`}
+                  className="min-w-0 flex-1"
+                >
+                  <p className="font-medium text-gray-200">
+                    {contract.contractName}
+                  </p>
+                  <p className="mt-1 text-sm text-gray-400">
+                    {contract.creatorName} · {contract.sponsorName}
+                  </p>
+                </Link>
+                <ContractStatusBadge status={contract.status} />
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    {contract.valueDisplay}
+                  </p>
+                  <p
+                    className={cn(
+                      "mt-0.5 text-xs",
+                      overdue
+                        ? "text-red-400"
+                        : expiring
+                          ? "text-orange-400"
+                          : "text-gray-500"
+                    )}
+                  >
+                    Ends {contract.endDateDisplay}
+                    {overdue ? " · Overdue" : expiring ? " · Expiring soon" : ""}
+                  </p>
+                </div>
+                <DeliverableProgress summary={summary} />
+              </div>
+
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => onSelect?.(contract)}
+                  className="flex-1 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5"
+                >
+                  Quick view
+                </button>
+                <Link
+                  href={`/contracts/${contract.id}`}
+                  className="flex-1 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-center text-xs font-medium text-accent-light"
+                >
+                  Open
+                </Link>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -80,58 +171,61 @@ export function ContractTable({
                   Sponsor
                 </th>
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Contract Value
+                  Value
                 </th>
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Status
                 </th>
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Deliverables
+                </th>
+                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
                   End Date
                 </th>
-                {canWrite && (
+                {canWrite ? (
                   <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Actions
                   </th>
-                )}
+                ) : null}
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
               {contracts.map((contract) => {
                 const expiring = isExpiringSoon(contract);
                 const overdue = isContractOverdue(contract);
+                const summary = deliverableSummaries[contract.id];
 
                 return (
                   <tr
                     key={contract.id}
                     onClick={() => onSelect?.(contract)}
-                    className={`group cursor-pointer transition-colors hover:bg-accent/[0.04] ${
-                      selectedId === contract.id ? "bg-accent/[0.06]" : ""
-                    }`}
+                    className={cn(
+                      "group cursor-pointer transition-colors hover:bg-accent/[0.04]",
+                      selectedId === contract.id && "bg-accent/[0.06]"
+                    )}
                   >
                     <td className="px-6 py-4">
-                      <Link
-                        href={`/contracts/${contract.id}`}
-                        className="block"
-                      >
+                      <Link href={`/contracts/${contract.id}`} className="block">
                         <p className="font-semibold text-gray-100 transition-colors group-hover:text-accent-light">
                           {contract.contractName}
                         </p>
-                        {overdue && (
+                        {overdue ? (
                           <span className="mt-1 inline-flex items-center text-xs text-red-400">
                             Overdue
                           </span>
-                        )}
-                        {expiring && !overdue && (
+                        ) : null}
+                        {expiring && !overdue ? (
                           <span className="mt-1 inline-flex items-center text-xs text-orange-400">
                             Expiring soon
                           </span>
-                        )}
+                        ) : null}
                       </Link>
                     </td>
                     <td className="px-6 py-4">
                       <Link
                         href={`/creators/${contract.creatorId}`}
                         className="text-gray-300 transition-colors hover:text-accent-light"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {contract.creatorName}
                       </Link>
@@ -140,6 +234,7 @@ export function ContractTable({
                       <Link
                         href={`/sponsors/${contract.sponsorId}`}
                         className="text-gray-300 transition-colors hover:text-accent-light"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {contract.sponsorName}
                       </Link>
@@ -151,6 +246,9 @@ export function ContractTable({
                     </td>
                     <td className="px-6 py-4">
                       <ContractStatusBadge status={contract.status} />
+                    </td>
+                    <td className="px-6 py-4">
+                      <DeliverableProgress summary={summary} />
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -165,21 +263,22 @@ export function ContractTable({
                         {contract.endDateDisplay}
                       </span>
                     </td>
-                    {canWrite && (
+                    {canWrite ? (
                       <td className="relative px-6 py-4">
                         <button
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setOpenMenu(
                               openMenu === contract.id ? null : contract.id
-                            )
-                          }
+                            );
+                          }}
                           className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-all hover:bg-surface-overlay hover:text-gray-200 group-hover:opacity-100"
                           disabled={deletingId === contract.id}
                           aria-label="Actions"
                         >
                           <MoreHorizontal className="h-5 w-5" />
                         </button>
-                        {openMenu === contract.id && (
+                        {openMenu === contract.id ? (
                           <>
                             <div
                               className="fixed inset-0 z-10"
@@ -195,7 +294,8 @@ export function ContractTable({
                                 View Contract
                               </Link>
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setEditingContract(contract);
                                   setOpenMenu(null);
                                 }}
@@ -205,12 +305,13 @@ export function ContractTable({
                                 Edit
                               </button>
                               <button
-                                onClick={() =>
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   handleDelete(
                                     contract.id,
                                     contract.contractName
-                                  )
-                                }
+                                  );
+                                }}
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -218,9 +319,9 @@ export function ContractTable({
                               </button>
                             </div>
                           </>
-                        )}
+                        ) : null}
                       </td>
-                    )}
+                    ) : null}
                   </tr>
                 );
               })}
@@ -229,7 +330,7 @@ export function ContractTable({
         </div>
       </div>
 
-      {canWrite && (
+      {canWrite ? (
         <ContractFormModal
           open={!!editingContract}
           onClose={() => setEditingContract(null)}
@@ -237,7 +338,7 @@ export function ContractTable({
           creators={creators}
           sponsors={sponsors}
         />
-      )}
+      ) : null}
     </>
   );
 }
