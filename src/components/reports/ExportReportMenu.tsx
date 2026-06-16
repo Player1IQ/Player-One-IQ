@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 interface ExportReportMenuProps {
   canExport: boolean;
-  variant?: "header" | "page";
+  variant?: "header" | "page" | "mobile";
   className?: string;
 }
 
@@ -82,18 +82,21 @@ export function ExportReportMenu({
   }
 
   if (!canExport) {
-    if (variant === "header") {
+    if (variant === "header" || variant === "mobile") {
       return (
         <Link
           href="/billing"
           className={cn(
-            "hidden items-center gap-1.5 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-accent/30 hover:text-accent-light sm:inline-flex",
+            variant === "mobile"
+              ? "inline-flex rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white"
+              : "hidden items-center gap-1.5 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-accent/30 hover:text-accent-light sm:inline-flex",
             className
           )}
           title="Upgrade to export reports"
+          aria-label="Upgrade to export reports"
         >
-          <Download className="h-3.5 w-3.5" />
-          Export
+          <Download className={variant === "mobile" ? "h-5 w-5" : "h-3.5 w-3.5"} />
+          {variant === "header" ? "Export" : null}
         </Link>
       );
     }
@@ -102,9 +105,11 @@ export function ExportReportMenu({
   }
 
   const triggerClass =
-    variant === "header"
-      ? "hidden items-center gap-1.5 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs font-medium text-gray-400 transition-colors hover:border-accent/30 hover:text-accent-light disabled:opacity-50 sm:inline-flex"
-      : "inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-accent/30 hover:text-white disabled:opacity-50";
+    variant === "mobile"
+      ? "inline-flex rounded-lg p-2 text-gray-400 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-50"
+      : variant === "header"
+        ? "hidden items-center gap-1.5 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs font-medium text-gray-400 transition-colors hover:border-accent/30 hover:text-accent-light disabled:opacity-50 sm:inline-flex"
+        : "inline-flex items-center gap-2 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-accent/30 hover:text-white disabled:opacity-50";
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -116,13 +121,16 @@ export function ExportReportMenu({
         aria-label="Export report"
         aria-expanded={open}
         aria-haspopup="true"
+        title={variant === "mobile" ? "Export report" : undefined}
       >
         {isPending ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <Loader2
+            className={variant === "mobile" ? "h-5 w-5 animate-spin" : "h-3.5 w-3.5 animate-spin"}
+          />
         ) : (
-          <Download className="h-3.5 w-3.5" />
+          <Download className={variant === "mobile" ? "h-5 w-5" : "h-3.5 w-3.5"} />
         )}
-        Export
+        {variant !== "mobile" ? "Export" : null}
         {variant === "page" ? (
           <ChevronDown className="h-4 w-4 text-gray-500" />
         ) : null}
@@ -132,7 +140,7 @@ export function ExportReportMenu({
         <div
           className={cn(
             "absolute z-50 mt-2 w-52 overflow-hidden rounded-xl border border-white/[0.06] bg-surface-raised/95 shadow-2xl backdrop-blur-xl",
-            variant === "header" ? "right-0" : "left-0"
+            variant === "header" || variant === "mobile" ? "right-0" : "left-0"
           )}
         >
           <div className="border-b border-white/[0.06] px-3 py-2">
@@ -165,7 +173,9 @@ export function ExportReportMenu({
         <p
           className={cn(
             "absolute z-50 mt-1 rounded-lg border border-red-500/20 bg-surface-raised px-2 py-1 text-xs text-red-400 shadow-lg",
-            variant === "header" ? "right-0 top-full w-56" : "top-full"
+            variant === "header" || variant === "mobile"
+              ? "right-0 top-full w-56"
+              : "top-full"
           )}
         >
           {error}

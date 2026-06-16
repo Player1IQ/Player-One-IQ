@@ -86,6 +86,9 @@ export async function DashboardLayout({
         messagingEnabled={messagingEnabled}
         organizations={organizations}
         activeOrganizationId={activeOrganization?.id ?? null}
+        mobileHeaderActions={
+          <ExportReportMenu canExport={canExportReports} variant="mobile" />
+        }
         header={header}
       >
         <SupabaseConfigBanner />

@@ -24,6 +24,8 @@ export interface CreatorRevenueRow {
 
 export interface MonthlyReportData {
   periodLabel: string;
+  creatorCount: number;
+  connectedAccountCount: number;
   revenue: ReturnType<typeof getDashboardRevenueSummary>;
   contractStats: ReturnType<typeof getContractStats>;
   opportunityStats: ReturnType<typeof getOpportunityStats>;
@@ -108,6 +110,8 @@ export function buildMonthlyReportData(params: {
 
   return {
     periodLabel,
+    creatorCount: params.creators.length,
+    connectedAccountCount: params.connectedAccountCount,
     revenue: getDashboardRevenueSummary(
       params.contracts,
       params.revenueEntries,

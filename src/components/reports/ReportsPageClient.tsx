@@ -5,6 +5,7 @@ import {
   Briefcase,
   DollarSign,
   FileText,
+  Link2,
   Sparkles,
   TrendingUp,
   Users,
@@ -18,19 +19,89 @@ interface ReportsPageClientProps {
   report: MonthlyReportData;
 }
 
+function ReportEmptyState({
+  icon: Icon,
+  title,
+  description,
+  actionHref,
+  actionLabel,
+}: {
+  icon: typeof Users;
+  title: string;
+  description: string;
+  actionHref: string;
+  actionLabel: string;
+}) {
+  return (
+    <div className="flex flex-col items-center rounded-xl border border-dashed border-white/[0.08] bg-surface/60 px-6 py-10 text-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/[0.04]">
+        <Icon className="h-5 w-5 text-gray-500" />
+      </div>
+      <p className="mt-3 text-sm font-medium text-white">{title}</p>
+      <p className="mt-1 max-w-sm text-sm text-gray-500">{description}</p>
+      <Link
+        href={actionHref}
+        className="mt-4 text-sm font-medium text-accent-light hover:text-white"
+      >
+        {actionLabel}
+      </Link>
+    </div>
+  );
+}
+
 export function ReportsPageClient({ report }: ReportsPageClientProps) {
   const aiRequestUsage = report.usage.find(
     (entry) => entry.metricKey === "ai_requests"
   );
 
+  const hasRevenueData =
+    report.creatorLeaderboard.length > 0 || report.platformBreakdown.length > 0;
+  const showSparseBanner =
+    !hasRevenueData &&
+    report.revenue.total <= 0 &&
+    report.contractStats.activeCount === 0;
+
   return (
     <div className="space-y-8 animate-fade-in">
+      {showSparseBanner ? (
+        <Card className="border-amber-500/20 bg-amber-500/5">
+          <CardContent className="px-5 py-4">
+            <p className="text-sm text-amber-100">
+              <span className="font-medium text-amber-200">Light data this month.</span>{" "}
+              Add creators, connect platform accounts, or log contracts to fill out
+              your report. You can still export what you have today.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3 text-sm">
+              <Link href="/creators" className="text-accent-light hover:text-white">
+                Add creators
+              </Link>
+              <Link href="/contracts" className="text-accent-light hover:text-white">
+                Create a contract
+              </Link>
+              <Link href="/settings" className="text-accent-light hover:text-white">
+                Sync platform revenue
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card className="border-white/[0.06] bg-surface-raised/80">
         <CardContent className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-          <p className="text-sm text-gray-400">
-            Monthly report for{" "}
-            <span className="font-medium text-white">{report.periodLabel}</span>
-          </p>
+          <div>
+            <p className="text-sm text-gray-400">
+              Monthly report for{" "}
+              <span className="font-medium text-white">{report.periodLabel}</span>
+            </p>
+            <p className="mt-0.5 text-xs text-gray-500">
+              {report.creatorCount} creator{report.creatorCount === 1 ? "" : "s"}
+              {report.connectedAccountCount > 0
+                ? ` · ${report.connectedAccountCount} OAuth-connected platform${
+                    report.connectedAccountCount === 1 ? "" : "s"
+                  }`
+                : ""}
+            </p>
+          </div>
           <ExportReportMenu canExport variant="page" />
         </CardContent>
       </Card>
@@ -80,9 +151,23 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
           </CardHeader>
           <CardContent>
             {report.creatorLeaderboard.length === 0 ? (
-              <p className="text-sm text-gray-500">
-                No creator revenue recorded this month yet.
-              </p>
+              <ReportEmptyState
+                icon={Users}
+                title="No creator revenue yet"
+                description={
+                  report.creatorCount === 0
+                    ? "Add creators to your roster, then connect contracts or platform income."
+                    : "Creators in your roster have no contract or platform revenue recorded for this month."
+                }
+                actionHref={
+                  report.creatorCount === 0 ? "/creators" : "/creators"
+                }
+                actionLabel={
+                  report.creatorCount === 0
+                    ? "Add your first creator"
+                    : "Review creators"
+                }
+              />
             ) : (
               <div className="space-y-3">
                 {report.creatorLeaderboard.slice(0, 8).map((row) => (
@@ -116,9 +201,27 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
           </CardHeader>
           <CardContent>
             {report.platformBreakdown.length === 0 ? (
-              <p className="text-sm text-gray-500">
-                Connect creator platforms or sync OAuth accounts to see breakdown.
-              </p>
+              <ReportEmptyState
+                icon={report.connectedAccountCount > 0 ? TrendingUp : Link2}
+                title={
+                  report.connectedAccountCount > 0
+                    ? "No platform income this month"
+                    : "No platform accounts connected"
+                }
+                description={
+                  report.connectedAccountCount > 0
+                    ? "OAuth accounts are linked but no revenue synced for this period yet. Run a manual sync or wait for the daily job."
+                    : "Connect YouTube, Twitch, or other platforms on a creator profile to track platform income."
+                }
+                actionHref={
+                  report.connectedAccountCount > 0 ? "/settings" : "/creators"
+                }
+                actionLabel={
+                  report.connectedAccountCount > 0
+                    ? "Open platform sync settings"
+                    : "Connect a platform"
+                }
+              />
             ) : (
               <div className="space-y-3">
                 {report.platformBreakdown.map((row) => (
@@ -162,7 +265,25 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
             </div>
           </CardContent>
         </Card>
-      ) : null}
+      ) : (
+        <Card className="border-white/[0.06] bg-surface-raised/80">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-violet-400" />
+              <CardTitle className="text-base">AI usage</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ReportEmptyState
+              icon={Sparkles}
+              title="No AI requests this month"
+              description="Run growth, sponsorship, or contract summaries from the AI page to see usage here."
+              actionHref="/ai"
+              actionLabel="Open AI assistants"
+            />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
