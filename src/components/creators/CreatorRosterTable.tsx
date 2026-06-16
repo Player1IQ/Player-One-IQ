@@ -42,19 +42,45 @@ export function CreatorRosterTable({
   }
 
   if (creators.length === 0) {
-    return (
-      <div className="flex min-h-[280px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-raised">
-        <p className="text-sm font-medium text-gray-300">No creators yet</p>
-        <p className="mt-1 text-xs text-gray-500">
-          Add your first creator to get started.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-border bg-surface-raised">
+      <div className="space-y-3 md:hidden">
+        {creators.map((creator) => (
+          <Link
+            key={creator.id}
+            href={`/creators/${creator.id}`}
+            className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-4 transition-colors hover:border-accent/30"
+          >
+            <CreatorAvatar
+              initials={creator.avatarInitials}
+              color={creator.avatarColor}
+              size="sm"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold text-gray-100">{creator.name}</p>
+                  {creator.email ? (
+                    <p className="mt-0.5 text-xs text-gray-500">{creator.email}</p>
+                  ) : null}
+                </div>
+                <StatusBadge status={creator.status} />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <PlatformBadge platform={creator.primaryPlatform} />
+                <span className="text-xs text-gray-500">
+                  Added {formatCreatorDate(creator.createdAt)}
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -177,13 +203,13 @@ export function CreatorRosterTable({
         </div>
       </div>
 
-      {canWrite && (
+      {canWrite ? (
         <CreatorFormModal
           open={!!editingCreator}
           onClose={() => setEditingCreator(null)}
           creator={editingCreator}
         />
-      )}
+      ) : null}
     </>
   );
 }

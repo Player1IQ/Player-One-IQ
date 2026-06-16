@@ -22,6 +22,13 @@ export const creatorStatuses: CreatorStatus[] = [
   "on-hold",
 ];
 
+export const creatorStatusLabels: Record<CreatorStatus, string> = {
+  active: "Active",
+  inactive: "Inactive",
+  pending: "Pending",
+  "on-hold": "On Hold",
+};
+
 export interface SocialHandle {
   platform: Platform;
   handle: string;
@@ -127,4 +134,14 @@ export interface CreatorInput {
   status: CreatorStatus;
   socialHandles: SocialHandle[];
   notes: string;
+}
+
+export function getCreatorStats(creators: Creator[]) {
+  return {
+    totalCount: creators.length,
+    activeCount: creators.filter((c) => c.status === "active").length,
+    pendingCount: creators.filter((c) => c.status === "pending").length,
+    onHoldCount: creators.filter((c) => c.status === "on-hold").length,
+    inactiveCount: creators.filter((c) => c.status === "inactive").length,
+  };
 }
