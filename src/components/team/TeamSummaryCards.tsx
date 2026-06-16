@@ -26,59 +26,63 @@ export function TeamSummaryCards({
     filter: TeamStatusFilter;
     icon: typeof Users;
     iconColor: string;
+    clickable: boolean;
   }[] = [
     {
       label: "Total Team Members",
       value: total,
-      sub: "Click to show all",
+      sub: "Members and pending invites",
       filter: "all",
       icon: Users,
       iconColor: "text-accent-light",
+      clickable: true,
     },
     {
       label: "Active Users",
       value: activeCount,
-      sub: "Click to filter active",
+      sub: "Accepted and signed in",
       filter: "active",
       icon: UserCheck,
       iconColor: "text-emerald-400",
+      clickable: true,
     },
     {
       label: "Pending Invites",
       value: pendingCount,
-      sub: "Click to filter pending",
+      sub: "Awaiting acceptance",
       filter: "pending",
       icon: Mail,
       iconColor: "text-amber-400",
+      clickable: true,
     },
     {
       label: "Assigned Roles",
       value: assignedRolesCount,
-      sub: "Unique role types",
+      sub: "Admin, manager, and viewer",
       filter: "all",
       icon: Shield,
       iconColor: "text-purple-400",
+      clickable: false,
     },
   ];
 
   return (
-    <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
-        const isActive = activeFilter === card.filter;
-        const isClickable = card.label !== "Assigned Roles";
+        const isActive = card.clickable && activeFilter === card.filter;
 
         return (
           <button
             key={card.label}
             type="button"
-            onClick={() => isClickable && onFilterChange(card.filter)}
-            disabled={!isClickable}
-            className={`group relative overflow-hidden rounded-xl border bg-surface-raised p-5 text-left transition-colors ${
+            onClick={() => card.clickable && onFilterChange(card.filter)}
+            disabled={!card.clickable}
+            className={`group relative w-full overflow-hidden rounded-2xl border bg-surface-raised/80 p-5 text-left backdrop-blur-sm transition-all duration-300 ${
               isActive
-                ? "border-accent/50 ring-1 ring-accent/30"
-                : "border-border hover:border-accent/30"
-            } ${isClickable ? "cursor-pointer" : "cursor-default"}`}
+                ? "border-accent/50 shadow-glow-active ring-1 ring-accent/30"
+                : "border-white/[0.06] hover:-translate-y-0.5 hover:border-accent/30 hover:shadow-card-hover"
+            } ${card.clickable ? "cursor-pointer" : "cursor-default"}`}
           >
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-gray-400">{card.label}</p>

@@ -87,29 +87,101 @@ export function TeamTable({
   }
 
   if (members.length === 0) {
-    return (
-      <div className="flex min-h-[280px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-raised">
-        <p className="text-sm font-medium text-gray-300">No team members yet</p>
-        <p className="mt-1 text-xs text-gray-500">
-          Invite your first team member to get started.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (
     <>
-      {copyFeedback && (
+      {copyFeedback ? (
         <div className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
           {copyFeedback}
         </div>
-      )}
-      {actionError && (
+      ) : null}
+      {actionError ? (
         <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {actionError}
         </div>
-      )}
-      <div className="overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm">
+      ) : null}
+
+      <div className="space-y-3 md:hidden">
+        {members.map((member) => {
+          const canEdit =
+            canManageTeam &&
+            !member.isInvitation &&
+            member.role !== "owner" &&
+            !(currentUserRole === "admin" && member.role === "admin");
+
+          return (
+            <div
+              key={member.id}
+              className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-4"
+            >
+              <div className="flex items-start gap-3">
+                <TeamMemberAvatar
+                  initials={member.avatarInitials}
+                  color={member.avatarColor}
+                  size="sm"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-gray-100">{member.name}</p>
+                    <RoleBadge role={member.role} />
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-500">{member.email}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <MemberStatusBadge status={member.status} />
+                    <span className="text-xs text-gray-500">
+                      Joined {member.joinedDate}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {member.isInvitation ? (
+                  <>
+                    {member.invitationToken ? (
+                      <button
+                        type="button"
+                        onClick={() => void copyInviteLink(member.invitationToken!)}
+                        className="flex-1 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5"
+                      >
+                        Copy link
+                      </button>
+                    ) : null}
+                    {canManageTeam ? (
+                      <button
+                        type="button"
+                        onClick={() => setResendInvite(member)}
+                        className="flex-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200"
+                      >
+                        Resend invite
+                      </button>
+                    ) : null}
+                  </>
+                ) : (
+                  <Link
+                    href={`/team/${member.id}`}
+                    className="flex-1 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-center text-xs font-medium text-accent-light"
+                  >
+                    View profile
+                  </Link>
+                )}
+                {canEdit ? (
+                  <button
+                    type="button"
+                    onClick={() => setEditingMember(member)}
+                    className="rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5"
+                  >
+                    Edit role
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>

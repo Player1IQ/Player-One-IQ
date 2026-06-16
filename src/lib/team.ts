@@ -31,6 +31,12 @@ export const roleLabels: Record<TeamRole, string> = {
   viewer: "Viewer",
 };
 
+export const memberStatusLabels: Record<MemberStatus, string> = {
+  active: "Active",
+  pending: "Pending",
+  inactive: "Inactive",
+};
+
 export interface PermissionDefinition {
   key: PermissionKey;
   label: string;
