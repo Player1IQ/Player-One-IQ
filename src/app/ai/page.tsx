@@ -1,20 +1,27 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { AiConnectionStrip } from "@/components/ai/AiConnectionStrip";
 import { AiDashboardClient } from "@/components/ai/AiDashboardClient";
 import { AiModeNotice } from "@/components/ai/AiModeNotice";
 import { SubscriptionBanner } from "@/components/subscription/SubscriptionBanner";
+import { getAiIntegrationPublicSummary } from "@/lib/ai/credentials";
 import { getAiDashboardData } from "@/lib/ai/queries";
 import { getAiLlmHealth } from "@/lib/ai/llm-health";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { canManageSettings, getCurrentUserRole } from "@/lib/permissions";
 import { hasAnyAiFeature } from "@/lib/subscription/features";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 
 export default async function AiPage() {
   const organizationId = await getOrganizationId();
-  const [aiData, context, aiLlmHealth] = await Promise.all([
+  const [aiData, context, aiLlmHealth, integration, role] = await Promise.all([
     getAiDashboardData(),
     getSubscriptionContext(),
     getAiLlmHealth(organizationId),
+    getAiIntegrationPublicSummary(),
+    getCurrentUserRole(),
   ]);
+
+  const canManage = canManageSettings(role);
 
   const aiRequestCount =
     context.usage.find((row) => row.metricKey === "ai_requests")?.count ?? 0;
@@ -32,6 +39,11 @@ export default async function AiPage() {
           tierGroup={context.subscription?.plan.tierGroup}
         />
       ) : null}
+      <AiConnectionStrip
+        integration={integration}
+        healthState={aiLlmHealth}
+        canManage={canManage}
+      />
       <AiModeNotice
         healthState={aiLlmHealth}
         aiRequestCount={aiRequestCount}

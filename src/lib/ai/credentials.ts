@@ -25,11 +25,15 @@ interface OrganizationAiIntegrationRow {
 }
 
 export async function getAiIntegrationForSettings(): Promise<AiIntegrationPublic | null> {
-  const supabase = await createClient();
-  if (!supabase) return null;
+  return getAiIntegrationPublicSummary();
+}
 
+export async function getAiIntegrationPublicSummary(): Promise<AiIntegrationPublic | null> {
   const organizationId = await getOrganizationId();
   if (!organizationId) return null;
+
+  const supabase = createServiceClient() ?? (await createClient());
+  if (!supabase) return null;
 
   const { data } = await supabase
     .from("organization_ai_integrations")
