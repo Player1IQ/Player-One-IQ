@@ -27,12 +27,14 @@ interface OpportunitiesPageClientProps {
   opportunities: Opportunity[];
   sponsors: Sponsor[];
   canManage: boolean;
+  pendingReviewCount?: number;
 }
 
 export function OpportunitiesPageClient({
   opportunities,
   sponsors,
   canManage,
+  pendingReviewCount = 0,
 }: OpportunitiesPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -79,12 +81,18 @@ export function OpportunitiesPageClient({
         />
       </div>
 
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/opportunities/applications"
-          className="text-sm text-accent-light hover:text-white"
+          className="inline-flex items-center gap-2 text-sm text-accent-light hover:text-white"
         >
-          View all applications →
+          View all applications
+          {canManage && pendingReviewCount > 0 ? (
+            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300 ring-1 ring-amber-500/25">
+              {pendingReviewCount} to review
+            </span>
+          ) : null}
+          <span aria-hidden>→</span>
         </Link>
       </div>
 

@@ -1,15 +1,19 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OpportunitiesPageClient } from "@/components/opportunities/OpportunitiesPageClient";
-import { getOpportunities } from "@/lib/opportunities/queries";
+import { getOpportunities, getAllApplications } from "@/lib/opportunities/queries";
+import { getApplicationStats } from "@/lib/opportunities";
 import { getSponsors } from "@/lib/sponsors/queries";
 import { getCurrentUserRole, canManageOpportunities } from "@/lib/permissions";
 
 export default async function OpportunitiesPage() {
-  const [opportunities, sponsors, role] = await Promise.all([
+  const [opportunities, sponsors, role, applications] = await Promise.all([
     getOpportunities(),
     getSponsors(),
     getCurrentUserRole(),
+    getAllApplications(),
   ]);
+
+  const pendingReviewCount = getApplicationStats(applications).needsAction;
 
   return (
     <DashboardLayout
@@ -20,6 +24,7 @@ export default async function OpportunitiesPage() {
         opportunities={opportunities}
         sponsors={sponsors}
         canManage={canManageOpportunities(role)}
+        pendingReviewCount={pendingReviewCount}
       />
     </DashboardLayout>
   );
