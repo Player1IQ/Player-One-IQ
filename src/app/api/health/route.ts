@@ -14,7 +14,13 @@ import {
 export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? null;
   const openAiConfigured = isAiLlmConfigured();
+  const aiCredentialsEncryptionConfigured = Boolean(
+    process.env.AI_CREDENTIALS_ENCRYPTION_KEY?.trim()
+  );
   const openAiHealth = openAiConfigured ? await getOpenAiHealth() : "unconfigured";
+  const aiDeployReady =
+    aiCredentialsEncryptionConfigured ||
+    (openAiConfigured && openAiHealth === "available");
 
   return NextResponse.json({
     ok: true,
@@ -30,9 +36,8 @@ export async function GET() {
     ),
     openAiConfigured,
     openAiHealth,
-    aiCredentialsEncryptionConfigured: Boolean(
-      process.env.AI_CREDENTIALS_ENCRYPTION_KEY?.trim()
-    ),
+    aiCredentialsEncryptionConfigured,
+    aiDeployReady,
     appUrl,
   });
 }

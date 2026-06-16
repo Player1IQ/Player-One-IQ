@@ -21,23 +21,26 @@ export interface AiIntegrationPublic {
 export const aiProviderOptions: Array<{
   value: AiProvider;
   label: string;
+  description: string;
   defaultModel: string;
   keyPrefix: string;
   docsUrl: string;
 }> = [
   {
+    value: "anthropic",
+    label: "Claude",
+    description: "Anthropic API — keys from console.anthropic.com (Claude Pro uses separate billing)",
+    defaultModel: "claude-sonnet-4-6",
+    keyPrefix: "sk-ant-",
+    docsUrl: "https://console.anthropic.com/settings/keys",
+  },
+  {
     value: "openai",
     label: "OpenAI",
+    description: "ChatGPT API — keys from platform.openai.com",
     defaultModel: "gpt-4o-mini",
     keyPrefix: "sk-",
     docsUrl: "https://platform.openai.com/api-keys",
-  },
-  {
-    value: "anthropic",
-    label: "Anthropic",
-    defaultModel: "claude-3-5-haiku-20241022",
-    keyPrefix: "sk-ant-",
-    docsUrl: "https://console.anthropic.com/settings/keys",
   },
 ];
 

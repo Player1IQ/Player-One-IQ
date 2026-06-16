@@ -9,7 +9,7 @@ interface AiModeNoticeProps {
 }
 
 function providerLabel(provider: string | null): string {
-  if (provider === "anthropic") return "Anthropic";
+  if (provider === "anthropic") return "Claude";
   if (provider === "openai") return "OpenAI";
   return "AI provider";
 }
@@ -112,7 +112,7 @@ export function AiModeNotice({
           responses until you connect an AI provider.
         </p>
         <p className="mt-2 text-xs text-gray-500">
-          Connect your OpenAI or Anthropic API key to enable live insights.
+          Connect your Claude or OpenAI API key to enable live insights.
         </p>
         <Link
           href="/settings"

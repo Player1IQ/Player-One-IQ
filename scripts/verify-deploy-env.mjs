@@ -99,9 +99,14 @@ const checks = [
     hint: "Twitch OAuth",
   },
   {
+    key: "AI_CREDENTIALS_ENCRYPTION_KEY",
+    required: false,
+    hint: "Required for workspace BYOK keys in Settings → AI integration",
+  },
+  {
     key: "OPENAI_API_KEY",
     required: false,
-    hint: "Live AI (demo mode without it)",
+    hint: "Optional platform AI fallback (workspaces can use BYOK instead)",
   },
   {
     key: "STRIPE_SECRET_KEY",
@@ -155,6 +160,19 @@ if (appUrl && !appUrl.includes("localhost")) {
   console.log("\nSupabase → Authentication → URL configuration:");
   console.log(`  Site URL: ${appUrl}`);
   console.log(`  Redirect URLs: ${appUrl}/auth/callback`);
+}
+
+const aiEncryption = Boolean(env.AI_CREDENTIALS_ENCRYPTION_KEY?.trim());
+const openAi = Boolean(env.OPENAI_API_KEY?.trim());
+if (!aiEncryption && !openAi) {
+  console.log(
+    "\n⚠ AI: set AI_CREDENTIALS_ENCRYPTION_KEY for workspace BYOK, and/or OPENAI_API_KEY as platform fallback."
+  );
+  warned += 1;
+} else if (aiEncryption && !openAi) {
+  console.log(
+    "\n✓ AI: BYOK encryption configured — workspaces connect keys in Settings."
+  );
 }
 
 console.log(

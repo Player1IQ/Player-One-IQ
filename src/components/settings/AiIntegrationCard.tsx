@@ -24,7 +24,7 @@ export function AiIntegrationCard({
   canManage,
 }: AiIntegrationCardProps) {
   const [provider, setProvider] = useState<AiProvider>(
-    integration?.provider ?? "openai"
+    integration?.provider ?? "anthropic"
   );
   const [model, setModel] = useState(
     integration?.model ??
@@ -114,8 +114,9 @@ export function AiIntegrationCard({
         <div className="flex-1">
           <h2 className="text-base font-semibold text-white">AI integration</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Connect your workspace&apos;s AI provider. Live insights use your API
-            key and bill your provider account directly. Without a workspace key,
+            Connect Claude, OpenAI, or another supported provider with your own
+            API key. Usage bills your provider account directly. Without a
+            workspace key,
             {platformFallbackConfigured
               ? " the platform OpenAI key is used as fallback."
               : " demo/sample responses are shown."}
@@ -163,6 +164,9 @@ export function AiIntegrationCard({
                       </option>
                     ))}
                   </select>
+                  <span className="mt-1 block text-xs text-gray-500">
+                    {selectedProvider.description}
+                  </span>
                 </label>
 
                 <label className="block text-sm">
