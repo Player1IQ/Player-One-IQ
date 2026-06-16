@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Calendar,
@@ -18,10 +18,10 @@ import {
   updateDeliverable,
 } from "@/app/contracts/deliverable-actions";
 import {
-  computeDeliverablesProgress,
   deliverableStatusBadgeVariant,
   deliverableStatusLabels,
   deliverableStatuses,
+  getDeliverableStats,
   type ContractDeliverable,
   type DeliverableStatus,
 } from "@/lib/contract-deliverables";
@@ -35,6 +35,16 @@ interface ContractDeliverablesPanelProps {
   deliverables: ContractDeliverable[];
   canWrite?: boolean;
 }
+
+type DeliverableFilter = "all" | "open" | "overdue" | "in_progress" | "completed";
+
+const quickFilters: Array<{ value: DeliverableFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "open", label: "Open" },
+  { value: "overdue", label: "Overdue" },
+  { value: "in_progress", label: "In progress" },
+  { value: "completed", label: "Completed" },
+];
 
 export function ContractDeliverablesPanel({
   contractId,
@@ -52,13 +62,31 @@ export function ContractDeliverablesPanel({
   const [editDueDate, setEditDueDate] = useState("");
   const [editStatus, setEditStatus] = useState<DeliverableStatus>("pending");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<DeliverableFilter>("all");
 
   useEffect(() => {
     setDeliverables(initialDeliverables);
   }, [initialDeliverables]);
 
-  const { completed, total, progressPercent } =
-    computeDeliverablesProgress(deliverables);
+  const stats = getDeliverableStats(deliverables);
+  const { completed, total, progressPercent } = stats;
+
+  const filteredDeliverables = useMemo(() => {
+    return deliverables.filter((item) => {
+      switch (statusFilter) {
+        case "open":
+          return item.status !== "completed";
+        case "overdue":
+          return item.isOverdue;
+        case "in_progress":
+          return item.status === "in_progress";
+        case "completed":
+          return item.status === "completed";
+        default:
+          return true;
+      }
+    });
+  }, [deliverables, statusFilter]);
 
   async function refreshAfterAction() {
     router.refresh();
@@ -176,13 +204,71 @@ export function ContractDeliverablesPanel({
 
       {error ? <p className="text-sm text-red-400">{error}</p> : null}
 
+      {stats.overdueCount > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-red-100">
+              {stats.overdueCount} deliverable
+              {stats.overdueCount === 1 ? "" : "s"} past due
+            </p>
+            <p className="mt-0.5 text-xs text-red-200/80">
+              Complete or reschedule items to keep this contract on track.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("overdue")}
+            className="shrink-0 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-100 transition-colors hover:bg-red-500/20"
+          >
+            View overdue
+          </button>
+        </div>
+      ) : null}
+
+      {total > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {quickFilters.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              onClick={() => setStatusFilter(filter.value)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                statusFilter === filter.value
+                  ? "border-accent/40 bg-accent/15 text-accent-light"
+                  : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
+              )}
+            >
+              {filter.label}
+              {filter.value === "overdue" && stats.overdueCount > 0 ? (
+                <span className="ml-1.5 text-red-400">({stats.overdueCount})</span>
+              ) : null}
+              {filter.value === "open" && stats.openCount > 0 ? (
+                <span className="ml-1.5 text-amber-400">({stats.openCount})</span>
+              ) : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       {deliverables.length === 0 ? (
         <p className="text-sm text-gray-500">
           No deliverables yet. Add items below to track progress.
         </p>
+      ) : filteredDeliverables.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-white/[0.08] px-4 py-6 text-center">
+          <p className="text-sm text-gray-400">No deliverables match this filter.</p>
+          <button
+            type="button"
+            onClick={() => setStatusFilter("all")}
+            className="mt-2 text-sm text-accent-light hover:text-white"
+          >
+            Show all
+          </button>
+        </div>
       ) : (
         <ul className="space-y-2">
-          {deliverables.map((item) => {
+          {filteredDeliverables.map((item) => {
             const isEditing = editingId === item.id;
             const isLoading = loadingId === item.id;
 

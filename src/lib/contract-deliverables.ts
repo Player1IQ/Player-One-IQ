@@ -136,6 +136,23 @@ export function buildDeliverablesSummary(
   return { total, completed, progressPercent, nextDue };
 }
 
+export function getDeliverableStats(deliverables: ContractDeliverable[]) {
+  const overdue = deliverables.filter((d) => d.isOverdue);
+  const inProgress = deliverables.filter((d) => d.status === "in_progress");
+  const pending = deliverables.filter((d) => d.status === "pending");
+  const completed = deliverables.filter((d) => d.status === "completed");
+  const open = deliverables.filter((d) => d.status !== "completed");
+
+  return {
+    overdueCount: overdue.length,
+    inProgressCount: inProgress.length,
+    pendingCount: pending.length,
+    completedCount: completed.length,
+    openCount: open.length,
+    ...computeDeliverablesProgress(deliverables),
+  };
+}
+
 export function parseDeliverableTitlesFromText(text: string | null): string[] {
   if (!text?.trim()) return [];
   return text

@@ -30,6 +30,8 @@ import { ContractDeliverablesPanel } from "./ContractDeliverablesPanel";
 import { ContractAiSummaryPanel } from "./ContractAiSummaryPanel";
 import { DealRoomButton } from "@/components/messages/DealRoomButton";
 import type { ContractDeliverable } from "@/lib/contract-deliverables";
+import { buildDeliverablesSummary } from "@/lib/contract-deliverables";
+import { ContractDeliverablesSummary } from "./ContractDeliverablesPanel";
 
 interface ContractDetailProps {
   contract: Contract;
@@ -77,6 +79,7 @@ export function ContractDetail({
   const [deleting, setDeleting] = useState(false);
   const expiring = isExpiringSoon(contract);
   const overdue = isContractOverdue(contract);
+  const deliverablesSummary = buildDeliverablesSummary(deliverables);
 
   async function handleDelete() {
     if (
@@ -209,6 +212,23 @@ export function ContractDetail({
                 </Link>
               </div>
             </div>
+            {deliverablesSummary.total > 0 ? (
+              <div className="mt-5 max-w-md rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Deliverables progress
+                </p>
+                <div className="mt-3">
+                  <ContractDeliverablesSummary
+                    completed={deliverablesSummary.completed}
+                    total={deliverablesSummary.total}
+                    progressPercent={deliverablesSummary.progressPercent}
+                    nextDueTitle={deliverablesSummary.nextDue?.title}
+                    nextDueDateDisplay={deliverablesSummary.nextDue?.dueDateDisplay}
+                    nextDueOverdue={deliverablesSummary.nextDue?.isOverdue}
+                  />
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -241,6 +261,12 @@ export function ContractDetail({
           </div>
         </div>
 
+        <ContractDeliverablesPanel
+          contractId={contract.id}
+          deliverables={deliverables}
+          canWrite={canWrite}
+        />
+
         <Section
           title="Contract Workflow"
           description="Set deal value below, then advance when terms are agreed"
@@ -270,51 +296,6 @@ export function ContractDetail({
             aiMode={aiMode}
           />
         </Section>
-
-        <Section title="Contract Information">
-          <dl className="space-y-4">
-            <div className="flex justify-between border-b border-border-subtle pb-3">
-              <dt className="text-sm text-gray-500">Creator</dt>
-              <dd>
-                <Link
-                  href={`/creators/${contract.creatorId}`}
-                  className="text-sm font-medium text-accent-light hover:text-white"
-                >
-                  {contract.creatorName}
-                </Link>
-              </dd>
-            </div>
-            <div className="flex justify-between border-b border-border-subtle pb-3">
-              <dt className="text-sm text-gray-500">Sponsor</dt>
-              <dd>
-                <Link
-                  href={`/sponsors/${contract.sponsorId}`}
-                  className="text-sm font-medium text-accent-light hover:text-white"
-                >
-                  {contract.sponsorName}
-                </Link>
-              </dd>
-            </div>
-            <div className="flex justify-between border-b border-border-subtle pb-3">
-              <dt className="text-sm text-gray-500">Contract Value</dt>
-              <dd className="text-sm font-semibold text-white">
-                {contract.valueDisplay}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-sm text-gray-500">Status</dt>
-              <dd>
-                <ContractStatusBadge status={contract.status} />
-              </dd>
-            </div>
-          </dl>
-        </Section>
-
-        <ContractDeliverablesPanel
-          contractId={contract.id}
-          deliverables={deliverables}
-          canWrite={canWrite}
-        />
 
         {contract.notes && (
           <Section
