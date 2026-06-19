@@ -4,6 +4,12 @@ import {
   getOrganizationId,
 } from "@/lib/organization/queries";
 import { getDefaultPlanForOrgType, parsePlanLimits, planCatalog } from "./plans";
+import { expirePlatformTrialIfNeeded } from "./trial-lifecycle";
+import {
+  applyPlatformTrialLimits,
+  getTrialPlanForOrgType,
+  isPlatformTrialActive,
+} from "./trials";
 import type {
   AiUsageSummary,
   FeatureKey,
@@ -295,7 +301,9 @@ export async function getAiUsageSummary(): Promise<AiUsageSummary[]> {
 
 async function getFallbackSubscriptionContext(): Promise<SubscriptionContext> {
   const organization = await getOrganizationForUser();
-  const planCode = getDefaultPlanForOrgType(organization?.type ?? "");
+  const planCode = organization?.type
+    ? getTrialPlanForOrgType(organization.type)
+    : getDefaultPlanForOrgType(organization?.type ?? "");
   const catalog = planCatalog[planCode];
 
   return {
@@ -307,21 +315,32 @@ async function getFallbackSubscriptionContext(): Promise<SubscriptionContext> {
 }
 
 export async function getSubscriptionContext(): Promise<SubscriptionContext> {
-  const subscription = await getOrganizationSubscription();
+  let subscription = await getOrganizationSubscription();
   if (!subscription) {
     return getFallbackSubscriptionContext();
   }
+
+  subscription = await expirePlatformTrialIfNeeded(subscription);
 
   const features = await resolveOrganizationFeatures(
     subscription.plan,
     subscription.organizationId
   );
-  const usage = await getUsageSnapshots(subscription.plan.limits);
+
+  const limits = isPlatformTrialActive(
+    subscription.status,
+    subscription.trialEndsAt,
+    subscription.stripeSubscriptionId
+  )
+    ? applyPlatformTrialLimits(subscription.plan, subscription.plan.limits)
+    : subscription.plan.limits;
+
+  const usage = await getUsageSnapshots(limits);
 
   return {
     subscription,
     features,
-    limits: subscription.plan.limits,
+    limits,
     usage,
   };
 }

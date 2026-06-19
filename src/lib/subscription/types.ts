@@ -1,6 +1,7 @@
 export const planCodes = [
   "free_creator",
   "creator_pro",
+  "agency_starter",
   "agency",
   "agency_pro",
   "sponsor",

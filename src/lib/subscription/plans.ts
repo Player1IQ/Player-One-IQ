@@ -27,6 +27,17 @@ export const planCatalog: Record<
       "monthly_reports",
     ],
   },
+  agency_starter: {
+    limits: { creators: 5, team_members: 2, opportunities: null, campaigns: null, ai_requests: 0 },
+    features: [
+      "creator_profiles",
+      "team_management",
+      "contracts",
+      "sponsor_crm",
+      "messaging",
+      "limited_analytics",
+    ],
+  },
   agency: {
     limits: { creators: 25, team_members: null, opportunities: null, campaigns: null, ai_requests: 200 },
     features: [
@@ -108,6 +119,14 @@ export const planHighlights: Record<
       "Revenue forecasting & monthly reports",
     ],
   },
+  agency_starter: {
+    tagline: "Essentials after your trial",
+    bullets: [
+      "Up to 5 creators & 2 team seats",
+      "Contracts, sponsor CRM & messaging",
+      "Upgrade for AI and higher limits",
+    ],
+  },
   agency: {
     tagline: "Run your roster end-to-end",
     bullets: [
@@ -148,6 +167,7 @@ export const planHighlights: Record<
 export const upgradePaths: Record<PlanCode, PlanCode[]> = {
   free_creator: ["creator_pro"],
   creator_pro: [],
+  agency_starter: ["agency", "agency_pro"],
   agency: ["agency_pro"],
   agency_pro: [],
   sponsor: ["sponsor_pro"],
@@ -164,7 +184,7 @@ export function getDefaultPlanForOrgType(orgType: string): PlanCode {
       "Talent Management Firm",
     ].includes(orgType)
   ) {
-    return "agency";
+    return "agency_starter";
   }
   return "free_creator";
 }

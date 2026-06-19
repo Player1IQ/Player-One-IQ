@@ -53,7 +53,7 @@ These steps are not automated — complete them before inviting real users:
 3. **Stripe** — Switch to live keys and configure the production webhook (`/api/billing/webhook`). Run `npm run verify:billing`.
 4. **Vercel** — Set all required env vars (`npm run verify:deploy`). After deploy, run `npm run verify:launch` (or `npm run verify:production`) against your live URL.
 5. **OAuth** — Register YouTube/Twitch callback URLs shown by the verify scripts when `PLATFORM_OAUTH_ENABLED=true`.
-6. **Agency billing policy** — New workspaces default to Agency plan (migration 018); tighten to paid tiers when billing goes live.
+6. **Agency billing policy** — New workspaces get a **5-day platform trial** on their tier’s paid entry plan (Agency, Creator Pro, or Sponsor Pro), then downgrade to the free tier if they don’t subscribe. Existing workspaces before migration 028 are unchanged.
 
 ### Launch complete criteria
 
@@ -65,6 +65,7 @@ You are ready to invite real users when:
 - [ ] Supabase auth URLs and leaked-password protection configured
 - [ ] OAuth callbacks registered in Google/Twitch consoles (if using platform revenue sync)
 - [ ] Agency free-tier vs paid policy decided and communicated to the team
+- [ ] Platform trials configured (migration 028) — new orgs trialing, existing orgs grandfathered
 
 Settings → **Deploy checklist** mirrors the production health checks in the app UI.
 

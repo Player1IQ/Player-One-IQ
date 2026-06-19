@@ -26,6 +26,10 @@ import type {
   UsageSnapshot,
 } from "@/lib/subscription/types";
 import { formatPlanPrice } from "@/lib/subscription/plans";
+import {
+  formatTrialCountdown,
+  isPlatformTrialActive,
+} from "@/lib/subscription/trials";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -110,9 +114,27 @@ export function BillingPageClient({
   }
 
   const totalAiRequests = aiUsage.reduce((sum, row) => sum + row.requestCount, 0);
+  const onPlatformTrial =
+    subscription &&
+    isPlatformTrialActive(
+      subscription.status,
+      subscription.trialEndsAt,
+      subscription.stripeSubscriptionId
+    );
+  const trialLabel = formatTrialCountdown(subscription?.trialEndsAt ?? null);
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 animate-fade-in">
+      {onPlatformTrial && trialLabel ? (
+        <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          <p className="font-medium">{trialLabel}</p>
+          <p className="mt-1 text-xs text-amber-200/80">
+            You&apos;re on a free {currentPlan?.name} trial with full feature access
+            (usage caps apply). Subscribe before it ends to keep premium tools, or
+            you&apos;ll move to the free tier for your organization type.
+          </p>
+        </div>
+      ) : null}
       {error ? (
         <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {error}
@@ -132,7 +154,9 @@ export function BillingPageClient({
             <div>
               <div className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-accent-light" />
-                <Badge variant="accent">{subscription?.status ?? "none"}</Badge>
+                <Badge variant="accent">
+                  {onPlatformTrial ? "trialing" : (subscription?.status ?? "none")}
+                </Badge>
               </div>
               <h2 className="mt-3 text-3xl font-bold text-white">
                 {currentPlan?.name ?? "No active plan"}
@@ -148,6 +172,9 @@ export function BillingPageClient({
                     )
                   : "Select a plan to get started"}
               </p>
+              {onPlatformTrial && trialLabel ? (
+                <p className="mt-2 text-sm text-amber-200">{trialLabel}</p>
+              ) : null}
               {subscription && (
                 <p className="mt-2 text-sm text-gray-500">
                   {new Date(subscription.currentPeriodStart).toLocaleDateString()} –{" "}
