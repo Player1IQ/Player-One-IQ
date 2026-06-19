@@ -38,6 +38,8 @@ import type { Creator } from "@/lib/creators";
 import type { Contract } from "@/lib/contracts";
 import type { DashboardRevenueSummary } from "@/lib/revenue/summary";
 import { StatusBadge } from "@/components/creators/StatusBadge";
+import { CreatorAvatar } from "@/components/creators/CreatorAvatar";
+import { PresenceBadge } from "@/components/presence/PresenceBadge";
 
 interface ActivityItem {
   id: string;
@@ -482,9 +484,13 @@ export function DashboardHomeClient({
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-xs font-bold text-accent-light">
                         {index + 1}
                       </span>
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent/30 to-accent-muted/30 text-xs font-bold text-white">
-                        {creator.avatarInitials}
-                      </div>
+                      <CreatorAvatar
+                        imageUrl={creator.avatarUrl}
+                        initials={creator.avatarInitials}
+                        color={creator.avatarColor}
+                        name={creator.name}
+                        size="sm"
+                      />
                       <div className="min-w-0 flex-1">
                         <Link
                           href={`/creators/${creator.id}`}
@@ -493,6 +499,9 @@ export function DashboardHomeClient({
                           {creator.name}
                         </Link>
                         <p className="text-xs text-gray-500">{creator.primaryPlatform}</p>
+                        <div className="mt-0.5">
+                          <PresenceBadge status={creator.availabilityStatus} showLabel={false} />
+                        </div>
                       </div>
                       <StatusBadge status={creator.status} />
                     </li>

@@ -23,6 +23,7 @@ import { TeamMemberAvatar } from "./TeamMemberAvatar";
 import { RoleBadge } from "./RoleBadge";
 import { MemberStatusBadge } from "./MemberStatusBadge";
 import { EditRoleModal } from "./EditRoleModal";
+import { PresenceBadge } from "@/components/presence/PresenceBadge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -135,6 +136,9 @@ export function TeamMemberProfile({
                   <MemberStatusBadge status={member.status} />
                 </div>
                 <p className="mt-1 text-gray-400">{member.email}</p>
+                <div className="mt-2">
+                  <PresenceBadge status={member.presenceStatus} size="md" />
+                </div>
                 <div className="mt-3">
                   <RoleBadge role={member.role} />
                 </div>

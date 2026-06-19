@@ -1,3 +1,5 @@
+import type { PresenceStatus } from "@/lib/presence/types";
+
 export type CreatorStatus = "active" | "inactive" | "pending" | "on-hold";
 
 export type Platform =
@@ -43,6 +45,8 @@ export interface CreatorRow {
   social_handles: SocialHandle[];
   status: CreatorStatus;
   notes: string | null;
+  avatar_url: string | null;
+  availability_status: PresenceStatus;
   created_at: string;
   updated_at: string;
 }
@@ -57,6 +61,8 @@ export interface Creator {
   status: CreatorStatus;
   notes: string | null;
   createdAt: string;
+  avatarUrl: string | null;
+  availabilityStatus: PresenceStatus;
   avatarInitials: string;
   avatarColor: string;
 }
@@ -122,6 +128,8 @@ export function mapCreatorRow(row: CreatorRow): Creator {
     status: row.status,
     notes: row.notes,
     createdAt: row.created_at,
+    avatarUrl: row.avatar_url ?? null,
+    availabilityStatus: row.availability_status ?? "inactive",
     avatarInitials: getAvatarInitials(row.name),
     avatarColor: getAvatarColor(row.id),
   };
@@ -132,6 +140,7 @@ export interface CreatorInput {
   email: string;
   primaryPlatform: Platform;
   status: CreatorStatus;
+  availabilityStatus: PresenceStatus;
   socialHandles: SocialHandle[];
   notes: string;
 }

@@ -5,6 +5,7 @@ export interface Organization {
   id: string;
   name: string;
   type: string;
+  logo_url: string | null;
   created_at: string;
 }
 
@@ -98,7 +99,7 @@ export async function getOrganizationForUser(): Promise<Organization | null> {
 
   const { data: org, error } = await supabase
     .from("organizations")
-    .select("id, name, type, created_at")
+    .select("id, name, type, logo_url, created_at")
     .eq("id", selected.id)
     .maybeSingle();
 

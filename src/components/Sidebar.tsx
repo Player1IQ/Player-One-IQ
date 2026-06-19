@@ -47,6 +47,8 @@ interface SidebarProps {
   enabledFeatures?: FeatureKey[];
   organizations?: UserOrganization[];
   activeOrganizationId?: string | null;
+  organizationName?: string;
+  organizationLogoUrl?: string | null;
   onNavigate?: () => void;
 }
 
@@ -54,6 +56,8 @@ export function Sidebar({
   enabledFeatures,
   organizations = [],
   activeOrganizationId = null,
+  organizationName,
+  organizationLogoUrl,
   onNavigate,
 }: SidebarProps) {
   const pathname = usePathname();
@@ -69,18 +73,38 @@ export function Sidebar({
     <aside className="flex h-full w-64 flex-col border-r border-white/[0.06] bg-surface-raised/95 backdrop-blur-xl">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-white/[0.06] px-5">
-        <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-muted shadow-glow-active">
-          <span className="text-sm font-black text-white">P1</span>
-          <div className="absolute inset-0 rounded-xl bg-accent/20 blur-md" />
-        </div>
-        <div>
-          <p className="text-sm font-bold tracking-tight text-white">
-            Player One IQ
-          </p>
-          <p className="text-[10px] font-medium uppercase tracking-widest text-gray-500">
-            Creator Platform
-          </p>
-        </div>
+        {organizationLogoUrl ? (
+          <>
+            <img
+              src={organizationLogoUrl}
+              alt={organizationName ? `${organizationName} logo` : "Organization logo"}
+              className="h-9 w-9 shrink-0 rounded-xl object-cover ring-1 ring-white/10"
+            />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold tracking-tight text-white">
+                {organizationName ?? "Workspace"}
+              </p>
+              <p className="text-[10px] font-medium uppercase tracking-widest text-gray-500">
+                Creator Platform
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-muted shadow-glow-active">
+              <span className="text-sm font-black text-white">P1</span>
+              <div className="absolute inset-0 rounded-xl bg-accent/20 blur-md" />
+            </div>
+            <div>
+              <p className="text-sm font-bold tracking-tight text-white">
+                Player One IQ
+              </p>
+              <p className="text-[10px] font-medium uppercase tracking-widest text-gray-500">
+                Creator Platform
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {activeOrganizationId ? (

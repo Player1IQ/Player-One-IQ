@@ -3,17 +3,25 @@
 import { useEffect, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { fetchMyPresence } from "@/lib/presence/actions";
+import { PresencePicker } from "@/components/presence/PresencePicker";
+import type { PresenceStatus } from "@/lib/presence/types";
 
 export function SidebarUser() {
   const [email, setEmail] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string | null>(null);
   const [initials, setInitials] = useState("PO");
+  const [presenceStatus, setPresenceStatus] =
+    useState<PresenceStatus>("inactive");
+  const [presenceReady, setPresenceReady] = useState(false);
   const configured = isSupabaseConfigured();
 
   useEffect(() => {
     if (!configured) {
       setEmail("demo@playeroneiq.com");
       setOrgName("Demo Mode");
+      setPresenceStatus("online");
+      setPresenceReady(true);
       return;
     }
 
@@ -48,6 +56,10 @@ export function SidebarUser() {
             .maybeSingle();
           if (org?.name) setOrgName(org.name);
         }
+
+        const status = await fetchMyPresence();
+        setPresenceStatus(status);
+        setPresenceReady(true);
       }
     }
 
@@ -67,6 +79,11 @@ export function SidebarUser() {
           <p className="truncate text-xs text-gray-500">
             {email ?? (configured ? "Loading..." : "Auth disabled")}
           </p>
+          {presenceReady && configured ? (
+            <div className="mt-1.5">
+              <PresencePicker initialStatus={presenceStatus} />
+            </div>
+          ) : null}
         </div>
       </div>
       {configured && (

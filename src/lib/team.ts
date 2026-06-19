@@ -131,6 +131,8 @@ export interface TeamInvitationRow {
   created_at: string;
 }
 
+import type { PresenceStatus } from "@/lib/presence/types";
+
 export interface TeamMember {
   id: string;
   organizationId: string;
@@ -139,6 +141,7 @@ export interface TeamMember {
   name: string;
   role: TeamRole;
   status: MemberStatus;
+  presenceStatus: PresenceStatus;
   avatarInitials: string;
   avatarColor: string;
   joinedDate: string;
@@ -193,7 +196,10 @@ export function displayNameFromEmail(email: string): string {
     .join(" ");
 }
 
-export function mapTeamMemberRow(row: TeamMemberRow): TeamMember {
+export function mapTeamMemberRow(
+  row: TeamMemberRow,
+  presenceStatus: PresenceStatus = "inactive"
+): TeamMember {
   const name = displayNameFromEmail(row.email);
 
   return {
@@ -204,6 +210,7 @@ export function mapTeamMemberRow(row: TeamMemberRow): TeamMember {
     name,
     role: row.role,
     status: row.status,
+    presenceStatus,
     avatarInitials: getAvatarInitials(name, row.email),
     avatarColor: getAvatarColor(row.id),
     joinedDate: formatJoinedDate(row.joined_at ?? row.created_at),
@@ -222,6 +229,7 @@ export function mapInvitationRow(row: TeamInvitationRow): TeamMember {
     name,
     role: row.role,
     status: "pending",
+    presenceStatus: "inactive",
     avatarInitials: getAvatarInitials(name, row.email),
     avatarColor: getAvatarColor(row.id),
     joinedDate: "—",

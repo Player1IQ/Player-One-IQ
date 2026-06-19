@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { Bell, CreditCard, Users } from "lucide-react";
 import { OrganizationSettingsForm } from "./OrganizationSettingsForm";
+import { OrganizationLogoUpload } from "./OrganizationLogoUpload";
 
 interface SettingsPageClientProps {
+  organizationId: string;
   organizationName: string;
   organizationType: string;
+  organizationLogoUrl?: string | null;
   memberCount: number;
   createdAtDisplay: string;
   canEdit: boolean;
@@ -17,8 +20,10 @@ interface SettingsPageClientProps {
 }
 
 export function SettingsPageClient({
+  organizationId,
   organizationName,
   organizationType,
+  organizationLogoUrl,
   memberCount,
   createdAtDisplay,
   canEdit,
@@ -64,6 +69,21 @@ export function SettingsPageClient({
           <OrganizationSettingsForm
             initialName={organizationName}
             initialType={organizationType}
+            canEdit={canEdit}
+          />
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
+        <h2 className="text-base font-semibold text-white">Branding</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Upload your agency logo for the sidebar and workspace.
+        </p>
+        <div className="mt-6">
+          <OrganizationLogoUpload
+            organizationId={organizationId}
+            organizationName={organizationName}
+            logoUrl={organizationLogoUrl}
             canEdit={canEdit}
           />
         </div>

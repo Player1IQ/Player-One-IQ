@@ -24,6 +24,7 @@ import { RoleBadge } from "./RoleBadge";
 import { MemberStatusBadge } from "./MemberStatusBadge";
 import { EditRoleModal } from "./EditRoleModal";
 import { ResendInviteModal } from "./ResendInviteModal";
+import { PresenceBadge } from "@/components/presence/PresenceBadge";
 
 interface TeamTableProps {
   members: TeamMember[];
@@ -181,6 +182,11 @@ export function TeamTable({
                     <RoleBadge role={member.role} />
                   </div>
                   <p className="mt-0.5 text-xs text-gray-500">{member.email}</p>
+                  {!member.isInvitation ? (
+                    <div className="mt-1">
+                      <PresenceBadge status={member.presenceStatus} />
+                    </div>
+                  ) : null}
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <MemberStatusBadge status={member.status} />
                     <span className="text-xs text-gray-500">
@@ -300,6 +306,11 @@ export function TeamTable({
                             {member.name}
                           </p>
                           <p className="text-xs text-gray-500">{member.email}</p>
+                          {!member.isInvitation ? (
+                            <div className="mt-1">
+                              <PresenceBadge status={member.presenceStatus} />
+                            </div>
+                          ) : null}
                           {member.isInvitation && canManageTeam && (
                             <p className="mt-1 text-xs text-amber-400">
                               Click row to resend invite

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { setPresenceInactive } from "@/lib/presence/actions";
 
 export function SignOutButton() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export function SignOutButton() {
     const supabase = createClient();
     if (!supabase) return;
 
+    await setPresenceInactive();
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();

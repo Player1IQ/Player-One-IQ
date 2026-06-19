@@ -12,7 +12,8 @@ import {
   creatorStatuses,
   type SocialHandle,
 } from "@/lib/creators";
-import { createCreator, updateCreator } from "@/app/creators/actions";
+import { presenceLabels, presenceStatuses } from "@/lib/presence/types";
+import { createCreator, updateCreator, uploadCreatorAvatar, removeCreatorAvatar } from "@/app/creators/actions";
 
 interface CreatorFormModalProps {
   open: boolean;
@@ -31,6 +32,7 @@ function creatorToInput(creator: Creator): CreatorInput {
     email: creator.email ?? "",
     primaryPlatform: creator.primaryPlatform,
     status: creator.status,
+    availabilityStatus: creator.availabilityStatus,
     socialHandles:
       creator.socialHandles.length > 0
         ? creator.socialHandles
@@ -44,6 +46,7 @@ const defaultInput = (): CreatorInput => ({
   email: "",
   primaryPlatform: "YouTube",
   status: "pending",
+  availabilityStatus: "inactive",
   socialHandles: [emptyHandle()],
   notes: "",
 });
@@ -58,11 +61,15 @@ export function CreatorFormModal({
   const [form, setForm] = useState<CreatorInput>(defaultInput());
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [removeAvatar, setRemoveAvatar] = useState(false);
 
   useEffect(() => {
     if (open) {
       setForm(creator ? creatorToInput(creator) : defaultInput());
       setError("");
+      setAvatarFile(null);
+      setRemoveAvatar(false);
     }
   }, [open, creator]);
 
@@ -112,13 +119,48 @@ export function CreatorFormModal({
       return;
     }
 
+    const creatorId = isEdit ? creator!.id : ("id" in result ? result.id : null);
+
+    if (creatorId && removeAvatar && isEdit) {
+      const removeResult = await removeCreatorAvatar(creatorId);
+      if ("error" in removeResult && removeResult.error) {
+        setError(removeResult.error);
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (creatorId && avatarFile) {
+      const avatarFormData = new FormData();
+      avatarFormData.set("file", avatarFile);
+      const avatarResult = await uploadCreatorAvatar(creatorId, avatarFormData);
+      if ("error" in avatarResult && avatarResult.error) {
+        setError(avatarResult.error);
+        setLoading(false);
+        return;
+      }
+    }
+
     onClose();
     router.refresh();
-    if (!isEdit && "id" in result && result.id) {
-      router.push(`/creators/${result.id}`);
+    if (!isEdit && creatorId) {
+      router.push(`/creators/${creatorId}`);
     }
     setLoading(false);
   }
+
+  const previewInitials =
+    form.name.trim().length > 0
+      ? form.name
+          .split(/\s+/)
+          .slice(0, 2)
+          .map((part) => part[0]?.toUpperCase() ?? "")
+          .join("") || "?"
+      : creator?.avatarInitials ?? "?";
+
+  const previewColor = creator?.avatarColor ?? "from-violet-500 to-purple-600";
+  const previewUrl =
+    removeAvatar ? null : creator?.avatarUrl ?? null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -145,6 +187,63 @@ export function CreatorFormModal({
               {error}
             </div>
           )}
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-300">
+              Profile photo
+            </label>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br font-semibold text-white ring-2 ring-border">
+                {avatarFile ? (
+                  <img
+                    src={URL.createObjectURL(avatarFile)}
+                    alt="Selected avatar preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt="Creator avatar"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className={`flex h-full w-full items-center justify-center bg-gradient-to-br text-xl font-semibold text-white ${previewColor}`}>
+                    {previewInitials}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-gray-200 transition-colors hover:bg-surface-overlay">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+                      setAvatarFile(file);
+                      if (file) setRemoveAvatar(false);
+                    }}
+                  />
+                  {previewUrl || avatarFile ? "Replace photo" : "Upload photo"}
+                </label>
+                {(previewUrl || avatarFile) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAvatarFile(null);
+                      setRemoveAvatar(true);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              JPEG, PNG, WebP, or GIF up to 2 MB.
+            </p>
+          </div>
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-300">
@@ -215,6 +314,30 @@ export function CreatorFormModal({
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                Availability
+              </label>
+              <select
+                value={form.availabilityStatus}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    availabilityStatus: e.target.value as typeof form.availabilityStatus,
+                  })
+                }
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+              >
+                {presenceStatuses.map((s) => (
+                  <option key={s} value={s}>
+                    {presenceLabels[s]}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500">
+                Shown on the roster and creator profile for your team.
+              </p>
             </div>
           </div>
 

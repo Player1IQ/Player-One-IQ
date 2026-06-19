@@ -23,6 +23,7 @@ import { CreatorAvatar } from "./CreatorAvatar";
 import { StatusBadge } from "./StatusBadge";
 import { PlatformBadge } from "./PlatformBadge";
 import { CreatorFormModal } from "./CreatorFormModal";
+import { CreatorAvailabilityPicker } from "@/components/presence/CreatorAvailabilityPicker";
 import { CreatorPlatformAccounts } from "./CreatorPlatformAccounts";
 import { CreatorIncomeOverview } from "./CreatorIncomeOverview";
 import type { CreatorPlatformAccount, CreatorRevenueEntry } from "@/lib/creator-revenue";
@@ -164,8 +165,10 @@ export function CreatorProfile({
         <div className="relative px-6 pb-6 pt-8 sm:px-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-end">
             <CreatorAvatar
+              imageUrl={creator.avatarUrl}
               initials={creator.avatarInitials}
               color={creator.avatarColor}
+              name={creator.name}
               size="lg"
             />
             <div className="flex-1">
@@ -176,6 +179,13 @@ export function CreatorProfile({
               {primaryHandle && (
                 <p className="mt-1 text-accent-light">{primaryHandle.handle}</p>
               )}
+              <div className="mt-2">
+                <CreatorAvailabilityPicker
+                  creatorId={creator.id}
+                  initialStatus={creator.availabilityStatus}
+                  canEdit={canWrite}
+                />
+              </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 <PlatformBadge platform={creator.primaryPlatform} />
                 {creator.socialHandles

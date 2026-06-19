@@ -13,6 +13,15 @@ import {
   platforms,
   creatorStatuses,
 } from "@/lib/creators";
+import { presenceStatuses } from "@/lib/presence/types";
+import {
+  CREATOR_AVATARS_BUCKET,
+  buildCreatorAvatarPath,
+  getExtensionFromMime,
+  removeStorageObject,
+  storagePathFromPublicUrl,
+  uploadImageToStorage,
+} from "@/lib/storage/images";
 
 function validateInput(input: CreatorInput) {
   if (!input.name.trim()) {
@@ -23,6 +32,9 @@ function validateInput(input: CreatorInput) {
   }
   if (!creatorStatuses.includes(input.status)) {
     return "Invalid status.";
+  }
+  if (!presenceStatuses.includes(input.availabilityStatus)) {
+    return "Invalid availability status.";
   }
   return null;
 }
@@ -67,6 +79,7 @@ export async function createCreator(input: CreatorInput) {
       primary_platform: input.primaryPlatform,
       social_handles: input.socialHandles.filter((h) => h.handle.trim()),
       status: input.status,
+      availability_status: input.availabilityStatus,
       notes: input.notes.trim() || null,
     })
     .select("id")
@@ -100,6 +113,7 @@ export async function updateCreator(id: string, input: CreatorInput) {
       primary_platform: input.primaryPlatform,
       social_handles: input.socialHandles.filter((h) => h.handle.trim()),
       status: input.status,
+      availability_status: input.availabilityStatus,
       notes: input.notes.trim() || null,
       updated_at: new Date().toISOString(),
     })
@@ -113,6 +127,112 @@ export async function updateCreator(id: string, input: CreatorInput) {
   return { success: true };
 }
 
+export async function uploadCreatorAvatar(creatorId: string, formData: FormData) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Please choose an image to upload." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: creator, error: creatorError } = await supabase
+    .from("creators")
+    .select("id, avatar_url")
+    .eq("id", creatorId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (creatorError) return { error: creatorError.message };
+  if (!creator) return { error: "Creator not found." };
+
+  const extension = getExtensionFromMime(file.type);
+  if (!extension) return { error: "Unsupported image type." };
+
+  const path = buildCreatorAvatarPath(organizationId, creatorId, extension);
+  const uploadResult = await uploadImageToStorage(
+    supabase,
+    CREATOR_AVATARS_BUCKET,
+    path,
+    file
+  );
+
+  if ("error" in uploadResult) return { error: uploadResult.error };
+
+  const { error: updateError } = await supabase
+    .from("creators")
+    .update({
+      avatar_url: uploadResult.publicUrl,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", creatorId)
+    .eq("organization_id", organizationId);
+
+  if (updateError) return { error: updateError.message };
+
+  const previousPath = storagePathFromPublicUrl(
+    CREATOR_AVATARS_BUCKET,
+    creator.avatar_url
+  );
+  if (previousPath && previousPath !== path) {
+    await removeStorageObject(supabase, CREATOR_AVATARS_BUCKET, previousPath);
+  }
+
+  revalidatePath("/creators");
+  revalidatePath(`/creators/${creatorId}`);
+  revalidatePath("/");
+  return { success: true, avatarUrl: uploadResult.publicUrl };
+}
+
+export async function removeCreatorAvatar(creatorId: string) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: creator, error: creatorError } = await supabase
+    .from("creators")
+    .select("avatar_url")
+    .eq("id", creatorId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (creatorError) return { error: creatorError.message };
+  if (!creator) return { error: "Creator not found." };
+
+  const { error: updateError } = await supabase
+    .from("creators")
+    .update({
+      avatar_url: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", creatorId)
+    .eq("organization_id", organizationId);
+
+  if (updateError) return { error: updateError.message };
+
+  const previousPath = storagePathFromPublicUrl(
+    CREATOR_AVATARS_BUCKET,
+    creator.avatar_url
+  );
+  await removeStorageObject(supabase, CREATOR_AVATARS_BUCKET, previousPath);
+
+  revalidatePath("/creators");
+  revalidatePath(`/creators/${creatorId}`);
+  revalidatePath("/");
+  return { success: true };
+}
+
 export async function deleteCreator(id: string) {
   const permError = await requireWriteAccess();
   if (permError) return permError;
@@ -123,6 +243,13 @@ export async function deleteCreator(id: string) {
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
 
+  const { data: creator } = await supabase
+    .from("creators")
+    .select("avatar_url")
+    .eq("id", id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
   const { error: deleteError } = await supabase
     .from("creators")
     .delete()
@@ -130,6 +257,12 @@ export async function deleteCreator(id: string) {
     .eq("organization_id", organizationId);
 
   if (deleteError) return { error: deleteError.message };
+
+  const previousPath = storagePathFromPublicUrl(
+    CREATOR_AVATARS_BUCKET,
+    creator?.avatar_url
+  );
+  await removeStorageObject(supabase, CREATOR_AVATARS_BUCKET, previousPath);
 
   revalidatePath("/creators");
   revalidatePath("/");

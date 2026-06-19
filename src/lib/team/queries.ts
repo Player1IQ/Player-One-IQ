@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { getPresenceForUserIds } from "@/lib/presence/queries";
 import {
   mapInvitationRow,
   mapTeamMemberRow,
@@ -32,7 +33,18 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
 
   if (membersError) return [];
 
-  const memberList = (members as TeamMemberRow[] | null)?.map(mapTeamMemberRow) ?? [];
+  const memberRows = (members as TeamMemberRow[] | null) ?? [];
+  const userIds = memberRows
+    .map((row) => row.user_id)
+    .filter((id): id is string => Boolean(id));
+  const presenceMap = await getPresenceForUserIds(userIds);
+
+  const memberList = memberRows.map((row) =>
+    mapTeamMemberRow(
+      row,
+      row.user_id ? (presenceMap.get(row.user_id) ?? "inactive") : "inactive"
+    )
+  );
   const inviteList =
   !invitesError && invitations
     ? (invitations as TeamInvitationRow[]).map(mapInvitationRow)

@@ -86,6 +86,8 @@ export async function DashboardLayout({
         messagingEnabled={messagingEnabled}
         organizations={organizations}
         activeOrganizationId={activeOrganization?.id ?? null}
+        organizationName={activeOrganization?.name}
+        organizationLogoUrl={activeOrganization?.logo_url ?? null}
         mobileTitle={title}
         mobileHeaderActions={
           <ExportReportMenu canExport={canExportReports} variant="mobile" />

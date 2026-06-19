@@ -65,8 +65,10 @@ export default async function SettingsPage() {
       description="Configure your workspace preferences"
     >
       <SettingsPageClient
+        organizationId={organization?.id ?? ""}
         organizationName={organization?.name ?? ""}
         organizationType={organization?.type ?? ""}
+        organizationLogoUrl={organization?.logo_url ?? null}
         memberCount={memberCount}
         createdAtDisplay={
           organization?.created_at

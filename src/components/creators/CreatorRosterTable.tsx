@@ -9,6 +9,7 @@ import { formatCreatorDate } from "@/lib/creators";
 import { deleteCreator } from "@/app/creators/actions";
 import { CreatorAvatar } from "./CreatorAvatar";
 import { StatusBadge } from "./StatusBadge";
+import { PresenceBadge } from "@/components/presence/PresenceBadge";
 import { PlatformBadge } from "./PlatformBadge";
 import { CreatorFormModal } from "./CreatorFormModal";
 
@@ -55,8 +56,10 @@ export function CreatorRosterTable({
             className="flex items-start gap-4 rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-4 transition-colors hover:border-accent/30"
           >
             <CreatorAvatar
+              imageUrl={creator.avatarUrl}
               initials={creator.avatarInitials}
               color={creator.avatarColor}
+              name={creator.name}
               size="sm"
             />
             <div className="min-w-0 flex-1">
@@ -66,6 +69,9 @@ export function CreatorRosterTable({
                   {creator.email ? (
                     <p className="mt-0.5 text-xs text-gray-500">{creator.email}</p>
                   ) : null}
+                  <div className="mt-1">
+                    <PresenceBadge status={creator.availabilityStatus} />
+                  </div>
                 </div>
                 <StatusBadge status={creator.status} />
               </div>
@@ -116,8 +122,10 @@ export function CreatorRosterTable({
                   <td className="px-6 py-4">
                     <Link href={`/creators/${creator.id}`}>
                       <CreatorAvatar
+                        imageUrl={creator.avatarUrl}
                         initials={creator.avatarInitials}
                         color={creator.avatarColor}
+                        name={creator.name}
                         size="sm"
                       />
                     </Link>
@@ -133,6 +141,9 @@ export function CreatorRosterTable({
                       {creator.email && (
                         <p className="text-xs text-gray-500">{creator.email}</p>
                       )}
+                      <div className="mt-1">
+                        <PresenceBadge status={creator.availabilityStatus} />
+                      </div>
                     </Link>
                   </td>
                   <td className="px-6 py-4">

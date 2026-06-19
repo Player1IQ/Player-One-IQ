@@ -1,25 +1,28 @@
+import { Avatar } from "@/components/ui/Avatar";
+
 interface CreatorAvatarProps {
+  imageUrl?: string | null;
   initials: string;
   color: string;
   size?: "sm" | "md" | "lg";
+  name?: string;
 }
 
-const sizeClasses = {
-  sm: "h-8 w-8 text-xs",
-  md: "h-10 w-10 text-sm",
-  lg: "h-16 w-16 text-xl",
-};
-
 export function CreatorAvatar({
+  imageUrl,
   initials,
   color,
   size = "md",
+  name,
 }: CreatorAvatarProps) {
   return (
-    <div
-      className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br font-semibold text-white ring-2 ring-border ${sizeClasses[size]} ${color}`}
-    >
-      {initials}
-    </div>
+    <Avatar
+      imageUrl={imageUrl}
+      initials={initials}
+      color={color}
+      size={size}
+      shape="circle"
+      alt={name ? `${name} avatar` : "Creator avatar"}
+    />
   );
 }

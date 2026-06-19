@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { MessageNotificationBell } from "@/components/messages/MessageNotificationBell";
+import { PresenceHeartbeat } from "@/components/presence/PresenceHeartbeat";
 import { Sidebar } from "./Sidebar";
 import type { FeatureKey } from "@/lib/subscription/types";
 import type { UserOrganization } from "@/lib/organization/queries";
@@ -16,6 +17,8 @@ interface DashboardShellProps {
   messagingEnabled?: boolean;
   organizations?: UserOrganization[];
   activeOrganizationId?: string | null;
+  organizationName?: string;
+  organizationLogoUrl?: string | null;
 }
 
 export function DashboardShell({
@@ -27,11 +30,14 @@ export function DashboardShell({
   messagingEnabled = true,
   organizations,
   activeOrganizationId,
+  organizationName,
+  organizationLogoUrl,
 }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-surface">
+      <PresenceHeartbeat />
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
@@ -50,6 +56,8 @@ export function DashboardShell({
           enabledFeatures={enabledFeatures}
           organizations={organizations}
           activeOrganizationId={activeOrganizationId}
+          organizationName={organizationName}
+          organizationLogoUrl={organizationLogoUrl}
           onNavigate={() => setMobileOpen(false)}
         />
       </div>
