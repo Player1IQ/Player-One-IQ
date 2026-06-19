@@ -11,7 +11,8 @@ import {
   Mail,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { type TeamMember, type TeamRole } from "@/lib/team";
 import {
   removeTeamMember,
@@ -30,6 +31,16 @@ interface TeamTableProps {
   currentUserRole: TeamRole | null;
 }
 
+interface MenuPosition {
+  anchorTop: number;
+  anchorBottom: number;
+  left: number;
+  placement: "above" | "below";
+}
+
+const MENU_WIDTH_PX = 192;
+const MENU_ESTIMATED_HEIGHT_PX = 220;
+
 export function TeamTable({
   members,
   canManageTeam,
@@ -37,6 +48,7 @@ export function TeamTable({
 }: TeamTableProps) {
   const router = useRouter();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [resendInvite, setResendInvite] = useState<TeamMember | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
@@ -56,7 +68,7 @@ export function TeamTable({
         return;
       }
 
-      setOpenMenu(null);
+      closeMenu();
       router.refresh();
     } catch (err) {
       alert(getErrorMessage(err));
@@ -67,7 +79,7 @@ export function TeamTable({
     try {
       const link = `${window.location.origin}/invite/${token}`;
       await copyTextToClipboard(link);
-      setOpenMenu(null);
+      closeMenu();
       setActionError(null);
       setCopyFeedback("Invite link copied to clipboard.");
       setTimeout(() => setCopyFeedback(null), 3000);
@@ -75,6 +87,47 @@ export function TeamTable({
       setActionError(getErrorMessage(err));
     }
   }
+
+  function closeMenu() {
+    setOpenMenu(null);
+    setMenuPosition(null);
+  }
+
+  function openActionsMenu(memberId: string, button: HTMLButtonElement) {
+    if (openMenu === memberId) {
+      closeMenu();
+      return;
+    }
+
+    const rect = button.getBoundingClientRect();
+    const placement =
+      rect.bottom + MENU_ESTIMATED_HEIGHT_PX > window.innerHeight - 8
+        ? "above"
+        : "below";
+
+    setMenuPosition({
+      anchorTop: rect.top,
+      anchorBottom: rect.bottom,
+      left: Math.max(8, rect.right - MENU_WIDTH_PX),
+      placement,
+    });
+    setOpenMenu(memberId);
+  }
+
+  useEffect(() => {
+    if (!openMenu) return;
+
+    function handleDismiss() {
+      closeMenu();
+    }
+
+    window.addEventListener("resize", handleDismiss);
+    window.addEventListener("scroll", handleDismiss, true);
+    return () => {
+      window.removeEventListener("resize", handleDismiss);
+      window.removeEventListener("scroll", handleDismiss, true);
+    };
+  }, [openMenu]);
 
   function handleRowClick(member: TeamMember) {
     if (member.isInvitation) {
@@ -149,13 +202,22 @@ export function TeamTable({
                       </button>
                     ) : null}
                     {canManageTeam ? (
-                      <button
-                        type="button"
-                        onClick={() => setResendInvite(member)}
-                        className="flex-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200"
-                      >
-                        Resend invite
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setResendInvite(member)}
+                          className="flex-1 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200"
+                        >
+                          Resend invite
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleRemove(member)}
+                          className="flex-1 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300"
+                        >
+                          Revoke invite
+                        </button>
+                      </>
                     ) : null}
                   </>
                 ) : (
@@ -181,7 +243,7 @@ export function TeamTable({
         })}
       </div>
 
-      <div className="hidden overflow-hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm md:block">
+      <div className="hidden rounded-2xl border border-white/[0.06] bg-surface-raised/80 shadow-card backdrop-blur-sm md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -291,98 +353,14 @@ export function TeamTable({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setOpenMenu(
-                                  openMenu === member.id ? null : member.id
-                                );
+                                openActionsMenu(member.id, e.currentTarget);
                               }}
                               className="rounded-lg p-1.5 text-gray-400 transition-all hover:bg-surface-overlay hover:text-gray-200"
                               aria-label="Actions"
+                              aria-expanded={openMenu === member.id}
                             >
                               <MoreHorizontal className="h-5 w-5" />
                             </button>
-                            {openMenu === member.id && (
-                              <>
-                                <div
-                                  className="fixed inset-0 z-40"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpenMenu(null);
-                                  }}
-                                />
-                                <div
-                                  className="absolute right-6 top-12 z-50 w-48 rounded-lg border border-border bg-surface-overlay py-1 shadow-xl ring-1 ring-white/5"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {!member.isInvitation && (
-                                    <Link
-                                      href={`/team/${member.id}`}
-                                      className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
-                                      onClick={() => setOpenMenu(null)}
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                      View Profile
-                                    </Link>
-                                  )}
-                                  {canEdit && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setEditingMember(member);
-                                        setOpenMenu(null);
-                                      }}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
-                                    >
-                                      <Pencil className="h-4 w-4" />
-                                      Edit Role
-                                    </button>
-                                  )}
-                                  {member.isInvitation && member.invitationToken && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        void copyInviteLink(member.invitationToken!);
-                                      }}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
-                                    >
-                                      <Copy className="h-4 w-4" />
-                                      Copy invite link
-                                    </button>
-                                  )}
-                                  {member.isInvitation && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setResendInvite(member);
-                                        setOpenMenu(null);
-                                      }}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
-                                    >
-                                      <Mail className="h-4 w-4" />
-                                      Resend invite link
-                                    </button>
-                                  )}
-                                  {canRemove && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemove(member)}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                                    >
-                                      {member.isInvitation ? (
-                                        <>
-                                          <Ban className="h-4 w-4" />
-                                          Revoke Invite
-                                        </>
-                                      ) : (
-                                        <>
-                                          <UserX className="h-4 w-4" />
-                                          Remove
-                                        </>
-                                      )}
-                                    </button>
-                                  )}
-                                </div>
-                              </>
-                            )}
                           </>
                         )}
                       </td>
@@ -408,6 +386,119 @@ export function TeamTable({
         invitationId={resendInvite?.id ?? ""}
         email={resendInvite?.email ?? ""}
       />
+
+      {openMenu && menuPosition
+        ? createPortal(
+            (() => {
+              const member = members.find((entry) => entry.id === openMenu);
+              if (!member) return null;
+
+              const canEdit =
+                canManageTeam &&
+                !member.isInvitation &&
+                member.role !== "owner" &&
+                !(currentUserRole === "admin" && member.role === "admin");
+
+              const canRemove =
+                canManageTeam &&
+                member.role !== "owner" &&
+                !(currentUserRole === "admin" && member.role === "admin");
+
+              return (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={closeMenu}
+                  />
+                  <div
+                    className="fixed z-50 w-48 rounded-lg border border-border bg-surface-overlay py-1 shadow-xl ring-1 ring-white/5"
+                    style={{
+                      left: menuPosition.left,
+                      top:
+                        menuPosition.placement === "below"
+                          ? menuPosition.anchorBottom + 4
+                          : undefined,
+                      bottom:
+                        menuPosition.placement === "above"
+                          ? window.innerHeight - menuPosition.anchorTop + 4
+                          : undefined,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {!member.isInvitation && (
+                      <Link
+                        href={`/team/${member.id}`}
+                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                        onClick={closeMenu}
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Profile
+                      </Link>
+                    )}
+                    {canEdit && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingMember(member);
+                          closeMenu();
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                      >
+                        <Pencil className="h-4 w-4" />
+                        Edit Role
+                      </button>
+                    )}
+                    {member.isInvitation && member.invitationToken && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void copyInviteLink(member.invitationToken!);
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                      >
+                        <Copy className="h-4 w-4" />
+                        Copy invite link
+                      </button>
+                    )}
+                    {member.isInvitation && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setResendInvite(member);
+                          closeMenu();
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-accent/10 hover:text-accent-light"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Resend invite link
+                      </button>
+                    )}
+                    {canRemove && (
+                      <button
+                        type="button"
+                        onClick={() => void handleRemove(member)}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                      >
+                        {member.isInvitation ? (
+                          <>
+                            <Ban className="h-4 w-4" />
+                            Revoke Invite
+                          </>
+                        ) : (
+                          <>
+                            <UserX className="h-4 w-4" />
+                            Remove
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </>
+              );
+            })(),
+            document.body
+          )
+        : null}
     </>
   );
 }
