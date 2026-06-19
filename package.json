@@ -11,7 +11,8 @@
     "verify:production": "node scripts/verify-production.mjs",
     "verify:billing": "node scripts/verify-billing.mjs",
     "verify:invites": "node scripts/verify-invites.mjs",
-    "verify:oauth": "node scripts/verify-oauth.mjs"
+    "verify:oauth": "node scripts/verify-oauth.mjs",
+    "verify:launch": "node scripts/verify-launch.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
