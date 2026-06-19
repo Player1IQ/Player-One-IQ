@@ -4,6 +4,7 @@ import {
   type Conversation,
   type ConversationRow,
   type ConversationType,
+  type ConversationParticipant,
   type Message,
   type MessageRow,
   type OrgUser,
@@ -33,25 +34,68 @@ export async function getOrganizationUsers(): Promise<OrgUser[]> {
   const organizationId = await getOrganizationId();
   if (!organizationId) return [];
 
-  const { data, error } = await supabase
-    .from("team_members")
-    .select("user_id, email, role")
-    .eq("organization_id", organizationId)
-    .eq("status", "active")
-    .not("user_id", "is", null);
+  const [{ data, error }, { data: org }] = await Promise.all([
+    supabase
+      .from("team_members")
+      .select("user_id, email, role")
+      .eq("organization_id", organizationId)
+      .eq("status", "active")
+      .not("user_id", "is", null),
+    supabase
+      .from("organizations")
+      .select("user_id")
+      .eq("id", organizationId)
+      .maybeSingle(),
+  ]);
 
-  if (error || !data) return [];
+  const byId = new Map<string, OrgUser>();
 
-  return data
-    .filter((row): row is { user_id: string; email: string; role: string } =>
-      Boolean(row.user_id)
-    )
-    .map((row) => ({
-      userId: row.user_id,
-      email: row.email,
-      name: displayNameFromEmail(row.email),
-      role: row.role,
-    }));
+  if (!error && data) {
+    for (const row of data) {
+      if (!row.user_id) continue;
+      byId.set(row.user_id, {
+        userId: row.user_id,
+        email: row.email,
+        name: displayNameFromEmail(row.email),
+        role: row.role,
+      });
+    }
+  }
+
+  const ownerId = org?.user_id;
+  if (ownerId && !byId.has(ownerId)) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user?.id === ownerId && user?.email) {
+      byId.set(ownerId, {
+        userId: ownerId,
+        email: user.email,
+        name: displayNameFromEmail(user.email),
+        role: "owner",
+      });
+    }
+  }
+
+  return [...byId.values()];
+}
+
+export async function getOrganizationUserIds(): Promise<string[]> {
+  const users = await getOrganizationUsers();
+  const ids = new Set(users.map((user) => user.userId));
+
+  const supabase = await createClient();
+  const organizationId = await getOrganizationId();
+  if (supabase && organizationId) {
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("user_id")
+      .eq("id", organizationId)
+      .maybeSingle();
+    if (org?.user_id) ids.add(org.user_id);
+  }
+
+  return [...ids];
 }
 
 async function buildUsersById(): Promise<Map<string, OrgUser>> {
@@ -122,6 +166,14 @@ function buildConversationTitle(
     return {
       title: relatedTitles.get(row.related_id) ?? "Contract Deal Room",
       subtitle: "Contract conversation",
+    };
+  }
+
+  if (row.type === "group") {
+    const memberCount = participantUserIds.length;
+    return {
+      title: row.title?.trim() || "Group Chat",
+      subtitle: `${memberCount} member${memberCount === 1 ? "" : "s"}`,
     };
   }
 
@@ -334,7 +386,7 @@ export async function getRecentMessageActivity(limit = 5) {
 }
 
 export async function findConversationByRelated(
-  type: Exclude<ConversationType, "direct">,
+  type: Exclude<ConversationType, "direct" | "group">,
   relatedId: string
 ): Promise<string | null> {
   const supabase = await createClient();
@@ -352,4 +404,36 @@ export async function findConversationByRelated(
     .maybeSingle();
 
   return data?.id ?? null;
+}
+
+export async function getConversationParticipants(
+  conversationId: string
+): Promise<ConversationParticipant[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return [];
+
+  const { data: participants, error } = await supabase
+    .from("conversation_participants")
+    .select("user_id, role")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+
+  if (error || !participants) return [];
+
+  const usersById = await buildUsersById();
+
+  return participants.map((row) => {
+    const user = usersById.get(row.user_id);
+    return {
+      userId: row.user_id,
+      name: user?.name ?? "Team member",
+      email: user?.email ?? "",
+      role: user?.role ?? "member",
+      participantRole: (row.role as "admin" | "member") ?? "member",
+      isCurrentUser: row.user_id === currentUserId,
+    };
+  });
 }

@@ -1,15 +1,17 @@
 import { displayNameFromEmail } from "@/lib/team";
 
-export type ConversationType = "direct" | "opportunity" | "contract";
+export type ConversationType = "direct" | "opportunity" | "contract" | "group";
 
 export const conversationTypes: ConversationType[] = [
   "direct",
+  "group",
   "opportunity",
   "contract",
 ];
 
 export const conversationTypeLabels: Record<ConversationType, string> = {
   direct: "Direct Message",
+  group: "Group Chat",
   opportunity: "Opportunity",
   contract: "Contract",
 };
@@ -19,6 +21,8 @@ export interface ConversationRow {
   organization_id: string;
   type: ConversationType;
   related_id: string | null;
+  title: string | null;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -27,8 +31,18 @@ export interface ParticipantRow {
   id: string;
   conversation_id: string;
   user_id: string;
+  role: "admin" | "member";
   last_read_at: string;
   created_at: string;
+}
+
+export interface ConversationParticipant {
+  userId: string;
+  name: string;
+  email: string;
+  role: string;
+  participantRole: "admin" | "member";
+  isCurrentUser: boolean;
 }
 
 export interface MessageRow {

@@ -7,7 +7,7 @@ import type { ConversationType } from "@/lib/messages";
 import { getOrCreateRelatedConversation } from "@/app/messages/actions";
 
 interface DealRoomButtonProps {
-  type: Exclude<ConversationType, "direct">;
+  type: Exclude<ConversationType, "direct" | "group">;
   relatedId: string;
   label?: string;
 }

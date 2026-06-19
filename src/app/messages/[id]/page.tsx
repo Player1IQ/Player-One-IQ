@@ -3,7 +3,9 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ConversationClient } from "@/components/messages/ConversationClient";
 import {
   getConversationById,
+  getConversationParticipants,
   getMessages,
+  getOrganizationUsers,
 } from "@/lib/messages/queries";
 
 interface ConversationPageProps {
@@ -12,9 +14,11 @@ interface ConversationPageProps {
 
 export default async function ConversationPage({ params }: ConversationPageProps) {
   const { id } = await params;
-  const [conversation, messages] = await Promise.all([
+  const [conversation, messages, participants, orgUsers] = await Promise.all([
     getConversationById(id),
     getMessages(id),
+    getConversationParticipants(id),
+    getOrganizationUsers(),
   ]);
 
   if (!conversation) notFound();
@@ -34,6 +38,8 @@ export default async function ConversationPage({ params }: ConversationPageProps
       <ConversationClient
         conversation={conversation}
         initialMessages={messages}
+        participants={participants}
+        orgUsers={orgUsers}
         relatedHref={relatedHref}
       />
     </DashboardLayout>

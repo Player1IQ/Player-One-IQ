@@ -1,4 +1,4 @@
-import { Briefcase, FileText, MessageCircle } from "lucide-react";
+import { Briefcase, FileText, MessageCircle, Users } from "lucide-react";
 import {
   type ConversationType,
   conversationTypeLabels,
@@ -6,12 +6,14 @@ import {
 
 const icons: Record<ConversationType, typeof MessageCircle> = {
   direct: MessageCircle,
+  group: Users,
   opportunity: Briefcase,
   contract: FileText,
 };
 
 const colors: Record<ConversationType, string> = {
   direct: "bg-violet-500/10 text-violet-400 ring-violet-500/20",
+  group: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
   opportunity: "bg-blue-500/10 text-blue-400 ring-blue-500/20",
   contract: "bg-fuchsia-500/10 text-fuchsia-400 ring-fuchsia-500/20",
 };

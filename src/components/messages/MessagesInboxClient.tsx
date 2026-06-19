@@ -22,6 +22,7 @@ const quickFilters: Array<{ value: InboxFilter; label: string }> = [
   { value: "all", label: "All" },
   { value: "unread", label: "Unread" },
   { value: "direct", label: conversationTypeLabels.direct },
+  { value: "group", label: conversationTypeLabels.group },
   { value: "opportunity", label: "Opportunity" },
   { value: "contract", label: conversationTypeLabels.contract },
 ];

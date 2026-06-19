@@ -10,6 +10,7 @@ import {
 import {
   getCurrentUserId,
   getOrganizationUsers,
+  getOrganizationUserIds,
   getConversationById,
   findConversationByRelated,
   getConversations,
@@ -45,27 +46,39 @@ async function addOrgParticipants(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
   conversationId: string
 ): Promise<{ error?: string }> {
-  const currentUserId = await getCurrentUserId();
-  const users = await getOrganizationUsers();
-  if (users.length === 0) return {};
+  const userIds = await getOrganizationUserIds();
+  if (userIds.length === 0) return {};
 
-  if (currentUserId) {
-    const selfResult = await ensureParticipant(
-      supabase,
-      conversationId,
-      currentUserId
-    );
-    if (selfResult.error) return selfResult;
-  }
-
-  for (const user of users) {
-    if (user.userId !== currentUserId) {
-      const result = await ensureParticipant(supabase, conversationId, user.userId);
-      if (result.error) return result;
-    }
+  for (const userId of userIds) {
+    const result = await ensureParticipant(supabase, conversationId, userId);
+    if (result.error) return result;
   }
 
   return {};
+}
+
+async function syncDealRoomParticipants(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  conversationId: string
+): Promise<{ error?: string }> {
+  return addOrgParticipants(supabase, conversationId);
+}
+
+function validateOrgMemberIds(
+  memberIds: string[],
+  allowedUserIds: string[],
+  currentUserId: string
+): string | null {
+  const allowed = new Set(allowedUserIds);
+  allowed.add(currentUserId);
+
+  for (const id of memberIds) {
+    if (!allowed.has(id)) {
+      return "One or more selected members are not in your organization.";
+    }
+  }
+
+  return null;
 }
 
 async function ensureParticipant(
@@ -159,8 +172,269 @@ export async function getOrCreateDirectConversation(otherUserId: string) {
   return { id: created.id };
 }
 
+export async function createGroupConversation(
+  title: string,
+  memberIds: string[]
+) {
+  const trimmedTitle = title.trim();
+  if (!trimmedTitle) return { error: "Group name is required." };
+
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated." };
+
+  const allowedUserIds = await getOrganizationUserIds();
+  const uniqueMemberIds = [...new Set(memberIds.filter((id) => id !== currentUserId))];
+  const validationError = validateOrgMemberIds(
+    uniqueMemberIds,
+    allowedUserIds,
+    currentUserId
+  );
+  if (validationError) return { error: validationError };
+
+  const { data: created, error } = await supabase
+    .from("conversations")
+    .insert({
+      organization_id: organizationId,
+      type: "group",
+      related_id: null,
+      title: trimmedTitle,
+      created_by: currentUserId,
+    })
+    .select("id")
+    .single();
+
+  if (error || !created) {
+    return { error: error?.message ?? "Failed to create group chat." };
+  }
+
+  const { error: adminError } = await supabase
+    .from("conversation_participants")
+    .insert({
+      conversation_id: created.id,
+      user_id: currentUserId,
+      role: "admin",
+    });
+
+  if (adminError) {
+    return { error: adminError.message };
+  }
+
+  for (const userId of uniqueMemberIds) {
+    const result = await ensureParticipant(supabase, created.id, userId);
+    if (result.error) return { error: result.error };
+  }
+
+  await logMessageActivity(supabase, organizationId, {
+    entityId: created.id,
+    action: "created",
+    summary: "Group chat created",
+    detail: trimmedTitle,
+  });
+
+  revalidatePath("/messages");
+  return { id: created.id };
+}
+
+export async function addConversationParticipants(
+  conversationId: string,
+  userIds: string[]
+) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated." };
+
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("id, type, title")
+    .eq("id", conversationId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!conversation) return { error: "Conversation not found." };
+  if (conversation.type === "direct") {
+    return { error: "Cannot add members to a direct message." };
+  }
+
+  const orgUsers = await getOrganizationUsers();
+  const allowedUserIds = await getOrganizationUserIds();
+  const uniqueIds = [...new Set(userIds.filter(Boolean))];
+  const validationError = validateOrgMemberIds(
+    uniqueIds,
+    allowedUserIds,
+    currentUserId
+  );
+  if (validationError) return { error: validationError };
+
+  const { data: selfParticipant } = await supabase
+    .from("conversation_participants")
+    .select("id")
+    .eq("conversation_id", conversationId)
+    .eq("user_id", currentUserId)
+    .maybeSingle();
+
+  if (!selfParticipant) {
+    return { error: "You are not a participant in this conversation." };
+  }
+
+  let added = 0;
+  for (const userId of uniqueIds) {
+    const { data: existing } = await supabase
+      .from("conversation_participants")
+      .select("id")
+      .eq("conversation_id", conversationId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existing) continue;
+
+    const result = await ensureParticipant(supabase, conversationId, userId);
+    if (result.error) return { error: result.error };
+    added += 1;
+  }
+
+  if (added > 0) {
+    const usersById = new Map(orgUsers.map((user) => [user.userId, user]));
+    const names = uniqueIds
+      .map((id) => usersById.get(id)?.name)
+      .filter(Boolean)
+      .join(", ");
+
+    await logMessageActivity(supabase, organizationId, {
+      entityId: conversationId,
+      action: "updated",
+      summary: "Members added to conversation",
+      detail: names || `${added} member(s)`,
+    });
+  }
+
+  revalidatePath("/messages");
+  revalidatePath(`/messages/${conversationId}`);
+  return { success: true as const, added };
+}
+
+export async function removeConversationParticipant(
+  conversationId: string,
+  userId: string
+) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated." };
+
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("id, type")
+    .eq("id", conversationId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!conversation) return { error: "Conversation not found." };
+  if (conversation.type === "direct") {
+    return { error: "Cannot remove members from a direct message." };
+  }
+
+  const { error } = await supabase.rpc("remove_conversation_participant", {
+    p_conversation_id: conversationId,
+    p_user_id: userId,
+  });
+
+  if (error) return { error: error.message };
+
+  const orgUsers = await getOrganizationUsers();
+  const removedName =
+    orgUsers.find((user) => user.userId === userId)?.name ?? "Member";
+
+  await logMessageActivity(supabase, organizationId, {
+    entityId: conversationId,
+    action: "updated",
+    summary:
+      userId === currentUserId
+        ? "Left conversation"
+        : "Member removed from conversation",
+    detail: removedName,
+  });
+
+  revalidatePath("/messages");
+  revalidatePath(`/messages/${conversationId}`);
+
+  if (userId === currentUserId) {
+    return { success: true as const, left: true as const };
+  }
+
+  return { success: true as const, left: false as const };
+}
+
+export async function syncConversationParticipants(conversationId: string) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated." };
+
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("id, type")
+    .eq("id", conversationId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!conversation) return { error: "Conversation not found." };
+  if (conversation.type !== "opportunity" && conversation.type !== "contract") {
+    return { error: "Only deal rooms can sync the full team." };
+  }
+
+  const result = await syncDealRoomParticipants(supabase, conversationId);
+  if (result.error) return { error: result.error };
+
+  revalidatePath("/messages");
+  revalidatePath(`/messages/${conversationId}`);
+  return { success: true as const };
+}
+
 export async function getOrCreateRelatedConversation(
-  type: Exclude<ConversationType, "direct">,
+  type: Exclude<ConversationType, "direct" | "group">,
   relatedId: string
 ) {
   const permError = await requireWriteAccess();
@@ -200,6 +474,12 @@ export async function getOrCreateRelatedConversation(
       currentUserId
     );
     if (participantResult.error) return { error: participantResult.error };
+
+    const syncResult = await syncDealRoomParticipants(supabase, existingId);
+    if (syncResult.error) return { error: syncResult.error };
+
+    revalidatePath("/messages");
+    revalidatePath(`/messages/${existingId}`);
     return { id: existingId };
   }
 
