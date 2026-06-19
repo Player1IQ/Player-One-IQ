@@ -116,6 +116,16 @@ export function LoginForm() {
         )}
       </button>
 
+      <p className="text-center text-xs text-gray-600">
+        <Link href="/terms" className="underline hover:text-gray-400">
+          Terms
+        </Link>
+        {" · "}
+        <Link href="/privacy" className="underline hover:text-gray-400">
+          Privacy
+        </Link>
+      </p>
+
       <p className="text-center text-sm text-gray-500">
         Don&apos;t have an account?{" "}
         <Link
