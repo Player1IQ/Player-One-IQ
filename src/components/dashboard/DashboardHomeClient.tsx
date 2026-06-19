@@ -20,17 +20,20 @@ import {
   AlertTriangle,
   Briefcase,
   MessageSquare,
-  Sparkles,
   TrendingUp,
   Target,
   LineChart,
   Brain,
   ArrowRight,
 } from "lucide-react";
-import { MetricCard } from "@/components/ui/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { CommandCenterHeader } from "@/components/dashboard/CommandCenterHeader";
+import { OpsQueue, type OpsQueueItem } from "@/components/dashboard/OpsQueue";
+import { CommandHeroMetric } from "@/components/dashboard/CommandHeroMetric";
+import { TelemetryPanel } from "@/components/dashboard/TelemetryPanel";
+import { SectorHeader } from "@/components/dashboard/SectorHeader";
 import type { Creator } from "@/lib/creators";
 import type { Contract } from "@/lib/contracts";
 import type { DashboardRevenueSummary } from "@/lib/revenue/summary";
@@ -57,6 +60,7 @@ interface CreatorGrowthPoint {
 }
 
 interface DashboardHomeClientProps {
+  organizationName: string;
   creators: Creator[];
   activeCreators: Creator[];
   contractStats: {
@@ -133,7 +137,64 @@ const aiAssistants = [
   },
 ];
 
+function buildOpsQueueItems({
+  overdueContracts,
+  contractStats,
+  pendingApplications,
+  unreadMessages,
+}: {
+  overdueContracts: Contract[];
+  contractStats: { expiringSoonCount: number };
+  pendingApplications: number;
+  unreadMessages: number;
+}): OpsQueueItem[] {
+  const items: OpsQueueItem[] = [];
+
+  for (const contract of overdueContracts) {
+    items.push({
+      id: `overdue-${contract.id}`,
+      label: contract.contractName,
+      detail: `Past end date — ${contract.sponsorName} × ${contract.creatorName}`,
+      href: `/contracts/${contract.id}`,
+      severity: "critical",
+    });
+  }
+
+  if (contractStats.expiringSoonCount > 0) {
+    items.push({
+      id: "expiring",
+      label: `${contractStats.expiringSoonCount} contract${contractStats.expiringSoonCount === 1 ? "" : "s"} expiring soon`,
+      detail: "Ending within 45 days — review renewals",
+      href: "/contracts?filter=expiring",
+      severity: "warning",
+    });
+  }
+
+  if (pendingApplications > 0) {
+    items.push({
+      id: "applications",
+      label: `${pendingApplications} application${pendingApplications === 1 ? "" : "s"} awaiting review`,
+      detail: "Creator applications on open opportunities",
+      href: "/opportunities/applications",
+      severity: "info",
+    });
+  }
+
+  if (unreadMessages > 0) {
+    items.push({
+      id: "messages",
+      label: `${unreadMessages} unread message${unreadMessages === 1 ? "" : "s"}`,
+      detail: "Team and creator messages need a response",
+      href: "/messages",
+      severity: "comms",
+    });
+  }
+
+  return items;
+}
+
 export function DashboardHomeClient({
+  organizationName,
   creators,
   activeCreators,
   contractStats,
@@ -155,100 +216,90 @@ export function DashboardHomeClient({
   );
   const hasCreatorGrowth = creatorGrowth.some((point) => point.creators > 0);
 
-  const attentionItems = [
-    overdueContracts.length > 0
-      ? {
-          label: `${overdueContracts.length} overdue contract${overdueContracts.length === 1 ? "" : "s"}`,
-          href: "/contracts?filter=overdue",
-          tone: "red" as const,
-        }
-      : null,
-    contractStats.expiringSoonCount > 0
-      ? {
-          label: `${contractStats.expiringSoonCount} contract${contractStats.expiringSoonCount === 1 ? "" : "s"} expiring soon`,
-          href: "/contracts?filter=expiring",
-          tone: "orange" as const,
-        }
-      : null,
-    pendingApplications > 0
-      ? {
-          label: `${pendingApplications} application${pendingApplications === 1 ? "" : "s"} to review`,
-          href: "/opportunities/applications",
-          tone: "amber" as const,
-        }
-      : null,
-    unreadMessages > 0
-      ? {
-          label: `${unreadMessages} unread message${unreadMessages === 1 ? "" : "s"}`,
-          href: "/messages",
-          tone: "accent" as const,
-        }
-      : null,
-  ].filter(Boolean) as Array<{
-    label: string;
-    href: string;
-    tone: "red" | "orange" | "amber" | "accent";
-  }>;
+  const opsQueueItems = buildOpsQueueItems({
+    overdueContracts,
+    contractStats,
+    pendingApplications,
+    unreadMessages,
+  });
 
   const topCreators = [...creators]
     .sort((a, b) => (a.name > b.name ? 1 : -1))
     .slice(0, 5);
 
-  return (
-    <div className="space-y-8 animate-fade-in">
-      {attentionItems.length > 0 ? (
-        <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-4 backdrop-blur-sm">
-          <p className="text-sm font-medium text-white">Needs attention</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {attentionItems.map((item) => (
-              <Link
-                key={item.href + item.label}
-                href={item.href}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                  item.tone === "red"
-                    ? "border-red-500/30 bg-red-500/10 text-red-200 hover:bg-red-500/20"
-                    : item.tone === "orange"
-                      ? "border-orange-500/30 bg-orange-500/10 text-orange-200 hover:bg-orange-500/20"
-                      : item.tone === "amber"
-                        ? "border-amber-500/30 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20"
-                        : "border-accent/30 bg-accent/10 text-accent-light hover:bg-accent/20"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : null}
+  const telemetryMetrics = [
+    {
+      title: "Active Sponsors",
+      value: String(activeSponsorsCount),
+      subtitle: `${totalSponsors} in pipeline`,
+      href: "/sponsors",
+      icon: Building2,
+      iconColor: "text-purple-400",
+    },
+    {
+      title: "Expiring Soon",
+      value: String(contractStats.expiringSoonCount),
+      subtitle: "Contracts ending in 45 days",
+      href: "/contracts?filter=expiring",
+      icon: AlertTriangle,
+      iconColor: "text-orange-400",
+      highlight: contractStats.expiringSoonCount > 0,
+    },
+    {
+      title: "Unread Messages",
+      value: String(unreadMessages),
+      subtitle: `${conversationCount} conversations`,
+      href: "/messages",
+      icon: MessageSquare,
+      iconColor: "text-emerald-400",
+    },
+    {
+      title: "Platform Revenue",
+      value: monthlyRevenue.platformRevenueDisplay,
+      subtitle: `${monthlyRevenue.connectedAccountCount} connected accounts`,
+      href: "/creators",
+      icon: TrendingUp,
+      iconColor: "text-cyan-400",
+    },
+  ];
 
-      {/* KPI Row */}
+  return (
+    <div className="command-center-bg space-y-8 animate-fade-in pb-2">
+      <CommandCenterHeader
+        organizationName={organizationName}
+        attentionCount={opsQueueItems.length}
+      />
+
+      <OpsQueue items={opsQueueItems} />
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          title="Monthly Revenue"
+        <CommandHeroMetric
+          telemetry="Monthly revenue"
           value={monthlyRevenue.totalDisplay}
           subtitle={monthlyRevenue.subtitle}
           href="/creators"
           icon={DollarSign}
           iconColor="text-accent-light"
         />
-        <MetricCard
-          title="Sponsorship Value"
+        <CommandHeroMetric
+          telemetry="Sponsorship pipeline"
           value={contractStats.totalValueDisplay}
           subtitle={`${contractStats.activeCount} active contracts`}
           href="/contracts"
           icon={FileText}
           iconColor="text-fuchsia-400"
         />
-        <MetricCard
-          title="Active Opportunities"
+        <CommandHeroMetric
+          telemetry="Open opportunities"
           value={String(opportunityStats.openCount)}
           subtitle={`${opportunityStats.applicationCount} applications`}
           href="/opportunities"
           icon={Briefcase}
           iconColor="text-blue-400"
+          pulse={pendingApplications > 0}
         />
-        <MetricCard
-          title="Creator Growth"
+        <CommandHeroMetric
+          telemetry="Active creators"
           value={String(activeCreators.length)}
           subtitle={`${creators.length} on roster`}
           href="/creators"
@@ -257,149 +308,120 @@ export function DashboardHomeClient({
         />
       </div>
 
-      {/* Secondary metrics */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Active Sponsors"
-          value={String(activeSponsorsCount)}
-          subtitle={`${totalSponsors} in pipeline`}
-          href="/sponsors"
-          icon={Building2}
-          iconColor="text-purple-400"
-        />
-        <MetricCard
-          title="Expiring Soon"
-          value={String(contractStats.expiringSoonCount)}
-          subtitle="Contracts ending in 45 days"
-          href="/contracts?filter=expiring"
-          icon={AlertTriangle}
-          iconColor="text-orange-400"
-          highlight={contractStats.expiringSoonCount > 0}
-        />
-        <MetricCard
-          title="Unread Messages"
-          value={String(unreadMessages)}
-          subtitle={`${conversationCount} conversations`}
-          href="/messages"
-          icon={MessageSquare}
-          iconColor="text-emerald-400"
-        />
-        <MetricCard
-          title="Platform Revenue"
-          value={monthlyRevenue.platformRevenueDisplay}
-          subtitle={`${monthlyRevenue.connectedAccountCount} connected accounts`}
-          href="/creators"
-          icon={TrendingUp}
-          iconColor="text-cyan-400"
-        />
-      </div>
+      <TelemetryPanel metrics={telemetryMetrics} />
 
-      {/* Charts */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
-            <CardDescription>
-              Contract & platform revenue — last 6 months
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {hasRevenueTrend ? (
-              <div className="h-64 min-h-[16rem] min-w-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={revenueTrend}>
-                    <defs>
-                      <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Area
-                      type="monotone"
-                      dataKey="contract"
-                      stroke="#7C3AED"
-                      fill="url(#revenueGrad)"
-                      strokeWidth={2}
-                      name="Contracts"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="platform"
-                      stroke="#A78BFA"
-                      fill="transparent"
-                      strokeWidth={2}
-                      strokeDasharray="4 4"
-                      name="Platform"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <EmptyState
-                icon={LineChart}
-                title="No revenue trend yet"
-                description="Add contracts or connect platforms to see trends"
-                className="min-h-[16rem]"
-              />
-            )}
-          </CardContent>
-        </Card>
+      <section className="space-y-4">
+        <SectorHeader
+          sector="Revenue"
+          title="Performance overview"
+          description="Contract and platform trends — last 6 months"
+        />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Revenue Overview</CardTitle>
+              <CardDescription>
+                Contract & platform revenue — last 6 months
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {hasRevenueTrend ? (
+                <div className="h-64 min-h-[16rem] min-w-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={revenueTrend}>
+                      <defs>
+                        <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#7C3AED" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                      <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <Tooltip contentStyle={chartTooltipStyle} />
+                      <Area
+                        type="monotone"
+                        dataKey="contract"
+                        stroke="#7C3AED"
+                        fill="url(#revenueGrad)"
+                        strokeWidth={2}
+                        name="Contracts"
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="platform"
+                        stroke="#A78BFA"
+                        fill="transparent"
+                        strokeWidth={2}
+                        strokeDasharray="4 4"
+                        name="Platform"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <EmptyState
+                  icon={LineChart}
+                  title="No revenue trend yet"
+                  description="Add contracts or connect platforms to see trends"
+                  className="min-h-[16rem]"
+                />
+              )}
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Creator Growth</CardTitle>
-            <CardDescription>
-              Cumulative creators on roster — last 6 months
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {hasCreatorGrowth ? (
-              <div className="h-64 min-h-[16rem] min-w-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={creatorGrowth}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                    <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Bar
-                      dataKey="creators"
-                      fill="#7C3AED"
-                      radius={[6, 6, 0, 0]}
-                      name="Creators"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <EmptyState
-                icon={Users}
-                title="No creators yet"
-                description="Add creators to your roster to see growth over time"
-                className="min-h-[16rem]"
-              />
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* AI Recommendations */}
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-accent-light" />
-            <h2 className="text-lg font-semibold text-white">AI Recommendations</h2>
-          </div>
-          <Link
-            href="/ai"
-            className="flex items-center gap-1 text-xs font-medium text-accent-light hover:text-white"
-          >
-            Open AI workspace <ArrowRight className="h-3 w-3" />
-          </Link>
+          <Card>
+            <CardHeader>
+              <CardTitle>Creator Growth</CardTitle>
+              <CardDescription>
+                Cumulative creators on roster — last 6 months
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {hasCreatorGrowth ? (
+                <div className="h-64 min-h-[16rem] min-w-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={creatorGrowth}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                      <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <Tooltip contentStyle={chartTooltipStyle} />
+                      <Bar
+                        dataKey="creators"
+                        fill="#7C3AED"
+                        radius={[6, 6, 0, 0]}
+                        name="Creators"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="No creators yet"
+                  description="Add creators to your roster to see growth over time"
+                  className="min-h-[16rem]"
+                />
+              )}
+            </CardContent>
+          </Card>
         </div>
+      </section>
+
+      <section className="space-y-4">
+        <SectorHeader
+          sector="AI"
+          title="Recommendations"
+          description="Tools to support growth, partnerships, and revenue planning"
+          action={
+            <Link
+              href="/ai"
+              className="flex items-center gap-1 text-xs font-medium text-accent-light hover:text-white"
+            >
+              Open AI workspace <ArrowRight className="h-3 w-3" />
+            </Link>
+          }
+        />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {aiAssistants.map((assistant) => {
             const Icon = assistant.icon;
@@ -424,170 +446,182 @@ export function DashboardHomeClient({
         </div>
       </section>
 
-      {/* Leaderboard + Activity */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Top Creators</CardTitle>
-                <CardDescription>Your roster leaderboard</CardDescription>
-              </div>
-              <Link href="/creators" className="text-xs font-medium text-accent-light hover:text-white">
-                View all
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {topCreators.length === 0 ? (
-              <EmptyState
-                icon={Users}
-                title="No creators yet"
-                description="Add your first creator to get started"
-              />
-            ) : (
-              <ul className="space-y-3">
-                {topCreators.map((creator, index) => (
-                  <li
-                    key={creator.id}
-                    className="flex items-center gap-4 rounded-xl border border-white/[0.04] bg-white/[0.02] px-4 py-3 transition-colors hover:border-accent/20"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-xs font-bold text-accent-light">
-                      {index + 1}
-                    </span>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent/30 to-accent-muted/30 text-xs font-bold text-white">
-                      {creator.avatarInitials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <Link
-                        href={`/creators/${creator.id}`}
-                        className="text-sm font-medium text-gray-200 hover:text-accent-light"
-                      >
-                        {creator.name}
-                      </Link>
-                      <p className="text-xs text-gray-500">{creator.primaryPlatform}</p>
-                    </div>
-                    <StatusBadge status={creator.status} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest updates across your workspace</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {activity.length === 0 ? (
-              <EmptyState
-                title="No activity yet"
-                description="Create a contract or opportunity to get started"
-              />
-            ) : (
-              <ul className="space-y-3">
-                {activity.slice(0, 8).map((item) => (
-                  <li
-                    key={item.id}
-                    className="flex items-start justify-between gap-3 border-b border-white/[0.04] pb-3 last:border-0 last:pb-0"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-200">
-                        {activityLabel(item.action, item.entityType, item.summary)}
-                      </p>
-                      {item.detail && (
-                        <p className="mt-0.5 truncate text-xs text-gray-500">
-                          {item.detail}
-                        </p>
-                      )}
-                    </div>
-                    <span className="shrink-0 text-xs text-gray-600">
-                      {item.timeAgo}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Expirations & Overdue */}
-      {(upcomingExpirations.length > 0 || overdueContracts.length > 0) && (
+      <section className="space-y-4">
+        <SectorHeader
+          sector="Team"
+          title="Creators and activity"
+          description="Roster highlights and recent workspace updates"
+        />
         <div className="grid gap-6 lg:grid-cols-2">
-          {upcomingExpirations.length > 0 && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Upcoming Expirations</CardTitle>
-                    <CardDescription>Contracts ending within 45 days</CardDescription>
-                  </div>
-                  <Badge variant="warning">{upcomingExpirations.length}</Badge>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Top Creators</CardTitle>
+                  <CardDescription>Your roster leaderboard</CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
+                <Link href="/creators" className="text-xs font-medium text-accent-light hover:text-white">
+                  View all
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {topCreators.length === 0 ? (
+                <EmptyState
+                  icon={Users}
+                  title="No creators yet"
+                  description="Add your first creator to get started"
+                />
+              ) : (
                 <ul className="space-y-3">
-                  {upcomingExpirations.slice(0, 4).map((contract) => (
-                    <li key={contract.id} className="flex items-center gap-3">
-                      <AlertTriangle className="h-4 w-4 shrink-0 text-orange-400" />
+                  {topCreators.map((creator, index) => (
+                    <li
+                      key={creator.id}
+                      className="flex items-center gap-4 rounded-xl border border-white/[0.04] bg-white/[0.02] px-4 py-3 transition-colors hover:border-accent/20"
+                    >
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-xs font-bold text-accent-light">
+                        {index + 1}
+                      </span>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent/30 to-accent-muted/30 text-xs font-bold text-white">
+                        {creator.avatarInitials}
+                      </div>
                       <div className="min-w-0 flex-1">
                         <Link
-                          href={`/contracts/${contract.id}`}
+                          href={`/creators/${creator.id}`}
                           className="text-sm font-medium text-gray-200 hover:text-accent-light"
                         >
-                          {contract.contractName}
+                          {creator.name}
                         </Link>
-                        <p className="text-xs text-gray-500">
-                          {contract.sponsorName} × {contract.creatorName}
-                        </p>
+                        <p className="text-xs text-gray-500">{creator.primaryPlatform}</p>
                       </div>
-                      <span className="text-xs font-medium text-orange-400">
-                        {contract.endDateDisplay}
+                      <StatusBadge status={creator.status} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>Latest updates across your workspace</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {activity.length === 0 ? (
+                <EmptyState
+                  title="No activity yet"
+                  description="Create a contract or opportunity to get started"
+                />
+              ) : (
+                <ul className="space-y-3">
+                  {activity.slice(0, 8).map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-start justify-between gap-3 border-b border-white/[0.04] pb-3 last:border-0 last:pb-0"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-200">
+                          {activityLabel(item.action, item.entityType, item.summary)}
+                        </p>
+                        {item.detail && (
+                          <p className="mt-0.5 truncate text-xs text-gray-500">
+                            {item.detail}
+                          </p>
+                        )}
+                      </div>
+                      <span className="shrink-0 text-xs text-gray-600">
+                        {item.timeAgo}
                       </span>
                     </li>
                   ))}
                 </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {overdueContracts.length > 0 && (
-            <Card className="border-red-500/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Overdue Contracts</CardTitle>
-                    <CardDescription>Past end date, still active</CardDescription>
-                  </div>
-                  <Badge variant="danger">{overdueContracts.length}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <ul className="space-y-3">
-                  {overdueContracts.slice(0, 4).map((contract) => (
-                    <li key={contract.id} className="flex items-center gap-3">
-                      <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
-                      <div className="min-w-0 flex-1">
-                        <Link
-                          href={`/contracts/${contract.id}`}
-                          className="text-sm font-medium text-gray-200 hover:text-accent-light"
-                        >
-                          {contract.contractName}
-                        </Link>
-                        <p className="text-xs text-gray-500">
-                          Ended {contract.endDateDisplay}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </CardContent>
+          </Card>
         </div>
+      </section>
+
+      {(upcomingExpirations.length > 0 || overdueContracts.length > 0) && (
+        <section className="space-y-4">
+          <SectorHeader
+            sector="Contracts"
+            title="Renewals and overdue items"
+            description="Deals that need follow-up before or after their end date"
+          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            {upcomingExpirations.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Upcoming Expirations</CardTitle>
+                      <CardDescription>Contracts ending within 45 days</CardDescription>
+                    </div>
+                    <Badge variant="warning">{upcomingExpirations.length}</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ul className="space-y-3">
+                    {upcomingExpirations.slice(0, 4).map((contract) => (
+                      <li key={contract.id} className="flex items-center gap-3">
+                        <AlertTriangle className="h-4 w-4 shrink-0 text-orange-400" />
+                        <div className="min-w-0 flex-1">
+                          <Link
+                            href={`/contracts/${contract.id}`}
+                            className="text-sm font-medium text-gray-200 hover:text-accent-light"
+                          >
+                            {contract.contractName}
+                          </Link>
+                          <p className="text-xs text-gray-500">
+                            {contract.sponsorName} × {contract.creatorName}
+                          </p>
+                        </div>
+                        <span className="text-xs font-medium text-orange-400">
+                          {contract.endDateDisplay}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {overdueContracts.length > 0 && (
+              <Card className="border-red-500/20">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Overdue Contracts</CardTitle>
+                      <CardDescription>Past end date, still active</CardDescription>
+                    </div>
+                    <Badge variant="danger">{overdueContracts.length}</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ul className="space-y-3">
+                    {overdueContracts.slice(0, 4).map((contract) => (
+                      <li key={contract.id} className="flex items-center gap-3">
+                        <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
+                        <div className="min-w-0 flex-1">
+                          <Link
+                            href={`/contracts/${contract.id}`}
+                            className="text-sm font-medium text-gray-200 hover:text-accent-light"
+                          >
+                            {contract.contractName}
+                          </Link>
+                          <p className="text-xs text-gray-500">
+                            Ended {contract.endDateDisplay}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </section>
       )}
     </div>
   );

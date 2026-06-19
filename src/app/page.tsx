@@ -1,3 +1,4 @@
+import { getOrganizationForUser } from "@/lib/organization/queries";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { DashboardHomeClient } from "@/components/dashboard/DashboardHomeClient";
 import { getCreators } from "@/lib/creators/queries";
@@ -77,13 +78,15 @@ export default async function DashboardPage() {
   const creatorGrowth = buildCreatorGrowthData(creators);
   const upcomingExpirations = getUpcomingExpirations(contracts);
   const overdueContracts = getOverdueContracts(contracts);
+  const organization = await getOrganizationForUser();
 
   return (
     <DashboardLayout
-      title="Command Center"
+      title="Dashboard"
       description="Executive overview of your creator ecosystem"
     >
       <DashboardHomeClient
+        organizationName={organization?.name ?? "Your workspace"}
         creators={creators}
         activeCreators={activeCreators}
         contractStats={contractStats}
