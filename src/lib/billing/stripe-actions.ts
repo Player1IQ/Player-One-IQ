@@ -7,9 +7,7 @@ import { requireBillingManageAccess } from "@/lib/permissions";
 import { changeSubscriptionPlan, startPlatformTrial } from "@/lib/subscription/actions";
 import { getSubscriptionPlans } from "@/lib/subscription/queries";
 import { planRequiresStripeCheckout } from "@/lib/subscription/plans";
-import { hasTrialedPlan, supportsPlatformTrial } from "@/lib/subscription/trials";
 import type { BillingInterval, PlanCode } from "@/lib/subscription/types";
-import { createServiceClient } from "@/lib/supabase/admin";
 import { getStripeClient } from "@/lib/stripe/client";
 import { isStripeConfigured } from "@/lib/stripe/config";
 
@@ -148,38 +146,24 @@ export async function openStripeCustomerPortal() {
   return { portalUrl: session.url };
 }
 
+export type BillingPlanMode = "trial" | "subscribe";
+
 export async function selectBillingPlan(
   planCode: PlanCode,
-  billingInterval: BillingInterval = "monthly"
+  billingInterval: BillingInterval = "monthly",
+  mode: BillingPlanMode = "subscribe"
 ) {
   const plans = await getSubscriptionPlans();
   const plan = plans.find((p) => p.code === planCode);
   if (!plan) return { error: "Invalid plan selected." };
 
-  if (planRequiresStripeCheckout(plan, billingInterval)) {
-    const admin = createServiceClient();
-    const organizationId = await getOrganizationId();
-
-    if (admin && organizationId && supportsPlatformTrial(planCode)) {
-      const { data: existingSub } = await admin
-        .from("organization_subscriptions")
-        .select("stripe_subscription_id, metadata")
-        .eq("organization_id", organizationId)
-        .maybeSingle();
-
-      if (
-        !existingSub?.stripe_subscription_id &&
-        !hasTrialedPlan(
-          (existingSub?.metadata ?? {}) as Record<string, unknown>,
-          planCode
-        )
-      ) {
-        return startPlatformTrial(planCode, billingInterval);
-      }
-    }
-
-    return startStripeCheckout(planCode, billingInterval);
+  if (!planRequiresStripeCheckout(plan, billingInterval)) {
+    return changeSubscriptionPlan(planCode, billingInterval);
   }
 
-  return changeSubscriptionPlan(planCode, billingInterval);
+  if (mode === "trial") {
+    return startPlatformTrial(planCode, billingInterval);
+  }
+
+  return startStripeCheckout(planCode, billingInterval);
 }

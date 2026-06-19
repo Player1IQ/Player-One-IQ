@@ -61,6 +61,9 @@ export function BillingPageClient({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [pendingPlan, setPendingPlan] = useState<PlanCode | null>(null);
+  const [pendingMode, setPendingMode] = useState<"trial" | "subscribe" | "free" | null>(
+    null
+  );
   const [isPending, startTransition] = useTransition();
   const [portalPending, startPortalTransition] = useTransition();
 
@@ -76,15 +79,24 @@ export function BillingPageClient({
     }
   }, [searchParams]);
 
-  function handlePlanChange(planCode: PlanCode) {
+  function runPlanAction(
+    planCode: PlanCode,
+    mode: "trial" | "subscribe" | "free"
+  ) {
     if (!canManage) return;
     setError("");
     setMessage("");
     setPendingPlan(planCode);
+    setPendingMode(mode);
 
     startTransition(async () => {
-      const result = await selectBillingPlan(planCode, billingInterval);
+      const result = await selectBillingPlan(
+        planCode,
+        billingInterval,
+        mode === "trial" ? "trial" : "subscribe"
+      );
       setPendingPlan(null);
+      setPendingMode(null);
 
       if ("error" in result && result.error) {
         setError(result.error);
@@ -139,8 +151,8 @@ export function BillingPageClient({
           <p className="font-medium">{trialLabel}</p>
           <p className="mt-1 text-xs text-amber-200/80">
             You&apos;re on a free {currentPlan?.name} trial with full feature access
-            (usage caps apply). Each paid plan includes one {PLATFORM_TRIAL_DAYS}-day trial per workspace.
-            Subscribe before it ends to keep premium tools.
+            (usage caps apply). Trials are optional — start one from any paid plan below,
+            or subscribe directly. Each paid plan includes one {PLATFORM_TRIAL_DAYS}-day trial per workspace.
           </p>
         </div>
       ) : null}
@@ -237,7 +249,7 @@ export function BillingPageClient({
                 Available Plans
               </CardTitle>
               <CardDescription>
-                Paid plans include a one-time {PLATFORM_TRIAL_DAYS}-day trial, then Stripe checkout
+                Try a paid plan free for {PLATFORM_TRIAL_DAYS} days, or subscribe directly
               </CardDescription>
             </div>
             <div className="flex rounded-xl border border-white/[0.08] p-1">
@@ -266,8 +278,27 @@ export function BillingPageClient({
                 plan={plan}
                 isCurrent={plan.code === currentPlan?.code}
                 billingInterval={billingInterval}
-                onSelect={canManage ? handlePlanChange : undefined}
-                loading={isPending && pendingPlan === plan.code}
+                onStartTrial={
+                  canManage
+                    ? (code) => runPlanAction(code, "trial")
+                    : undefined
+                }
+                onSubscribe={
+                  canManage
+                    ? (code) => runPlanAction(code, "subscribe")
+                    : undefined
+                }
+                onSwitchFree={
+                  canManage ? (code) => runPlanAction(code, "free") : undefined
+                }
+                loadingTrial={
+                  isPending && pendingPlan === plan.code && pendingMode === "trial"
+                }
+                loadingSubscribe={
+                  isPending &&
+                  pendingPlan === plan.code &&
+                  (pendingMode === "subscribe" || pendingMode === "free")
+                }
                 trialAvailable={
                   !hasStripeCustomer &&
                   supportsPlatformTrial(plan.code) &&

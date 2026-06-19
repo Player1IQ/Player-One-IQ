@@ -9,8 +9,11 @@ interface SubscriptionPlanCardProps {
   plan: SubscriptionPlan;
   isCurrent: boolean;
   billingInterval: BillingInterval;
-  onSelect?: (planCode: PlanCode) => void;
-  loading?: boolean;
+  onStartTrial?: (planCode: PlanCode) => void;
+  onSubscribe?: (planCode: PlanCode) => void;
+  onSwitchFree?: (planCode: PlanCode) => void;
+  loadingTrial?: boolean;
+  loadingSubscribe?: boolean;
   trialAvailable?: boolean;
   trialUsed?: boolean;
 }
@@ -19,8 +22,11 @@ export function SubscriptionPlanCard({
   plan,
   isCurrent,
   billingInterval,
-  onSelect,
-  loading = false,
+  onStartTrial,
+  onSubscribe,
+  onSwitchFree,
+  loadingTrial = false,
+  loadingSubscribe = false,
   trialAvailable = false,
   trialUsed = false,
 }: SubscriptionPlanCardProps) {
@@ -30,19 +36,9 @@ export function SubscriptionPlanCard({
       ? plan.priceYearlyCents
       : plan.priceMonthlyCents;
   const isPaid = planRequiresStripeCheckout(plan, billingInterval);
-
-  function actionLabel() {
-    if (loading) return null;
-    if (isPaid && trialAvailable && !trialUsed) {
-      return `Start ${PLATFORM_TRIAL_DAYS}-day free trial`;
-    }
-    if (isPaid && trialUsed) {
-      return `Subscribe to ${plan.name}`;
-    }
-    return `Switch to ${plan.name}`;
-  }
-
-  const label = actionLabel();
+  const showTrialOption = isPaid && trialAvailable && !trialUsed && onStartTrial;
+  const showSubscribeOption = isPaid && onSubscribe;
+  const showFreeSwitch = !isPaid && onSwitchFree;
 
   return (
     <div
@@ -74,22 +70,66 @@ export function SubscriptionPlanCard({
         ))}
       </ul>
 
-      {!isCurrent && onSelect ? (
-        <button
-          type="button"
-          onClick={() => onSelect(plan.code)}
-          disabled={loading}
-          className="mt-6 w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-gray-200 transition-colors hover:border-accent/30 hover:bg-accent/10 disabled:opacity-50"
-        >
-          {loading ? (
-            <span className="inline-flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Updating...
-            </span>
-          ) : label ? (
-            label
+      {!isCurrent && (showTrialOption || showSubscribeOption || showFreeSwitch) ? (
+        <div className="mt-6 space-y-2">
+          {showTrialOption ? (
+            <button
+              type="button"
+              onClick={() => onStartTrial(plan.code)}
+              disabled={loadingTrial || loadingSubscribe}
+              className="w-full rounded-lg border border-accent/30 bg-accent/10 px-4 py-2.5 text-sm font-medium text-accent-light transition-colors hover:bg-accent/20 disabled:opacity-50"
+            >
+              {loadingTrial ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Starting trial...
+                </span>
+              ) : (
+                `Try free for ${PLATFORM_TRIAL_DAYS} days`
+              )}
+            </button>
           ) : null}
-        </button>
+          {showSubscribeOption ? (
+            <button
+              type="button"
+              onClick={() => onSubscribe(plan.code)}
+              disabled={loadingTrial || loadingSubscribe}
+              className={`w-full rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 ${
+                showTrialOption
+                  ? "border-border text-gray-200 hover:border-accent/30 hover:bg-accent/5"
+                  : "border-border text-gray-200 hover:border-accent/30 hover:bg-accent/10"
+              }`}
+            >
+              {loadingSubscribe ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Redirecting...
+                </span>
+              ) : trialUsed || !showTrialOption ? (
+                `Subscribe to ${plan.name}`
+              ) : (
+                "Subscribe now — skip trial"
+              )}
+            </button>
+          ) : null}
+          {showFreeSwitch ? (
+            <button
+              type="button"
+              onClick={() => onSwitchFree(plan.code)}
+              disabled={loadingTrial || loadingSubscribe}
+              className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-gray-200 transition-colors hover:border-accent/30 hover:bg-accent/10 disabled:opacity-50"
+            >
+              {loadingSubscribe ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Updating...
+                </span>
+              ) : (
+                `Switch to ${plan.name}`
+              )}
+            </button>
+          ) : null}
+        </div>
       ) : isCurrent ? (
         <p className="mt-6 text-center text-xs text-gray-500">
           Active on your workspace

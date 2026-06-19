@@ -53,7 +53,7 @@ These steps are not automated — complete them before inviting real users:
 3. **Stripe** — Switch to live keys and configure the production webhook (`/api/billing/webhook`). Run `npm run verify:billing`.
 4. **Vercel** — Set all required env vars (`npm run verify:deploy`). After deploy, run `npm run verify:launch` (or `npm run verify:production`) against your live URL.
 5. **OAuth** — Register YouTube/Twitch callback URLs shown by the verify scripts when `PLATFORM_OAUTH_ENABLED=true`.
-6. **Agency billing policy** — New workspaces get a **5-day platform trial** on signup (paid entry plan for their org type). **Each paid plan** (Creator Pro, Agency, Agency Pro, Sponsor Pro) includes a **one-time 5-day trial** per workspace from Billing; after that, Stripe checkout is required. Free tiers (free_creator, Agency Starter, Sponsor) have no trial. Existing workspaces before migration 028 are unchanged.
+6. **Billing policy** — New workspaces start on the **free tier** for their org type (no forced trial). **Optional** 5-day trials are available per paid plan from Billing, or users can subscribe via Stripe directly.
 
 ### Launch complete criteria
 

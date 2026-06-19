@@ -7,7 +7,6 @@ import { getDefaultPlanForOrgType, parsePlanLimits, planCatalog } from "./plans"
 import { expirePlatformTrialIfNeeded } from "./trial-lifecycle";
 import {
   applyPlatformTrialLimits,
-  getTrialPlanForOrgType,
   isPlatformTrialActive,
 } from "./trials";
 import type {
@@ -306,9 +305,7 @@ export async function getAiUsageSummary(): Promise<AiUsageSummary[]> {
 
 async function getFallbackSubscriptionContext(): Promise<SubscriptionContext> {
   const organization = await getOrganizationForUser();
-  const planCode = organization?.type
-    ? getTrialPlanForOrgType(organization.type)
-    : getDefaultPlanForOrgType(organization?.type ?? "");
+  const planCode = getDefaultPlanForOrgType(organization?.type ?? "");
   const catalog = planCatalog[planCode];
 
   return {
