@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { getCurrentUserMembership } from "@/lib/permissions";
 import { mapCreatorRow, type Creator, type CreatorRow } from "@/lib/creators";
+import { isPortalRole } from "@/lib/team";
 
 export async function getCreators(): Promise<Creator[]> {
   const supabase = await createClient();
@@ -8,6 +10,13 @@ export async function getCreators(): Promise<Creator[]> {
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return [];
+
+  const membership = await getCurrentUserMembership();
+  if (membership && isPortalRole(membership.role)) {
+    if (!membership.linkedCreatorId) return [];
+    const creator = await getCreatorById(membership.linkedCreatorId);
+    return creator ? [creator] : [];
+  }
 
   const { data, error } = await supabase
     .from("creators")
@@ -25,6 +34,16 @@ export async function getCreatorById(id: string): Promise<Creator | null> {
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return null;
+
+  const membership = await getCurrentUserMembership();
+  if (
+    membership &&
+    isPortalRole(membership.role) &&
+    membership.linkedCreatorId &&
+    membership.linkedCreatorId !== id
+  ) {
+    return null;
+  }
 
   const { data, error } = await supabase
     .from("creators")

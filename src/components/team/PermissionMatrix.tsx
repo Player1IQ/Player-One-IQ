@@ -5,8 +5,8 @@ import {
   permissionMatrix,
   type PermissionLevel,
   roleLabels,
+  getRoleColor,
 } from "@/lib/team";
-import { getRoleColor } from "@/lib/team";
 
 function PermissionCell({ level }: { level: PermissionLevel }) {
   if (level === "full") {
@@ -22,6 +22,13 @@ function PermissionCell({ level }: { level: PermissionLevel }) {
     return (
       <div className="flex justify-center">
         <span className="text-xs font-medium text-sky-400">Read</span>
+      </div>
+    );
+  }
+  if (level === "scoped") {
+    return (
+      <div className="flex justify-center">
+        <span className="text-xs font-medium text-amber-400">Own</span>
       </div>
     );
   }
@@ -42,7 +49,8 @@ export function PermissionMatrix() {
           Role-Based Permission Matrix
         </h2>
         <p className="mt-0.5 text-sm text-gray-500">
-          Access levels for each role across the platform
+          Staff roles manage the agency; portal roles are scoped to a linked
+          roster profile
         </p>
       </div>
       <div className="overflow-x-auto">
@@ -55,7 +63,7 @@ export function PermissionMatrix() {
               {teamRoles.map((role) => (
                 <th
                   key={role}
-                  className="min-w-[100px] px-4 py-3.5 text-center"
+                  className="min-w-[88px] px-3 py-3.5 text-center"
                 >
                   <span
                     className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${getRoleColor(role)}`}
@@ -79,7 +87,7 @@ export function PermissionMatrix() {
                   </p>
                 </td>
                 {teamRoles.map((role) => (
-                  <td key={role} className="px-4 py-4">
+                  <td key={role} className="px-3 py-4">
                     <PermissionCell level={permissionMatrix[role][perm.key]} />
                   </td>
                 ))}
@@ -87,6 +95,12 @@ export function PermissionMatrix() {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="border-t border-border px-6 py-3 text-xs text-gray-500">
+        <span className="font-medium text-emerald-400">Full</span> = read and
+        write · <span className="font-medium text-sky-400">Read</span> = view
+        only · <span className="font-medium text-amber-400">Own</span> = linked
+        roster record only
       </div>
     </div>
   );

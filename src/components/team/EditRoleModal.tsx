@@ -7,15 +7,17 @@ import {
   type TeamMember,
   type TeamRole,
   invitableRoles,
-  roleLabels,
 } from "@/lib/team";
+import type { Creator } from "@/lib/creators";
 import { updateTeamMemberRole } from "@/app/team/actions";
+import { RoleSelectFields } from "./RoleSelectFields";
 
 interface EditRoleModalProps {
   open: boolean;
   onClose: () => void;
   member: TeamMember | null;
   currentUserRole: TeamRole | null;
+  creators: Creator[];
 }
 
 export function EditRoleModal({
@@ -23,15 +25,18 @@ export function EditRoleModal({
   onClose,
   member,
   currentUserRole,
+  creators,
 }: EditRoleModalProps) {
   const router = useRouter();
   const [role, setRole] = useState<TeamRole>("viewer");
+  const [linkedCreatorId, setLinkedCreatorId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open && member && member.role !== "owner") {
       setRole(member.role);
+      setLinkedCreatorId(member.linkedCreatorId ?? "");
       setError("");
     }
   }, [open, member]);
@@ -50,7 +55,11 @@ export function EditRoleModal({
     setError("");
     setLoading(true);
 
-    const result = await updateTeamMemberRole(member!.id, role);
+    const result = await updateTeamMemberRole(
+      member!.id,
+      role,
+      linkedCreatorId || null
+    );
 
     if ("error" in result && result.error) {
       setError(result.error);
@@ -91,22 +100,14 @@ export function EditRoleModal({
             Update role for <span className="text-gray-200">{member.email}</span>
           </p>
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">
-              Role
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as TeamRole)}
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
-            >
-              {availableRoles.map((r) => (
-                <option key={r} value={r}>
-                  {roleLabels[r]}
-                </option>
-              ))}
-            </select>
-          </div>
+          <RoleSelectFields
+            role={role}
+            onRoleChange={setRole}
+            linkedCreatorId={linkedCreatorId}
+            onLinkedCreatorChange={setLinkedCreatorId}
+            creators={creators}
+            availableRoles={availableRoles}
+          />
 
           <div className="flex justify-end gap-3 pt-2">
             <button

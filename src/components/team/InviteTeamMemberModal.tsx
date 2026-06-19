@@ -3,25 +3,26 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { X, Loader2, Copy, Check } from "lucide-react";
-import {
-  type TeamRole,
-  invitableRoles,
-  roleLabels,
-} from "@/lib/team";
+import { type TeamRole } from "@/lib/team";
+import type { Creator } from "@/lib/creators";
 import { inviteTeamMember } from "@/app/team/actions";
+import { RoleSelectFields } from "./RoleSelectFields";
 
 interface InviteTeamMemberModalProps {
   open: boolean;
   onClose: () => void;
+  creators: Creator[];
 }
 
 export function InviteTeamMemberModal({
   open,
   onClose,
+  creators,
 }: InviteTeamMemberModalProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<TeamRole>("viewer");
+  const [linkedCreatorId, setLinkedCreatorId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
@@ -34,6 +35,7 @@ export function InviteTeamMemberModal({
   function handleClose() {
     setEmail("");
     setRole("viewer");
+    setLinkedCreatorId("");
     setError("");
     setInviteLink("");
     setEmailSent(false);
@@ -47,7 +49,11 @@ export function InviteTeamMemberModal({
     setError("");
     setLoading(true);
 
-    const result = await inviteTeamMember(email, role);
+    const result = await inviteTeamMember(
+      email,
+      role,
+      linkedCreatorId || null
+    );
 
     if ("error" in result && result.error) {
       setError(result.error);
@@ -161,22 +167,13 @@ export function InviteTeamMemberModal({
               />
             </div>
 
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                Role
-              </label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as TeamRole)}
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
-              >
-                {invitableRoles.map((r) => (
-                  <option key={r} value={r}>
-                    {roleLabels[r]}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <RoleSelectFields
+              role={role}
+              onRoleChange={setRole}
+              linkedCreatorId={linkedCreatorId}
+              onLinkedCreatorChange={setLinkedCreatorId}
+              creators={creators}
+            />
 
             <div className="flex justify-end gap-3 pt-2">
               <button

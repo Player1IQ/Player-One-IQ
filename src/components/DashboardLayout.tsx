@@ -10,6 +10,7 @@ import {
 } from "@/lib/organization/queries";
 import { getSearchIndex } from "@/lib/search/queries";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
+import { getCurrentUserRole } from "@/lib/permissions";
 import { hasAnyFeature } from "@/lib/subscription/features";
 import { ExportReportMenu } from "@/components/reports/ExportReportMenu";
 import { Calendar } from "lucide-react";
@@ -36,12 +37,13 @@ export async function DashboardLayout({
   description,
   headerActions,
 }: DashboardLayoutProps) {
-  const [searchIndex, subscriptionContext, organizations, activeOrganization] =
+  const [searchIndex, subscriptionContext, organizations, activeOrganization, currentUserRole] =
     await Promise.all([
       getSearchIndex(),
       getSubscriptionContext(),
       getUserOrganizations(),
       getOrganizationForUser(),
+      getCurrentUserRole(),
     ]);
 
   const messagingEnabled = subscriptionContext.features.has("messaging");
@@ -88,6 +90,7 @@ export async function DashboardLayout({
         activeOrganizationId={activeOrganization?.id ?? null}
         organizationName={activeOrganization?.name}
         organizationLogoUrl={activeOrganization?.logo_url ?? null}
+        teamRole={currentUserRole}
         mobileTitle={title}
         mobileHeaderActions={
           <ExportReportMenu canExport={canExportReports} variant="mobile" />

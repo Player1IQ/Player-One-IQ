@@ -26,8 +26,11 @@ import { EditRoleModal } from "./EditRoleModal";
 import { ResendInviteModal } from "./ResendInviteModal";
 import { PresenceBadge } from "@/components/presence/PresenceBadge";
 
+import type { Creator } from "@/lib/creators";
+
 interface TeamTableProps {
   members: TeamMember[];
+  creators: Creator[];
   canManageTeam: boolean;
   currentUserRole: TeamRole | null;
 }
@@ -44,6 +47,7 @@ const MENU_ESTIMATED_HEIGHT_PX = 220;
 
 export function TeamTable({
   members,
+  creators,
   canManageTeam,
   currentUserRole,
 }: TeamTableProps) {
@@ -389,6 +393,7 @@ export function TeamTable({
         onClose={() => setEditingMember(null)}
         member={editingMember}
         currentUserRole={currentUserRole}
+        creators={creators}
       />
 
       <ResendInviteModal

@@ -17,7 +17,9 @@ import {
   permissionMatrix,
   permissions,
   roleLabels,
+  requiresLinkedCreator,
 } from "@/lib/team";
+import type { Creator } from "@/lib/creators";
 import { removeTeamMember } from "@/app/team/actions";
 import { TeamMemberAvatar } from "./TeamMemberAvatar";
 import { RoleBadge } from "./RoleBadge";
@@ -30,6 +32,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 
 interface TeamMemberProfileProps {
   member: TeamMember;
+  creators: Creator[];
   canManageTeam: boolean;
   currentUserRole: TeamRole | null;
 }
@@ -56,6 +59,7 @@ function Section({
 
 export function TeamMemberProfile({
   member,
+  creators,
   canManageTeam,
   currentUserRole,
 }: TeamMemberProfileProps) {
@@ -72,6 +76,9 @@ export function TeamMemberProfile({
   const fullAccessCount = permissions.filter(
     (perm) => memberPermissions[perm.key] === "full"
   ).length;
+  const linkedCreatorName = member.linkedCreatorId
+    ? creators.find((c) => c.id === member.linkedCreatorId)?.name
+    : null;
 
   async function handleRemove() {
     if (!confirm(`Remove ${member.email} from your team?`)) return;
@@ -188,6 +195,17 @@ export function TeamMemberProfile({
               {member.joinedDate}
             </p>
           </div>
+          {requiresLinkedCreator(member.role) ? (
+            <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-4 backdrop-blur-sm sm:col-span-2">
+              <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+                <Shield className="h-3.5 w-3.5" />
+                Linked roster profile
+              </div>
+              <p className="mt-2 text-sm font-medium text-white">
+                {linkedCreatorName ?? "Not linked"}
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <Section
@@ -219,14 +237,18 @@ export function TeamMemberProfile({
                         ? "text-emerald-400"
                         : level === "read"
                           ? "text-sky-400"
-                          : "text-gray-500"
+                          : level === "scoped"
+                            ? "text-amber-400"
+                            : "text-gray-500"
                     }`}
                   >
                     {level === "full"
                       ? "Full access"
                       : level === "read"
                         ? "Read only"
-                        : "No access"}
+                        : level === "scoped"
+                          ? "Own profile only"
+                          : "No access"}
                   </span>
                 </li>
               );
@@ -240,6 +262,7 @@ export function TeamMemberProfile({
         onClose={() => setEditOpen(false)}
         member={member}
         currentUserRole={currentUserRole}
+        creators={creators}
       />
     </>
   );

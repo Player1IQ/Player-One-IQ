@@ -8,7 +8,7 @@ import { getContractById, getContractNegotiationContext } from "@/lib/contracts/
 import { getDeliverablesForContract } from "@/lib/contract-deliverables/queries";
 import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
-import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import { canAccessContract, canWriteData, getCurrentUserRole } from "@/lib/permissions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 
@@ -32,6 +32,10 @@ export default async function ContractDetailPage({
     ]);
 
   if (!contract) {
+    notFound();
+  }
+
+  if (!(await canAccessContract(contract))) {
     notFound();
   }
 

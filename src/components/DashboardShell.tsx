@@ -7,6 +7,7 @@ import { PresenceHeartbeat } from "@/components/presence/PresenceHeartbeat";
 import { Sidebar } from "./Sidebar";
 import type { FeatureKey } from "@/lib/subscription/types";
 import type { UserOrganization } from "@/lib/organization/queries";
+import type { TeamRole } from "@/lib/team";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ interface DashboardShellProps {
   activeOrganizationId?: string | null;
   organizationName?: string;
   organizationLogoUrl?: string | null;
+  teamRole?: TeamRole | null;
 }
 
 export function DashboardShell({
@@ -32,6 +34,7 @@ export function DashboardShell({
   activeOrganizationId,
   organizationName,
   organizationLogoUrl,
+  teamRole = null,
 }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -58,6 +61,7 @@ export function DashboardShell({
           activeOrganizationId={activeOrganizationId}
           organizationName={organizationName}
           organizationLogoUrl={organizationLogoUrl}
+          teamRole={teamRole}
           onNavigate={() => setMobileOpen(false)}
         />
       </div>

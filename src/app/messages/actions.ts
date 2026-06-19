@@ -6,6 +6,7 @@ import { getOrganizationId } from "@/lib/organization/queries";
 import {
   requireFeatureAccess,
   requireWriteAccess,
+  requireMessagingAccess,
 } from "@/lib/permissions";
 import {
   getCurrentUserId,
@@ -644,7 +645,7 @@ export async function sendMessage(conversationId: string, content: string) {
   const trimmed = content.trim();
   if (!trimmed) return { error: "Message cannot be empty." };
 
-  const permError = await requireWriteAccess();
+  const permError = await requireMessagingAccess();
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");
@@ -738,7 +739,7 @@ export async function sendMessage(conversationId: string, content: string) {
 }
 
 export async function markConversationRead(conversationId: string) {
-  const permError = await requireWriteAccess();
+  const permError = await requireMessagingAccess();
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");

@@ -9,7 +9,7 @@ import {
 } from "@/lib/creator-revenue/queries";
 import { canRunLiveAi } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import { canAccessCreator, canWriteData, getCurrentUserRole } from "@/lib/permissions";
 import { getOAuthPlatformUi } from "@/lib/platform-oauth/config";
 import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
@@ -46,6 +46,10 @@ export default async function CreatorDetailPage({
   ]);
 
   if (!creator) {
+    notFound();
+  }
+
+  if (!(await canAccessCreator(id))) {
     notFound();
   }
 

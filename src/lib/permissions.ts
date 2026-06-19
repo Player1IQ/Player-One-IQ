@@ -10,14 +10,24 @@ import { getSubscriptionContext } from "@/lib/subscription/queries";
 import type { FeatureKey, UsageMetricKey } from "@/lib/subscription/types";
 import {
   type TeamRole,
+  type PermissionKey,
   canManageTeam,
   canWriteData,
+  canUseMessaging,
+  hasFullAccess,
+  hasReadAccess,
+  isPortalRole,
   permissionMatrix,
 } from "@/lib/team";
 
-export { canWriteData };
+export { canWriteData, canUseMessaging, isPortalRole, hasFullAccess, hasReadAccess };
 
-export async function getCurrentUserRole(): Promise<TeamRole | null> {
+export interface CurrentUserMembership {
+  role: TeamRole;
+  linkedCreatorId: string | null;
+}
+
+export async function getCurrentUserMembership(): Promise<CurrentUserMembership | null> {
   const supabase = await createClient();
   if (!supabase) return null;
 
@@ -36,24 +46,75 @@ export async function getCurrentUserRole(): Promise<TeamRole | null> {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (ownedOrg) return "owner";
+  if (ownedOrg) {
+    return { role: "owner", linkedCreatorId: null };
+  }
 
   const { data: membership } = await supabase
     .from("team_members")
-    .select("role")
+    .select("role, linked_creator_id")
     .eq("organization_id", organizationId)
     .eq("user_id", user.id)
     .eq("status", "active")
     .maybeSingle();
 
-  return (membership?.role as TeamRole) ?? null;
+  if (!membership?.role) return null;
+
+  return {
+    role: membership.role as TeamRole,
+    linkedCreatorId: membership.linked_creator_id ?? null,
+  };
+}
+
+export async function getCurrentUserRole(): Promise<TeamRole | null> {
+  const membership = await getCurrentUserMembership();
+  return membership?.role ?? null;
+}
+
+export async function getLinkedCreatorId(): Promise<string | null> {
+  const membership = await getCurrentUserMembership();
+  return membership?.linkedCreatorId ?? null;
+}
+
+export async function canAccessCreator(creatorId: string): Promise<boolean> {
+  const membership = await getCurrentUserMembership();
+  if (!membership) return false;
+
+  if (isPortalRole(membership.role)) {
+    return membership.linkedCreatorId === creatorId;
+  }
+
+  return hasReadAccess(membership.role, "creators");
+}
+
+export async function canAccessContract(contract: {
+  creatorId: string;
+}): Promise<boolean> {
+  const membership = await getCurrentUserMembership();
+  if (!membership) return false;
+
+  if (isPortalRole(membership.role)) {
+    return membership.linkedCreatorId === contract.creatorId;
+  }
+
+  return hasReadAccess(membership.role, "contracts");
 }
 
 export async function requireWriteAccess(): Promise<{ error: string } | null> {
   const role = await getCurrentUserRole();
   if (!canWriteData(role)) {
     return {
-      error: "You do not have permission to modify data. Viewers have read-only access.",
+      error: "You do not have permission to modify data.",
+    };
+  }
+  return null;
+}
+
+export async function requireMessagingAccess(): Promise<{ error: string } | null> {
+  const role = await getCurrentUserRole();
+  if (!canUseMessaging(role)) {
+    return {
+      error: "You do not have permission to use messaging.",
     };
   }
   return null;
@@ -72,11 +133,20 @@ export async function requireTeamManageAccess(): Promise<
 }
 
 export function canManageOpportunities(role: TeamRole | null): boolean {
-  return role === "owner" || role === "admin";
+  return (
+    role === "owner" ||
+    role === "admin" ||
+    role === "partnerships"
+  );
 }
 
 export function canApplyToOpportunities(role: TeamRole | null): boolean {
-  return role === "owner" || role === "admin" || role === "manager";
+  return (
+    role === "owner" ||
+    role === "admin" ||
+    role === "manager" ||
+    role === "talent_manager"
+  );
 }
 
 export async function requireOpportunityManageAccess(): Promise<
@@ -109,7 +179,8 @@ export function canViewSettings(role: TeamRole | null): boolean {
 }
 
 export function canManageSettings(role: TeamRole | null): boolean {
-  return canManageTeam(role);
+  if (!role) return false;
+  return hasFullAccess(role, "settings");
 }
 
 export async function requireSettingsManageAccess(): Promise<
@@ -125,7 +196,12 @@ export async function requireSettingsManageAccess(): Promise<
 }
 
 export function canManageBilling(role: TeamRole | null): boolean {
-  return canManageTeam(role);
+  return role === "owner";
+}
+
+export function canViewBilling(role: TeamRole | null): boolean {
+  if (!role) return false;
+  return permissionMatrix[role].billing !== "none";
 }
 
 export async function requireBillingManageAccess(): Promise<
@@ -180,4 +256,13 @@ export async function canAccessFeature(
 ): Promise<boolean> {
   const context = await getSubscriptionContext();
   return hasFeature(context.features, feature);
+}
+
+export function canAccessAgencyArea(
+  role: TeamRole | null,
+  key: PermissionKey
+): boolean {
+  if (!role) return false;
+  if (isPortalRole(role)) return false;
+  return hasReadAccess(role, key);
 }

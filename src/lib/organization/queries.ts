@@ -9,7 +9,16 @@ export interface Organization {
   created_at: string;
 }
 
-export type OrganizationRole = "owner" | "admin" | "manager" | "viewer";
+export type OrganizationRole =
+  | "owner"
+  | "admin"
+  | "manager"
+  | "partnerships"
+  | "talent_manager"
+  | "member"
+  | "viewer"
+  | "player"
+  | "content_creator";
 
 export interface UserOrganization {
   id: string;

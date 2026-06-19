@@ -21,9 +21,9 @@ import {
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import type { UserOrganization } from "@/lib/organization/queries";
 import { useMemo } from "react";
-import { navItemAccessible } from "@/lib/subscription/features";
 import type { FeatureKey } from "@/lib/subscription/types";
-import { navItems, type NavIconName } from "@/lib/navigation";
+import { getAccessibleNavItems, type NavIconName } from "@/lib/navigation";
+import type { TeamRole } from "@/lib/team";
 import { SidebarUser } from "@/components/SidebarUser";
 import { UnreadBadge } from "@/components/messages/UnreadBadge";
 import { cn } from "@/lib/utils";
@@ -49,6 +49,7 @@ interface SidebarProps {
   activeOrganizationId?: string | null;
   organizationName?: string;
   organizationLogoUrl?: string | null;
+  teamRole?: TeamRole | null;
   onNavigate?: () => void;
 }
 
@@ -58,16 +59,16 @@ export function Sidebar({
   activeOrganizationId = null,
   organizationName,
   organizationLogoUrl,
+  teamRole = null,
   onNavigate,
 }: SidebarProps) {
   const pathname = usePathname();
   const items = useMemo(() => {
-    if (!enabledFeatures) return navItems;
-    const features = new Set(enabledFeatures);
-    return navItems.filter((item) =>
-      navItemAccessible(features, item.requiredFeature)
-    );
-  }, [enabledFeatures]);
+    const features = new Set(enabledFeatures ?? []);
+    return getAccessibleNavItems(features, teamRole);
+  }, [enabledFeatures, teamRole]);
+  const showBillingCta =
+    teamRole !== "player" && teamRole !== "content_creator";
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-white/[0.06] bg-surface-raised/95 backdrop-blur-xl">
@@ -149,22 +150,23 @@ export function Sidebar({
         })}
       </nav>
 
-      {/* Upgrade CTA */}
-      <div className="mx-3 mb-2">
-        <Link
-          href="/billing"
-          onClick={onNavigate}
-          className="group flex items-center gap-3 rounded-xl border border-accent/20 bg-gradient-to-r from-accent/10 to-accent/5 p-3 transition-all duration-200 hover:border-accent/40 hover:shadow-glow"
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/20">
-            <Zap className="h-4 w-4 text-accent-light" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-white">Upgrade Plan</p>
-            <p className="text-[10px] text-gray-500">Unlock AI & analytics</p>
-          </div>
-        </Link>
-      </div>
+      {showBillingCta ? (
+        <div className="mx-3 mb-2">
+          <Link
+            href="/billing"
+            onClick={onNavigate}
+            className="group flex items-center gap-3 rounded-xl border border-accent/20 bg-gradient-to-r from-accent/10 to-accent/5 p-3 transition-all duration-200 hover:border-accent/40 hover:shadow-glow"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/20">
+              <Zap className="h-4 w-4 text-accent-light" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-white">Upgrade Plan</p>
+              <p className="text-[10px] text-gray-500">Unlock AI & analytics</p>
+            </div>
+          </Link>
+        </div>
+      ) : null}
 
       <SidebarUser />
     </aside>

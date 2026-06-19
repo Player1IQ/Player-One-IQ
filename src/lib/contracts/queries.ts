@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { getCurrentUserMembership } from "@/lib/permissions";
+import { isPortalRole } from "@/lib/team";
 import {
   formatCurrency,
   mapContractRow,
@@ -21,11 +23,19 @@ export async function getContracts(): Promise<Contract[]> {
   const organizationId = await getOrganizationId();
   if (!organizationId) return [];
 
-  const { data, error } = await supabase
+  const membership = await getCurrentUserMembership();
+
+  let query = supabase
     .from("contracts")
     .select(contractSelect)
-    .eq("organization_id", organizationId)
-    .order("created_at", { ascending: false });
+    .eq("organization_id", organizationId);
+
+  if (membership && isPortalRole(membership.role)) {
+    if (!membership.linkedCreatorId) return [];
+    query = query.eq("creator_id", membership.linkedCreatorId);
+  }
+
+  const { data, error } = await query.order("created_at", { ascending: false });
 
   if (error || !data) return [];
   return (data as ContractRow[]).map(mapContractRow);
@@ -38,12 +48,20 @@ export async function getContractById(id: string): Promise<Contract | null> {
   const organizationId = await getOrganizationId();
   if (!organizationId) return null;
 
-  const { data, error } = await supabase
+  const membership = await getCurrentUserMembership();
+
+  let query = supabase
     .from("contracts")
     .select(contractSelect)
     .eq("id", id)
-    .eq("organization_id", organizationId)
-    .maybeSingle();
+    .eq("organization_id", organizationId);
+
+  if (membership && isPortalRole(membership.role)) {
+    if (!membership.linkedCreatorId) return null;
+    query = query.eq("creator_id", membership.linkedCreatorId);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error || !data) return null;
   return mapContractRow(data as ContractRow);

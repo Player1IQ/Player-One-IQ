@@ -9,6 +9,7 @@ import {
   roleLabels,
   getTeamStats,
 } from "@/lib/team";
+import type { Creator } from "@/lib/creators";
 import { TeamNav } from "./TeamNav";
 import { TeamSummaryCards, type TeamStatusFilter } from "./TeamSummaryCards";
 import { TeamTable } from "./TeamTable";
@@ -29,12 +30,14 @@ const quickFilters: Array<{ value: TeamStatusFilter; label: string }> = [
 
 interface TeamPageClientProps {
   members: TeamMember[];
+  creators: Creator[];
   canManageTeam: boolean;
   currentUserRole: TeamRole | null;
 }
 
 export function TeamPageClient({
   members,
+  creators,
   canManageTeam,
   currentUserRole,
 }: TeamPageClientProps) {
@@ -222,6 +225,7 @@ export function TeamPageClient({
           </p>
           <TeamTable
             members={filtered}
+            creators={creators}
             canManageTeam={canManageTeam}
             currentUserRole={currentUserRole}
           />
@@ -232,6 +236,7 @@ export function TeamPageClient({
         <InviteTeamMemberModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
+          creators={creators}
         />
       ) : null}
     </div>

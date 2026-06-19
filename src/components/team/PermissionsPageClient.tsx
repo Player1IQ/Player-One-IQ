@@ -8,8 +8,8 @@ export function PermissionsPageClient() {
       <TeamNav />
 
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-sm text-gray-400">
-        Role permissions apply across creators, sponsors, contracts, team, and
-        settings.{" "}
+        Nine permission areas across staff and portal roles. Portal users
+        (Player, Content Creator) are scoped to a linked roster profile.{" "}
         <Link href="/team" className="font-medium text-accent-light hover:text-white">
           Back to team members
         </Link>

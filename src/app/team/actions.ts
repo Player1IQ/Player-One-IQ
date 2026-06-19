@@ -16,6 +16,7 @@ import {
   type TeamRole,
   invitableRoles,
   roleLabels,
+  requiresLinkedCreator,
 } from "@/lib/team";
 
 async function requireTeamFeature() {
@@ -62,7 +63,11 @@ async function logTeamActivity(
   });
 }
 
-export async function inviteTeamMember(email: string, role: TeamRole) {
+export async function inviteTeamMember(
+  email: string,
+  role: TeamRole,
+  linkedCreatorId?: string | null
+) {
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
 
@@ -75,6 +80,11 @@ export async function inviteTeamMember(email: string, role: TeamRole) {
 
   const normalizedEmail = email.trim().toLowerCase();
   if (!normalizedEmail) return { error: "Email is required." };
+
+  const normalizedLinkedCreatorId = linkedCreatorId?.trim() || null;
+  if (requiresLinkedCreator(role) && !normalizedLinkedCreatorId) {
+    return { error: "Portal roles must be linked to a roster profile." };
+  }
 
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
@@ -127,12 +137,26 @@ export async function inviteTeamMember(email: string, role: TeamRole) {
     return { error: "A pending invitation already exists for this email." };
   }
 
+  if (normalizedLinkedCreatorId) {
+    const { data: creator } = await supabase
+      .from("creators")
+      .select("id")
+      .eq("id", normalizedLinkedCreatorId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!creator) {
+      return { error: "Selected roster profile was not found." };
+    }
+  }
+
   const { data, error } = await supabase
     .from("team_invitations")
     .insert({
       organization_id: organizationId,
       email: normalizedEmail,
       role,
+      linked_creator_id: normalizedLinkedCreatorId,
       invited_by: user.id,
     })
     .select("token")
@@ -167,7 +191,8 @@ export async function inviteTeamMember(email: string, role: TeamRole) {
 
 export async function updateTeamMemberRole(
   memberId: string,
-  role: TeamRole
+  role: TeamRole,
+  linkedCreatorId?: string | null
 ) {
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
@@ -193,6 +218,11 @@ export async function updateTeamMemberRole(
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
 
+  const normalizedLinkedCreatorId = linkedCreatorId?.trim() || null;
+  if (requiresLinkedCreator(role) && !normalizedLinkedCreatorId) {
+    return { error: "Portal roles must be linked to a roster profile." };
+  }
+
   const { data: member, error: fetchError } = await supabase
     .from("team_members")
     .select("email, role")
@@ -212,9 +242,28 @@ export async function updateTeamMemberRole(
     return { error: "Admins cannot change other admin roles." };
   }
 
+  if (normalizedLinkedCreatorId) {
+    const { data: creator } = await supabase
+      .from("creators")
+      .select("id")
+      .eq("id", normalizedLinkedCreatorId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!creator) {
+      return { error: "Selected roster profile was not found." };
+    }
+  }
+
   const { error: updateError } = await supabase
     .from("team_members")
-    .update({ role, updated_at: new Date().toISOString() })
+    .update({
+      role,
+      linked_creator_id: requiresLinkedCreator(role)
+        ? normalizedLinkedCreatorId
+        : null,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", memberId)
     .eq("organization_id", organizationId);
 
@@ -461,6 +510,7 @@ export async function acceptInvitation(token: string) {
       user_id: user.id,
       email: user.email.toLowerCase(),
       role: invite.role,
+      linked_creator_id: invite.linked_creator_id ?? null,
       status: "active",
       invited_by: invite.invited_by,
       joined_at: new Date().toISOString(),

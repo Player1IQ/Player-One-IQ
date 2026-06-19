@@ -1,7 +1,10 @@
 import { getOrganizationForUser } from "@/lib/organization/queries";
+import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { DashboardHomeClient } from "@/components/dashboard/DashboardHomeClient";
 import { getCreators } from "@/lib/creators/queries";
+import { getCurrentUserRole } from "@/lib/permissions";
+import { canAccessStaffDashboard } from "@/lib/team";
 import { getSponsors } from "@/lib/sponsors/queries";
 import { getContracts } from "@/lib/contracts/queries";
 import { getRecentActivity } from "@/lib/activity/queries";
@@ -31,6 +34,11 @@ import {
 } from "@/lib/dashboard/charts";
 
 export default async function DashboardPage() {
+  const role = await getCurrentUserRole();
+  if (role && !canAccessStaffDashboard(role)) {
+    redirect("/portal");
+  }
+
   const monthKeys = getLastNMonthKeys(6).map((month) => month.key);
 
   const [
