@@ -9,6 +9,7 @@ import {
 } from "@/app/settings/ai-integration-actions";
 import type { AiIntegrationPublic, AiProvider } from "@/lib/ai/providers/types";
 import { aiProviderOptions } from "@/lib/ai/providers/types";
+import { AiProviderSetupGuide } from "@/components/settings/AiProviderSetupGuide";
 
 interface AiIntegrationCardProps {
   integration: AiIntegrationPublic | null;
@@ -108,7 +109,10 @@ export function AiIntegrationCard({
   }
 
   return (
-    <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
+    <section
+      id="ai-integration"
+      className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm"
+    >
       <div className="flex items-start gap-3">
         <Sparkles className="mt-0.5 h-5 w-5 text-accent-light" />
         <div className="flex-1">
@@ -181,6 +185,12 @@ export function AiIntegrationCard({
                 </label>
               </div>
 
+              <AiProviderSetupGuide
+                key={provider}
+                provider={provider}
+                defaultOpen={!integration?.hasApiKey}
+              />
+
               <label className="block text-sm">
                 <span className="text-gray-400">API key</span>
                 <input
@@ -197,16 +207,7 @@ export function AiIntegrationCard({
                 />
                 <span className="mt-1 block text-xs text-gray-500">
                   Keys are encrypted server-side and never sent to the browser
-                  after save. Get a key from{" "}
-                  <a
-                    href={selectedProvider.docsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent-light hover:text-white"
-                  >
-                    {selectedProvider.label}
-                  </a>
-                  .
+                  after save. Use the setup guide above if you need a new key.
                 </span>
               </label>
 

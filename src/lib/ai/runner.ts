@@ -90,6 +90,8 @@ export async function runAssistantAction(
     };
   }
 
+  let llmSource: "org" | "platform" | undefined;
+
   try {
     const llmConfig = await resolveLlmConfig(organizationId);
     if (!llmConfig) {
@@ -100,6 +102,8 @@ export async function runAssistantAction(
         model: null,
       };
     }
+
+    llmSource = llmConfig.source;
 
     const workspace = await buildAiWorkspaceContext();
     const contextJson = summarizeContextForPrompt(workspace);
@@ -127,7 +131,7 @@ export async function runAssistantAction(
       mode: "demo",
       tokensUsed: 0,
       model: null,
-      fallbackNotice: getLlmFallbackNotice(error),
+      fallbackNotice: getLlmFallbackNotice(error, llmSource),
     };
   }
 }

@@ -1,6 +1,7 @@
 import type { AiAssistantResult, AiForecast, AiMatchScore } from "./types";
 import type { AiAssistantType } from "@/lib/subscription/types";
 import type { ResolvedLlmConfig } from "./providers/types";
+import { formatLlmUserMessage } from "./llm-errors";
 
 export interface LlmRunResult {
   result: AiAssistantResult;
@@ -258,9 +259,13 @@ export async function probeLlmConfig(
 
     return { ok: true };
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Connection test failed.";
-    return { ok: false, error: message };
+    return {
+      ok: false,
+      error: formatLlmUserMessage(error, {
+        source: config.source,
+        provider: config.provider,
+      }),
+    };
   }
 }
 

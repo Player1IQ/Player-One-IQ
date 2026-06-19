@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Settings2, Sparkles } from "lucide-react";
+import { CircleHelp, Settings2, Sparkles } from "lucide-react";
 import type { AiIntegrationPublic } from "@/lib/ai/providers/types";
 import { aiProviderOptions } from "@/lib/ai/providers/types";
 import type { AiLlmHealthState } from "@/lib/ai/llm-health";
@@ -70,13 +70,24 @@ export function AiConnectionStrip({
         </div>
       </div>
       {canManage ? (
-        <Link
-          href="/settings"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs font-medium text-gray-300 transition-colors hover:border-accent/30 hover:text-white"
-        >
-          <Settings2 className="h-3.5 w-3.5" />
-          {workspaceConnected ? "Manage" : "Connect"}
-        </Link>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {!workspaceConnected ? (
+            <Link
+              href="/settings#ai-integration"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs font-medium text-gray-400 transition-colors hover:border-accent/30 hover:text-white"
+            >
+              <CircleHelp className="h-3.5 w-3.5" />
+              Setup guide
+            </Link>
+          ) : null}
+          <Link
+            href="/settings"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs font-medium text-gray-300 transition-colors hover:border-accent/30 hover:text-white"
+          >
+            <Settings2 className="h-3.5 w-3.5" />
+            {workspaceConnected ? "Manage" : "Connect"}
+          </Link>
+        </div>
       ) : null}
     </div>
   );
