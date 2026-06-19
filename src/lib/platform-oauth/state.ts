@@ -14,11 +14,18 @@ export interface OAuthStatePayload {
 }
 
 function getStateSecret(): string {
-  return (
-    process.env.PLATFORM_OAUTH_STATE_SECRET ??
-    process.env.YOUTUBE_CLIENT_SECRET ??
-    "dev-platform-oauth-state-secret"
-  );
+  const secret =
+    process.env.PLATFORM_OAUTH_STATE_SECRET?.trim() ||
+    process.env.YOUTUBE_CLIENT_SECRET?.trim();
+  if (secret) return secret;
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "PLATFORM_OAUTH_STATE_SECRET is required in production for OAuth state signing."
+    );
+  }
+
+  return "dev-platform-oauth-state-secret";
 }
 
 export function createOAuthState(

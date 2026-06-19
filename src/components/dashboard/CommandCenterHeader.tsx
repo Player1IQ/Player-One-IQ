@@ -30,9 +30,10 @@ export function CommandCenterHeader({
   organizationName,
   attentionCount,
 }: CommandCenterHeaderProps) {
-  const [now, setNow] = useState(() => new Date());
+  const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
+    setNow(new Date());
     const timer = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(timer);
   }, []);
@@ -63,10 +64,10 @@ export function CommandCenterHeader({
               Local time
             </p>
             <p className="mt-1 text-lg font-semibold tabular-nums text-white">
-              {formatCommandTime(now)}
+              {now ? formatCommandTime(now) : "--:--:--"}
             </p>
             <p className="mt-0.5 text-xs text-gray-500">
-              {formatCommandDate(now)}
+              {now ? formatCommandDate(now) : "\u00A0"}
             </p>
           </div>
 
