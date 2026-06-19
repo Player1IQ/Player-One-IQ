@@ -8,17 +8,32 @@ import { createClient } from "@/lib/supabase/client";
 import { formatAuthError } from "@/lib/auth/errors";
 import { getErrorMessage } from "@/lib/safe-action";
 import { AuthInput } from "./AuthInput";
+import { InviteAuthBanner } from "./InviteAuthContext";
+
+function buildAuthQuery(params: {
+  redirect?: string | null;
+  email?: string | null;
+  org?: string | null;
+}) {
+  const query = new URLSearchParams();
+  if (params.redirect) query.set("redirect", params.redirect);
+  if (params.email) query.set("email", params.email);
+  if (params.org) query.set("org", params.org);
+  const serialized = query.toString();
+  return serialized ? `?${serialized}` : "";
+}
 
 export function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
   const inviteEmail = searchParams.get("email");
-  const loginHref = redirect
-    ? `/login?redirect=${encodeURIComponent(redirect)}${inviteEmail ? `&email=${encodeURIComponent(inviteEmail)}` : ""}`
-    : inviteEmail
-      ? `/login?email=${encodeURIComponent(inviteEmail)}`
-      : "/login";
+  const inviteOrg = searchParams.get("org");
+  const loginHref = `/login${buildAuthQuery({
+    redirect,
+    email: inviteEmail,
+    org: inviteOrg,
+  })}`;
   const [email, setEmail] = useState(inviteEmail ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -87,6 +102,8 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <InviteAuthBanner />
+
       {error && (
         <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {error}

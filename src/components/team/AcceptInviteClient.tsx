@@ -107,13 +107,13 @@ export function AcceptInviteClient({
             this invitation.
           </p>
           <a
-            href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}`}
+            href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
             className="flex w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
           >
             Sign in to accept
           </a>
           <a
-            href={`/signup?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}`}
+            href={`/signup?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
             className="flex w-full items-center justify-center rounded-lg border border-border py-2.5 text-sm font-medium text-gray-300 hover:bg-surface-overlay"
           >
             Create account
@@ -121,7 +121,7 @@ export function AcceptInviteClient({
           <p className="text-center text-xs text-gray-500">
             Already tried signing up? Use{" "}
             <a
-              href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}`}
+              href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
               className="text-accent-light hover:underline"
             >
               Sign in
@@ -137,7 +137,7 @@ export function AcceptInviteClient({
             {email}. Sign out and sign in with the correct account.
           </div>
           <a
-            href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}`}
+            href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
             className="flex w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
           >
             Switch account

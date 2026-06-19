@@ -72,8 +72,11 @@ function checklistItems(health) {
 
 const ROUTE_CHECKS = [
   { path: "/login", label: "Login page reachable" },
+  { path: "/signup", label: "Signup page reachable" },
   { path: "/terms", label: "Terms page reachable" },
   { path: "/privacy", label: "Privacy page reachable" },
+  { path: "/robots.txt", label: "robots.txt served" },
+  { path: "/sitemap.xml", label: "sitemap.xml served" },
 ];
 
 async function checkPublicRoutes() {

@@ -4,7 +4,7 @@ import { SupabaseConfigBanner } from "./SupabaseConfigBanner";
 interface AuthLayoutProps {
   children: React.ReactNode;
   title: string;
-  subtitle: string;
+  subtitle: React.ReactNode;
 }
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {

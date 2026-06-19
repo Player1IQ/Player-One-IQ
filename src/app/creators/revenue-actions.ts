@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireWriteAccess } from "@/lib/permissions";
+import { requireFeatureAccess, requireWriteAccess } from "@/lib/permissions";
 import { platforms, type Platform } from "@/lib/creators";
 import {
   getCurrentPeriodMonth,
@@ -92,12 +92,19 @@ async function getCreatorInOrg(
   return data;
 }
 
+async function requireCreatorProfilesFeature() {
+  return requireFeatureAccess("creator_profiles", "Creator profiles");
+}
+
 export async function connectCreatorPlatformAccount(
   creatorId: string,
   platform: Platform,
   accountHandle: string,
   initialRevenue?: RevenueInput
 ) {
+  const featureError = await requireCreatorProfilesFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
@@ -166,6 +173,9 @@ export async function connectCreatorPlatformAccount(
 }
 
 export async function disconnectCreatorPlatformAccount(accountId: string) {
+  const featureError = await requireCreatorProfilesFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
@@ -208,6 +218,9 @@ export async function upsertCreatorPlatformRevenue(
   accountId: string,
   revenue: RevenueInput
 ) {
+  const featureError = await requireCreatorProfilesFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
@@ -252,6 +265,9 @@ export async function upsertCreatorPlatformRevenue(
 }
 
 export async function syncCreatorPlatformAccount(accountId: string) {
+  const featureError = await requireCreatorProfilesFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
@@ -286,6 +302,9 @@ export async function syncCreatorPlatformAccount(accountId: string) {
 }
 
 export async function syncAllCreatorOAuthAccounts(creatorId: string) {
+  const featureError = await requireCreatorProfilesFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 

@@ -1,12 +1,17 @@
 import { Suspense } from "react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
+import { InviteAuthSubtitle } from "@/components/auth/InviteAuthContext";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export default function LoginPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Sign in to your Player One IQ workspace"
+      subtitle={
+        <Suspense fallback="Sign in to your Player One IQ workspace">
+          <InviteAuthSubtitle fallback="Sign in to your Player One IQ workspace" />
+        </Suspense>
+      }
     >
       <Suspense
         fallback={

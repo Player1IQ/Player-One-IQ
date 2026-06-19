@@ -1,12 +1,17 @@
 import { Suspense } from "react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
+import { InviteSignUpSubtitle } from "@/components/auth/InviteAuthContext";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 
 export default function SignUpPage() {
   return (
     <AuthLayout
       title="Create your account"
-      subtitle="Start managing creators and sponsors in minutes"
+      subtitle={
+        <Suspense fallback="Start managing creators and sponsors in minutes">
+          <InviteSignUpSubtitle fallback="Start managing creators and sponsors in minutes" />
+        </Suspense>
+      }
     >
       <Suspense
         fallback={

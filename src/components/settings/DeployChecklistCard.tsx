@@ -3,6 +3,21 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Circle, ExternalLink, Loader2 } from "lucide-react";
 
+const PUBLIC_ROUTE_CHECKS = [
+  { path: "/login", label: "Login page reachable" },
+  { path: "/signup", label: "Signup page reachable" },
+  { path: "/terms", label: "Terms page reachable" },
+  { path: "/privacy", label: "Privacy page reachable" },
+  { path: "/robots.txt", label: "robots.txt served" },
+  { path: "/sitemap.xml", label: "sitemap.xml served" },
+] as const;
+
+interface ChecklistItem {
+  label: string;
+  done: boolean;
+  optional?: boolean;
+}
+
 interface HealthResponse {
   ok: boolean;
   supabase: boolean;
@@ -22,17 +37,41 @@ interface HealthResponse {
 
 export function DeployChecklistCard() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
+  const [routeChecks, setRouteChecks] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/health")
-      .then((res) => res.json())
-      .then((data: HealthResponse) => setHealth(data))
-      .catch(() => setHealth(null))
-      .finally(() => setLoading(false));
+    async function loadChecklist() {
+      try {
+        const [healthRes, routeResults] = await Promise.all([
+          fetch("/api/health").then((res) => res.json() as Promise<HealthResponse>),
+          Promise.all(
+            PUBLIC_ROUTE_CHECKS.map(async ({ path, label }) => {
+              try {
+                const response = await fetch(path, { redirect: "follow" });
+                return { label, done: response.ok };
+              } catch {
+                return { label, done: false };
+              }
+            })
+          ),
+        ]);
+        setHealth(healthRes);
+        setRouteChecks(routeResults);
+      } catch {
+        setHealth(null);
+        setRouteChecks(
+          PUBLIC_ROUTE_CHECKS.map(({ label }) => ({ label, done: false }))
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    void loadChecklist();
   }, []);
 
-  const items = [
+  const envItems: ChecklistItem[] = [
     {
       label: "Supabase connected",
       done: health?.supabase ?? false,
@@ -90,6 +129,8 @@ export function DeployChecklistCard() {
     },
   ];
 
+  const items = [...envItems, ...routeChecks];
+
   const oauthBase = health?.appUrl?.replace(/\/$/, "");
   const requiredItems = items.filter((item) => !item.optional);
   const readyCount = requiredItems.filter((item) => item.done).length;
@@ -99,8 +140,8 @@ export function DeployChecklistCard() {
       <h2 className="text-base font-semibold text-white">Deploy checklist</h2>
       <p className="mt-1 text-sm text-gray-500">
         Production readiness for Vercel. Run{" "}
-        <code className="rounded bg-surface px-1 text-xs">npm run verify:deploy</code>{" "}
-        locally before pushing.
+        <code className="rounded bg-surface px-1 text-xs">npm run verify:production</code>{" "}
+        against your deployed URL before launch.
       </p>
 
       {loading ? (
