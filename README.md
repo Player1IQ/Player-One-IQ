@@ -42,6 +42,10 @@ Run these before or after deploy to confirm configuration:
 
 ## Production launch (manual)
 
+**Code complete for v1 launch.** Remaining work is manual ops and policy — not app code. After deploy, run `npm run verify:launch` (or `npm run verify:production` against your live URL). Production smoke was **19/19** passing as of the latest deploy.
+
+### Manual steps before go-live
+
 These steps are not automated — complete them before inviting real users:
 
 1. **Supabase Auth** — Set Site URL and Redirect URLs to your production domain (`/auth/callback`). Enable leaked-password protection in Authentication → Providers.
@@ -50,6 +54,19 @@ These steps are not automated — complete them before inviting real users:
 4. **Vercel** — Set all required env vars (`npm run verify:deploy`). After deploy, run `npm run verify:launch` (or `npm run verify:production`) against your live URL.
 5. **OAuth** — Register YouTube/Twitch callback URLs shown by the verify scripts when `PLATFORM_OAUTH_ENABLED=true`.
 6. **Agency billing policy** — New workspaces default to Agency plan (migration 018); tighten to paid tiers when billing goes live.
+
+### Launch complete criteria
+
+You are ready to invite real users when:
+
+- [ ] `npm run verify:launch` passes (or `verify:production` is 19/19 on your live URL)
+- [ ] Resend domain verified (not `onboarding@resend.dev`)
+- [ ] Stripe live mode + webhook receiving events
+- [ ] Supabase auth URLs and leaked-password protection configured
+- [ ] OAuth callbacks registered in Google/Twitch consoles (if using platform revenue sync)
+- [ ] Agency free-tier vs paid policy decided and communicated to the team
+
+Settings → **Deploy checklist** mirrors the production health checks in the app UI.
 
 ## Project structure
 

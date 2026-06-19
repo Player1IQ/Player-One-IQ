@@ -135,7 +135,7 @@ async function main() {
         : `Invite email configured with ${warned} warning(s).\n`
       : `${failed} issue(s) found.\n`
   );
-  process.exit(failed > 0 ? 1 : 0);
+  process.exitCode = failed > 0 ? 1 : 0;
 }
 
 main().catch((error) => {

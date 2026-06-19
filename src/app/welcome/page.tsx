@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Gamepad2 } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Welcome",
+  description:
+    "Creator and sponsor management for gaming agencies and creator organizations.",
+};
 
 export default function WelcomePage() {
   return (

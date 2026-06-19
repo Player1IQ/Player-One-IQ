@@ -140,8 +140,10 @@ export function DeployChecklistCard() {
       <h2 className="text-base font-semibold text-white">Deploy checklist</h2>
       <p className="mt-1 text-sm text-gray-500">
         Production readiness for Vercel. Run{" "}
+        <code className="rounded bg-surface px-1 text-xs">npm run verify:launch</code>{" "}
+        locally (or{" "}
         <code className="rounded bg-surface px-1 text-xs">npm run verify:production</code>{" "}
-        against your deployed URL before launch.
+        against your deployed URL) before go-live.
       </p>
 
       {loading ? (
