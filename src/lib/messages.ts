@@ -50,6 +50,7 @@ export interface MessageRow {
   conversation_id: string;
   sender_id: string;
   content: string;
+  message_kind?: "user" | "system";
   created_at: string;
 }
 
@@ -77,12 +78,15 @@ export interface Conversation {
   participantUserIds: string[];
 }
 
+export type MessageKind = "user" | "system";
+
 export interface Message {
   id: string;
   conversationId: string;
   senderId: string;
   senderName: string;
   content: string;
+  kind: MessageKind;
   createdAt: string;
   createdAtDisplay: string;
   isOwn: boolean;
@@ -135,15 +139,17 @@ export function mapMessageRow(
   senderName: string,
   currentUserId: string
 ): Message {
+  const kind = row.message_kind ?? "user";
   return {
     id: row.id,
     conversationId: row.conversation_id,
     senderId: row.sender_id,
-    senderName,
+    senderName: kind === "system" ? "System" : senderName,
     content: row.content,
+    kind,
     createdAt: row.created_at,
     createdAtDisplay: formatMessageTime(row.created_at),
-    isOwn: row.sender_id === currentUserId,
+    isOwn: kind === "user" && row.sender_id === currentUserId,
   };
 }
 

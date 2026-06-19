@@ -21,6 +21,13 @@ import {
   truncatePreview,
 } from "@/lib/messages";
 import type { ActivityAction } from "@/lib/activity/queries";
+import {
+  dealRoomOpenedMessage,
+  groupCreatedMessage,
+  memberLeftMessage,
+  memberRemovedMessage,
+  membersAddedMessage,
+} from "@/lib/messages/system-events";
 
 async function logMessageActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -47,9 +54,19 @@ async function addOrgParticipants(
   conversationId: string
 ): Promise<{ error?: string }> {
   const userIds = await getOrganizationUserIds();
-  if (userIds.length === 0) return {};
+  const currentUserId = await getCurrentUserId();
+
+  if (currentUserId) {
+    const selfResult = await ensureParticipant(
+      supabase,
+      conversationId,
+      currentUserId
+    );
+    if (selfResult.error) return selfResult;
+  }
 
   for (const userId of userIds) {
+    if (userId === currentUserId) continue;
     const result = await ensureParticipant(supabase, conversationId, userId);
     if (result.error) return result;
   }
@@ -93,6 +110,71 @@ async function ensureParticipant(
 
   if (error) return { error: error.message };
   return {};
+}
+
+async function postConversationSystemEvent(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  conversationId: string,
+  content: string,
+  actorUserId: string
+): Promise<{ error?: string }> {
+  const trimmed = content.trim();
+  if (!trimmed) return {};
+
+  const participantResult = await ensureParticipant(
+    supabase,
+    conversationId,
+    actorUserId
+  );
+  if (participantResult.error) return participantResult;
+
+  const { error } = await supabase.from("messages").insert({
+    conversation_id: conversationId,
+    sender_id: actorUserId,
+    content: trimmed,
+    message_kind: "system",
+  });
+
+  if (error) return { error: error.message };
+  return {};
+}
+
+export async function notifyDealRoom(conversationId: string, content: string) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated." };
+
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("id", conversationId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!conversation) return { error: "Conversation not found." };
+
+  const result = await postConversationSystemEvent(
+    supabase,
+    conversationId,
+    content,
+    currentUserId
+  );
+  if (result.error) return { error: result.error };
+
+  revalidatePath("/messages");
+  revalidatePath(`/messages/${conversationId}`);
+  return { success: true as const };
 }
 
 export async function getOrCreateDirectConversation(otherUserId: string) {
@@ -195,6 +277,7 @@ export async function createGroupConversation(
   if (!currentUserId) return { error: "Not authenticated." };
 
   const allowedUserIds = await getOrganizationUserIds();
+  const orgUsers = await getOrganizationUsers();
   const uniqueMemberIds = [...new Set(memberIds.filter((id) => id !== currentUserId))];
   const validationError = validateOrgMemberIds(
     uniqueMemberIds,
@@ -234,6 +317,26 @@ export async function createGroupConversation(
   for (const userId of uniqueMemberIds) {
     const result = await ensureParticipant(supabase, created.id, userId);
     if (result.error) return { error: result.error };
+  }
+
+  const addedNames = uniqueMemberIds
+    .map((id) => orgUsers.find((user) => user.userId === id)?.name)
+    .filter((name): name is string => Boolean(name));
+
+  await postConversationSystemEvent(
+    supabase,
+    created.id,
+    groupCreatedMessage(trimmedTitle),
+    currentUserId
+  );
+
+  if (addedNames.length > 0) {
+    await postConversationSystemEvent(
+      supabase,
+      created.id,
+      membersAddedMessage(addedNames),
+      currentUserId
+    );
   }
 
   await logMessageActivity(supabase, organizationId, {
@@ -316,17 +419,22 @@ export async function addConversationParticipants(
   }
 
   if (added > 0) {
-    const usersById = new Map(orgUsers.map((user) => [user.userId, user]));
     const names = uniqueIds
-      .map((id) => usersById.get(id)?.name)
-      .filter(Boolean)
-      .join(", ");
+      .map((id) => orgUsers.find((user) => user.userId === id)?.name)
+      .filter((name): name is string => Boolean(name));
+
+    await postConversationSystemEvent(
+      supabase,
+      conversationId,
+      membersAddedMessage(names),
+      currentUserId
+    );
 
     await logMessageActivity(supabase, organizationId, {
       entityId: conversationId,
       action: "updated",
       summary: "Members added to conversation",
-      detail: names || `${added} member(s)`,
+      detail: names.join(", ") || `${added} member(s)`,
     });
   }
 
@@ -376,6 +484,15 @@ export async function removeConversationParticipant(
   const orgUsers = await getOrganizationUsers();
   const removedName =
     orgUsers.find((user) => user.userId === userId)?.name ?? "Member";
+
+  await postConversationSystemEvent(
+    supabase,
+    conversationId,
+    userId === currentUserId
+      ? memberLeftMessage(removedName)
+      : memberRemovedMessage(removedName),
+    currentUserId
+  );
 
   await logMessageActivity(supabase, organizationId, {
     entityId: conversationId,
@@ -502,6 +619,15 @@ export async function getOrCreateRelatedConversation(
 
   const title = (related as Record<string, string>)[titleField];
 
+  await postConversationSystemEvent(
+    supabase,
+    created.id,
+    dealRoomOpenedMessage(
+      type === "opportunity" ? "Opportunity" : "Contract"
+    ),
+    currentUserId
+  );
+
   await logMessageActivity(supabase, organizationId, {
     entityId: created.id,
     action: "created",
@@ -585,6 +711,7 @@ export async function sendMessage(conversationId: string, content: string) {
       conversation_id: conversationId,
       sender_id: currentUserId,
       content: trimmed,
+      message_kind: "user",
     })
     .select("id")
     .single();

@@ -42,6 +42,7 @@ interface ContractDetailProps {
   canWrite?: boolean;
   canUseAi?: boolean;
   aiMode?: "live" | "demo";
+  dealRoomConversationId?: string | null;
 }
 
 function Section({
@@ -73,6 +74,7 @@ export function ContractDetail({
   canWrite = true,
   canUseAi = false,
   aiMode = "demo",
+  dealRoomConversationId,
 }: ContractDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -112,7 +114,11 @@ export function ContractDetail({
             Back to Contracts
           </Link>
           <div className="flex flex-wrap gap-2">
-            <DealRoomButton type="contract" relatedId={contract.id} />
+            <DealRoomButton
+              type="contract"
+              relatedId={contract.id}
+              conversationId={dealRoomConversationId}
+            />
             {canWrite && (
               <>
                 <button

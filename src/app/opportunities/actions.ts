@@ -22,6 +22,14 @@ import {
 } from "@/lib/opportunities";
 import type { ActivityAction } from "@/lib/activity/queries";
 import { createDraftContractFromApplication } from "@/lib/opportunities/contract-from-application";
+import {
+  getOrCreateRelatedConversation,
+  notifyDealRoom,
+} from "@/app/messages/actions";
+import {
+  applicationStatusChangedMessage,
+  applicationSubmittedMessage,
+} from "@/lib/messages/system-events";
 
 async function logOpportunityActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -353,9 +361,25 @@ export async function applyToOpportunity(input: ApplicationInput) {
     detail: `${creator.name} applied to ${opportunity.title}`,
   });
 
+  const room = await getOrCreateRelatedConversation(
+    "opportunity",
+    input.opportunityId
+  );
+  if (!("error" in room) && room.id) {
+    await notifyDealRoom(
+      room.id,
+      applicationSubmittedMessage({
+        creatorName: creator.name,
+        opportunityTitle: opportunity.title,
+        proposedRate: input.proposedRate,
+      })
+    );
+  }
+
   revalidatePath("/opportunities");
   revalidatePath(`/opportunities/${input.opportunityId}`);
   revalidatePath("/opportunities/applications");
+  revalidatePath("/messages");
   revalidatePath("/");
   return { success: true };
 }
@@ -410,6 +434,7 @@ export async function updateApplicationStatus(
   if (updateError) return { error: updateError.message };
 
   let contractId: string | undefined;
+  let contractName: string | undefined;
 
   if (status === "accepted") {
     await supabase
@@ -435,6 +460,29 @@ export async function updateApplicationStatus(
     }
 
     contractId = contractResult.contractId;
+
+    const { data: contractRow } = await supabase
+      .from("contracts")
+      .select("contract_name")
+      .eq("id", contractId)
+      .maybeSingle();
+    contractName = contractRow?.contract_name;
+  }
+
+  const room = await getOrCreateRelatedConversation(
+    "opportunity",
+    application.opportunity_id
+  );
+  if (!("error" in room) && room.id) {
+    await notifyDealRoom(
+      room.id,
+      applicationStatusChangedMessage({
+        creatorName: creator?.name ?? "Creator",
+        opportunityTitle: opportunity.title,
+        status,
+        contractName,
+      })
+    );
   }
 
   await logOpportunityActivity(supabase, organizationId, {
@@ -448,6 +496,7 @@ export async function updateApplicationStatus(
   revalidatePath(`/opportunities/${application.opportunity_id}`);
   revalidatePath("/opportunities/applications");
   revalidatePath("/contracts");
+  revalidatePath("/messages");
   if (contractId) revalidatePath(`/contracts/${contractId}`);
   revalidatePath("/");
   return { success: true, contractId };

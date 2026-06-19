@@ -13,6 +13,7 @@ import {
   XCircle,
   Users,
   Briefcase,
+  MessageSquare,
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Opportunity, OpportunityApplication } from "@/lib/opportunities";
@@ -42,6 +43,7 @@ interface OpportunityDetailProps {
   sponsors: Sponsor[];
   canManage: boolean;
   canApply: boolean;
+  dealRoomConversationId?: string | null;
 }
 
 function Section({
@@ -71,6 +73,7 @@ export function OpportunityDetail({
   sponsors,
   canManage,
   canApply,
+  dealRoomConversationId,
 }: OpportunityDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -123,7 +126,11 @@ export function OpportunityDetail({
             Back to Opportunities
           </Link>
           <div className="flex flex-wrap gap-2">
-            <DealRoomButton type="opportunity" relatedId={opportunity.id} />
+            <DealRoomButton
+              type="opportunity"
+              relatedId={opportunity.id}
+              conversationId={dealRoomConversationId}
+            />
             {canApplyNow && (
               <Button size="sm" onClick={() => setApplyOpen(true)}>
                 Apply
@@ -245,6 +252,20 @@ export function OpportunityDetail({
           title="Applicants"
           description={`${applications.length} application${applications.length !== 1 ? "s" : ""}`}
         >
+          {dealRoomConversationId ? (
+            <div className="mb-4 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
+              <p className="text-sm text-gray-300">
+                Application updates and team notes appear in the deal room timeline.
+              </p>
+              <Link
+                href={`/messages/${dealRoomConversationId}`}
+                className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-accent-light hover:text-white"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Go to deal room
+              </Link>
+            </div>
+          ) : null}
           <div className="mb-4 flex justify-end">
             <Link
               href="/opportunities/applications"

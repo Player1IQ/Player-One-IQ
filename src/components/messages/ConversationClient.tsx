@@ -12,6 +12,8 @@ import type {
 } from "@/lib/messages";
 import { ConversationTypeBadge } from "./ConversationTypeBadge";
 import { ConversationMembersPanel } from "./ConversationMembersPanel";
+import { DealRoomContextPanel } from "./DealRoomContextPanel";
+import type { DealRoomContext } from "@/lib/messages/deal-room-context";
 import { markConversationRead, sendMessage } from "@/app/messages/actions";
 import { MESSAGES_UNREAD_CHANGED_EVENT } from "@/hooks/useUnreadMessageCount";
 import { useMessageRealtime } from "@/hooks/useMessageRealtime";
@@ -21,6 +23,7 @@ interface ConversationClientProps {
   initialMessages: Message[];
   participants: ConversationParticipant[];
   orgUsers: OrgUser[];
+  dealRoomContext?: DealRoomContext | null;
   relatedHref?: string | null;
 }
 
@@ -29,6 +32,7 @@ export function ConversationClient({
   initialMessages,
   participants,
   orgUsers,
+  dealRoomContext,
   relatedHref,
 }: ConversationClientProps) {
   const router = useRouter();
@@ -122,7 +126,19 @@ export function ConversationClient({
               </p>
             </div>
           ) : (
-            messages.map((message) => (
+          messages.map((message) =>
+            message.kind === "system" ? (
+              <div key={message.id} className="flex justify-center py-1">
+                <div className="max-w-[85%] rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-2.5 text-center">
+                  <p className="whitespace-pre-wrap text-xs leading-relaxed text-gray-400">
+                    {message.content}
+                  </p>
+                  <p className="mt-1.5 text-[10px] text-gray-600">
+                    {message.createdAtDisplay}
+                  </p>
+                </div>
+              </div>
+            ) : (
               <div
                 key={message.id}
                 className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
@@ -149,7 +165,8 @@ export function ConversationClient({
                   </p>
                 </div>
               </div>
-            ))
+            )
+          )
           )}
           <div ref={bottomRef} />
         </div>
@@ -181,12 +198,17 @@ export function ConversationClient({
       </div>
 
       {showMembersPanel ? (
-        <ConversationMembersPanel
-          conversation={conversation}
-          participants={participants}
-          orgUsers={orgUsers}
-          onMembersChanged={refresh}
-        />
+        <div className="space-y-4">
+          {dealRoomContext ? (
+            <DealRoomContextPanel context={dealRoomContext} />
+          ) : null}
+          <ConversationMembersPanel
+            conversation={conversation}
+            participants={participants}
+            orgUsers={orgUsers}
+            onMembersChanged={refresh}
+          />
+        </div>
       ) : null}
     </div>
   );

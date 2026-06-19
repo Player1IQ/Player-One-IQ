@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ConversationClient } from "@/components/messages/ConversationClient";
+import { getDealRoomContext } from "@/lib/messages/deal-room-context";
 import {
   getConversationById,
   getConversationParticipants,
@@ -30,6 +31,12 @@ export default async function ConversationPage({ params }: ConversationPageProps
         ? `/contracts/${conversation.relatedId}`
         : null;
 
+  const dealRoomContext =
+    (conversation.type === "opportunity" || conversation.type === "contract") &&
+    conversation.relatedId
+      ? await getDealRoomContext(conversation.type, conversation.relatedId)
+      : null;
+
   return (
     <DashboardLayout
       title={conversation.title}
@@ -40,6 +47,7 @@ export default async function ConversationPage({ params }: ConversationPageProps
         initialMessages={messages}
         participants={participants}
         orgUsers={orgUsers}
+        dealRoomContext={dealRoomContext}
         relatedHref={relatedHref}
       />
     </DashboardLayout>

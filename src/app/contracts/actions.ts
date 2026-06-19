@@ -17,9 +17,9 @@ import {
 } from "@/lib/contracts";
 import {
   getOrCreateRelatedConversation,
-  sendMessage,
+  notifyDealRoom,
 } from "@/app/messages/actions";
-import { buildContractNegotiationMessage } from "@/lib/contracts/negotiation-message";
+import { contractTermsUpdatedMessage } from "@/lib/messages/system-events";
 import type { ActivityAction } from "@/lib/activity/queries";
 
 async function logActivity(
@@ -400,7 +400,7 @@ export async function updateContractDealTerms(
 
   const room = await getOrCreateRelatedConversation("contract", id);
   if (!("error" in room) && room.id) {
-    const message = buildContractNegotiationMessage({
+    const message = contractTermsUpdatedMessage({
       contractName: existing.contract_name,
       sponsorName: sponsor?.company_name ?? "Sponsor",
       creatorName: creator?.name ?? "Creator",
@@ -409,7 +409,7 @@ export async function updateContractDealTerms(
       status,
       negotiationNote: trimmedNote || undefined,
     });
-    const sent = await sendMessage(room.id, message);
+    const sent = await notifyDealRoom(room.id, message);
     if (!("error" in sent)) {
       dealRoomId = room.id;
     }

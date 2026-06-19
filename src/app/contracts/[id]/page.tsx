@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ContractDetail } from "@/components/contracts/ContractDetail";
 import { canRunLiveAi } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { findConversationByRelated } from "@/lib/messages/queries";
 import { getContractById, getContractNegotiationContext } from "@/lib/contracts/queries";
 import { getDeliverablesForContract } from "@/lib/contract-deliverables/queries";
 import { getCreators } from "@/lib/creators/queries";
@@ -19,7 +20,7 @@ export default async function ContractDetailPage({
   params,
 }: ContractDetailPageProps) {
   const { id } = await params;
-  const [contract, creators, sponsors, role, deliverables, subscription] =
+  const [contract, creators, sponsors, role, deliverables, subscription, dealRoomConversationId] =
     await Promise.all([
       getContractById(id),
       getCreators(),
@@ -27,6 +28,7 @@ export default async function ContractDetailPage({
       getCurrentUserRole(),
       getDeliverablesForContract(id),
       getSubscriptionContext(),
+      findConversationByRelated("contract", id),
     ]);
 
   if (!contract) {
@@ -52,6 +54,7 @@ export default async function ContractDetailPage({
         canWrite={canWriteData(role)}
         canUseAi={hasFeature(subscription.features, "ai_contract_summaries")}
         aiMode={aiLive ? "live" : "demo"}
+        dealRoomConversationId={dealRoomConversationId}
       />
     </DashboardLayout>
   );

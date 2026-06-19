@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OpportunityDetail } from "@/components/opportunities/OpportunityDetail";
+import { findConversationByRelated } from "@/lib/messages/queries";
 import {
   getOpportunityById,
   getApplicationsForOpportunity,
@@ -21,12 +22,14 @@ export default async function OpportunityDetailPage({
   params,
 }: OpportunityDetailPageProps) {
   const { id } = await params;
-  const [opportunity, applications, creators, sponsors, role] = await Promise.all([
+  const [opportunity, applications, creators, sponsors, role, dealRoomConversationId] =
+    await Promise.all([
     getOpportunityById(id),
     getApplicationsForOpportunity(id),
     getCreators(),
     getSponsors(),
     getCurrentUserRole(),
+    findConversationByRelated("opportunity", id),
   ]);
 
   if (!opportunity) notFound();
@@ -43,6 +46,7 @@ export default async function OpportunityDetailPage({
         sponsors={sponsors}
         canManage={canManageOpportunities(role)}
         canApply={canApplyToOpportunities(role)}
+        dealRoomConversationId={dealRoomConversationId}
       />
     </DashboardLayout>
   );
