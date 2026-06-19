@@ -95,6 +95,7 @@ export interface OrganizationSubscription {
   canceledAt: string | null;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
+  metadata: Record<string, unknown>;
 }
 
 export interface UsageSnapshot {

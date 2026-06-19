@@ -28,7 +28,10 @@ import type {
 import { formatPlanPrice } from "@/lib/subscription/plans";
 import {
   formatTrialCountdown,
+  hasTrialedPlan,
   isPlatformTrialActive,
+  PLATFORM_TRIAL_DAYS,
+  supportsPlatformTrial,
 } from "@/lib/subscription/trials";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -94,7 +97,13 @@ export function BillingPageClient({
       }
 
       if ("success" in result && result.success) {
-        setMessage(`Plan updated to ${planCode.replace(/_/g, " ")}.`);
+        if ("trialing" in result && result.trialing) {
+          setMessage(
+            `${planCode.replace(/_/g, " ")} trial started — explore the plan for ${PLATFORM_TRIAL_DAYS} days.`
+          );
+        } else {
+          setMessage(`Plan updated to ${planCode.replace(/_/g, " ")}.`);
+        }
       }
     });
   }
@@ -130,8 +139,8 @@ export function BillingPageClient({
           <p className="font-medium">{trialLabel}</p>
           <p className="mt-1 text-xs text-amber-200/80">
             You&apos;re on a free {currentPlan?.name} trial with full feature access
-            (usage caps apply). Subscribe before it ends to keep premium tools, or
-            you&apos;ll move to the free tier for your organization type.
+            (usage caps apply). Each paid plan includes one {PLATFORM_TRIAL_DAYS}-day trial per workspace.
+            Subscribe before it ends to keep premium tools.
           </p>
         </div>
       ) : null}
@@ -228,7 +237,7 @@ export function BillingPageClient({
                 Available Plans
               </CardTitle>
               <CardDescription>
-                Paid plans checkout securely via Stripe
+                Paid plans include a one-time {PLATFORM_TRIAL_DAYS}-day trial, then Stripe checkout
               </CardDescription>
             </div>
             <div className="flex rounded-xl border border-white/[0.08] p-1">
@@ -259,6 +268,12 @@ export function BillingPageClient({
                 billingInterval={billingInterval}
                 onSelect={canManage ? handlePlanChange : undefined}
                 loading={isPending && pendingPlan === plan.code}
+                trialAvailable={
+                  !hasStripeCustomer &&
+                  supportsPlatformTrial(plan.code) &&
+                  plan.code !== currentPlan?.code
+                }
+                trialUsed={hasTrialedPlan(subscription?.metadata, plan.code)}
               />
             ))}
           </div>

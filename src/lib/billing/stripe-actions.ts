@@ -4,10 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getAppOrigin } from "@/lib/email/app-url";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { requireBillingManageAccess } from "@/lib/permissions";
-import { changeSubscriptionPlan } from "@/lib/subscription/actions";
+import { changeSubscriptionPlan, startPlatformTrial } from "@/lib/subscription/actions";
 import { getSubscriptionPlans } from "@/lib/subscription/queries";
 import { planRequiresStripeCheckout } from "@/lib/subscription/plans";
+import { hasTrialedPlan, supportsPlatformTrial } from "@/lib/subscription/trials";
 import type { BillingInterval, PlanCode } from "@/lib/subscription/types";
+import { createServiceClient } from "@/lib/supabase/admin";
 import { getStripeClient } from "@/lib/stripe/client";
 import { isStripeConfigured } from "@/lib/stripe/config";
 
@@ -155,6 +157,27 @@ export async function selectBillingPlan(
   if (!plan) return { error: "Invalid plan selected." };
 
   if (planRequiresStripeCheckout(plan, billingInterval)) {
+    const admin = createServiceClient();
+    const organizationId = await getOrganizationId();
+
+    if (admin && organizationId && supportsPlatformTrial(planCode)) {
+      const { data: existingSub } = await admin
+        .from("organization_subscriptions")
+        .select("stripe_subscription_id, metadata")
+        .eq("organization_id", organizationId)
+        .maybeSingle();
+
+      if (
+        !existingSub?.stripe_subscription_id &&
+        !hasTrialedPlan(
+          (existingSub?.metadata ?? {}) as Record<string, unknown>,
+          planCode
+        )
+      ) {
+        return startPlatformTrial(planCode, billingInterval);
+      }
+    }
+
     return startStripeCheckout(planCode, billingInterval);
   }
 

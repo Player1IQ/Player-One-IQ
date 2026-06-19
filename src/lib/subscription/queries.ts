@@ -80,6 +80,7 @@ export async function getOrganizationSubscription(): Promise<OrganizationSubscri
       canceled_at,
       stripe_customer_id,
       stripe_subscription_id,
+      metadata,
       plan:subscription_plans (
         id,
         code,
@@ -121,6 +122,10 @@ export async function getOrganizationSubscription(): Promise<OrganizationSubscri
     canceledAt: data.canceled_at,
     stripeCustomerId: data.stripe_customer_id,
     stripeSubscriptionId: data.stripe_subscription_id,
+    metadata:
+      data.metadata && typeof data.metadata === "object" && !Array.isArray(data.metadata)
+        ? (data.metadata as Record<string, unknown>)
+        : {},
   };
 }
 

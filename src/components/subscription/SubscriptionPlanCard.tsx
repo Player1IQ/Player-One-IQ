@@ -1,7 +1,8 @@
 "use client";
 
 import { Check, Loader2 } from "lucide-react";
-import { formatPlanPrice, planHighlights } from "@/lib/subscription/plans";
+import { formatPlanPrice, planHighlights, planRequiresStripeCheckout } from "@/lib/subscription/plans";
+import { PLATFORM_TRIAL_DAYS } from "@/lib/subscription/trials";
 import type { BillingInterval, PlanCode, SubscriptionPlan } from "@/lib/subscription/types";
 
 interface SubscriptionPlanCardProps {
@@ -10,6 +11,8 @@ interface SubscriptionPlanCardProps {
   billingInterval: BillingInterval;
   onSelect?: (planCode: PlanCode) => void;
   loading?: boolean;
+  trialAvailable?: boolean;
+  trialUsed?: boolean;
 }
 
 export function SubscriptionPlanCard({
@@ -18,12 +21,28 @@ export function SubscriptionPlanCard({
   billingInterval,
   onSelect,
   loading = false,
+  trialAvailable = false,
+  trialUsed = false,
 }: SubscriptionPlanCardProps) {
   const highlights = planHighlights[plan.code];
   const priceCents =
     billingInterval === "yearly" && plan.priceYearlyCents !== null
       ? plan.priceYearlyCents
       : plan.priceMonthlyCents;
+  const isPaid = planRequiresStripeCheckout(plan, billingInterval);
+
+  function actionLabel() {
+    if (loading) return null;
+    if (isPaid && trialAvailable && !trialUsed) {
+      return `Start ${PLATFORM_TRIAL_DAYS}-day free trial`;
+    }
+    if (isPaid && trialUsed) {
+      return `Subscribe to ${plan.name}`;
+    }
+    return `Switch to ${plan.name}`;
+  }
+
+  const label = actionLabel();
 
   return (
     <div
@@ -67,9 +86,9 @@ export function SubscriptionPlanCard({
               <Loader2 className="h-4 w-4 animate-spin" />
               Updating...
             </span>
-          ) : (
-            `Switch to ${plan.name}`
-          )}
+          ) : label ? (
+            label
+          ) : null}
         </button>
       ) : isCurrent ? (
         <p className="mt-6 text-center text-xs text-gray-500">

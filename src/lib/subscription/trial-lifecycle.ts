@@ -1,6 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/admin";
 import { parsePlanLimits } from "./plans";
-import { getPostTrialPlanCode } from "./trials";
+import { getPostTrialPlanCode, appendTrialedPlan } from "./trials";
 import type { FeatureKey, OrganizationSubscription } from "./types";
 
 export async function expirePlatformTrialIfNeeded(
@@ -28,6 +28,17 @@ export async function expirePlatformTrialIfNeeded(
   const periodEnd = new Date(now);
   periodEnd.setUTCMonth(periodEnd.getUTCMonth() + 1);
 
+  const { data: current } = await admin
+    .from("organization_subscriptions")
+    .select("metadata")
+    .eq("id", subscription.id)
+    .maybeSingle();
+
+  const metadata = appendTrialedPlan(
+    (current?.metadata ?? subscription.metadata) as Record<string, unknown>,
+    subscription.plan.code
+  );
+
   const { error } = await admin
     .from("organization_subscriptions")
     .update({
@@ -36,6 +47,7 @@ export async function expirePlatformTrialIfNeeded(
       trial_ends_at: null,
       current_period_start: now.toISOString(),
       current_period_end: periodEnd.toISOString(),
+      metadata,
       updated_at: now.toISOString(),
     })
     .eq("id", subscription.id)
@@ -51,6 +63,7 @@ export async function expirePlatformTrialIfNeeded(
     ...subscription,
     status: "active",
     trialEndsAt: null,
+    metadata,
     plan: {
       id: targetPlan.id,
       code: targetPlan.code as OrganizationSubscription["plan"]["code"],
