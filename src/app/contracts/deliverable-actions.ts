@@ -3,7 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireWriteAccess } from "@/lib/permissions";
+import { requireFeatureAccess, requireWriteAccess } from "@/lib/permissions";
+
+async function requireContractsFeature() {
+  return requireFeatureAccess("contracts", "Contracts");
+}
 import {
   deliverableStatuses,
   type DeliverableStatus,
@@ -57,6 +61,9 @@ export async function createDeliverable(
   contractId: string,
   input: { title: string; dueDate?: string | null; status?: DeliverableStatus }
 ) {
+  const featureError = await requireContractsFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
@@ -129,6 +136,9 @@ export async function updateDeliverable(
     status?: DeliverableStatus;
   }
 ) {
+  const featureError = await requireContractsFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
@@ -193,6 +203,9 @@ export async function updateDeliverable(
 }
 
 export async function toggleDeliverableComplete(id: string) {
+  const featureError = await requireContractsFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
@@ -241,6 +254,9 @@ export async function toggleDeliverableComplete(id: string) {
 }
 
 export async function deleteDeliverable(id: string) {
+  const featureError = await requireContractsFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 
@@ -285,6 +301,9 @@ export async function reorderDeliverables(
   contractId: string,
   orderedIds: string[]
 ) {
+  const featureError = await requireContractsFeature();
+  if (featureError) return featureError;
+
   const permError = await requireWriteAccess();
   if (permError) return permError;
 

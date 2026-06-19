@@ -39,6 +39,18 @@ Run these before or after deploy to confirm configuration:
 | `npm run verify:invites` | Team invite email (Resend) |
 | `npm run verify:oauth` | Platform OAuth credentials |
 
+## Production launch (manual)
+
+These steps are not automated — complete them before inviting real users:
+
+1. **Supabase Auth** — Set Site URL and Redirect URLs to your production domain (`/auth/callback`). Enable leaked-password protection in Authentication → Providers.
+2. **Resend** — Verify a custom sending domain; set `INVITE_EMAIL_FROM` to that domain. Run `npm run verify:invites`.
+3. **Stripe** — Switch to live keys and configure the production webhook (`/api/billing/webhook`). Run `npm run verify:billing`.
+4. **Vercel** — Set all required env vars (`npm run verify:deploy`). After deploy, run `npm run verify:production` against your live URL.
+5. **OAuth** — Register YouTube/Twitch callback URLs shown by the verify scripts when `PLATFORM_OAUTH_ENABLED=true`.
+
+New agency workspaces receive the **Agency** plan by default (migration 018) — intentional for beta; tighten to paid tiers when billing goes live.
+
 ## Project structure
 
 ```

@@ -70,6 +70,27 @@ function checklistItems(health) {
   ];
 }
 
+const ROUTE_CHECKS = [
+  { path: "/login", label: "Login page reachable" },
+  { path: "/terms", label: "Terms page reachable" },
+  { path: "/privacy", label: "Privacy page reachable" },
+];
+
+async function checkPublicRoutes() {
+  const results = [];
+  for (const { path, label } of ROUTE_CHECKS) {
+    try {
+      const response = await fetch(`${baseUrl}${path}`, {
+        redirect: "follow",
+      });
+      results.push({ label, done: response.ok });
+    } catch {
+      results.push({ label, done: false });
+    }
+  }
+  return results;
+}
+
 async function main() {
   console.log(`\nPlayer One IQ — deploy checklist (production)\n${baseUrl}\n`);
 
@@ -81,10 +102,12 @@ async function main() {
 
   const health = await response.json();
   const items = checklistItems(health);
-  const required = items.filter((item) => !item.optional);
+  const routeChecks = await checkPublicRoutes();
+  const allItems = [...items, ...routeChecks];
+  const required = allItems.filter((item) => !item.optional);
   let failed = 0;
 
-  for (const item of items) {
+  for (const item of allItems) {
     const prefix = item.done ? "✓" : item.optional ? "○" : "✗";
     const suffix = item.optional && !item.done ? " (optional, skipped)" : "";
     console.log(`${prefix} ${item.label}${suffix}`);
