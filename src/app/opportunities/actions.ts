@@ -69,6 +69,20 @@ function validateOpportunityInput(input: OpportunityInput) {
   return null;
 }
 
+async function requireOpportunityManageFeature() {
+  return requireFeatureAccess(
+    ["create_opportunities", "opportunity_management"],
+    "Opportunity management"
+  );
+}
+
+async function requireOpportunityApplyFeature() {
+  return requireFeatureAccess(
+    ["apply_opportunities", "opportunity_management"],
+    "Apply to opportunities"
+  );
+}
+
 function toOpportunityPayload(input: OpportunityInput) {
   return {
     title: input.title.trim(),
@@ -87,10 +101,7 @@ export async function createOpportunity(input: OpportunityInput) {
   const permError = await requireOpportunityManageAccess();
   if (permError) return permError;
 
-  const featureError = await requireFeatureAccess(
-    ["create_opportunities", "opportunity_management"],
-    "Create opportunities"
-  );
+  const featureError = await requireOpportunityManageFeature();
   if (featureError) return featureError;
 
   const error = validateOpportunityInput(input);
@@ -135,6 +146,9 @@ export async function createOpportunity(input: OpportunityInput) {
 export async function updateOpportunity(id: string, input: OpportunityInput) {
   const permError = await requireOpportunityManageAccess();
   if (permError) return permError;
+
+  const featureError = await requireOpportunityManageFeature();
+  if (featureError) return featureError;
 
   const error = validateOpportunityInput(input);
   if (error) return { error };
@@ -193,6 +207,9 @@ export async function closeOpportunity(id: string) {
   const permError = await requireOpportunityManageAccess();
   if (permError) return permError;
 
+  const featureError = await requireOpportunityManageFeature();
+  if (featureError) return featureError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -233,6 +250,9 @@ export async function deleteOpportunity(id: string) {
   const permError = await requireOpportunityManageAccess();
   if (permError) return permError;
 
+  const featureError = await requireOpportunityManageFeature();
+  if (featureError) return featureError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -271,6 +291,9 @@ export async function deleteOpportunity(id: string) {
 export async function applyToOpportunity(input: ApplicationInput) {
   const permError = await requireApplicationAccess();
   if (permError) return permError;
+
+  const featureError = await requireOpportunityApplyFeature();
+  if (featureError) return featureError;
 
   if (!input.creatorId) return { error: "Creator is required." };
   if (!input.coverMessage.trim()) return { error: "Cover message is required." };
@@ -343,6 +366,9 @@ export async function updateApplicationStatus(
 ) {
   const permError = await requireOpportunityManageAccess();
   if (permError) return permError;
+
+  const featureError = await requireOpportunityManageFeature();
+  if (featureError) return featureError;
 
   if (!applicationStatuses.includes(status)) {
     return { error: "Invalid application status." };

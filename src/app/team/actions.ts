@@ -18,6 +18,10 @@ import {
   roleLabels,
 } from "@/lib/team";
 
+async function requireTeamFeature() {
+  return requireFeatureAccess("team_management", "Team management");
+}
+
 async function dispatchTeamInviteEmail(params: {
   email: string;
   role: TeamRole;
@@ -78,10 +82,7 @@ export async function inviteTeamMember(email: string, role: TeamRole) {
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
 
-  const featureError = await requireFeatureAccess(
-    "team_management",
-    "Team management"
-  );
+  const featureError = await requireTeamFeature();
   if (featureError) return featureError;
 
   const { count: teamCount } = await supabase
@@ -171,6 +172,9 @@ export async function updateTeamMemberRole(
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
 
+  const featureError = await requireTeamFeature();
+  if (featureError) return featureError;
+
   if (
     role === "owner" ||
     !invitableRoles.includes(role as (typeof invitableRoles)[number])
@@ -232,6 +236,9 @@ export async function removeTeamMember(memberId: string) {
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
 
+  const featureError = await requireTeamFeature();
+  if (featureError) return featureError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -289,6 +296,9 @@ export async function removeTeamMember(memberId: string) {
 export async function resendInvitation(invitationId: string) {
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
+
+  const featureError = await requireTeamFeature();
+  if (featureError) return featureError;
 
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
@@ -360,6 +370,9 @@ export async function resendInvitation(invitationId: string) {
 export async function revokeInvitation(invitationId: string) {
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
+
+  const featureError = await requireTeamFeature();
+  if (featureError) return featureError;
 
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };

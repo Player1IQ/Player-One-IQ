@@ -131,9 +131,17 @@ export function AcceptInviteClient({
           </p>
         </div>
       ) : emailMismatch ? (
-        <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
-          You&apos;re signed in as {userEmail}, but this invite was sent to{" "}
-          {email}. Sign out and sign in with the correct account.
+        <div className="space-y-4">
+          <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+            You&apos;re signed in as {userEmail}, but this invite was sent to{" "}
+            {email}. Sign out and sign in with the correct account.
+          </div>
+          <a
+            href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}`}
+            className="flex w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
+          >
+            Switch account
+          </a>
         </div>
       ) : (
         <button
