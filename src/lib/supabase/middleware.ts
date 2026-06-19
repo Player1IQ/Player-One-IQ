@@ -10,6 +10,7 @@ const PUBLIC_ROUTES = [
   "/terms",
   "/privacy",
   "/welcome",
+  "/invite",
   "/api/billing/webhook",
   "/api/health",
 ];

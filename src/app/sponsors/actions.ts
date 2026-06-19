@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireWriteAccess } from "@/lib/permissions";
+import {
+  requireFeatureAccess,
+  requireWriteAccess,
+} from "@/lib/permissions";
 import {
   type SponsorInput,
   industries,
@@ -83,6 +86,9 @@ export async function createSponsor(input: SponsorInput) {
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
 
+  const featureError = await requireFeatureAccess("sponsor_crm", "Sponsor CRM");
+  if (featureError) return featureError;
+
   const { data, error: insertError } = await supabase
     .from("sponsors")
     .insert({
@@ -112,6 +118,9 @@ export async function updateSponsor(id: string, input: SponsorInput) {
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
 
+  const featureError = await requireFeatureAccess("sponsor_crm", "Sponsor CRM");
+  if (featureError) return featureError;
+
   const { error: updateError } = await supabase
     .from("sponsors")
     .update({
@@ -137,6 +146,9 @@ export async function deleteSponsor(id: string) {
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
+
+  const featureError = await requireFeatureAccess("sponsor_crm", "Sponsor CRM");
+  if (featureError) return featureError;
 
   const { error: deleteError } = await supabase
     .from("sponsors")

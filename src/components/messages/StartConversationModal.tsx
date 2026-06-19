@@ -38,7 +38,7 @@ export function StartConversationModal({
 
     const result = await getOrCreateDirectConversation(selectedUserId);
 
-    if ("error" in result && result.error) {
+    if ("error" in result) {
       setError(result.error);
       setLoading(false);
       return;

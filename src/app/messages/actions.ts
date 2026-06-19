@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
+  requireFeatureAccess,
+  requireWriteAccess,
+} from "@/lib/permissions";
+import {
   getCurrentUserId,
   getOrganizationUsers,
   getConversationById,
@@ -79,6 +83,12 @@ async function ensureParticipant(
 }
 
 export async function getOrCreateDirectConversation(otherUserId: string) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -153,6 +163,12 @@ export async function getOrCreateRelatedConversation(
   type: Exclude<ConversationType, "direct">,
   relatedId: string
 ) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -221,6 +237,12 @@ export async function getOrCreateRelatedConversation(
 export async function sendMessage(conversationId: string, content: string) {
   const trimmed = content.trim();
   if (!trimmed) return { error: "Message cannot be empty." };
+
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
 
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
@@ -309,6 +331,12 @@ export async function sendMessage(conversationId: string, content: string) {
 }
 
 export async function markConversationRead(conversationId: string) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -332,6 +360,9 @@ export async function fetchMessageNotificationDetails(
   conversationId: string,
   messageId: string
 ) {
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -382,6 +413,9 @@ export type UnreadConversationPreview = {
 export async function fetchUnreadConversationPreviews(): Promise<
   UnreadConversationPreview[]
 > {
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return [];
+
   const conversations = await getConversations();
 
   return conversations
@@ -402,6 +436,9 @@ export async function fetchUnreadConversationPreviews(): Promise<
 }
 
 export async function fetchUnreadMessageCount() {
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return 0;
+
   const supabase = await createClient();
   if (!supabase) return 0;
 

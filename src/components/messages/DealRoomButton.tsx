@@ -24,7 +24,7 @@ export function DealRoomButton({
     setLoading(true);
     const result = await getOrCreateRelatedConversation(type, relatedId);
 
-    if ("error" in result && result.error) {
+    if ("error" in result) {
       alert(result.error);
       setLoading(false);
       return;

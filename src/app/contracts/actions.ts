@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireWriteAccess } from "@/lib/permissions";
+import {
+  requireFeatureAccess,
+  requireWriteAccess,
+} from "@/lib/permissions";
 import {
   type ContractInput,
   contractStatuses,
@@ -113,6 +116,9 @@ export async function createContract(input: ContractInput) {
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
 
+  const featureError = await requireFeatureAccess("contracts", "Contracts");
+  if (featureError) return featureError;
+
   const relationError = await validateRelations(
     supabase,
     organizationId,
@@ -158,6 +164,9 @@ export async function updateContract(id: string, input: ContractInput) {
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
+
+  const featureError = await requireFeatureAccess("contracts", "Contracts");
+  if (featureError) return featureError;
 
   const relationError = await validateRelations(
     supabase,
@@ -240,6 +249,9 @@ export async function updateContractStatus(
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
 
+  const featureError = await requireFeatureAccess("contracts", "Contracts");
+  if (featureError) return featureError;
+
   const { data: existing, error: fetchError } = await supabase
     .from("contracts")
     .select("contract_name, contract_status")
@@ -310,6 +322,9 @@ export async function updateContractDealTerms(
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
+
+  const featureError = await requireFeatureAccess("contracts", "Contracts");
+  if (featureError) return featureError;
 
   const { data: existing, error: fetchError } = await supabase
     .from("contracts")
@@ -416,6 +431,9 @@ export async function deleteContract(id: string) {
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
+
+  const featureError = await requireFeatureAccess("contracts", "Contracts");
+  if (featureError) return featureError;
 
   const { data: existing, error: fetchError } = await supabase
     .from("contracts")
