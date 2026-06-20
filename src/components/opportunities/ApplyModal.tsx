@@ -12,6 +12,8 @@ interface ApplyModalProps {
   onClose: () => void;
   opportunity: Opportunity;
   creators: Creator[];
+  isPortalUser?: boolean;
+  linkedCreatorId?: string | null;
 }
 
 export function ApplyModal({
@@ -19,9 +21,11 @@ export function ApplyModal({
   onClose,
   opportunity,
   creators,
+  isPortalUser = false,
+  linkedCreatorId = null,
 }: ApplyModalProps) {
   const router = useRouter();
-  const [creatorId, setCreatorId] = useState("");
+  const [creatorId, setCreatorId] = useState(linkedCreatorId ?? "");
   const [coverMessage, setCoverMessage] = useState("");
   const [proposedRate, setProposedRate] = useState("");
   const [error, setError] = useState("");
@@ -36,7 +40,7 @@ export function ApplyModal({
 
     const result = await applyToOpportunity({
       opportunityId: opportunity.id,
-      creatorId,
+      creatorId: isPortalUser ? linkedCreatorId ?? "" : creatorId,
       coverMessage,
       proposedRate: proposedRate ? parseFloat(proposedRate) : null,
     });
@@ -73,7 +77,43 @@ export function ApplyModal({
             </div>
           )}
 
-          {creators.length === 0 ? (
+          {isPortalUser ? (
+            !linkedCreatorId ? (
+              <p className="text-sm text-amber-300">
+                Your portal account is not linked to a creator profile.
+              </p>
+            ) : (
+              <>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                    Cover Message
+                  </label>
+                  <textarea
+                    value={coverMessage}
+                    onChange={(e) => setCoverMessage(e.target.value)}
+                    required
+                    rows={4}
+                    placeholder="Why are you a great fit for this opportunity?"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-gray-300">
+                    Proposed Rate ($)
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={proposedRate}
+                    onChange={(e) => setProposedRate(e.target.value)}
+                    placeholder="Optional"
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200"
+                  />
+                </div>
+              </>
+            )
+          ) : creators.length === 0 ? (
             <p className="text-sm text-amber-300">
               Add creators to your roster before applying.
             </p>
@@ -126,7 +166,10 @@ export function ApplyModal({
             </button>
             <button
               type="submit"
-              disabled={loading || creators.length === 0}
+              disabled={
+                loading ||
+                (isPortalUser ? !linkedCreatorId : creators.length === 0)
+              }
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}

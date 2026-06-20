@@ -249,8 +249,21 @@ export function canApplyToOpportunities(role: TeamRole | null): boolean {
     role === "owner" ||
     role === "admin" ||
     role === "manager" ||
-    role === "talent_manager"
+    role === "talent_manager" ||
+    role === "content_creator"
   );
+}
+
+export function canAccessOpportunityAsPortal(
+  membership: CurrentUserMembership | null,
+  creatorId?: string
+): boolean {
+  if (!membership || membership.role !== "content_creator") return false;
+  if (!membership.linkedCreatorId) return false;
+  if (creatorId !== undefined) {
+    return membership.linkedCreatorId === creatorId;
+  }
+  return true;
 }
 
 export async function requireOpportunityManageAccess(): Promise<
@@ -272,6 +285,18 @@ export async function requireApplicationAccess(): Promise<
   if (!canApplyToOpportunities(role)) {
     return {
       error: "You do not have permission to submit applications.",
+    };
+  }
+  return null;
+}
+
+export async function requirePortalApplicationAccess(
+  creatorId: string
+): Promise<{ error: string } | null> {
+  const membership = await getCurrentUserMembership();
+  if (!canAccessOpportunityAsPortal(membership, creatorId)) {
+    return {
+      error: "You do not have permission to access this application.",
     };
   }
   return null;

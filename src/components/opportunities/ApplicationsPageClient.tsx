@@ -36,6 +36,7 @@ interface ApplicationsPageClientProps {
   applications: OpportunityApplication[];
   canManage: boolean;
   organizationType?: string;
+  isPortalUser?: boolean;
 }
 
 type StatusFilter = ApplicationStatus | "all" | "needs_action";
@@ -53,6 +54,7 @@ export function ApplicationsPageClient({
   applications,
   canManage,
   organizationType,
+  isPortalUser = false,
 }: ApplicationsPageClientProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(
@@ -91,38 +93,68 @@ export function ApplicationsPageClient({
         className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Opportunities
+        Back to {isPortalUser ? "opportunities" : "Opportunities"}
       </Link>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Needs action"
-          value={String(stats.needsAction)}
-          subtitle="Applied or under review"
-          icon={Inbox}
-          iconColor="text-amber-400"
-        />
-        <MetricCard
-          title="Under review"
-          value={String(stats.underReview)}
-          icon={Clock}
-          iconColor="text-blue-400"
-        />
-        <MetricCard
-          title="Accepted"
-          value={String(stats.accepted)}
-          icon={CheckCircle2}
-          iconColor="text-emerald-400"
-        />
-        <MetricCard
-          title="Total applications"
-          value={String(stats.total)}
-          icon={Users}
-          iconColor="text-accent-light"
-        />
-      </div>
+      {!isPortalUser ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Needs action"
+            value={String(stats.needsAction)}
+            subtitle="Applied or under review"
+            icon={Inbox}
+            iconColor="text-amber-400"
+          />
+          <MetricCard
+            title="Under review"
+            value={String(stats.underReview)}
+            icon={Clock}
+            iconColor="text-blue-400"
+          />
+          <MetricCard
+            title="Accepted"
+            value={String(stats.accepted)}
+            icon={CheckCircle2}
+            iconColor="text-emerald-400"
+          />
+          <MetricCard
+            title="Total applications"
+            value={String(stats.total)}
+            icon={Users}
+            iconColor="text-accent-light"
+          />
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Pending review"
+            value={String(stats.needsAction)}
+            subtitle="Awaiting agency decision"
+            icon={Inbox}
+            iconColor="text-amber-400"
+          />
+          <MetricCard
+            title="Under review"
+            value={String(stats.underReview)}
+            icon={Clock}
+            iconColor="text-blue-400"
+          />
+          <MetricCard
+            title="Accepted"
+            value={String(stats.accepted)}
+            icon={CheckCircle2}
+            iconColor="text-emerald-400"
+          />
+          <MetricCard
+            title="Total submitted"
+            value={String(stats.total)}
+            icon={Users}
+            iconColor="text-accent-light"
+          />
+        </div>
+      )}
 
-      {!canManage ? (
+      {!canManage && !isPortalUser ? (
         <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-sm text-gray-400">
           You have view-only access. Owners and admins can review, accept, or
           reject applications from this hub.
@@ -219,9 +251,11 @@ export function ApplicationsPageClient({
           }
           description={
             applications.length === 0
-              ? isSponsorOrg
-                ? "Publish an open opportunity and creators in the network can apply. You'll review them here."
-                : "When creators apply to your opportunities, they'll show up in this hub for review."
+              ? isPortalUser
+                ? "You have not applied to any opportunities yet. Browse open listings to submit your first application."
+                : isSponsorOrg
+                  ? "Publish an open opportunity and creators in the network can apply. You'll review them here."
+                  : "When creators apply to your opportunities, they'll show up in this hub for review."
               : "Try a different search or status filter."
           }
           action={
@@ -234,7 +268,9 @@ export function ApplicationsPageClient({
                   ? isSponsorOrg
                     ? "Post an opportunity →"
                     : "Manage opportunities →"
-                  : "Browse opportunities →"}
+                  : isPortalUser
+                    ? "Browse opportunities →"
+                    : "Browse opportunities →"}
               </Link>
             ) : hasActiveFilters ? (
               <button
@@ -264,12 +300,18 @@ export function ApplicationsPageClient({
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
                       <div className="flex flex-wrap items-center gap-2">
-                        <Link
-                          href={`/creators/${app.creatorId}`}
-                          className="text-lg font-semibold text-white hover:text-accent-light"
-                        >
-                          {app.creatorName}
-                        </Link>
+                        {!isPortalUser ? (
+                          <Link
+                            href={`/creators/${app.creatorId}`}
+                            className="text-lg font-semibold text-white hover:text-accent-light"
+                          >
+                            {app.creatorName}
+                          </Link>
+                        ) : (
+                          <span className="text-lg font-semibold text-white">
+                            {app.creatorName}
+                          </span>
+                        )}
                         <ApplicationStatusBadge status={app.status} />
                       </div>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">

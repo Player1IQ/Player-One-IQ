@@ -44,6 +44,9 @@ interface OpportunityDetailProps {
   canManage: boolean;
   canApply: boolean;
   dealRoomConversationId?: string | null;
+  isPortalUser?: boolean;
+  linkedCreatorId?: string | null;
+  hasApplied?: boolean;
 }
 
 function Section({
@@ -74,6 +77,9 @@ export function OpportunityDetail({
   canManage,
   canApply,
   dealRoomConversationId,
+  isPortalUser = false,
+  linkedCreatorId = null,
+  hasApplied = false,
 }: OpportunityDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -83,7 +89,8 @@ export function OpportunityDetail({
   const canApplyNow =
     canApply &&
     opportunity.status === "open" &&
-    creators.length > 0;
+    !hasApplied &&
+    (isPortalUser ? Boolean(linkedCreatorId) : creators.length > 0);
 
   const acceptedContract = applications.find(
     (app) => app.status === "accepted" && app.contractId
@@ -119,18 +126,20 @@ export function OpportunityDetail({
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <Link
-            href="/opportunities"
+            href={isPortalUser ? "/opportunities" : "/opportunities"}
             className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Opportunities
+            {isPortalUser ? "Back to opportunities" : "Back to Opportunities"}
           </Link>
           <div className="flex flex-wrap gap-2">
-            <DealRoomButton
-              type="opportunity"
-              relatedId={opportunity.id}
-              conversationId={dealRoomConversationId}
-            />
+            {!isPortalUser ? (
+              <DealRoomButton
+                type="opportunity"
+                relatedId={opportunity.id}
+                conversationId={dealRoomConversationId}
+              />
+            ) : null}
             {canApplyNow && (
               <Button size="sm" onClick={() => setApplyOpen(true)}>
                 Apply
@@ -187,13 +196,20 @@ export function OpportunityDetail({
                 {opportunity.budgetDisplay}
               </span>
               {opportunity.sponsorId && opportunity.sponsorName && (
-                <Link
-                  href={`/sponsors/${opportunity.sponsorId}`}
-                  className="inline-flex items-center gap-2 text-gray-300 transition-colors hover:text-accent-light"
-                >
-                  <Building2 className="h-4 w-4 text-accent-light" />
-                  {opportunity.sponsorName}
-                </Link>
+                isPortalUser ? (
+                  <span className="inline-flex items-center gap-2 text-gray-300">
+                    <Building2 className="h-4 w-4 text-accent-light" />
+                    {opportunity.sponsorName}
+                  </span>
+                ) : (
+                  <Link
+                    href={`/sponsors/${opportunity.sponsorId}`}
+                    className="inline-flex items-center gap-2 text-gray-300 transition-colors hover:text-accent-light"
+                  >
+                    <Building2 className="h-4 w-4 text-accent-light" />
+                    {opportunity.sponsorName}
+                  </Link>
+                )
               )}
               <span className="inline-flex items-center gap-2 text-gray-400">
                 <Calendar className="h-4 w-4" />
@@ -203,31 +219,54 @@ export function OpportunityDetail({
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <MetricCard
-            title="Applications"
-            value={String(applications.length)}
-            subtitle={`${pendingCount} pending review`}
-            icon={Users}
-            iconColor="text-violet-400"
-          />
-          <MetricCard
-            title="Budget"
-            value={opportunity.budgetDisplay}
-            subtitle="Proposed sponsorship"
-            icon={DollarSign}
-            iconColor="text-emerald-400"
-          />
-          <MetricCard
-            title="Status"
-            value={opportunity.status.replace(/_/g, " ")}
-            subtitle="Current opportunity state"
-            icon={Briefcase}
-            iconColor="text-blue-400"
-          />
-        </div>
+        {!isPortalUser ? (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <MetricCard
+              title="Applications"
+              value={String(applications.length)}
+              subtitle={`${pendingCount} pending review`}
+              icon={Users}
+              iconColor="text-violet-400"
+            />
+            <MetricCard
+              title="Budget"
+              value={opportunity.budgetDisplay}
+              subtitle="Proposed sponsorship"
+              icon={DollarSign}
+              iconColor="text-emerald-400"
+            />
+            <MetricCard
+              title="Status"
+              value={opportunity.status.replace(/_/g, " ")}
+              subtitle="Current opportunity state"
+              icon={Briefcase}
+              iconColor="text-blue-400"
+            />
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <MetricCard
+              title="Budget"
+              value={opportunity.budgetDisplay}
+              subtitle="Proposed sponsorship"
+              icon={DollarSign}
+              iconColor="text-emerald-400"
+            />
+            <MetricCard
+              title="Your application"
+              value={hasApplied ? "Submitted" : "Not applied"}
+              subtitle={
+                hasApplied
+                  ? applications[0]?.status.replace(/_/g, " ") ?? "Pending"
+                  : "Apply before the deadline"
+              }
+              icon={Briefcase}
+              iconColor="text-blue-400"
+            />
+          </div>
+        )}
 
-        {acceptedContract?.contractId && (
+        {acceptedContract?.contractId && !isPortalUser && (
           <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
             <p className="text-sm text-emerald-300">
               This opportunity has been filled. A draft contract was created for{" "}
@@ -248,6 +287,38 @@ export function OpportunityDetail({
           </Section>
         )}
 
+        {isPortalUser ? (
+          hasApplied && applications[0] ? (
+            <Section
+              title="Your application"
+              description="Track your submission status"
+            >
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm text-gray-500">
+                      Proposed: {applications[0].proposedRateDisplay}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Applied {applications[0].createdAtDisplay}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <ApplicationStatusBadge status={applications[0].status} />
+                    {applications[0].contractId ? (
+                      <ApplicationContractLink contractId={applications[0].contractId} />
+                    ) : null}
+                  </div>
+                </div>
+                {applications[0].coverMessage ? (
+                  <p className="mt-3 text-sm text-gray-400">
+                    {applications[0].coverMessage}
+                  </p>
+                ) : null}
+              </div>
+            </Section>
+          ) : null
+        ) : (
         <Section
           title="Applicants"
           description={`${applications.length} application${applications.length !== 1 ? "s" : ""}`}
@@ -323,6 +394,7 @@ export function OpportunityDetail({
             </ul>
           )}
         </Section>
+        )}
       </div>
 
       <OpportunityFormModal
@@ -336,6 +408,8 @@ export function OpportunityDetail({
         onClose={() => setApplyOpen(false)}
         opportunity={opportunity}
         creators={creators}
+        isPortalUser={isPortalUser}
+        linkedCreatorId={linkedCreatorId}
       />
     </>
   );

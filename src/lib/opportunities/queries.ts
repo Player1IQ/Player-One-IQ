@@ -170,6 +170,101 @@ export async function getAllApplications(): Promise<OpportunityApplication[]> {
   return rows.map((row) => mapApplicationRow(row, contractIds[row.id] ?? null));
 }
 
+export async function getOpenOpportunitiesForPortal(): Promise<Opportunity[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const { data, error } = await supabase
+    .from("opportunities")
+    .select("*, sponsors ( company_name )")
+    .eq("organization_id", organizationId)
+    .eq("status", "open")
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+
+  const rows = data as OpportunityRow[];
+  return rows.map((row) => mapOpportunityRow(row, 0));
+}
+
+export async function getApplicationsForCreator(
+  creatorId: string
+): Promise<OpportunityApplication[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const { data: opportunities } = await supabase
+    .from("opportunities")
+    .select("id")
+    .eq("organization_id", organizationId);
+
+  if (!opportunities?.length) return [];
+
+  const ids = opportunities.map((o) => o.id);
+
+  const { data, error } = await supabase
+    .from("opportunity_applications")
+    .select(
+      `*,
+      creators ( name ),
+      opportunities ( title, status )`
+    )
+    .eq("creator_id", creatorId)
+    .in("opportunity_id", ids)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+
+  const rows = data as ApplicationRow[];
+  const contractIds = await getContractIdsByApplicationIds(
+    rows.map((row) => row.id)
+  );
+
+  return rows.map((row) => mapApplicationRow(row, contractIds[row.id] ?? null));
+}
+
+export async function getApplicationForCreatorOnOpportunity(
+  opportunityId: string,
+  creatorId: string
+): Promise<OpportunityApplication | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return null;
+
+  const { data: opportunity } = await supabase
+    .from("opportunities")
+    .select("id")
+    .eq("id", opportunityId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!opportunity) return null;
+
+  const { data, error } = await supabase
+    .from("opportunity_applications")
+    .select(
+      `*,
+      creators ( name ),
+      opportunities ( title, status )`
+    )
+    .eq("opportunity_id", opportunityId)
+    .eq("creator_id", creatorId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  const contractIds = await getContractIdsByApplicationIds([data.id]);
+  return mapApplicationRow(data as ApplicationRow, contractIds[data.id] ?? null);
+}
+
 export async function getOpportunityActivity(limit = 5) {
   const supabase = await createClient();
   if (!supabase) return [];

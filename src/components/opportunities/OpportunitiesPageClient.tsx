@@ -39,6 +39,9 @@ interface OpportunitiesPageClientProps {
   sponsors: Sponsor[];
   canManage: boolean;
   pendingReviewCount?: number;
+  isPortalUser?: boolean;
+  myApplicationCount?: number;
+  myPendingCount?: number;
 }
 
 export function OpportunitiesPageClient({
@@ -46,6 +49,9 @@ export function OpportunitiesPageClient({
   sponsors,
   canManage,
   pendingReviewCount = 0,
+  isPortalUser = false,
+  myApplicationCount = 0,
+  myPendingCount = 0,
 }: OpportunitiesPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -72,27 +78,50 @@ export function OpportunitiesPageClient({
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <MetricCard
-          title="Open Opportunities"
-          value={String(stats.openCount)}
-          subtitle={`${stats.draftCount} in draft`}
-          icon={Briefcase}
-          iconColor="text-emerald-400"
-        />
-        <MetricCard
-          title="Total Opportunities"
-          value={String(stats.totalCount)}
-          icon={FileText}
-          iconColor="text-accent-light"
-        />
-        <MetricCard
-          title="Total Applications"
-          value={String(stats.applicationCount)}
-          icon={Users}
-          iconColor="text-violet-400"
-        />
-      </div>
+      {!isPortalUser ? (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <MetricCard
+            title="Open Opportunities"
+            value={String(stats.openCount)}
+            subtitle={`${stats.draftCount} in draft`}
+            icon={Briefcase}
+            iconColor="text-emerald-400"
+          />
+          <MetricCard
+            title="Total Opportunities"
+            value={String(stats.totalCount)}
+            icon={FileText}
+            iconColor="text-accent-light"
+          />
+          <MetricCard
+            title="Total Applications"
+            value={String(stats.applicationCount)}
+            icon={Users}
+            iconColor="text-violet-400"
+          />
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <MetricCard
+            title="Open opportunities"
+            value={String(opportunities.length)}
+            subtitle="Available to apply"
+            icon={Briefcase}
+            iconColor="text-emerald-400"
+          />
+          <MetricCard
+            title="Your applications"
+            value={String(myApplicationCount)}
+            subtitle={
+              myPendingCount > 0
+                ? `${myPendingCount} awaiting review`
+                : "Submitted applications"
+            }
+            icon={FileText}
+            iconColor="text-violet-400"
+          />
+        </div>
+      )}
 
       {canManage && pendingReviewCount > 0 ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
@@ -140,10 +169,14 @@ export function OpportunitiesPageClient({
           href="/opportunities/applications"
           className="inline-flex items-center gap-2 text-sm text-accent-light hover:text-white"
         >
-          View all applications
+          {isPortalUser ? "View my applications" : "View all applications"}
           {canManage && pendingReviewCount > 0 ? (
             <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300 ring-1 ring-amber-500/25">
               {pendingReviewCount} to review
+            </span>
+          ) : isPortalUser && myPendingCount > 0 ? (
+            <span className="rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-300 ring-1 ring-violet-500/25">
+              {myPendingCount} pending
             </span>
           ) : null}
           <span aria-hidden>→</span>
@@ -160,20 +193,22 @@ export function OpportunitiesPageClient({
           className="max-w-md flex-1"
         />
         <div className="flex flex-wrap gap-3">
-          <select
-            value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(e.target.value as StatusFilter)
-            }
-            className={selectClassName}
-          >
-            <option value="all">All statuses</option>
-            {opportunityStatuses.map((s) => (
-              <option key={s} value={s}>
-                {opportunityStatusLabels[s]}
-              </option>
-            ))}
-          </select>
+          {!isPortalUser ? (
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as StatusFilter)
+              }
+              className={selectClassName}
+            >
+              <option value="all">All statuses</option>
+              {opportunityStatuses.map((s) => (
+                <option key={s} value={s}>
+                  {opportunityStatusLabels[s]}
+                </option>
+              ))}
+            </select>
+          ) : null}
           {canManage ? (
             <Button type="button" onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
@@ -183,29 +218,31 @@ export function OpportunitiesPageClient({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {quickFilters.map((filter) => (
-          <button
-            key={filter.value}
-            type="button"
-            onClick={() => setStatusFilter(filter.value)}
-            className={cn(
-              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-              statusFilter === filter.value
-                ? "border-accent/40 bg-accent/15 text-accent-light"
-                : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
-            )}
-          >
-            {filter.label}
-            {filter.value === "open" && stats.openCount > 0 ? (
-              <span className="ml-1.5 text-emerald-400">({stats.openCount})</span>
-            ) : null}
-            {filter.value === "draft" && stats.draftCount > 0 ? (
-              <span className="ml-1.5 text-blue-400">({stats.draftCount})</span>
-            ) : null}
-          </button>
-        ))}
-      </div>
+      {!isPortalUser ? (
+        <div className="flex flex-wrap gap-2">
+          {quickFilters.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              onClick={() => setStatusFilter(filter.value)}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                statusFilter === filter.value
+                  ? "border-accent/40 bg-accent/15 text-accent-light"
+                  : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
+              )}
+            >
+              {filter.label}
+              {filter.value === "open" && stats.openCount > 0 ? (
+                <span className="ml-1.5 text-emerald-400">({stats.openCount})</span>
+              ) : null}
+              {filter.value === "draft" && stats.draftCount > 0 ? (
+                <span className="ml-1.5 text-blue-400">({stats.draftCount})</span>
+              ) : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {filtered.length === 0 ? (
         <EmptyState
@@ -217,9 +254,11 @@ export function OpportunitiesPageClient({
           }
           description={
             opportunities.length === 0
-              ? canManage
-                ? "Create your first sponsorship opportunity for creators to discover and apply."
-                : "Check back when opportunities are published."
+              ? isPortalUser
+                ? "No open opportunities right now. Check back when your agency publishes new deals."
+                : canManage
+                  ? "Create your first sponsorship opportunity for creators to discover and apply."
+                  : "Check back when opportunities are published."
               : "Try a different search or status filter."
           }
           action={
@@ -273,10 +312,12 @@ export function OpportunitiesPageClient({
                 <span className="font-semibold text-white">
                   {opportunity.budgetDisplay}
                 </span>
-                <span className="text-gray-500">
-                  {opportunity.applicationCount} applicant
-                  {opportunity.applicationCount !== 1 ? "s" : ""}
-                </span>
+                {!isPortalUser ? (
+                  <span className="text-gray-500">
+                    {opportunity.applicationCount} applicant
+                    {opportunity.applicationCount !== 1 ? "s" : ""}
+                  </span>
+                ) : null}
               </div>
               <p className="mt-2 text-xs text-gray-500">
                 Deadline: {opportunity.applicationDeadlineDisplay}

@@ -79,7 +79,7 @@ export const roleDescriptions: Record<TeamRole, string> = {
   viewer: "Read-only access across the organization",
   player: "Portal access to own roster profile, contracts, and deliverables",
   content_creator:
-    "Portal access to own profile, contracts, campaigns, and content",
+    "Portal access to own profile, contracts, campaigns, opportunities, and content",
 };
 
 export const memberStatusLabels: Record<MemberStatus, string> = {
@@ -238,7 +238,7 @@ export const permissionMatrix: Record<
     creators: "scoped",
     sponsors: "none",
     contracts: "scoped",
-    opportunities: "none",
+    opportunities: "scoped",
     campaigns: "scoped",
     messages: "full",
     team: "none",

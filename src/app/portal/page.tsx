@@ -7,6 +7,11 @@ import { getCreatorById } from "@/lib/creators/queries";
 import { getPortalDeliverableMetrics } from "@/lib/contract-deliverables/queries";
 import { getContracts } from "@/lib/contracts/queries";
 import { getUnreadMessageCount } from "@/lib/messages/queries";
+import {
+  getOpenOpportunitiesForPortal,
+  getApplicationsForCreator,
+} from "@/lib/opportunities/queries";
+import { getApplicationStats } from "@/lib/opportunities";
 import { getOrganizationForUser } from "@/lib/organization/queries";
 import { roleLabels, isPortalRole } from "@/lib/team";
 import { getCurrentUserMembership } from "@/lib/permissions";
@@ -31,6 +36,7 @@ export default async function PortalHomePage() {
   }
 
   const showCampaigns = membership.role === "content_creator";
+  const showOpportunities = membership.role === "content_creator";
 
   const [
     creator,
@@ -40,6 +46,8 @@ export default async function PortalHomePage() {
     campaigns,
     deliverableMetrics,
     subscription,
+    openOpportunities,
+    opportunityApplications,
   ] = await Promise.all([
     getCreatorById(membership.linkedCreatorId),
     getContracts(),
@@ -48,6 +56,10 @@ export default async function PortalHomePage() {
     showCampaigns ? getCampaigns() : Promise.resolve([]),
     getPortalDeliverableMetrics(membership.linkedCreatorId),
     getSubscriptionContext(),
+    showOpportunities ? getOpenOpportunitiesForPortal() : Promise.resolve([]),
+    showOpportunities
+      ? getApplicationsForCreator(membership.linkedCreatorId)
+      : Promise.resolve([]),
   ]);
 
   if (!creator) {
@@ -55,6 +67,7 @@ export default async function PortalHomePage() {
   }
 
   const whiteLabelEnabled = hasFeature(subscription.features, "white_label");
+  const opportunityApplicationStats = getApplicationStats(opportunityApplications);
 
   return (
     <DashboardLayout
@@ -71,6 +84,9 @@ export default async function PortalHomePage() {
         roleLabel={roleLabels[membership.role]}
         showCampaigns={showCampaigns}
         campaignCount={campaigns.length}
+        showOpportunities={showOpportunities}
+        openOpportunityCount={openOpportunities.length}
+        pendingApplicationCount={opportunityApplicationStats.needsAction}
         deliverableMetrics={deliverableMetrics}
       />
     </DashboardLayout>

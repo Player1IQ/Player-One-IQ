@@ -33,6 +33,9 @@ interface PortalHomeClientProps {
   roleLabel: string;
   showCampaigns: boolean;
   campaignCount: number;
+  showOpportunities?: boolean;
+  openOpportunityCount?: number;
+  pendingApplicationCount?: number;
   deliverableMetrics: PortalDeliverableMetrics;
 }
 
@@ -46,6 +49,9 @@ export function PortalHomeClient({
   roleLabel,
   showCampaigns,
   campaignCount,
+  showOpportunities = false,
+  openOpportunityCount = 0,
+  pendingApplicationCount = 0,
   deliverableMetrics,
 }: PortalHomeClientProps) {
   const activeContracts = contracts.filter((contract) =>
@@ -105,7 +111,13 @@ export function PortalHomeClient({
       </div>
 
       <div
-        className={`grid gap-4 ${showCampaigns ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"}`}
+        className={`grid gap-4 ${
+          showCampaigns && showOpportunities
+            ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7"
+            : showCampaigns || showOpportunities
+              ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+              : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+        }`}
       >
         <MetricCard
           title="Open deliverables"
@@ -140,6 +152,19 @@ export function PortalHomeClient({
             }
             icon={Target}
             iconColor="text-amber-400"
+          />
+        ) : null}
+        {showOpportunities ? (
+          <MetricCard
+            title="Opportunities"
+            value={String(openOpportunityCount)}
+            subtitle={
+              pendingApplicationCount > 0
+                ? `${pendingApplicationCount} pending review`
+                : "Open to apply"
+            }
+            icon={Briefcase}
+            iconColor="text-sky-400"
           />
         ) : null}
         <MetricCard
@@ -279,6 +304,20 @@ export function PortalHomeClient({
                 {campaignCount > 0 ? (
                   <span className="text-xs text-gray-500">
                     {campaignCount} assigned
+                  </span>
+                ) : null}
+              </Link>
+            ) : null}
+            {showOpportunities ? (
+              <Link
+                href="/opportunities"
+                className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
+              >
+                <Briefcase className="h-4 w-4 text-accent-light" />
+                <span className="flex-1">Opportunities</span>
+                {openOpportunityCount > 0 ? (
+                  <span className="text-xs text-gray-500">
+                    {openOpportunityCount} open
                   </span>
                 ) : null}
               </Link>

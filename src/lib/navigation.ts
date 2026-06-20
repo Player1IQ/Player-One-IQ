@@ -127,6 +127,23 @@ export function getAccessibleNavItems(
         ];
       }
     }
+
+    const opportunitiesItem = navItems.find(
+      (item) => item.href === "/opportunities"
+    );
+    if (
+      opportunitiesItem &&
+      !items.some((item) => item.href === "/opportunities")
+    ) {
+      const messagesIndex = items.findIndex((item) => item.href === "/messages");
+      if (messagesIndex >= 0) {
+        items = [
+          ...items.slice(0, messagesIndex),
+          opportunitiesItem,
+          ...items.slice(messagesIndex),
+        ];
+      }
+    }
   }
 
   return items.filter((item) =>

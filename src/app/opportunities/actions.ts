@@ -7,6 +7,7 @@ import {
   requireApplicationAccess,
   requireFeatureAccess,
   requireOpportunityManageAccess,
+  getCurrentUserMembership,
 } from "@/lib/permissions";
 import {
   type OpportunityInput,
@@ -300,10 +301,27 @@ export async function applyToOpportunity(input: ApplicationInput) {
   const permError = await requireApplicationAccess();
   if (permError) return permError;
 
+  const membership = await getCurrentUserMembership();
+  const isPortalCreator = membership?.role === "content_creator";
+
+  let creatorId = input.creatorId;
+  if (isPortalCreator) {
+    if (!membership?.linkedCreatorId) {
+      return { error: "Your portal account is not linked to a creator profile." };
+    }
+    if (creatorId && creatorId !== membership.linkedCreatorId) {
+      return {
+        error: "You can only apply as your linked creator profile.",
+      };
+    }
+    creatorId = membership.linkedCreatorId;
+  } else if (!creatorId) {
+    return { error: "Creator is required." };
+  }
+
   const featureError = await requireOpportunityApplyFeature();
   if (featureError) return featureError;
 
-  if (!input.creatorId) return { error: "Creator is required." };
   if (!input.coverMessage.trim()) return { error: "Cover message is required." };
 
   const supabase = await createClient();
@@ -327,7 +345,7 @@ export async function applyToOpportunity(input: ApplicationInput) {
   const { data: creator } = await supabase
     .from("creators")
     .select("id, name")
-    .eq("id", input.creatorId)
+    .eq("id", creatorId)
     .eq("organization_id", organizationId)
     .maybeSingle();
 
@@ -337,7 +355,7 @@ export async function applyToOpportunity(input: ApplicationInput) {
     .from("opportunity_applications")
     .select("id")
     .eq("opportunity_id", input.opportunityId)
-    .eq("creator_id", input.creatorId)
+    .eq("creator_id", creatorId)
     .maybeSingle();
 
   if (existing) return { error: "This creator has already applied." };
@@ -346,7 +364,7 @@ export async function applyToOpportunity(input: ApplicationInput) {
     .from("opportunity_applications")
     .insert({
       opportunity_id: input.opportunityId,
-      creator_id: input.creatorId,
+      creator_id: creatorId,
       cover_message: input.coverMessage.trim(),
       proposed_rate: input.proposedRate,
       status: "applied",

@@ -5,7 +5,6 @@ export const PORTAL_HOME = "/portal";
 
 const STAFF_ONLY_PREFIXES = [
   "/sponsors",
-  "/opportunities",
   "/team",
   "/billing",
   "/ai",
@@ -54,6 +53,14 @@ export function isPathAllowedForPortalUser(
 
   if (role === "content_creator" && pathname.startsWith("/campaigns")) {
     return true;
+  }
+
+  if (role === "content_creator" && pathname.startsWith("/opportunities")) {
+    return true;
+  }
+
+  if (role === "player" && pathname.startsWith("/opportunities")) {
+    return false;
   }
 
   return pathname === PORTAL_HOME || pathname.startsWith(`${PORTAL_HOME}/`);
