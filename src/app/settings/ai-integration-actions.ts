@@ -9,6 +9,7 @@ import {
   removeOrganizationAiIntegration,
   resolveLlmConfig,
   saveOrganizationAiIntegration,
+  updateOrganizationAiProbeStatus,
 } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { probeLlmConfig } from "@/lib/ai/llm";
@@ -42,8 +43,20 @@ export async function saveAiIntegrationSettings(input: {
     return { error: "Invalid AI provider." };
   }
 
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
   const result = await saveOrganizationAiIntegration(input);
   if (result.error) return { error: result.error };
+
+  const config = await resolveLlmConfig(organizationId);
+  if (config?.source === "org") {
+    const probe = await probeLlmConfig(config);
+    await updateOrganizationAiProbeStatus(
+      organizationId,
+      probe.ok ? { ok: true } : { ok: false, error: probe.error }
+    );
+  }
 
   revalidatePath("/settings");
   revalidatePath("/ai");
@@ -111,12 +124,23 @@ export async function testAiIntegrationConnection(input?: {
   }
 
   const probe = await probeLlmConfig(config);
+  if (config.source === "org") {
+    await updateOrganizationAiProbeStatus(
+      organizationId,
+      probe.ok ? { ok: true } : { ok: false, error: probe.error }
+    );
+  }
+
   if (!probe.ok) {
+    revalidatePath("/settings");
+    revalidatePath("/ai");
+    revalidateAiLlmHealth();
     return { error: probe.error };
   }
 
   revalidateAiLlmHealth();
   revalidatePath("/ai");
+  revalidatePath("/settings");
 
   return {
     success: true,

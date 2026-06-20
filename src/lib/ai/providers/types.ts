@@ -16,6 +16,8 @@ export interface AiIntegrationPublic {
   isEnabled: boolean;
   hasApiKey: boolean;
   updatedAt: string;
+  lastVerifiedAt: string | null;
+  lastProbeError: string | null;
 }
 
 export const aiProviderOptions: Array<{

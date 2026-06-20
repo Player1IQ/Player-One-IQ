@@ -38,6 +38,7 @@ interface CampaignsPageClientProps {
   sponsors: Sponsor[];
   opportunities: Opportunity[];
   canWrite?: boolean;
+  isPortalUser?: boolean;
 }
 
 export function CampaignsPageClient({
@@ -45,6 +46,7 @@ export function CampaignsPageClient({
   sponsors,
   opportunities,
   canWrite = true,
+  isPortalUser = false,
 }: CampaignsPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -69,38 +71,40 @@ export function CampaignsPageClient({
 
   return (
     <div className="animate-fade-in space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          title="Total Campaigns"
-          value={String(stats.totalCount)}
-          subtitle={`${stats.activeCount} active`}
-          icon={Target}
-          iconColor="text-accent-light"
-        />
-        <MetricCard
-          title="Active"
-          value={String(stats.activeCount)}
-          subtitle="Currently running"
-          icon={Play}
-          iconColor="text-emerald-400"
-        />
-        <MetricCard
-          title="Completed"
-          value={String(stats.completedCount)}
-          subtitle={`${stats.draftCount} in draft`}
-          icon={CheckCircle2}
-          iconColor="text-blue-400"
-        />
-        <MetricCard
-          title="Total Budget"
-          value={stats.totalBudgetDisplay}
-          subtitle="Across all campaigns"
-          icon={DollarSign}
-          iconColor="text-amber-400"
-        />
-      </div>
+      {!isPortalUser ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <MetricCard
+            title="Total Campaigns"
+            value={String(stats.totalCount)}
+            subtitle={`${stats.activeCount} active`}
+            icon={Target}
+            iconColor="text-accent-light"
+          />
+          <MetricCard
+            title="Active"
+            value={String(stats.activeCount)}
+            subtitle="Currently running"
+            icon={Play}
+            iconColor="text-emerald-400"
+          />
+          <MetricCard
+            title="Completed"
+            value={String(stats.completedCount)}
+            subtitle={`${stats.draftCount} in draft`}
+            icon={CheckCircle2}
+            iconColor="text-blue-400"
+          />
+          <MetricCard
+            title="Total Budget"
+            value={stats.totalBudgetDisplay}
+            subtitle="Across all campaigns"
+            icon={DollarSign}
+            iconColor="text-amber-400"
+          />
+        </div>
+      ) : null}
 
-      {stats.draftCount > 0 ? (
+      {!isPortalUser && stats.draftCount > 0 ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-amber-100">
@@ -178,7 +182,7 @@ export function CampaignsPageClient({
         ))}
       </div>
 
-      {sponsors.length === 0 ? (
+      {sponsors.length === 0 && !isPortalUser ? (
         <EmptyState
           icon={Target}
           title="Add a sponsor first"
@@ -195,10 +199,18 @@ export function CampaignsPageClient({
       ) : filtered.length === 0 ? (
         <EmptyState
           icon={Target}
-          title={campaigns.length === 0 ? "No campaigns yet" : "No matching campaigns"}
+          title={
+            campaigns.length === 0
+              ? isPortalUser
+                ? "No campaigns assigned"
+                : "No campaigns yet"
+              : "No matching campaigns"
+          }
           description={
             campaigns.length === 0
-              ? "Create your first sponsor campaign to track budgets and status."
+              ? isPortalUser
+                ? "Your agency will assign you to campaigns when they go live."
+                : "Create your first sponsor campaign to track budgets and status."
               : "Try a different search or status filter."
           }
           action={
@@ -278,13 +290,17 @@ export function CampaignsPageClient({
                       ) : null}
                     </td>
                     <td className="px-5 py-4">
-                      <Link
-                        href={`/sponsors/${campaign.sponsorId}`}
-                        className="text-gray-300 hover:text-accent-light"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {campaign.sponsorName}
-                      </Link>
+                      {isPortalUser ? (
+                        <span className="text-gray-300">{campaign.sponsorName}</span>
+                      ) : (
+                        <Link
+                          href={`/sponsors/${campaign.sponsorId}`}
+                          className="text-gray-300 hover:text-accent-light"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {campaign.sponsorName}
+                        </Link>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <CampaignStatusBadge status={campaign.status} />

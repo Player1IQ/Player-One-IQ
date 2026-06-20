@@ -21,12 +21,15 @@ import { StatusBadge } from "@/components/creators/StatusBadge";
 import { ContractStatusBadge } from "@/components/contracts/ContractStatusBadge";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
+import { PortalAlertsBanner } from "@/components/portal/PortalAlertsBanner";
 
 interface PortalHomeClientProps {
   creator: Creator;
   contracts: Contract[];
   unreadMessages: number;
   organizationName: string;
+  organizationLogoUrl?: string | null;
+  whiteLabelEnabled?: boolean;
   roleLabel: string;
   showCampaigns: boolean;
   campaignCount: number;
@@ -38,6 +41,8 @@ export function PortalHomeClient({
   contracts,
   unreadMessages,
   organizationName,
+  organizationLogoUrl,
+  whiteLabelEnabled = false,
   roleLabel,
   showCampaigns,
   campaignCount,
@@ -49,16 +54,29 @@ export function PortalHomeClient({
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <PortalAlertsBanner
+        overdueDeliverables={deliverableMetrics.overdueCount}
+        unreadMessages={unreadMessages}
+      />
+
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-600/10 via-surface-raised to-surface" />
         <div className="relative flex flex-col gap-5 px-6 py-8 sm:flex-row sm:items-center sm:px-8">
-          <CreatorAvatar
-            name={creator.name}
-            imageUrl={creator.avatarUrl}
-            initials={creator.avatarInitials}
-            color={creator.avatarColor}
-            size="lg"
-          />
+          {organizationLogoUrl ? (
+            <img
+              src={organizationLogoUrl}
+              alt={`${organizationName} logo`}
+              className="h-16 w-16 shrink-0 rounded-2xl object-cover ring-1 ring-white/10"
+            />
+          ) : (
+            <CreatorAvatar
+              name={creator.name}
+              imageUrl={creator.avatarUrl}
+              initials={creator.avatarInitials}
+              color={creator.avatarColor}
+              size="lg"
+            />
+          )}
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
               {organizationName} · {roleLabel}
@@ -77,6 +95,13 @@ export function PortalHomeClient({
             View full profile
           </Link>
         </div>
+        {!whiteLabelEnabled && organizationLogoUrl ? (
+          <div className="relative border-t border-white/[0.04] px-6 py-2 sm:px-8">
+            <p className="text-[10px] text-gray-600">
+              Portal powered by Player One IQ
+            </p>
+          </div>
+        ) : null}
       </div>
 
       <div

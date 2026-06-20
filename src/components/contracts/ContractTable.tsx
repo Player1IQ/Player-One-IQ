@@ -23,6 +23,7 @@ interface ContractTableProps {
   sponsors: Sponsor[];
   deliverableSummaries?: Record<string, DeliverablesSummary>;
   canWrite?: boolean;
+  isPortalUser?: boolean;
   selectedId?: string | null;
   onSelect?: (contract: Contract) => void;
 }
@@ -58,6 +59,7 @@ export function ContractTable({
   sponsors,
   deliverableSummaries = {},
   canWrite = true,
+  isPortalUser = false,
   selectedId,
   onSelect,
 }: ContractTableProps) {
@@ -108,7 +110,9 @@ export function ContractTable({
                     {contract.contractName}
                   </p>
                   <p className="mt-1 text-sm text-gray-400">
-                    {contract.creatorName} · {contract.sponsorName}
+                    {isPortalUser
+                      ? contract.sponsorName
+                      : `${contract.creatorName} · ${contract.sponsorName}`}
                   </p>
                 </Link>
                 <ContractStatusBadge status={contract.status} />
@@ -164,9 +168,11 @@ export function ContractTable({
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Contract Name
                 </th>
-                <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Creator
-                </th>
+                {!isPortalUser ? (
+                  <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    Creator
+                  </th>
+                ) : null}
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Sponsor
                 </th>
@@ -221,23 +227,29 @@ export function ContractTable({
                         ) : null}
                       </Link>
                     </td>
+                    {!isPortalUser ? (
+                      <td className="px-6 py-4">
+                        <Link
+                          href={`/creators/${contract.creatorId}`}
+                          className="text-gray-300 transition-colors hover:text-accent-light"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {contract.creatorName}
+                        </Link>
+                      </td>
+                    ) : null}
                     <td className="px-6 py-4">
-                      <Link
-                        href={`/creators/${contract.creatorId}`}
-                        className="text-gray-300 transition-colors hover:text-accent-light"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {contract.creatorName}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/sponsors/${contract.sponsorId}`}
-                        className="text-gray-300 transition-colors hover:text-accent-light"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {contract.sponsorName}
-                      </Link>
+                      {isPortalUser ? (
+                        <span className="text-gray-300">{contract.sponsorName}</span>
+                      ) : (
+                        <Link
+                          href={`/sponsors/${contract.sponsorId}`}
+                          className="text-gray-300 transition-colors hover:text-accent-light"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {contract.sponsorName}
+                        </Link>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span className="font-semibold text-white">

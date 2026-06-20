@@ -48,6 +48,7 @@ interface ContractsPageClientProps {
   deliverableSummaries?: Record<string, DeliverablesSummary>;
   canWrite?: boolean;
   initialSummaryFilter?: ContractSummaryFilter;
+  isPortalUser?: boolean;
 }
 
 export function ContractsPageClient({
@@ -57,6 +58,7 @@ export function ContractsPageClient({
   deliverableSummaries = {},
   canWrite = true,
   initialSummaryFilter = null,
+  isPortalUser = false,
 }: ContractsPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -133,17 +135,19 @@ export function ContractsPageClient({
 
   return (
     <div className="animate-fade-in space-y-6">
-      <ContractSummaryCards
-        activeCount={stats.activeCount}
-        negotiatingCount={stats.negotiatingCount}
-        expiringSoonCount={stats.expiringSoonCount}
-        overdueCount={stats.overdueCount}
-        totalValueDisplay={stats.totalValueDisplay}
-        activeFilter={summaryFilter}
-        onFilterChange={setSummaryFilter}
-      />
+      {!isPortalUser ? (
+        <ContractSummaryCards
+          activeCount={stats.activeCount}
+          negotiatingCount={stats.negotiatingCount}
+          expiringSoonCount={stats.expiringSoonCount}
+          overdueCount={stats.overdueCount}
+          totalValueDisplay={stats.totalValueDisplay}
+          activeFilter={summaryFilter}
+          onFilterChange={setSummaryFilter}
+        />
+      ) : null}
 
-      {stats.overdueCount > 0 ? (
+      {!isPortalUser && stats.overdueCount > 0 ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-red-100">
@@ -164,7 +168,7 @@ export function ContractsPageClient({
         </div>
       ) : null}
 
-      {stats.expiringSoonCount > 0 && stats.overdueCount === 0 ? (
+      {!isPortalUser && stats.expiringSoonCount > 0 && stats.overdueCount === 0 ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-500/25 bg-orange-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-orange-100">
@@ -185,7 +189,8 @@ export function ContractsPageClient({
         </div>
       ) : null}
 
-      {stats.negotiatingCount > 0 &&
+      {!isPortalUser &&
+      stats.negotiatingCount > 0 &&
       summaryFilter !== "pipeline" &&
       !hasActiveFilters ? (
         <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
@@ -199,7 +204,11 @@ export function ContractsPageClient({
           <Input
             icon={<Search className="h-4 w-4" />}
             type="text"
-            placeholder="Search contracts, creators, or sponsors..."
+            placeholder={
+              isPortalUser
+                ? "Search your deals..."
+                : "Search contracts, creators, or sponsors..."
+            }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -253,7 +262,13 @@ export function ContractsPageClient({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {quickFilters.map((filter) => (
+        {(isPortalUser
+          ? quickFilters.filter(
+              (f): f is (typeof quickFilters)[number] =>
+                f.value === "all" || f.value === "active" || f.value === "overdue"
+            )
+          : quickFilters
+        ).map((filter) => (
           <button
             key={filter.value}
             type="button"
@@ -288,11 +303,17 @@ export function ContractsPageClient({
         <EmptyState
           icon={FileText}
           title={
-            contracts.length === 0 ? "No contracts yet" : "No matching contracts"
+            contracts.length === 0
+              ? isPortalUser
+                ? "No deals yet"
+                : "No contracts yet"
+              : "No matching contracts"
           }
           description={
             contracts.length === 0
-              ? "Create your first sponsorship agreement to track value, status, and deliverables."
+              ? isPortalUser
+                ? "Your agency will add sponsorship agreements here as deals progress."
+                : "Create your first sponsorship agreement to track value, status, and deliverables."
               : "Try a different search or filter."
           }
           action={
@@ -332,6 +353,7 @@ export function ContractsPageClient({
                 sponsors={sponsors}
                 deliverableSummaries={deliverableSummaries}
                 canWrite={canWrite}
+                isPortalUser={isPortalUser}
                 selectedId={selectedContract?.id}
                 onSelect={setSelectedContract}
               />

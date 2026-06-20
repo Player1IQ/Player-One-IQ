@@ -22,6 +22,8 @@ interface OrganizationAiIntegrationRow {
   model: string | null;
   is_enabled: boolean;
   updated_at: string;
+  last_verified_at: string | null;
+  last_probe_error: string | null;
 }
 
 export async function getAiIntegrationForSettings(): Promise<AiIntegrationPublic | null> {
@@ -37,7 +39,9 @@ export async function getAiIntegrationPublicSummary(): Promise<AiIntegrationPubl
 
   const { data } = await supabase
     .from("organization_ai_integrations")
-    .select("provider, api_key_hint, model, is_enabled, updated_at")
+    .select(
+      "provider, api_key_hint, model, is_enabled, updated_at, last_verified_at, last_probe_error"
+    )
     .eq("organization_id", organizationId)
     .maybeSingle();
 
@@ -50,7 +54,28 @@ export async function getAiIntegrationPublicSummary(): Promise<AiIntegrationPubl
     isEnabled: data.is_enabled,
     hasApiKey: Boolean(data.api_key_hint),
     updatedAt: data.updated_at,
+    lastVerifiedAt: data.last_verified_at ?? null,
+    lastProbeError: data.last_probe_error ?? null,
   };
+}
+
+export async function updateOrganizationAiProbeStatus(
+  organizationId: string,
+  result: { ok: true } | { ok: false; error: string }
+): Promise<void> {
+  const supabase = createServiceClient() ?? (await createClient());
+  if (!supabase) return;
+
+  const now = new Date().toISOString();
+  const patch =
+    result.ok === true
+      ? { last_verified_at: now, last_probe_error: null, updated_at: now }
+      : { last_probe_error: result.error, updated_at: now };
+
+  await supabase
+    .from("organization_ai_integrations")
+    .update(patch)
+    .eq("organization_id", organizationId);
 }
 
 export type OrganizationLlmConfigResult =

@@ -15,7 +15,9 @@ import { enforcePortalRouteAccess } from "@/lib/portal/guard";
 import { canAccessStaffDashboard } from "@/lib/team";
 import { hasAnyFeature } from "@/lib/subscription/features";
 import { ExportReportMenu } from "@/components/reports/ExportReportMenu";
+import { PortalPoweredByFooter } from "@/components/portal/PortalPoweredByFooter";
 import { Calendar } from "lucide-react";
+import { hasFeature } from "@/lib/subscription/features";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -53,6 +55,8 @@ export async function DashboardLayout({
     ]);
 
   const messagingEnabled = subscriptionContext.features.has("messaging");
+  const showPortalPoweredBy =
+    isPortalUser && !hasFeature(subscriptionContext.features, "white_label");
   const canExportReports =
     !isPortalUser &&
     hasAnyFeature(subscriptionContext.features, [
@@ -114,6 +118,7 @@ export async function DashboardLayout({
         <SupabaseConfigBanner />
         <PendingInviteBannerWrapper />
         {children}
+        {showPortalPoweredBy ? <PortalPoweredByFooter /> : null}
       </DashboardShell>
       <MessageNotifications />
     </>

@@ -150,6 +150,29 @@ export function AiIntegrationCard({
             </p>
           ) : null}
 
+          {integration?.lastVerifiedAt ? (
+            <p className="mt-2 text-xs text-gray-500">
+              Last verified{" "}
+              {new Date(integration.lastVerifiedAt).toLocaleString(undefined, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
+            </p>
+          ) : null}
+
+          {integration?.lastProbeError ? (
+            <p className="mt-3 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-100">
+              Last connection test failed: {integration.lastProbeError}. Re-enter
+              your API key and run Test connection, or check provider billing and
+              model settings.
+            </p>
+          ) : integration?.hasApiKey && !integration.lastVerifiedAt ? (
+            <p className="mt-3 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+              A key is saved but has not been verified yet. Run Test connection
+              after deploy to confirm production access.
+            </p>
+          ) : null}
+
           {canManage ? (
             <div className="mt-5 space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">

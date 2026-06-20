@@ -35,7 +35,15 @@ interface HealthResponse {
   appUrl: string | null;
 }
 
-export function DeployChecklistCard() {
+interface DeployChecklistCardProps {
+  aiIntegrationHasKey?: boolean;
+  aiIntegrationProbeError?: string | null;
+}
+
+export function DeployChecklistCard({
+  aiIntegrationHasKey = false,
+  aiIntegrationProbeError = null,
+}: DeployChecklistCardProps) {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [routeChecks, setRouteChecks] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,6 +123,11 @@ export function DeployChecklistCard() {
     {
       label: "Live AI ready (BYOK or platform fallback)",
       done: health?.aiDeployReady ?? false,
+    },
+    {
+      label: "Workspace AI key verified",
+      done: !aiIntegrationProbeError,
+      optional: !aiIntegrationHasKey,
     },
     {
       label: "Platform OpenAI fallback (optional)",
@@ -209,6 +222,14 @@ export function DeployChecklistCard() {
               Platform OpenAI has no billing quota. Workspaces with their own key
               in Settings are unaffected; others see sample insights until billing
               is restored or BYOK is connected.
+            </p>
+          ) : null}
+
+          {aiIntegrationProbeError ? (
+            <p className="mt-3 text-xs text-amber-400/90">
+              Your saved workspace AI key failed its last connection test:{" "}
+              {aiIntegrationProbeError}. Open Settings → AI integration and run
+              Test connection after verifying keys on Vercel.
             </p>
           ) : null}
 

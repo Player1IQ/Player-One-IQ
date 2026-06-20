@@ -84,7 +84,10 @@ export default async function SettingsPage() {
         platformSync={
           canView ? (
             <>
-              <DeployChecklistCard />
+              <DeployChecklistCard
+                aiIntegrationHasKey={aiIntegration?.hasApiKey ?? false}
+                aiIntegrationProbeError={aiIntegration?.lastProbeError ?? null}
+              />
               <AiIntegrationCard
                 integration={aiIntegration}
                 encryptionConfigured={isAiCredentialsEncryptionConfigured()}
