@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import type { PortalDeliverableMetrics } from "@/lib/contract-deliverables/queries";
 import {
   Briefcase,
+  Calendar,
+  CheckSquare,
   ExternalLink,
   FileText,
   MessageSquare,
@@ -27,6 +30,7 @@ interface PortalHomeClientProps {
   roleLabel: string;
   showCampaigns: boolean;
   campaignCount: number;
+  deliverableMetrics: PortalDeliverableMetrics;
 }
 
 export function PortalHomeClient({
@@ -37,6 +41,7 @@ export function PortalHomeClient({
   roleLabel,
   showCampaigns,
   campaignCount,
+  deliverableMetrics,
 }: PortalHomeClientProps) {
   const activeContracts = contracts.filter((contract) =>
     ["active", "negotiating", "draft"].includes(contract.status)
@@ -75,8 +80,23 @@ export function PortalHomeClient({
       </div>
 
       <div
-        className={`grid gap-4 ${showCampaigns ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}
+        className={`grid gap-4 ${showCampaigns ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"}`}
       >
+        <MetricCard
+          title="Open deliverables"
+          value={String(deliverableMetrics.openCount)}
+          subtitle={
+            deliverableMetrics.overdueCount > 0
+              ? `${deliverableMetrics.overdueCount} overdue`
+              : "Across your contracts"
+          }
+          icon={CheckSquare}
+          iconColor={
+            deliverableMetrics.overdueCount > 0
+              ? "text-red-400"
+              : "text-amber-400"
+          }
+        />
         <MetricCard
           title="Active deals"
           value={String(activeContracts.length)}
@@ -112,6 +132,45 @@ export function PortalHomeClient({
           iconColor="text-sky-400"
         />
       </div>
+
+      {deliverableMetrics.nextDue ? (
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <Calendar
+                className={`mt-0.5 h-4 w-4 shrink-0 ${
+                  deliverableMetrics.nextDue.isOverdue
+                    ? "text-red-400"
+                    : "text-accent-light"
+                }`}
+              />
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Next deliverable due
+                </p>
+                <p
+                  className={`mt-1 text-sm font-medium ${
+                    deliverableMetrics.nextDue.isOverdue
+                      ? "text-red-300"
+                      : "text-gray-200"
+                  }`}
+                >
+                  {deliverableMetrics.nextDue.title}
+                </p>
+                <p className="mt-0.5 text-xs text-gray-500">
+                  Due {deliverableMetrics.nextDue.dueDateDisplay}
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/contracts/${deliverableMetrics.nextDue.contractId}`}
+              className="text-sm font-medium text-accent-light hover:text-white"
+            >
+              View contract
+            </Link>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <Card>

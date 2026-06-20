@@ -2,12 +2,19 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
   buildDeliverablesSummary,
+  getDeliverableStats,
   mapDeliverableRow,
   parseDeliverableTitlesFromText,
   type ContractDeliverable,
   type ContractDeliverableRow,
   type DeliverablesSummary,
 } from "@/lib/contract-deliverables";
+
+export interface PortalDeliverableMetrics {
+  openCount: number;
+  overdueCount: number;
+  nextDue: ContractDeliverable | null;
+}
 
 async function seedDeliverablesFromContractText(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -114,4 +121,48 @@ export async function getDeliverablesSummariesForContracts(
   }
 
   return summaries;
+}
+
+export async function getPortalDeliverableMetrics(
+  creatorId: string
+): Promise<PortalDeliverableMetrics> {
+  const empty: PortalDeliverableMetrics = {
+    openCount: 0,
+    overdueCount: 0,
+    nextDue: null,
+  };
+
+  const supabase = await createClient();
+  if (!supabase) return empty;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return empty;
+
+  const { data: contracts, error: contractsError } = await supabase
+    .from("contracts")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("creator_id", creatorId);
+
+  if (contractsError || !contracts?.length) return empty;
+
+  const contractIds = contracts.map((c) => c.id);
+
+  const { data, error } = await supabase
+    .from("contract_deliverables")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .in("contract_id", contractIds);
+
+  if (error || !data) return empty;
+
+  const deliverables = (data as ContractDeliverableRow[]).map(mapDeliverableRow);
+  const stats = getDeliverableStats(deliverables);
+  const summary = buildDeliverablesSummary(deliverables);
+
+  return {
+    openCount: stats.openCount,
+    overdueCount: stats.overdueCount,
+    nextDue: summary.nextDue,
+  };
 }

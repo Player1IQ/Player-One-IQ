@@ -40,6 +40,8 @@ interface ContractDetailProps {
   negotiationContext: ContractNegotiationContext | null;
   deliverables: ContractDeliverable[];
   canWrite?: boolean;
+  canUpdateStatus?: boolean;
+  isPortalUser?: boolean;
   canUseAi?: boolean;
   aiMode?: "live" | "demo";
   dealRoomConversationId?: string | null;
@@ -72,6 +74,8 @@ export function ContractDetail({
   negotiationContext,
   deliverables,
   canWrite = true,
+  canUpdateStatus = false,
+  isPortalUser = false,
   canUseAi = false,
   aiMode = "demo",
   dealRoomConversationId,
@@ -107,11 +111,11 @@ export function ContractDetail({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <Link
-            href="/contracts"
+            href={isPortalUser ? "/portal" : "/contracts"}
             className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Contracts
+            {isPortalUser ? "Back to Portal" : "Back to Contracts"}
           </Link>
           <div className="flex flex-wrap gap-2">
             <DealRoomButton
@@ -161,7 +165,7 @@ export function ContractDetail({
           </div>
         )}
 
-        {contract.sourceOpportunityId && (
+        {contract.sourceOpportunityId && !isPortalUser && (
           <div className="rounded-lg border border-border bg-surface-overlay/40 px-4 py-3 text-sm text-gray-400">
             Created from an accepted opportunity application.{" "}
             <Link
@@ -271,39 +275,44 @@ export function ContractDetail({
           contractId={contract.id}
           deliverables={deliverables}
           canWrite={canWrite}
+          canUpdateStatus={canUpdateStatus}
         />
 
-        <Section
-          title="Contract Workflow"
-          description="Set deal value below, then advance when terms are agreed"
-        >
-          <ContractNegotiationPanel
-            contract={contract}
-            negotiationContext={negotiationContext}
-            canWrite={canWrite}
-          />
-          <div className="mt-5">
-            <ContractWorkflowActions contract={contract} canWrite={canWrite} />
-          </div>
-        </Section>
+        {!isPortalUser ? (
+          <>
+            <Section
+              title="Contract Workflow"
+              description="Set deal value below, then advance when terms are agreed"
+            >
+              <ContractNegotiationPanel
+                contract={contract}
+                negotiationContext={negotiationContext}
+                canWrite={canWrite}
+              />
+              <div className="mt-5">
+                <ContractWorkflowActions contract={contract} canWrite={canWrite} />
+              </div>
+            </Section>
 
-        <Section
-          title="AI Contract Summary"
-          description="Deal terms, deliverables, risks, and next steps"
-        >
-          <ContractAiSummaryPanel
-            contractId={contract.id}
-            contractName={contract.contractName}
-            creatorName={contract.creatorName}
-            sponsorName={contract.sponsorName}
-            status={contract.status}
-            contractValue={contract.contractValue}
-            canUseAi={canUseAi}
-            aiMode={aiMode}
-          />
-        </Section>
+            <Section
+              title="AI Contract Summary"
+              description="Deal terms, deliverables, risks, and next steps"
+            >
+              <ContractAiSummaryPanel
+                contractId={contract.id}
+                contractName={contract.contractName}
+                creatorName={contract.creatorName}
+                sponsorName={contract.sponsorName}
+                status={contract.status}
+                contractValue={contract.contractValue}
+                canUseAi={canUseAi}
+                aiMode={aiMode}
+              />
+            </Section>
+          </>
+        ) : null}
 
-        {contract.notes && (
+        {contract.notes && !isPortalUser && (
           <Section
             title="Internal Notes"
             description="Confidential — team members only"

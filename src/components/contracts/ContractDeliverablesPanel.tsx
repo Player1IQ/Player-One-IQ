@@ -34,6 +34,7 @@ interface ContractDeliverablesPanelProps {
   contractId: string;
   deliverables: ContractDeliverable[];
   canWrite?: boolean;
+  canUpdateStatus?: boolean;
 }
 
 type DeliverableFilter = "all" | "open" | "overdue" | "in_progress" | "completed";
@@ -50,8 +51,10 @@ export function ContractDeliverablesPanel({
   contractId,
   deliverables: initialDeliverables,
   canWrite = true,
+  canUpdateStatus = false,
 }: ContractDeliverablesPanelProps) {
   const router = useRouter();
+  const canChangeStatus = canWrite || canUpdateStatus;
   const [deliverables, setDeliverables] = useState(initialDeliverables);
   const [newTitle, setNewTitle] = useState("");
   const [newDueDate, setNewDueDate] = useState("");
@@ -112,10 +115,23 @@ export function ContractDeliverablesPanel({
   }
 
   async function handleToggle(id: string) {
-    if (!canWrite) return;
+    if (!canChangeStatus) return;
     setLoadingId(id);
     setError("");
     const result = await toggleDeliverableComplete(id);
+    setLoadingId(null);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    await refreshAfterAction();
+  }
+
+  async function handleStatusChange(id: string, status: DeliverableStatus) {
+    if (!canChangeStatus) return;
+    setLoadingId(id);
+    setError("");
+    const result = await updateDeliverable(id, { status });
     setLoadingId(null);
     if ("error" in result && result.error) {
       setError(result.error);
@@ -355,7 +371,7 @@ export function ContractDeliverablesPanel({
                     <button
                       type="button"
                       onClick={() => handleToggle(item.id)}
-                      disabled={!canWrite || isLoading}
+                      disabled={!canChangeStatus || isLoading}
                       className={cn(
                         "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors disabled:cursor-not-allowed disabled:opacity-50",
                         item.status === "completed"
@@ -407,6 +423,26 @@ export function ContractDeliverablesPanel({
                           <Calendar className="h-3 w-3" />
                           Due {item.dueDateDisplay}
                         </p>
+                      ) : null}
+                      {canUpdateStatus && !canWrite ? (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {deliverableStatuses.map((status) => (
+                            <button
+                              key={status}
+                              type="button"
+                              onClick={() => handleStatusChange(item.id, status)}
+                              disabled={isLoading || item.status === status}
+                              className={cn(
+                                "rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors disabled:cursor-default disabled:opacity-60",
+                                item.status === status
+                                  ? "border-accent/40 bg-accent/15 text-accent-light"
+                                  : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
+                              )}
+                            >
+                              {deliverableStatusLabels[status]}
+                            </button>
+                          ))}
+                        </div>
                       ) : null}
                     </div>
 
@@ -473,11 +509,11 @@ export function ContractDeliverablesPanel({
             </Button>
           </div>
         </form>
-      ) : (
+      ) : !canChangeStatus ? (
         <p className="text-sm text-gray-500">
-          View-only access — an owner, admin, or manager can update deliverables.
+          View-only access — you cannot update deliverables on this contract.
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -8,7 +8,13 @@ import { getContractById, getContractNegotiationContext } from "@/lib/contracts/
 import { getDeliverablesForContract } from "@/lib/contract-deliverables/queries";
 import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
-import { canAccessContract, canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import {
+  canAccessContract,
+  canUpdateDeliverable,
+  canWriteData,
+  getCurrentUserMembership,
+} from "@/lib/permissions";
+import { isPortalRole } from "@/lib/team";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 
@@ -20,12 +26,15 @@ export default async function ContractDetailPage({
   params,
 }: ContractDetailPageProps) {
   const { id } = await params;
-  const [contract, creators, sponsors, role, deliverables, subscription, dealRoomConversationId] =
+  const membership = await getCurrentUserMembership();
+  const role = membership?.role ?? null;
+  const isPortalUser = isPortalRole(role);
+
+  const [contract, creators, sponsors, deliverables, subscription, dealRoomConversationId] =
     await Promise.all([
       getContractById(id),
       getCreators(),
       getSponsors(),
-      getCurrentUserRole(),
       getDeliverablesForContract(id),
       getSubscriptionContext(),
       findConversationByRelated("contract", id),
@@ -39,10 +48,16 @@ export default async function ContractDetailPage({
     notFound();
   }
 
-  const negotiationContext = await getContractNegotiationContext(contract);
+  const negotiationContext = isPortalUser
+    ? null
+    : await getContractNegotiationContext(contract);
   const organizationId = await getOrganizationId();
   const aiLive =
     Boolean(organizationId) && (await canRunLiveAi(organizationId!));
+  const canWrite = canWriteData(role);
+  const canUpdateStatus = canUpdateDeliverable(membership, {
+    creatorId: contract.creatorId,
+  });
 
   return (
     <DashboardLayout
@@ -55,7 +70,9 @@ export default async function ContractDetailPage({
         sponsors={sponsors}
         negotiationContext={negotiationContext}
         deliverables={deliverables}
-        canWrite={canWriteData(role)}
+        canWrite={canWrite}
+        canUpdateStatus={canUpdateStatus}
+        isPortalUser={isPortalUser}
         canUseAi={hasFeature(subscription.features, "ai_contract_summaries")}
         aiMode={aiLive ? "live" : "demo"}
         dealRoomConversationId={dealRoomConversationId}

@@ -100,6 +100,53 @@ export async function canAccessContract(contract: {
   return hasReadAccess(membership.role, "contracts");
 }
 
+export function canUpdateDeliverable(
+  membership: CurrentUserMembership | null,
+  contract: { creatorId: string }
+): boolean {
+  if (!membership) return false;
+
+  if (canWriteData(membership.role)) return true;
+
+  if (isPortalRole(membership.role)) {
+    return membership.linkedCreatorId === contract.creatorId;
+  }
+
+  return false;
+}
+
+export async function requireDeliverableUpdateAccess(
+  contractId: string
+): Promise<{ error: string } | null> {
+  const membership = await getCurrentUserMembership();
+  if (!membership) {
+    return { error: "You do not have permission to update deliverables." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: contract } = await supabase
+    .from("contracts")
+    .select("creator_id")
+    .eq("id", contractId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!contract) return { error: "Contract not found." };
+
+  if (
+    !canUpdateDeliverable(membership, { creatorId: contract.creator_id })
+  ) {
+    return { error: "You do not have permission to update deliverables." };
+  }
+
+  return null;
+}
+
 export async function canAccessCampaign(campaignId: string): Promise<boolean> {
   const membership = await getCurrentUserMembership();
   if (!membership) return false;

@@ -3,7 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireFeatureAccess, requireWriteAccess } from "@/lib/permissions";
+import {
+  canWriteData,
+  getCurrentUserMembership,
+  isPortalRole,
+  requireDeliverableUpdateAccess,
+  requireFeatureAccess,
+  requireWriteAccess,
+} from "@/lib/permissions";
 
 async function requireContractsFeature() {
   return requireFeatureAccess("contracts", "Contracts");
@@ -55,6 +62,7 @@ async function getContractForDeliverable(
 function revalidateContractPaths(contractId: string) {
   revalidatePath("/contracts");
   revalidatePath(`/contracts/${contractId}`);
+  revalidatePath("/portal");
 }
 
 export async function createDeliverable(
@@ -139,9 +147,6 @@ export async function updateDeliverable(
   const featureError = await requireContractsFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
-  if (permError) return permError;
-
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -157,6 +162,24 @@ export async function updateDeliverable(
 
   if (fetchError || !existing) {
     return { error: "Deliverable not found." };
+  }
+
+  const permError = await requireDeliverableUpdateAccess(existing.contract_id);
+  if (permError) return permError;
+
+  const membership = await getCurrentUserMembership();
+  const portalStatusOnly =
+    membership &&
+    isPortalRole(membership.role) &&
+    !canWriteData(membership.role);
+
+  if (portalStatusOnly) {
+    if (input.title !== undefined || input.dueDate !== undefined) {
+      return { error: "You can only update deliverable status." };
+    }
+    if (input.status === undefined) {
+      return { error: "No changes specified." };
+    }
   }
 
   const updates: Record<string, unknown> = {
@@ -206,9 +229,6 @@ export async function toggleDeliverableComplete(id: string) {
   const featureError = await requireContractsFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
-  if (permError) return permError;
-
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -225,6 +245,9 @@ export async function toggleDeliverableComplete(id: string) {
   if (fetchError || !existing) {
     return { error: "Deliverable not found." };
   }
+
+  const permError = await requireDeliverableUpdateAccess(existing.contract_id);
+  if (permError) return permError;
 
   const completing = existing.status !== "completed";
   const newStatus: DeliverableStatus = completing ? "completed" : "pending";
