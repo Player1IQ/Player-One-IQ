@@ -26,6 +26,7 @@ interface CreatorPlatformAccountsProps {
   revenueEntries: CreatorRevenueEntry[];
   oauthPlatformUi?: OAuthPlatformUi[];
   canWrite?: boolean;
+  allowPlatformOAuth?: boolean;
 }
 
 function getAccountRevenue(
@@ -54,7 +55,9 @@ export function CreatorPlatformAccounts({
   revenueEntries,
   oauthPlatformUi = [],
   canWrite = true,
+  allowPlatformOAuth = false,
 }: CreatorPlatformAccountsProps) {
+  const canManagePlatforms = canWrite || allowPlatformOAuth;
   const router = useRouter();
   const [connectOpen, setConnectOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -154,15 +157,17 @@ export function CreatorPlatformAccounts({
             <p className="text-sm text-gray-500">
               No platform accounts connected yet.
             </p>
-            {canWrite && (
+            {canManagePlatforms && (
               <div className="mt-4 flex flex-wrap justify-center gap-2">
-                <button
-                  onClick={() => setConnectOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
-                >
-                  <Plus className="h-4 w-4" />
-                  Connect manually
-                </button>
+                {canWrite ? (
+                  <button
+                    onClick={() => setConnectOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Connect manually
+                  </button>
+                ) : null}
                 <OAuthPlatformActions
                   creatorId={creator.id}
                   platforms={oauthPlatformUi}
@@ -172,7 +177,7 @@ export function CreatorPlatformAccounts({
           </div>
         ) : (
           <>
-            {canWrite && oauthAccountCount > 1 ? (
+            {canManagePlatforms && oauthAccountCount > 1 ? (
               <div className="flex justify-end">
                 <button
                   onClick={handleSyncAll}
@@ -227,7 +232,7 @@ export function CreatorPlatformAccounts({
                           ) : null}
                         </div>
                       </div>
-                      {canWrite && (
+                      {canManagePlatforms ? (
                         <div className="flex gap-2">
                           {account.connectionStatus === "connected_oauth" && (
                             <button
@@ -243,31 +248,49 @@ export function CreatorPlatformAccounts({
                               Sync now
                             </button>
                           )}
-                          <button
-                            onClick={() =>
-                              isEditing
-                                ? setEditingId(null)
-                                : startEdit(account)
-                            }
-                            className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs text-gray-300 hover:text-white"
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                            {isEditing ? "Cancel" : "Update income"}
-                          </button>
-                          <button
-                            onClick={() => handleDisconnect(account.id)}
-                            disabled={loadingId === account.id}
-                            className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 px-2.5 py-1.5 text-xs text-red-400"
-                          >
-                            {loadingId === account.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Unlink className="h-3.5 w-3.5" />
-                            )}
-                            Disconnect
-                          </button>
+                          {canWrite ? (
+                            <>
+                              <button
+                                onClick={() =>
+                                  isEditing
+                                    ? setEditingId(null)
+                                    : startEdit(account)
+                                }
+                                className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs text-gray-300 hover:text-white"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                                {isEditing ? "Cancel" : "Update income"}
+                              </button>
+                              <button
+                                onClick={() => handleDisconnect(account.id)}
+                                disabled={loadingId === account.id}
+                                className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 px-2.5 py-1.5 text-xs text-red-400"
+                              >
+                                {loadingId === account.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Unlink className="h-3.5 w-3.5" />
+                                )}
+                                Disconnect
+                              </button>
+                            </>
+                          ) : allowPlatformOAuth &&
+                            account.connectionStatus === "connected_oauth" ? (
+                            <button
+                              onClick={() => handleDisconnect(account.id)}
+                              disabled={loadingId === account.id}
+                              className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 px-2.5 py-1.5 text-xs text-red-400"
+                            >
+                              {loadingId === account.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Unlink className="h-3.5 w-3.5" />
+                              )}
+                              Disconnect
+                            </button>
+                          ) : null}
                         </div>
-                      )}
+                      ) : null}
                     </div>
 
                     {isEditing ? (
@@ -338,7 +361,7 @@ export function CreatorPlatformAccounts({
               })}
             </ul>
 
-            {canWrite && accounts.length < 5 && (
+            {canWrite && accounts.length < 5 ? (
               <button
                 onClick={() => setConnectOpen(true)}
                 className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-gray-300 hover:border-accent/30 hover:text-white"
@@ -346,7 +369,7 @@ export function CreatorPlatformAccounts({
                 <Link2 className="h-4 w-4" />
                 Connect another platform
               </button>
-            )}
+            ) : null}
           </>
         )}
       </div>

@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { revalidateAiLlmHealth } from "@/lib/ai/llm-health";
 import { requireSettingsManageAccess } from "@/lib/permissions";
 import {
   getAiIntegrationForSettings,
+  getOrganizationLlmConfigResult,
   removeOrganizationAiIntegration,
   resolveLlmConfig,
   saveOrganizationAiIntegration,
@@ -45,6 +47,7 @@ export async function saveAiIntegrationSettings(input: {
 
   revalidatePath("/settings");
   revalidatePath("/ai");
+  revalidateAiLlmHealth();
   return { success: true };
 }
 
@@ -57,6 +60,7 @@ export async function disconnectAiIntegration() {
 
   revalidatePath("/settings");
   revalidatePath("/ai");
+  revalidateAiLlmHealth();
   return { success: true };
 }
 
@@ -72,6 +76,16 @@ export async function testAiIntegrationConnection(input?: {
   if (!organizationId) return { error: "Organization not found." };
 
   let config = await resolveLlmConfig(organizationId);
+
+  if (!input?.apiKey?.trim()) {
+    const orgResult = await getOrganizationLlmConfigResult(organizationId);
+    if (orgResult.status === "decrypt_failed") {
+      return {
+        error:
+          "Your saved API key could not be decrypted. Paste the key again and save, or verify AI_CREDENTIALS_ENCRYPTION_KEY matches the value used when the key was saved.",
+      };
+    }
+  }
 
   if (input?.apiKey?.trim()) {
     const provider = input.provider ?? config?.provider ?? "openai";
@@ -100,6 +114,9 @@ export async function testAiIntegrationConnection(input?: {
   if (!probe.ok) {
     return { error: probe.error };
   }
+
+  revalidateAiLlmHealth();
+  revalidatePath("/ai");
 
   return {
     success: true,

@@ -53,38 +53,61 @@ export async function getAiIntegrationPublicSummary(): Promise<AiIntegrationPubl
   };
 }
 
-export async function getOrganizationLlmConfig(
+export type OrganizationLlmConfigResult =
+  | { status: "ok"; config: ResolvedLlmConfig }
+  | { status: "disabled" }
+  | { status: "missing" }
+  | { status: "decrypt_failed" };
+
+async function loadOrganizationAiIntegrationRow(
   organizationId: string
-): Promise<ResolvedLlmConfig | null> {
-  const supabase = createServiceClient();
+): Promise<OrganizationAiIntegrationRow | null> {
+  const supabase = createServiceClient() ?? (await createClient());
   if (!supabase) return null;
 
   const { data } = await supabase
     .from("organization_ai_integrations")
-    .select("provider, encrypted_api_key, model, is_enabled")
+    .select(
+      "organization_id, provider, encrypted_api_key, api_key_hint, model, is_enabled, updated_at"
+    )
     .eq("organization_id", organizationId)
-    .maybeSingle<Pick<
-      OrganizationAiIntegrationRow,
-      "provider" | "encrypted_api_key" | "model" | "is_enabled"
-    >>();
+    .maybeSingle<OrganizationAiIntegrationRow>();
 
-  if (!data?.is_enabled) return null;
+  return data ?? null;
+}
+
+export async function getOrganizationLlmConfigResult(
+  organizationId: string
+): Promise<OrganizationLlmConfigResult> {
+  const data = await loadOrganizationAiIntegrationRow(organizationId);
+  if (!data) return { status: "missing" };
+  if (!data.is_enabled) return { status: "disabled" };
 
   try {
     const apiKey = decryptApiKey(data.encrypted_api_key).trim();
-    if (!apiKey) return null;
+    if (!apiKey) return { status: "decrypt_failed" };
 
     const provider = data.provider as AiProvider;
     return {
-      source: "org",
-      provider,
-      apiKey,
-      model: data.model?.trim() || getDefaultModelForProvider(provider),
+      status: "ok",
+      config: {
+        source: "org",
+        provider,
+        apiKey,
+        model: data.model?.trim() || getDefaultModelForProvider(provider),
+      },
     };
   } catch (error) {
     console.error("Failed to decrypt organization AI credentials:", error);
-    return null;
+    return { status: "decrypt_failed" };
   }
+}
+
+export async function getOrganizationLlmConfig(
+  organizationId: string
+): Promise<ResolvedLlmConfig | null> {
+  const result = await getOrganizationLlmConfigResult(organizationId);
+  return result.status === "ok" ? result.config : null;
 }
 
 export async function resolveLlmConfig(

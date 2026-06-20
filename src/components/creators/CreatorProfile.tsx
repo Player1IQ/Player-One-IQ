@@ -48,6 +48,8 @@ interface CreatorProfileProps {
   oauthSuccess?: string | null;
   oauthError?: string | null;
   canWrite?: boolean;
+  isPortalUser?: boolean;
+  isContentCreator?: boolean;
   canUseContentAi?: boolean;
   aiMode?: "live" | "demo";
   audienceAnalytics?: CreatorAudienceAnalytics;
@@ -84,6 +86,8 @@ export function CreatorProfile({
   oauthSuccess = null,
   oauthError = null,
   canWrite = true,
+  isPortalUser = false,
+  isContentCreator = false,
   canUseContentAi = false,
   aiMode = "demo",
   audienceAnalytics,
@@ -112,7 +116,7 @@ export function CreatorProfile({
       setDeleting(false);
       return;
     }
-    router.push("/creators");
+    router.push(isPortalUser ? "/portal" : "/creators");
     router.refresh();
   }
 
@@ -132,11 +136,11 @@ export function CreatorProfile({
 
       <div className="flex items-center justify-between">
         <Link
-          href="/creators"
+          href={isPortalUser ? "/portal" : "/creators"}
           className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Creators
+          {isPortalUser ? "Back to Portal" : "Back to Creators"}
         </Link>
         {canWrite && (
           <div className="flex gap-2">
@@ -174,7 +178,7 @@ export function CreatorProfile({
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h2 className="text-3xl font-bold text-white">{creator.name}</h2>
-                <StatusBadge status={creator.status} />
+                {!isPortalUser ? <StatusBadge status={creator.status} /> : null}
               </div>
               {primaryHandle && (
                 <p className="mt-1 text-accent-light">{primaryHandle.handle}</p>
@@ -200,25 +204,31 @@ export function CreatorProfile({
       </div>
 
       {/* Metrics */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className={`grid gap-4 sm:grid-cols-2 ${isPortalUser ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
         <MetricCard
-          title="Active Contracts"
+          title={isPortalUser ? "Active deals" : "Active Contracts"}
           value={String(activeContracts.length)}
-          subtitle={`${contracts.length} total`}
+          subtitle={
+            isPortalUser
+              ? `${contracts.length} sponsorship agreement${contracts.length === 1 ? "" : "s"}`
+              : `${contracts.length} total`
+          }
           icon={DollarSign}
           iconColor="text-accent-light"
         />
-        <MetricCard
-          title="Contract Value"
-          value={
-            totalContractValue > 0
-              ? `$${totalContractValue.toLocaleString()}`
-              : "—"
-          }
-          subtitle="Total pipeline value"
-          icon={TrendingUp}
-          iconColor="text-emerald-400"
-        />
+        {!isPortalUser ? (
+          <MetricCard
+            title="Contract Value"
+            value={
+              totalContractValue > 0
+                ? `$${totalContractValue.toLocaleString()}`
+                : "—"
+            }
+            subtitle="Total pipeline value"
+            icon={TrendingUp}
+            iconColor="text-emerald-400"
+          />
+        ) : null}
         <MetricCard
           title="Platforms"
           value={String(platformAccounts.length)}
@@ -227,9 +237,9 @@ export function CreatorProfile({
           iconColor="text-violet-400"
         />
         <MetricCard
-          title="Member Since"
+          title={isPortalUser ? "With agency since" : "Member Since"}
           value={formatCreatorDate(creator.createdAt).split(",")[0] ?? "—"}
-          subtitle="On your roster"
+          subtitle={isPortalUser ? "On your roster profile" : "On your roster"}
           icon={Award}
           iconColor="text-amber-400"
         />
@@ -251,7 +261,7 @@ export function CreatorProfile({
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Section title="Creator Information">
+        <Section title={isPortalUser ? "Your information" : "Creator Information"}>
           <dl className="space-y-4">
             <div className="flex items-center gap-3">
               <Mail className="h-4 w-4 text-gray-500" />
@@ -304,33 +314,41 @@ export function CreatorProfile({
         </Section>
       </div>
 
-      <Section
-        title="Income Overview"
-        description="Combined platform and sponsorship revenue for this month"
-      >
-        <CreatorIncomeOverview
-          contracts={contracts}
-          revenueEntries={revenueEntries}
-        />
-      </Section>
+      {!isPortalUser ? (
+        <Section
+          title="Income Overview"
+          description="Combined platform and sponsorship revenue for this month"
+        >
+          <CreatorIncomeOverview
+            contracts={contracts}
+            revenueEntries={revenueEntries}
+          />
+        </Section>
+      ) : null}
 
-      <Section
-        title="AI Content Coach"
-        description="Cross-platform recommendations from connected accounts"
-      >
-        <CreatorContentCoach
-          creatorId={creator.id}
-          creatorName={creator.name}
-          connectedOAuthPlatforms={connectedOAuthPlatforms}
-          oauthPlatformUi={oauthPlatformUi}
-          canUseAi={canUseContentAi}
-          aiMode={aiMode}
-        />
-      </Section>
+      {!isPortalUser || isContentCreator ? (
+        <Section
+          title="AI Content Coach"
+          description="Cross-platform recommendations from connected accounts"
+        >
+          <CreatorContentCoach
+            creatorId={creator.id}
+            creatorName={creator.name}
+            connectedOAuthPlatforms={connectedOAuthPlatforms}
+            oauthPlatformUi={oauthPlatformUi}
+            canUseAi={canUseContentAi}
+            aiMode={aiMode}
+          />
+        </Section>
+      ) : null}
 
       <Section
         title="Connected Platforms"
-        description={platformOAuthDescription(oauthPlatformUi)}
+        description={
+          isPortalUser
+            ? "Connect your streaming and social accounts for analytics and content insights."
+            : platformOAuthDescription(oauthPlatformUi)
+        }
       >
         <CreatorPlatformAccounts
           creator={creator}
@@ -338,32 +356,45 @@ export function CreatorProfile({
           revenueEntries={revenueEntries}
           oauthPlatformUi={oauthPlatformUi}
           canWrite={canWrite}
+          allowPlatformOAuth={isPortalUser}
         />
       </Section>
 
       <Section
         title="Contracts"
-        description="Sponsorship agreements for this creator"
+        description={
+          isPortalUser
+            ? "Your sponsorship agreements with this agency"
+            : "Sponsorship agreements for this creator"
+        }
       >
         <RelatedContractsSection
           contracts={contracts}
-          emptyMessage="No contracts linked to this creator yet."
+          emptyMessage={
+            isPortalUser
+              ? "No contracts linked to your profile yet."
+              : "No contracts linked to this creator yet."
+          }
         />
       </Section>
 
-      <Section title="Notes" description="Internal notes and context">
-        <div className="rounded-lg border border-border-subtle bg-surface px-4 py-4">
-          <p className="text-sm leading-relaxed text-gray-300">
-            {creator.notes?.trim() || "No notes yet."}
-          </p>
-        </div>
-      </Section>
+      {!isPortalUser ? (
+        <Section title="Notes" description="Internal notes and context">
+          <div className="rounded-lg border border-border-subtle bg-surface px-4 py-4">
+            <p className="text-sm leading-relaxed text-gray-300">
+              {creator.notes?.trim() || "No notes yet."}
+            </p>
+          </div>
+        </Section>
+      ) : null}
 
-      <CreatorFormModal
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        creator={creator}
-      />
+      {canWrite ? (
+        <CreatorFormModal
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          creator={creator}
+        />
+      ) : null}
     </div>
   );
 }

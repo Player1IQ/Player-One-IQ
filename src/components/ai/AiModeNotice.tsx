@@ -19,7 +19,7 @@ export function AiModeNotice({
   aiRequestCount,
   aiRequestLimit,
 }: AiModeNoticeProps) {
-  const { health, source, provider } = healthState;
+  const { health, source, provider, detail } = healthState;
   const planUsage =
     aiRequestLimit != null && aiRequestCount != null
       ? `${aiRequestCount} of ${aiRequestLimit} included requests used this month`
@@ -90,15 +90,50 @@ export function AiModeNotice({
     );
   }
 
+  if (health === "credentials_error") {
+    return (
+      <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3">
+        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+        <div className="text-sm text-amber-100">
+          <p>
+            <span className="font-medium text-amber-300">Sample insights</span> —
+            your workspace API key is saved but the server cannot read it.
+          </p>
+          <p className="mt-2 text-xs text-amber-200/80">
+            {detail ??
+              "Re-enter your API key in Settings, or confirm AI_CREDENTIALS_ENCRYPTION_KEY is the same in every environment."}
+          </p>
+          <Link
+            href="/settings#ai-integration"
+            className="mt-3 inline-flex rounded-lg border border-amber-500/30 px-3 py-1.5 text-sm font-medium text-amber-100 hover:bg-amber-500/10"
+          >
+            Fix in Settings
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (health === "unavailable") {
     return (
       <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-        <p className="text-sm text-amber-100">
-          <span className="font-medium text-amber-300">Sample insights</span> —
-          live AI is temporarily unavailable. Your included plan requests are
-          unchanged.
-        </p>
+        <div className="text-sm text-amber-100">
+          <p>
+            <span className="font-medium text-amber-300">Sample insights</span> —
+            live AI is temporarily unavailable. Your included plan requests are
+            unchanged.
+          </p>
+          {detail ? (
+            <p className="mt-2 text-xs text-amber-200/80">{detail}</p>
+          ) : null}
+          <Link
+            href="/settings#ai-integration"
+            className="mt-2 inline-block text-xs text-amber-200/70 underline hover:text-amber-50"
+          >
+            Test connection in Settings
+          </Link>
+        </div>
       </div>
     );
   }

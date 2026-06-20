@@ -24,34 +24,52 @@ export function AiConnectionStrip({
 }: AiConnectionStripProps) {
   const workspaceConnected =
     integration?.hasApiKey && integration.isEnabled;
-  const { health, source, provider } = healthState;
+  const { health, source, provider, detail } = healthState;
 
   let statusLabel = "Not connected";
   let statusTone: "emerald" | "amber" | "gray" = "gray";
-  let detail = "Connect Claude or OpenAI to unlock live insights.";
+  let statusDetail = "Connect Claude or OpenAI to unlock live insights.";
 
   if (workspaceConnected) {
     statusLabel = `${providerDisplayName(integration.provider)} connected`;
-    statusTone = health === "available" ? "emerald" : "amber";
-    detail = `Workspace key ${integration.apiKeyHint}${
+    statusTone =
+      health === "available"
+        ? "emerald"
+        : health === "credentials_error"
+          ? "amber"
+          : "amber";
+    statusDetail = `Workspace key ${integration.apiKeyHint}${
       integration.model ? ` · ${integration.model}` : ""
     }`;
-    if (health === "quota_exceeded") {
-      detail += " — billing issue on your provider account";
+    if (health === "credentials_error") {
+      statusDetail =
+        detail ??
+        "Saved key could not be read — re-enter your API key in Settings.";
+    } else if (health === "quota_exceeded") {
+      statusDetail += " — billing issue on your provider account";
+      if (detail) statusDetail = detail;
     } else if (health === "unavailable") {
-      detail += " — connection issue, try Test in Settings";
+      statusDetail = detail
+        ? `${statusDetail} — ${detail}`
+        : `${statusDetail} — connection issue, try Test in Settings`;
+    } else if (source === "org" && health === "available") {
+      // keep default statusDetail
+    } else if (source !== "org" && health !== "available") {
+      statusDetail +=
+        " — server could not load your workspace key; try Save again in Settings";
     }
   } else if (source === "platform" && provider) {
     statusLabel = `${providerDisplayName(provider)} (platform fallback)`;
     statusTone = health === "available" ? "emerald" : "amber";
-    detail =
+    statusDetail =
       health === "available"
         ? "Using the platform API key. Connect your own key in Settings for direct billing."
-        : "Platform AI is unavailable — connect your workspace key in Settings.";
+        : detail ??
+          "Platform AI is unavailable — connect your workspace key in Settings.";
   } else if (integration?.hasApiKey && !integration.isEnabled) {
     statusLabel = `${providerDisplayName(integration.provider)} disabled`;
     statusTone = "amber";
-    detail = `Key on file (${integration.apiKeyHint}) but integration is turned off.`;
+    statusDetail = `Key on file (${integration.apiKeyHint}) but integration is turned off.`;
   }
 
   const iconClasses = {
@@ -66,7 +84,7 @@ export function AiConnectionStrip({
         <Sparkles className={`mt-0.5 h-4 w-4 shrink-0 ${iconClasses[statusTone]}`} />
         <div className="min-w-0">
           <p className="text-sm font-medium text-white">{statusLabel}</p>
-          <p className="mt-0.5 text-xs text-gray-500">{detail}</p>
+          <p className="mt-0.5 text-xs text-gray-500">{statusDetail}</p>
         </div>
       </div>
       {canManage ? (
