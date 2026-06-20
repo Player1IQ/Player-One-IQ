@@ -147,6 +147,46 @@ export async function requireDeliverableUpdateAccess(
   return null;
 }
 
+export async function canAccessConversation(
+  conversationId: string
+): Promise<boolean> {
+  const membership = await getCurrentUserMembership();
+  if (!membership || !canUseMessaging(membership.role)) return false;
+
+  const supabase = await createClient();
+  if (!supabase) return false;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return false;
+
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("id, organization_id")
+    .eq("id", conversationId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!conversation) return false;
+
+  if (isPortalRole(membership.role)) {
+    const currentUserId = (
+      await supabase.auth.getUser()
+    ).data.user?.id;
+    if (!currentUserId) return false;
+
+    const { data: participant } = await supabase
+      .from("conversation_participants")
+      .select("id")
+      .eq("conversation_id", conversationId)
+      .eq("user_id", currentUserId)
+      .maybeSingle();
+
+    return Boolean(participant);
+  }
+
+  return hasReadAccess(membership.role, "messages");
+}
+
 export async function canAccessCampaign(campaignId: string): Promise<boolean> {
   const membership = await getCurrentUserMembership();
   if (!membership) return false;

@@ -12,11 +12,13 @@ import {
   requireUsageWithinLimit,
   getCurrentUserRole,
 } from "@/lib/permissions";
+import { bootstrapPortalUserContractDealRooms } from "@/app/messages/actions";
 import {
   type TeamRole,
   invitableRoles,
   roleLabels,
   requiresLinkedCreator,
+  isPortalRole,
 } from "@/lib/team";
 
 async function requireTeamFeature() {
@@ -528,6 +530,17 @@ export async function acceptInvitation(token: string) {
     .eq("id", invite.id);
 
   if (updateError) return { error: updateError.message };
+
+  if (
+    isPortalRole(invite.role as TeamRole) &&
+    invite.linked_creator_id
+  ) {
+    await bootstrapPortalUserContractDealRooms(
+      invite.organization_id,
+      user.id,
+      invite.linked_creator_id
+    );
+  }
 
   await logTeamActivity(
     supabase,

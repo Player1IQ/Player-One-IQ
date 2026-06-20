@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ConversationClient } from "@/components/messages/ConversationClient";
 import { getDealRoomContext } from "@/lib/messages/deal-room-context";
+import { canAccessConversation } from "@/lib/permissions";
 import {
   getConversationById,
   getConversationParticipants,
@@ -23,6 +24,8 @@ export default async function ConversationPage({ params }: ConversationPageProps
   ]);
 
   if (!conversation) notFound();
+
+  if (!(await canAccessConversation(id))) notFound();
 
   const relatedHref =
     conversation.type === "opportunity" && conversation.relatedId

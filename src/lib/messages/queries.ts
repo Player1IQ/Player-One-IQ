@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { canAccessConversation } from "@/lib/permissions";
 import {
   type Conversation,
   type ConversationRow,
@@ -327,6 +328,8 @@ export async function getConversationById(
     .maybeSingle();
 
   if (error || !data) return null;
+
+  if (!(await canAccessConversation(id))) return null;
 
   const enriched = await enrichConversations([data as ConversationRow], currentUserId);
   return enriched[0] ?? null;

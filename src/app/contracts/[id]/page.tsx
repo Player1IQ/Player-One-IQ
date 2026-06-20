@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ContractDetail } from "@/components/contracts/ContractDetail";
 import { canRunLiveAi } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { syncPortalUserToContractDealRooms } from "@/app/messages/actions";
 import { findConversationByRelated } from "@/lib/messages/queries";
 import { getContractById, getContractNegotiationContext } from "@/lib/contracts/queries";
 import { getDeliverablesForContract } from "@/lib/contract-deliverables/queries";
@@ -48,6 +49,14 @@ export default async function ContractDetailPage({
     notFound();
   }
 
+  if (isPortalUser && membership?.linkedCreatorId === contract.creatorId) {
+    await syncPortalUserToContractDealRooms(contract.creatorId);
+  }
+
+  const resolvedDealRoomConversationId = isPortalUser
+    ? await findConversationByRelated("contract", id)
+    : dealRoomConversationId;
+
   const negotiationContext = isPortalUser
     ? null
     : await getContractNegotiationContext(contract);
@@ -75,7 +84,7 @@ export default async function ContractDetailPage({
         isPortalUser={isPortalUser}
         canUseAi={hasFeature(subscription.features, "ai_contract_summaries")}
         aiMode={aiLive ? "live" : "demo"}
-        dealRoomConversationId={dealRoomConversationId}
+        dealRoomConversationId={resolvedDealRoomConversationId}
       />
     </DashboardLayout>
   );

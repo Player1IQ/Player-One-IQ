@@ -7,7 +7,10 @@ import {
   requireFeatureAccess,
   requireWriteAccess,
   requireMessagingAccess,
+  getCurrentUserMembership,
+  canAccessContract,
 } from "@/lib/permissions";
+import { isPortalRole, type TeamRole } from "@/lib/team";
 import {
   getCurrentUserId,
   getOrganizationUsers,
@@ -50,13 +53,81 @@ async function logMessageActivity(
   });
 }
 
-async function addOrgParticipants(
+const PORTAL_ROLES = ["player", "content_creator"] as const;
+
+async function getDealRoomParticipantUserIds(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  organizationId: string,
+  type: "contract" | "opportunity",
+  relatedId: string | null
+): Promise<string[]> {
+  if (!relatedId) return [];
+
+  let creatorId: string | null = null;
+  if (type === "contract") {
+    const { data } = await supabase
+      .from("contracts")
+      .select("creator_id")
+      .eq("id", relatedId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    creatorId = data?.creator_id ?? null;
+  }
+
+  const [{ data: members }, { data: org }] = await Promise.all([
+    supabase
+      .from("team_members")
+      .select("user_id, role, linked_creator_id")
+      .eq("organization_id", organizationId)
+      .eq("status", "active")
+      .not("user_id", "is", null),
+    supabase
+      .from("organizations")
+      .select("user_id")
+      .eq("id", organizationId)
+      .maybeSingle(),
+  ]);
+
+  const userIds = new Set<string>();
+  if (org?.user_id) userIds.add(org.user_id);
+
+  for (const member of members ?? []) {
+    if (!member.user_id) continue;
+    const isPortal = PORTAL_ROLES.includes(
+      member.role as (typeof PORTAL_ROLES)[number]
+    );
+
+    if (type === "opportunity") {
+      if (!isPortal) userIds.add(member.user_id);
+      continue;
+    }
+
+    if (!isPortal) {
+      userIds.add(member.user_id);
+    } else if (creatorId && member.linked_creator_id === creatorId) {
+      userIds.add(member.user_id);
+    }
+  }
+
+  return [...userIds];
+}
+
+async function syncDealRoomParticipants(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
   conversationId: string
 ): Promise<{ error?: string }> {
-  const userIds = await getOrganizationUserIds();
-  const currentUserId = await getCurrentUserId();
+  const { data: conversation } = await supabase
+    .from("conversations")
+    .select("type, related_id, organization_id")
+    .eq("id", conversationId)
+    .maybeSingle();
 
+  if (!conversation) return { error: "Conversation not found." };
+  if (conversation.type !== "contract" && conversation.type !== "opportunity") {
+    return {};
+  }
+
+  const currentUserId = await getCurrentUserId();
   if (currentUserId) {
     const selfResult = await ensureParticipant(
       supabase,
@@ -65,6 +136,13 @@ async function addOrgParticipants(
     );
     if (selfResult.error) return selfResult;
   }
+
+  const userIds = await getDealRoomParticipantUserIds(
+    supabase,
+    conversation.organization_id,
+    conversation.type,
+    conversation.related_id
+  );
 
   for (const userId of userIds) {
     if (userId === currentUserId) continue;
@@ -75,11 +153,102 @@ async function addOrgParticipants(
   return {};
 }
 
-async function syncDealRoomParticipants(
+async function ensureUserOnCreatorContractDealRooms(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
-  conversationId: string
-): Promise<{ error?: string }> {
-  return addOrgParticipants(supabase, conversationId);
+  organizationId: string,
+  userId: string,
+  creatorId: string
+): Promise<{ error?: string; synced?: number }> {
+  const { data: contracts } = await supabase
+    .from("contracts")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("creator_id", creatorId);
+
+  if (!contracts?.length) return { synced: 0 };
+
+  const contractIds = contracts.map((row) => row.id);
+  const { data: conversations } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("type", "contract")
+    .in("related_id", contractIds);
+
+  let synced = 0;
+  for (const conversation of conversations ?? []) {
+    const result = await ensureParticipant(
+      supabase,
+      conversation.id,
+      userId
+    );
+    if (result.error) return result;
+    synced += 1;
+  }
+
+  return { synced };
+}
+
+export async function syncPortalUserToContractDealRooms(
+  creatorId: string,
+  organizationIdOverride?: string
+): Promise<{ error?: string; synced?: number }> {
+  const messagingError = await requireMessagingAccess();
+  if (messagingError) return messagingError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
+  const membership = await getCurrentUserMembership();
+  if (!membership || !isPortalRole(membership.role)) {
+    return { error: "Only portal users can sync contract deal rooms." };
+  }
+  if (membership.linkedCreatorId !== creatorId) {
+    return { error: "You do not have access to this creator's deal rooms." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId =
+    organizationIdOverride ?? (await getOrganizationId());
+  if (!organizationId) return { error: "Organization not found." };
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated." };
+
+  const result = await ensureUserOnCreatorContractDealRooms(
+    supabase,
+    organizationId,
+    currentUserId,
+    creatorId
+  );
+  if (result.error) return result;
+
+  revalidatePath("/messages");
+  revalidatePath("/portal");
+  return result;
+}
+
+export async function bootstrapPortalUserContractDealRooms(
+  organizationId: string,
+  userId: string,
+  creatorId: string
+): Promise<{ error?: string; synced?: number }> {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const result = await ensureUserOnCreatorContractDealRooms(
+    supabase,
+    organizationId,
+    userId,
+    creatorId
+  );
+  if (result.error) return result;
+
+  revalidatePath("/messages");
+  revalidatePath("/portal");
+  return result;
 }
 
 function validateOrgMemberIds(
@@ -179,8 +348,8 @@ export async function notifyDealRoom(conversationId: string, content: string) {
 }
 
 export async function getOrCreateDirectConversation(otherUserId: string) {
-  const permError = await requireWriteAccess();
-  if (permError) return permError;
+  const messagingError = await requireMessagingAccess();
+  if (messagingError) return messagingError;
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");
   if (featureError) return featureError;
@@ -199,8 +368,18 @@ export async function getOrCreateDirectConversation(otherUserId: string) {
   }
 
   const orgUsers = await getOrganizationUsers();
-  if (!orgUsers.some((user) => user.userId === otherUserId)) {
+  const otherUser = orgUsers.find((user) => user.userId === otherUserId);
+  if (!otherUser) {
     return { error: "User is not in your organization." };
+  }
+
+  const membership = await getCurrentUserMembership();
+  if (
+    membership &&
+    isPortalRole(membership.role) &&
+    isPortalRole(otherUser.role as TeamRole)
+  ) {
+    return { error: "Portal users can only message agency staff." };
   }
 
   const { data: directConversations } = await supabase
@@ -261,6 +440,11 @@ export async function createGroupConversation(
 ) {
   const trimmedTitle = title.trim();
   if (!trimmedTitle) return { error: "Group name is required." };
+
+  const role = (await getCurrentUserMembership())?.role ?? null;
+  if (isPortalRole(role)) {
+    return { error: "Portal users cannot create group chats." };
+  }
 
   const permError = await requireWriteAccess();
   if (permError) return permError;
@@ -555,8 +739,20 @@ export async function getOrCreateRelatedConversation(
   type: Exclude<ConversationType, "direct" | "group">,
   relatedId: string
 ) {
-  const permError = await requireWriteAccess();
-  if (permError) return permError;
+  const membership = await getCurrentUserMembership();
+  if (!membership) return { error: "Not authenticated." };
+
+  if (isPortalRole(membership.role)) {
+    if (type !== "contract") {
+      return { error: "You do not have permission to open this deal room." };
+    }
+
+    const messagingError = await requireMessagingAccess();
+    if (messagingError) return messagingError;
+  } else {
+    const permError = await requireWriteAccess();
+    if (permError) return permError;
+  }
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");
   if (featureError) return featureError;
@@ -570,18 +766,39 @@ export async function getOrCreateRelatedConversation(
   const currentUserId = await getCurrentUserId();
   if (!currentUserId) return { error: "Not authenticated." };
 
-  const table = type === "opportunity" ? "opportunities" : "contracts";
-  const titleField = type === "opportunity" ? "title" : "contract_name";
+  let relatedTitle = "";
+  if (type === "contract") {
+    const { data: contract } = await supabase
+      .from("contracts")
+      .select("id, contract_name, creator_id")
+      .eq("id", relatedId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
 
-  const { data: related } = await supabase
-    .from(table)
-    .select(`id, ${titleField}`)
-    .eq("id", relatedId)
-    .eq("organization_id", organizationId)
-    .maybeSingle();
+    if (!contract) {
+      return { error: "Contract not found." };
+    }
 
-  if (!related) {
-    return { error: `${type === "opportunity" ? "Opportunity" : "Contract"} not found.` };
+    if (isPortalRole(membership.role)) {
+      if (!(await canAccessContract({ creatorId: contract.creator_id }))) {
+        return { error: "You do not have permission to open this deal room." };
+      }
+    }
+
+    relatedTitle = contract.contract_name;
+  } else {
+    const { data: opportunity } = await supabase
+      .from("opportunities")
+      .select("id, title")
+      .eq("id", relatedId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!opportunity) {
+      return { error: "Opportunity not found." };
+    }
+
+    relatedTitle = opportunity.title;
   }
 
   const existingId = await findConversationByRelated(type, relatedId);
@@ -615,10 +832,10 @@ export async function getOrCreateRelatedConversation(
     return { error: error?.message ?? "Failed to create conversation." };
   }
 
-  const participantsResult = await addOrgParticipants(supabase, created.id);
+  const participantsResult = await syncDealRoomParticipants(supabase, created.id);
   if (participantsResult.error) return { error: participantsResult.error };
 
-  const title = (related as Record<string, string>)[titleField];
+  const title = relatedTitle;
 
   await postConversationSystemEvent(
     supabase,

@@ -17,6 +17,7 @@ interface StartConversationModalProps {
   onClose: () => void;
   users: OrgUser[];
   currentUserId: string;
+  isPortalUser?: boolean;
 }
 
 export function StartConversationModal({
@@ -24,6 +25,7 @@ export function StartConversationModal({
   onClose,
   users,
   currentUserId,
+  isPortalUser = false,
 }: StartConversationModalProps) {
   const router = useRouter();
   const [mode, setMode] = useState<StartMode>("direct");
@@ -86,7 +88,9 @@ export function StartConversationModal({
           )}
 
           <div className="flex rounded-xl border border-white/[0.08] p-1">
-            {(["direct", "group"] as const).map((option) => (
+            {(["direct", "group"] as const)
+              .filter((option) => !isPortalUser || option === "direct")
+              .map((option) => (
               <button
                 key={option}
                 type="button"
@@ -104,19 +108,25 @@ export function StartConversationModal({
 
           {recipients.length === 0 ? (
             <div className="space-y-2 text-sm text-gray-400">
-              <p>No other team members available yet.</p>
               <p>
-                Invite colleagues from the{" "}
-                <Link href="/team" className="text-accent-light hover:underline">
-                  Team page
-                </Link>{" "}
-                and have them accept the invitation before starting a conversation.
+                {isPortalUser
+                  ? "No agency contacts are available yet."
+                  : "No other team members available yet."}
               </p>
+              {!isPortalUser ? (
+                <p>
+                  Invite colleagues from the{" "}
+                  <Link href="/team" className="text-accent-light hover:underline">
+                    Team page
+                  </Link>{" "}
+                  and have them accept the invitation before starting a conversation.
+                </p>
+              ) : null}
             </div>
           ) : mode === "direct" ? (
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-300">
-                Team member
+                {isPortalUser ? "Agency contact" : "Team member"}
               </label>
               <select
                 value={selectedUserId}

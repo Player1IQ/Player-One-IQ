@@ -18,29 +18,42 @@ const selectClassName =
 
 type InboxFilter = "all" | "unread" | ConversationType;
 
-const quickFilters: Array<{ value: InboxFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "unread", label: "Unread" },
-  { value: "direct", label: conversationTypeLabels.direct },
-  { value: "group", label: conversationTypeLabels.group },
-  { value: "opportunity", label: "Opportunity" },
-  { value: "contract", label: conversationTypeLabels.contract },
-];
+function getQuickFilters(isPortalUser: boolean): Array<{ value: InboxFilter; label: string }> {
+  const filters: Array<{ value: InboxFilter; label: string }> = [
+    { value: "all", label: "All" },
+    { value: "unread", label: "Unread" },
+    { value: "direct", label: conversationTypeLabels.direct },
+  ];
+
+  if (!isPortalUser) {
+    filters.push(
+      { value: "group", label: conversationTypeLabels.group },
+      { value: "opportunity", label: "Opportunity" }
+    );
+  }
+
+  filters.push({ value: "contract", label: conversationTypeLabels.contract });
+  return filters;
+}
 
 interface MessagesInboxClientProps {
   conversations: Conversation[];
   users: OrgUser[];
   currentUserId: string;
+  isPortalUser?: boolean;
 }
 
 export function MessagesInboxClient({
   conversations,
   users,
   currentUserId,
+  isPortalUser = false,
 }: MessagesInboxClientProps) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<InboxFilter>("all");
   const [modalOpen, setModalOpen] = useState(false);
+
+  const quickFilters = getQuickFilters(isPortalUser);
 
   const totalUnread = conversations.reduce(
     (sum, conversation) => sum + conversation.unreadCount,
@@ -83,7 +96,7 @@ export function MessagesInboxClient({
           iconColor="text-emerald-400"
         />
         <MetricCard
-          title="Team Members"
+          title={isPortalUser ? "Agency Contacts" : "Team Members"}
           value={String(users.length)}
           icon={Users}
           iconColor="text-violet-400"
@@ -97,7 +110,9 @@ export function MessagesInboxClient({
               {totalUnread} unread message{totalUnread === 1 ? "" : "s"}
             </p>
             <p className="mt-0.5 text-xs text-gray-400">
-              Deal rooms and direct messages waiting for your reply.
+              {isPortalUser
+                ? "Direct messages and contract deal rooms waiting for your reply."
+                : "Deal rooms and direct messages waiting for your reply."}
             </p>
           </div>
           <button
@@ -134,7 +149,9 @@ export function MessagesInboxClient({
             <option value="all">All types</option>
             <option value="unread">Unread</option>
             <option value="direct">{conversationTypeLabels.direct}</option>
-            <option value="opportunity">{conversationTypeLabels.opportunity}</option>
+            {!isPortalUser ? (
+              <option value="opportunity">{conversationTypeLabels.opportunity}</option>
+            ) : null}
             <option value="contract">{conversationTypeLabels.contract}</option>
           </select>
           <Button type="button" onClick={() => setModalOpen(true)}>
@@ -175,7 +192,9 @@ export function MessagesInboxClient({
           }
           description={
             conversations.length === 0
-              ? "Start a direct message or open a deal room from an opportunity or contract."
+              ? isPortalUser
+                ? "Message your agency team or open a contract deal room from your contract details."
+                : "Start a direct message or open a deal room from an opportunity or contract."
               : "Try a different search or filter."
           }
           action={
@@ -312,6 +331,7 @@ export function MessagesInboxClient({
         onClose={() => setModalOpen(false)}
         users={users}
         currentUserId={currentUserId}
+        isPortalUser={isPortalUser}
       />
     </div>
   );
