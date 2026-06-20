@@ -11,6 +11,8 @@ import {
 import { getSearchIndex } from "@/lib/search/queries";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { getCurrentUserRole } from "@/lib/permissions";
+import { enforcePortalRouteAccess } from "@/lib/portal/guard";
+import { canAccessStaffDashboard } from "@/lib/team";
 import { hasAnyFeature } from "@/lib/subscription/features";
 import { ExportReportMenu } from "@/components/reports/ExportReportMenu";
 import { Calendar } from "lucide-react";
@@ -37,20 +39,26 @@ export async function DashboardLayout({
   description,
   headerActions,
 }: DashboardLayoutProps) {
-  const [searchIndex, subscriptionContext, organizations, activeOrganization, currentUserRole] =
+  await enforcePortalRouteAccess();
+
+  const currentUserRole = await getCurrentUserRole();
+  const isPortalUser = !canAccessStaffDashboard(currentUserRole);
+
+  const [searchIndex, subscriptionContext, organizations, activeOrganization] =
     await Promise.all([
-      getSearchIndex(),
+      isPortalUser ? Promise.resolve([]) : getSearchIndex(),
       getSubscriptionContext(),
       getUserOrganizations(),
       getOrganizationForUser(),
-      getCurrentUserRole(),
     ]);
 
   const messagingEnabled = subscriptionContext.features.has("messaging");
-  const canExportReports = hasAnyFeature(subscriptionContext.features, [
-    "advanced_analytics",
-    "monthly_reports",
-  ]);
+  const canExportReports =
+    !isPortalUser &&
+    hasAnyFeature(subscriptionContext.features, [
+      "advanced_analytics",
+      "monthly_reports",
+    ]);
 
   const header = (
     <header className="sticky top-0 z-20 hidden border-b border-white/[0.06] bg-surface/80 backdrop-blur-xl lg:block">
@@ -65,13 +73,17 @@ export async function DashboardLayout({
         </div>
         <div className="flex items-center gap-3">
           <MessageNotificationBell messagingEnabled={messagingEnabled} />
-          <GlobalSearch items={searchIndex} />
+          {!isPortalUser ? <GlobalSearch items={searchIndex} /> : null}
           {headerActions}
-          <div className="hidden items-center gap-2 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs text-gray-400 xl:flex">
-            <Calendar className="h-3.5 w-3.5" />
-            {formatWelcomeDate()}
-          </div>
-          <ExportReportMenu canExport={canExportReports} variant="header" />
+          {!isPortalUser ? (
+            <div className="hidden items-center gap-2 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs text-gray-400 xl:flex">
+              <Calendar className="h-3.5 w-3.5" />
+              {formatWelcomeDate()}
+            </div>
+          ) : null}
+          {!isPortalUser ? (
+            <ExportReportMenu canExport={canExportReports} variant="header" />
+          ) : null}
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400 ring-1 ring-emerald-500/20">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
             Live
@@ -93,7 +105,9 @@ export async function DashboardLayout({
         teamRole={currentUserRole}
         mobileTitle={title}
         mobileHeaderActions={
-          <ExportReportMenu canExport={canExportReports} variant="mobile" />
+          !isPortalUser ? (
+            <ExportReportMenu canExport={canExportReports} variant="mobile" />
+          ) : undefined
         }
         header={header}
       >

@@ -100,6 +100,23 @@ export async function canAccessContract(contract: {
   return hasReadAccess(membership.role, "contracts");
 }
 
+export async function canAccessCampaign(campaignId: string): Promise<boolean> {
+  const membership = await getCurrentUserMembership();
+  if (!membership) return false;
+
+  if (membership.role === "player") return false;
+
+  if (isPortalRole(membership.role)) {
+    if (!membership.linkedCreatorId) return false;
+    const { isCreatorAssignedToCampaign } = await import(
+      "@/lib/campaigns/creator-sync"
+    );
+    return isCreatorAssignedToCampaign(campaignId, membership.linkedCreatorId);
+  }
+
+  return hasReadAccess(membership.role, "campaigns");
+}
+
 export async function requireWriteAccess(): Promise<{ error: string } | null> {
   const role = await getCurrentUserRole();
   if (!canWriteData(role)) {

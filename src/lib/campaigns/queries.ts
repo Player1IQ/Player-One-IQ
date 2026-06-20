@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { getPortalCampaignFilter } from "@/lib/campaigns/creator-sync";
 import {
   mapCampaignRow,
   type SponsorCampaign,
@@ -19,11 +20,20 @@ export async function getCampaigns(): Promise<SponsorCampaign[]> {
   const organizationId = await getOrganizationId();
   if (!organizationId) return [];
 
-  const { data, error } = await supabase
+  const portalCampaignIds = await getPortalCampaignFilter();
+  if (portalCampaignIds && portalCampaignIds.length === 0) return [];
+
+  let query = supabase
     .from("sponsor_campaigns")
     .select(campaignSelect)
     .eq("organization_id", organizationId)
     .order("created_at", { ascending: false });
+
+  if (portalCampaignIds) {
+    query = query.in("id", portalCampaignIds);
+  }
+
+  const { data, error } = await query;
 
   if (error || !data) return [];
   return (data as SponsorCampaignRow[]).map(mapCampaignRow);
@@ -35,6 +45,9 @@ export async function getCampaignById(id: string): Promise<SponsorCampaign | nul
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return null;
+
+  const portalCampaignIds = await getPortalCampaignFilter();
+  if (portalCampaignIds && !portalCampaignIds.includes(id)) return null;
 
   const { data, error } = await supabase
     .from("sponsor_campaigns")
@@ -50,19 +63,6 @@ export async function getCampaignById(id: string): Promise<SponsorCampaign | nul
 export async function getCampaignsBySponsor(
   sponsorId: string
 ): Promise<SponsorCampaign[]> {
-  const supabase = await createClient();
-  if (!supabase) return [];
-
-  const organizationId = await getOrganizationId();
-  if (!organizationId) return [];
-
-  const { data, error } = await supabase
-    .from("sponsor_campaigns")
-    .select(campaignSelect)
-    .eq("organization_id", organizationId)
-    .eq("sponsor_id", sponsorId)
-    .order("created_at", { ascending: false });
-
-  if (error || !data) return [];
-  return (data as SponsorCampaignRow[]).map(mapCampaignRow);
+  const campaigns = await getCampaigns();
+  return campaigns.filter((campaign) => campaign.sponsorId === sponsorId);
 }

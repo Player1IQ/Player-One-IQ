@@ -23,10 +23,13 @@ import {
 } from "@/lib/campaigns";
 import type { Sponsor } from "@/lib/sponsors";
 import type { Opportunity } from "@/lib/opportunities";
+import type { Creator } from "@/lib/creators";
+import type { CampaignCreatorAssignment } from "@/lib/campaigns/assignments";
 import {
   deleteCampaign,
   updateCampaignStatus,
 } from "@/app/campaigns/actions";
+import { CampaignCreatorsPanel } from "./CampaignCreatorsPanel";
 import { CampaignStatusBadge } from "./CampaignStatusBadge";
 import { CampaignFormModal } from "./CampaignFormModal";
 import { Button } from "@/components/ui/Button";
@@ -35,14 +38,20 @@ interface CampaignDetailProps {
   campaign: SponsorCampaign;
   sponsors: Sponsor[];
   opportunities: Opportunity[];
+  assignments: CampaignCreatorAssignment[];
+  creators: Creator[];
   canWrite?: boolean;
+  canManageCreators?: boolean;
 }
 
 export function CampaignDetail({
   campaign,
   sponsors,
   opportunities,
+  assignments,
+  creators,
   canWrite = true,
+  canManageCreators = false,
 }: CampaignDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -258,6 +267,13 @@ export function CampaignDetail({
             </p>
           </section>
         ) : null}
+
+        <CampaignCreatorsPanel
+          campaignId={campaign.id}
+          assignments={assignments}
+          creators={creators}
+          canManage={canManageCreators}
+        />
       </div>
 
       {canWrite ? (

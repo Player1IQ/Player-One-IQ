@@ -2,10 +2,16 @@ import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CampaignDetail } from "@/components/campaigns/CampaignDetail";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
+import { getCampaignCreators } from "@/lib/campaigns/creator-sync";
 import { getCampaignById } from "@/lib/campaigns/queries";
+import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
 import { getOpportunities } from "@/lib/opportunities/queries";
-import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import {
+  canAccessCampaign,
+  canWriteData,
+  getCurrentUserRole,
+} from "@/lib/permissions";
 
 interface CampaignDetailPageProps {
   params: Promise<{ id: string }>;
@@ -15,16 +21,23 @@ export default async function CampaignDetailPage({
   params,
 }: CampaignDetailPageProps) {
   const { id } = await params;
-  const [campaign, sponsors, opportunities, role] = await Promise.all([
+  const [campaign, sponsors, opportunities, role, hasAccess] = await Promise.all([
     getCampaignById(id),
     getSponsors(),
     getOpportunities(),
     getCurrentUserRole(),
+    canAccessCampaign(id),
   ]);
 
-  if (!campaign) {
+  if (!campaign || !hasAccess) {
     notFound();
   }
+
+  const canWrite = canWriteData(role);
+  const [assignments, creators] = await Promise.all([
+    getCampaignCreators(id),
+    canWrite ? getCreators() : Promise.resolve([]),
+  ]);
 
   return (
     <DashboardLayout title={campaign.name} description={campaign.sponsorName}>
@@ -36,7 +49,10 @@ export default async function CampaignDetailPage({
           campaign={campaign}
           sponsors={sponsors}
           opportunities={opportunities}
-          canWrite={canWriteData(role)}
+          assignments={assignments}
+          creators={creators}
+          canWrite={canWrite}
+          canManageCreators={canWrite}
         />
       </SubscriptionPageGate>
     </DashboardLayout>

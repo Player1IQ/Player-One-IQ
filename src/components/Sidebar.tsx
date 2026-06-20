@@ -120,7 +120,12 @@ export function Sidebar({
           const isActive =
             item.href === "/"
               ? pathname === "/"
-              : pathname.startsWith(item.href);
+              : item.href === "/portal"
+                ? pathname === "/portal"
+                : item.href === "/portal/profile"
+                  ? pathname.startsWith("/creators/") ||
+                    pathname === "/portal/profile"
+                  : pathname.startsWith(item.href);
           const Icon = navIcons[item.icon];
 
           return (

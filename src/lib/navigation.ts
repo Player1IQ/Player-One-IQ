@@ -90,7 +90,8 @@ export const navItems: NavItem[] = [
 ];
 
 export const portalNavItems: NavItem[] = [
-  { label: "My Profile", href: "/portal", icon: "users" },
+  { label: "Home", href: "/portal", icon: "dashboard" },
+  { label: "My Profile", href: "/portal/profile", icon: "users" },
   {
     label: "Contracts",
     href: "/contracts",
@@ -104,7 +105,7 @@ export const portalNavItems: NavItem[] = [
     showUnreadBadge: true,
     requiredFeature: navFeatureRequirements["/messages"],
   },
-  { label: "Settings", href: "/settings", icon: "settings" },
+  { label: "Account", href: "/portal/account", icon: "settings" },
 ];
 
 export function getAccessibleNavItems(
@@ -117,12 +118,14 @@ export function getAccessibleNavItems(
   if (role === "content_creator" && !canAccessStaffDashboard(role)) {
     const campaignsItem = navItems.find((item) => item.href === "/campaigns");
     if (campaignsItem && !items.some((item) => item.href === "/campaigns")) {
-      items = [
-        items[0],
-        items[1],
-        campaignsItem,
-        ...items.slice(2),
-      ];
+      const messagesIndex = items.findIndex((item) => item.href === "/messages");
+      if (messagesIndex >= 0) {
+        items = [
+          ...items.slice(0, messagesIndex),
+          campaignsItem,
+          ...items.slice(messagesIndex),
+        ];
+      }
     }
   }
 

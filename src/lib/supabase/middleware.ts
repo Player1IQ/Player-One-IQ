@@ -1,6 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "./config";
+import {
+  getPortalRedirectPath,
+  isPathAllowedForPortalUser,
+  PORTAL_HOME,
+} from "@/lib/portal/paths";
+import type { TeamRole } from "@/lib/team";
+
+export const ACTIVE_ORGANIZATION_COOKIE = "poiq_active_org";
 
 const PUBLIC_ROUTES = [
   "/login",
@@ -113,10 +121,79 @@ export async function updateSession(request: NextRequest) {
       (isOrgSetup || AUTH_ONLY_ROUTES.includes(pathname))
     ) {
       const url = request.nextUrl.clone();
-      url.pathname = "/";
+      const activeOrgId =
+        request.cookies.get(ACTIVE_ORGANIZATION_COOKIE)?.value ??
+        organization?.id ??
+        memberships?.[0]?.organization_id ??
+        null;
+
+      let redirectPath = "/";
+
+      if (activeOrgId) {
+        const isOwner = Boolean(organization && organization.id === activeOrgId);
+        let role: TeamRole | null = isOwner ? "owner" : null;
+
+        if (!role) {
+          const { data: member } = await supabase
+            .from("team_members")
+            .select("role")
+            .eq("user_id", user.id)
+            .eq("organization_id", activeOrgId)
+            .eq("status", "active")
+            .maybeSingle();
+
+          role = (member?.role as TeamRole | undefined) ?? null;
+        }
+
+        if (role === "player" || role === "content_creator") {
+          redirectPath = PORTAL_HOME;
+        }
+      }
+
+      url.pathname = redirectPath;
       return NextResponse.redirect(url);
+    }
+
+    const activeOrgId =
+      request.cookies.get(ACTIVE_ORGANIZATION_COOKIE)?.value ??
+      organization?.id ??
+      memberships?.[0]?.organization_id ??
+      null;
+
+    if (activeOrgId && !isPublicRoute && !isOrgSetup && !isInviteRoute) {
+      const isOwner = Boolean(organization && organization.id === activeOrgId);
+      let role: TeamRole | null = isOwner ? "owner" : null;
+      let linkedCreatorId: string | null = null;
+
+      if (!role) {
+        const { data: member } = await supabase
+          .from("team_members")
+          .select("role, linked_creator_id")
+          .eq("user_id", user.id)
+          .eq("organization_id", activeOrgId)
+          .eq("status", "active")
+          .maybeSingle();
+
+        role = (member?.role as TeamRole | undefined) ?? null;
+        linkedCreatorId = member?.linked_creator_id ?? null;
+      }
+
+      if (role === "player" || role === "content_creator") {
+        if (!isPathAllowedForPortalUser(pathname, role, linkedCreatorId)) {
+          const url = request.nextUrl.clone();
+          url.pathname = getPortalRedirectPath(pathname, linkedCreatorId);
+          return NextResponse.redirect(url);
+        }
+
+        if (pathname === "/") {
+          const url = request.nextUrl.clone();
+          url.pathname = PORTAL_HOME;
+          return NextResponse.redirect(url);
+        }
+      }
     }
   }
 
+  supabaseResponse.headers.set("x-pathname", pathname);
   return supabaseResponse;
 }

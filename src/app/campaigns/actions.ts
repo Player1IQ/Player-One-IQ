@@ -13,6 +13,7 @@ import {
   campaignStatuses,
 } from "@/lib/campaigns";
 import { getUsageMetricCount, incrementUsageMetric } from "@/lib/subscription/usage";
+import { syncInferredCampaignCreators } from "@/lib/campaigns/creator-sync";
 
 function validateInput(input: CampaignInput) {
   if (!input.name.trim()) return "Campaign name is required.";
@@ -126,6 +127,14 @@ export async function createCampaign(input: CampaignInput) {
 
   if (insertError) return { error: insertError.message };
 
+  await syncInferredCampaignCreators(
+    supabase,
+    organizationId,
+    data.id,
+    input.sponsorId,
+    input.relatedOpportunityId
+  );
+
   await incrementUsageMetric("campaigns");
 
   revalidatePath("/campaigns");
@@ -179,6 +188,14 @@ export async function updateCampaign(id: string, input: CampaignInput) {
     .eq("organization_id", organizationId);
 
   if (updateError) return { error: updateError.message };
+
+  await syncInferredCampaignCreators(
+    supabase,
+    organizationId,
+    id,
+    input.sponsorId,
+    input.relatedOpportunityId
+  );
 
   revalidatePath("/campaigns");
   revalidatePath(`/campaigns/${id}`);
@@ -278,4 +295,92 @@ export async function deleteCampaign(id: string) {
     revalidatePath(`/sponsors/${existing.sponsor_id}`);
   }
   return { success: true };
+}
+
+export async function assignCampaignCreator(
+  campaignId: string,
+  creatorId: string
+) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess(
+    "campaign_tracking",
+    "Campaign tracking"
+  );
+  if (featureError) return featureError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: campaign } = await supabase
+    .from("sponsor_campaigns")
+    .select("id")
+    .eq("id", campaignId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!campaign) return { error: "Campaign not found." };
+
+  const { data: creator } = await supabase
+    .from("creators")
+    .select("id")
+    .eq("id", creatorId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!creator) return { error: "Creator not found." };
+
+  const { error } = await supabase.from("sponsor_campaign_creators").upsert(
+    {
+      campaign_id: campaignId,
+      creator_id: creatorId,
+      organization_id: organizationId,
+    },
+    { onConflict: "campaign_id,creator_id" }
+  );
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/campaigns");
+  revalidatePath(`/campaigns/${campaignId}`);
+  revalidatePath("/portal");
+  return { success: true as const };
+}
+
+export async function removeCampaignCreator(
+  campaignId: string,
+  creatorId: string
+) {
+  const permError = await requireWriteAccess();
+  if (permError) return permError;
+
+  const featureError = await requireFeatureAccess(
+    "campaign_tracking",
+    "Campaign tracking"
+  );
+  if (featureError) return featureError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { error } = await supabase
+    .from("sponsor_campaign_creators")
+    .delete()
+    .eq("organization_id", organizationId)
+    .eq("campaign_id", campaignId)
+    .eq("creator_id", creatorId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/campaigns");
+  revalidatePath(`/campaigns/${campaignId}`);
+  revalidatePath("/portal");
+  return { success: true as const };
 }
