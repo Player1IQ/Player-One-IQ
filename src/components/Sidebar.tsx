@@ -68,7 +68,9 @@ export function Sidebar({
     return getAccessibleNavItems(features, teamRole);
   }, [enabledFeatures, teamRole]);
   const showBillingCta =
-    teamRole !== "player" && teamRole !== "content_creator";
+    teamRole !== "player" &&
+    teamRole !== "content_creator" &&
+    teamRole !== "sponsor";
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-white/[0.06] bg-surface-raised/95 backdrop-blur-xl">

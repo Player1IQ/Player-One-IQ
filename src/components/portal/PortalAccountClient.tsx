@@ -9,16 +9,16 @@ interface PortalAccountClientProps {
   organizationName: string;
   roleLabel: string;
   email: string;
-  creatorName: string;
-  creatorId: string;
+  profileLabel: string;
+  profileHref: string;
 }
 
 export function PortalAccountClient({
   organizationName,
   roleLabel,
   email,
-  creatorName,
-  creatorId,
+  profileLabel,
+  profileHref,
 }: PortalAccountClientProps) {
   return (
     <div className="mx-auto max-w-2xl space-y-6 animate-fade-in">
@@ -64,10 +64,10 @@ export function PortalAccountClient({
               Linked profile
             </div>
             <Link
-              href={`/creators/${creatorId}`}
+              href={profileHref}
               className="mt-1 inline-flex text-sm font-medium text-accent-light hover:text-white"
             >
-              {creatorName}
+              {profileLabel}
             </Link>
           </div>
         </CardContent>

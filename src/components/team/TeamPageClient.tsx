@@ -28,9 +28,12 @@ const quickFilters: Array<{ value: TeamStatusFilter; label: string }> = [
   { value: "pending", label: "Pending invites" },
 ];
 
+import type { Sponsor } from "@/lib/sponsors";
+
 interface TeamPageClientProps {
   members: TeamMember[];
   creators: Creator[];
+  sponsors: Sponsor[];
   canManageTeam: boolean;
   currentUserRole: TeamRole | null;
 }
@@ -38,6 +41,7 @@ interface TeamPageClientProps {
 export function TeamPageClient({
   members,
   creators,
+  sponsors,
   canManageTeam,
   currentUserRole,
 }: TeamPageClientProps) {
@@ -226,6 +230,7 @@ export function TeamPageClient({
           <TeamTable
             members={filtered}
             creators={creators}
+            sponsors={sponsors}
             canManageTeam={canManageTeam}
             currentUserRole={currentUserRole}
           />
@@ -237,6 +242,7 @@ export function TeamPageClient({
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           creators={creators}
+          sponsors={sponsors}
         />
       ) : null}
     </div>

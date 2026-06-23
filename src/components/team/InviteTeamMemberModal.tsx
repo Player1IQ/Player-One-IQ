@@ -8,21 +8,26 @@ import type { Creator } from "@/lib/creators";
 import { inviteTeamMember } from "@/app/team/actions";
 import { RoleSelectFields } from "./RoleSelectFields";
 
+import type { Sponsor } from "@/lib/sponsors";
+
 interface InviteTeamMemberModalProps {
   open: boolean;
   onClose: () => void;
   creators: Creator[];
+  sponsors: Sponsor[];
 }
 
 export function InviteTeamMemberModal({
   open,
   onClose,
   creators,
+  sponsors,
 }: InviteTeamMemberModalProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<TeamRole>("viewer");
   const [linkedCreatorId, setLinkedCreatorId] = useState("");
+  const [linkedSponsorId, setLinkedSponsorId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [inviteLink, setInviteLink] = useState("");
@@ -36,6 +41,7 @@ export function InviteTeamMemberModal({
     setEmail("");
     setRole("viewer");
     setLinkedCreatorId("");
+    setLinkedSponsorId("");
     setError("");
     setInviteLink("");
     setEmailSent(false);
@@ -52,7 +58,8 @@ export function InviteTeamMemberModal({
     const result = await inviteTeamMember(
       email,
       role,
-      linkedCreatorId || null
+      linkedCreatorId || null,
+      linkedSponsorId || null
     );
 
     if ("error" in result && result.error) {
@@ -172,7 +179,10 @@ export function InviteTeamMemberModal({
               onRoleChange={setRole}
               linkedCreatorId={linkedCreatorId}
               onLinkedCreatorChange={setLinkedCreatorId}
+              linkedSponsorId={linkedSponsorId}
+              onLinkedSponsorChange={setLinkedSponsorId}
               creators={creators}
+              sponsors={sponsors}
             />
 
             <div className="flex justify-end gap-3 pt-2">

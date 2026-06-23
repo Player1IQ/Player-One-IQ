@@ -18,8 +18,10 @@ import {
   permissions,
   roleLabels,
   requiresLinkedCreator,
+  requiresLinkedSponsor,
 } from "@/lib/team";
 import type { Creator } from "@/lib/creators";
+import type { Sponsor } from "@/lib/sponsors";
 import { removeTeamMember } from "@/app/team/actions";
 import { TeamMemberAvatar } from "./TeamMemberAvatar";
 import { RoleBadge } from "./RoleBadge";
@@ -33,6 +35,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 interface TeamMemberProfileProps {
   member: TeamMember;
   creators: Creator[];
+  sponsors: Sponsor[];
   canManageTeam: boolean;
   currentUserRole: TeamRole | null;
 }
@@ -60,6 +63,7 @@ function Section({
 export function TeamMemberProfile({
   member,
   creators,
+  sponsors,
   canManageTeam,
   currentUserRole,
 }: TeamMemberProfileProps) {
@@ -78,6 +82,9 @@ export function TeamMemberProfile({
   ).length;
   const linkedCreatorName = member.linkedCreatorId
     ? creators.find((c) => c.id === member.linkedCreatorId)?.name
+    : null;
+  const linkedSponsorName = member.linkedSponsorId
+    ? sponsors.find((s) => s.id === member.linkedSponsorId)?.companyName
     : null;
 
   async function handleRemove() {
@@ -206,6 +213,17 @@ export function TeamMemberProfile({
               </p>
             </div>
           ) : null}
+          {requiresLinkedSponsor(member.role) ? (
+            <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-4 backdrop-blur-sm sm:col-span-2">
+              <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+                <Shield className="h-3.5 w-3.5" />
+                Linked sponsor company
+              </div>
+              <p className="mt-2 text-sm font-medium text-white">
+                {linkedSponsorName ?? "Not linked"}
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <Section
@@ -263,6 +281,7 @@ export function TeamMemberProfile({
         member={member}
         currentUserRole={currentUserRole}
         creators={creators}
+        sponsors={sponsors}
       />
     </>
   );

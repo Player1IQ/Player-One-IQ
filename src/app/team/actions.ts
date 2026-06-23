@@ -18,7 +18,8 @@ import {
   invitableRoles,
   roleLabels,
   requiresLinkedCreator,
-  isPortalRole,
+  requiresLinkedSponsor,
+  isCreatorPortalRole,
 } from "@/lib/team";
 
 async function requireTeamFeature() {
@@ -68,7 +69,8 @@ async function logTeamActivity(
 export async function inviteTeamMember(
   email: string,
   role: TeamRole,
-  linkedCreatorId?: string | null
+  linkedCreatorId?: string | null,
+  linkedSponsorId?: string | null
 ) {
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
@@ -84,8 +86,12 @@ export async function inviteTeamMember(
   if (!normalizedEmail) return { error: "Email is required." };
 
   const normalizedLinkedCreatorId = linkedCreatorId?.trim() || null;
+  const normalizedLinkedSponsorId = linkedSponsorId?.trim() || null;
   if (requiresLinkedCreator(role) && !normalizedLinkedCreatorId) {
     return { error: "Portal roles must be linked to a roster profile." };
+  }
+  if (requiresLinkedSponsor(role) && !normalizedLinkedSponsorId) {
+    return { error: "Sponsor portal roles must be linked to a sponsor company." };
   }
 
   const supabase = await createClient();
@@ -152,13 +158,31 @@ export async function inviteTeamMember(
     }
   }
 
+  if (normalizedLinkedSponsorId) {
+    const { data: sponsor } = await supabase
+      .from("sponsors")
+      .select("id")
+      .eq("id", normalizedLinkedSponsorId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!sponsor) {
+      return { error: "Selected sponsor company was not found." };
+    }
+  }
+
   const { data, error } = await supabase
     .from("team_invitations")
     .insert({
       organization_id: organizationId,
       email: normalizedEmail,
       role,
-      linked_creator_id: normalizedLinkedCreatorId,
+      linked_creator_id: requiresLinkedCreator(role)
+        ? normalizedLinkedCreatorId
+        : null,
+      linked_sponsor_id: requiresLinkedSponsor(role)
+        ? normalizedLinkedSponsorId
+        : null,
       invited_by: user.id,
     })
     .select("token")
@@ -194,7 +218,8 @@ export async function inviteTeamMember(
 export async function updateTeamMemberRole(
   memberId: string,
   role: TeamRole,
-  linkedCreatorId?: string | null
+  linkedCreatorId?: string | null,
+  linkedSponsorId?: string | null
 ) {
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
@@ -221,8 +246,12 @@ export async function updateTeamMemberRole(
   if (!organizationId) return { error: "Organization not found." };
 
   const normalizedLinkedCreatorId = linkedCreatorId?.trim() || null;
+  const normalizedLinkedSponsorId = linkedSponsorId?.trim() || null;
   if (requiresLinkedCreator(role) && !normalizedLinkedCreatorId) {
     return { error: "Portal roles must be linked to a roster profile." };
+  }
+  if (requiresLinkedSponsor(role) && !normalizedLinkedSponsorId) {
+    return { error: "Sponsor portal roles must be linked to a sponsor company." };
   }
 
   const { data: member, error: fetchError } = await supabase
@@ -257,12 +286,28 @@ export async function updateTeamMemberRole(
     }
   }
 
+  if (normalizedLinkedSponsorId) {
+    const { data: sponsor } = await supabase
+      .from("sponsors")
+      .select("id")
+      .eq("id", normalizedLinkedSponsorId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (!sponsor) {
+      return { error: "Selected sponsor company was not found." };
+    }
+  }
+
   const { error: updateError } = await supabase
     .from("team_members")
     .update({
       role,
       linked_creator_id: requiresLinkedCreator(role)
         ? normalizedLinkedCreatorId
+        : null,
+      linked_sponsor_id: requiresLinkedSponsor(role)
+        ? normalizedLinkedSponsorId
         : null,
       updated_at: new Date().toISOString(),
     })
@@ -513,6 +558,7 @@ export async function acceptInvitation(token: string) {
       email: user.email.toLowerCase(),
       role: invite.role,
       linked_creator_id: invite.linked_creator_id ?? null,
+      linked_sponsor_id: invite.linked_sponsor_id ?? null,
       status: "active",
       invited_by: invite.invited_by,
       joined_at: new Date().toISOString(),
@@ -532,7 +578,7 @@ export async function acceptInvitation(token: string) {
   if (updateError) return { error: updateError.message };
 
   if (
-    isPortalRole(invite.role as TeamRole) &&
+    isCreatorPortalRole(invite.role as TeamRole) &&
     invite.linked_creator_id
   ) {
     await bootstrapPortalUserContractDealRooms(

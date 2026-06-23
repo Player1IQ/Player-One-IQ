@@ -1,10 +1,14 @@
 import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PortalHomeClient } from "@/components/portal/PortalHomeClient";
+import { PortalSponsorHomeClient } from "@/components/portal/PortalSponsorHomeClient";
 import { PortalNoProfileClient } from "@/components/portal/PortalNoProfileClient";
 import { getCampaigns } from "@/lib/campaigns/queries";
 import { getCreatorById } from "@/lib/creators/queries";
-import { getPortalDeliverableMetrics } from "@/lib/contract-deliverables/queries";
+import {
+  getPortalDeliverableMetrics,
+  getSponsorPortalDeliverableMetrics,
+} from "@/lib/contract-deliverables/queries";
 import { getContracts } from "@/lib/contracts/queries";
 import { getUnreadMessageCount } from "@/lib/messages/queries";
 import {
@@ -13,7 +17,12 @@ import {
 } from "@/lib/opportunities/queries";
 import { getApplicationStats } from "@/lib/opportunities";
 import { getOrganizationForUser } from "@/lib/organization/queries";
-import { roleLabels, isPortalRole } from "@/lib/team";
+import { getSponsorById } from "@/lib/sponsors/queries";
+import {
+  roleLabels,
+  isPortalRole,
+  isSponsorPortalRole,
+} from "@/lib/team";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
@@ -22,6 +31,62 @@ export default async function PortalHomePage() {
   const membership = await getCurrentUserMembership();
   if (!membership || !isPortalRole(membership.role)) {
     redirect("/");
+  }
+
+  if (isSponsorPortalRole(membership.role)) {
+    if (!membership.linkedSponsorId) {
+      return (
+        <DashboardLayout title="Portal" description="Your agency portal">
+          <PortalNoProfileClient
+            roleLabel={roleLabels[membership.role]}
+            variant="sponsor"
+          />
+        </DashboardLayout>
+      );
+    }
+
+    const [
+      sponsor,
+      contracts,
+      unreadMessages,
+      organization,
+      campaigns,
+      deliverableMetrics,
+      subscription,
+    ] = await Promise.all([
+      getSponsorById(membership.linkedSponsorId),
+      getContracts(),
+      getUnreadMessageCount(),
+      getOrganizationForUser(),
+      getCampaigns(),
+      getSponsorPortalDeliverableMetrics(membership.linkedSponsorId),
+      getSubscriptionContext(),
+    ]);
+
+    if (!sponsor) {
+      redirect("/");
+    }
+
+    const whiteLabelEnabled = hasFeature(subscription.features, "white_label");
+
+    return (
+      <DashboardLayout
+        title="Portal"
+        description={`Welcome back, ${sponsor.companyName}`}
+      >
+        <PortalSponsorHomeClient
+          sponsor={sponsor}
+          contracts={contracts}
+          unreadMessages={unreadMessages}
+          organizationName={organization?.name ?? "Your organization"}
+          organizationLogoUrl={organization?.logo_url ?? null}
+          whiteLabelEnabled={whiteLabelEnabled}
+          roleLabel={roleLabels[membership.role]}
+          campaignCount={campaigns.length}
+          deliverableMetrics={deliverableMetrics}
+        />
+      </DashboardLayout>
+    );
   }
 
   if (!membership.linkedCreatorId) {

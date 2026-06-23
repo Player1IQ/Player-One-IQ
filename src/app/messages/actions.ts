@@ -771,7 +771,7 @@ export async function getOrCreateRelatedConversation(
   if (type === "contract") {
     const { data: contract } = await supabase
       .from("contracts")
-      .select("id, contract_name, creator_id")
+      .select("id, contract_name, creator_id, sponsor_id")
       .eq("id", relatedId)
       .eq("organization_id", organizationId)
       .maybeSingle();
@@ -781,7 +781,12 @@ export async function getOrCreateRelatedConversation(
     }
 
     if (isPortalRole(membership.role)) {
-      if (!(await canAccessContract({ creatorId: contract.creator_id }))) {
+      if (
+        !(await canAccessContract({
+          creatorId: contract.creator_id,
+          sponsorId: contract.sponsor_id,
+        }))
+      ) {
         return { error: "You do not have permission to open this deal room." };
       }
     }

@@ -145,7 +145,7 @@ export async function updateSession(request: NextRequest) {
           role = (member?.role as TeamRole | undefined) ?? null;
         }
 
-        if (role === "player" || role === "content_creator") {
+        if (role === "player" || role === "content_creator" || role === "sponsor") {
           redirectPath = PORTAL_HOME;
         }
       }
@@ -164,11 +164,12 @@ export async function updateSession(request: NextRequest) {
       const isOwner = Boolean(organization && organization.id === activeOrgId);
       let role: TeamRole | null = isOwner ? "owner" : null;
       let linkedCreatorId: string | null = null;
+      let linkedSponsorId: string | null = null;
 
       if (!role) {
         const { data: member } = await supabase
           .from("team_members")
-          .select("role, linked_creator_id")
+          .select("role, linked_creator_id, linked_sponsor_id")
           .eq("user_id", user.id)
           .eq("organization_id", activeOrgId)
           .eq("status", "active")
@@ -176,12 +177,14 @@ export async function updateSession(request: NextRequest) {
 
         role = (member?.role as TeamRole | undefined) ?? null;
         linkedCreatorId = member?.linked_creator_id ?? null;
+        linkedSponsorId = member?.linked_sponsor_id ?? null;
       }
 
-      if (role === "player" || role === "content_creator") {
-        if (!isPathAllowedForPortalUser(pathname, role, linkedCreatorId)) {
+      if (role === "player" || role === "content_creator" || role === "sponsor") {
+        const portalContext = { linkedCreatorId, linkedSponsorId };
+        if (!isPathAllowedForPortalUser(pathname, role, portalContext)) {
           const url = request.nextUrl.clone();
-          url.pathname = getPortalRedirectPath(pathname, linkedCreatorId);
+          url.pathname = getPortalRedirectPath(pathname, portalContext);
           return NextResponse.redirect(url);
         }
 

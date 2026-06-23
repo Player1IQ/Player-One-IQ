@@ -6,11 +6,14 @@ import { getCreators } from "@/lib/creators/queries";
 import { getCurrentUserRole } from "@/lib/permissions";
 import { canManageTeam } from "@/lib/team";
 
+import { getSponsors } from "@/lib/sponsors/queries";
+
 export default async function TeamPage() {
-  const [members, currentUserRole, creators] = await Promise.all([
+  const [members, currentUserRole, creators, sponsors] = await Promise.all([
     getTeamMembers(),
     getCurrentUserRole(),
     getCreators(),
+    getSponsors(),
   ]);
 
   return (
@@ -22,6 +25,7 @@ export default async function TeamPage() {
         <TeamPageClient
           members={members}
           creators={creators}
+          sponsors={sponsors}
           canManageTeam={canManageTeam(currentUserRole)}
           currentUserRole={currentUserRole}
         />

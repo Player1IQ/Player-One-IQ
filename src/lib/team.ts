@@ -7,7 +7,8 @@ export type TeamRole =
   | "member"
   | "viewer"
   | "player"
-  | "content_creator";
+  | "content_creator"
+  | "sponsor";
 
 export type MemberStatus = "active" | "pending" | "inactive";
 
@@ -34,7 +35,9 @@ export const staffRoles: TeamRole[] = [
   "viewer",
 ];
 
-export const portalRoles: TeamRole[] = ["player", "content_creator"];
+export const creatorPortalRoles: TeamRole[] = ["player", "content_creator"];
+export const sponsorPortalRoles: TeamRole[] = ["sponsor"];
+export const portalRoles: TeamRole[] = [...creatorPortalRoles, ...sponsorPortalRoles];
 
 export const teamRoles: TeamRole[] = [...staffRoles, ...portalRoles];
 
@@ -50,6 +53,7 @@ export const invitableStaffRoles: Exclude<TeamRole, "owner">[] = [
 export const invitablePortalRoles: Exclude<TeamRole, "owner">[] = [
   "player",
   "content_creator",
+  "sponsor",
 ];
 
 export const invitableRoles: Exclude<TeamRole, "owner">[] = [
@@ -67,6 +71,7 @@ export const roleLabels: Record<TeamRole, string> = {
   viewer: "Viewer",
   player: "Player",
   content_creator: "Content Creator",
+  sponsor: "Sponsor Contact",
 };
 
 export const roleDescriptions: Record<TeamRole, string> = {
@@ -80,6 +85,8 @@ export const roleDescriptions: Record<TeamRole, string> = {
   player: "Portal access to own roster profile, contracts, and deliverables",
   content_creator:
     "Portal access to own profile, contracts, campaigns, opportunities, and content",
+  sponsor:
+    "Portal access to your company profile, contracts, campaigns, and deal rooms (read-only)",
 };
 
 export const memberStatusLabels: Record<MemberStatus, string> = {
@@ -245,6 +252,17 @@ export const permissionMatrix: Record<
     settings: "none",
     billing: "none",
   },
+  sponsor: {
+    creators: "none",
+    sponsors: "scoped",
+    contracts: "scoped",
+    opportunities: "none",
+    campaigns: "scoped",
+    messages: "read",
+    team: "none",
+    settings: "none",
+    billing: "none",
+  },
 };
 
 export interface TeamMemberRow {
@@ -255,6 +273,7 @@ export interface TeamMemberRow {
   role: TeamRole;
   status: "active" | "inactive";
   linked_creator_id: string | null;
+  linked_sponsor_id: string | null;
   invited_by: string | null;
   joined_at: string | null;
   created_at: string;
@@ -267,6 +286,7 @@ export interface TeamInvitationRow {
   email: string;
   role: Exclude<TeamRole, "owner">;
   linked_creator_id: string | null;
+  linked_sponsor_id: string | null;
   token: string;
   invited_by: string;
   status: "pending" | "accepted" | "revoked" | "expired";
@@ -286,6 +306,7 @@ export interface TeamMember {
   role: TeamRole;
   status: MemberStatus;
   linkedCreatorId: string | null;
+  linkedSponsorId: string | null;
   presenceStatus: PresenceStatus;
   avatarInitials: string;
   avatarColor: string;
@@ -356,6 +377,7 @@ export function mapTeamMemberRow(
     role: row.role,
     status: row.status,
     linkedCreatorId: row.linked_creator_id,
+    linkedSponsorId: row.linked_sponsor_id,
     presenceStatus,
     avatarInitials: getAvatarInitials(name, row.email),
     avatarColor: getAvatarColor(row.id),
@@ -376,6 +398,7 @@ export function mapInvitationRow(row: TeamInvitationRow): TeamMember {
     role: row.role,
     status: "pending",
     linkedCreatorId: row.linked_creator_id,
+    linkedSponsorId: row.linked_sponsor_id,
     presenceStatus: "inactive",
     avatarInitials: getAvatarInitials(name, row.email),
     avatarColor: getAvatarColor(row.id),
@@ -411,16 +434,33 @@ export function getRoleColor(role: TeamRole): string {
     viewer: "bg-gray-500/10 text-gray-400 ring-gray-500/20",
     player: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
     content_creator: "bg-orange-500/10 text-orange-400 ring-orange-500/20",
+    sponsor: "bg-teal-500/10 text-teal-400 ring-teal-500/20",
   };
   return colors[role];
 }
 
-export function isPortalRole(role: TeamRole | null): boolean {
+export function isCreatorPortalRole(role: TeamRole | null): boolean {
   return role === "player" || role === "content_creator";
 }
 
+export function isSponsorPortalRole(role: TeamRole | null): boolean {
+  return role === "sponsor";
+}
+
+export function isPortalRole(role: TeamRole | null): boolean {
+  return isCreatorPortalRole(role) || isSponsorPortalRole(role);
+}
+
 export function requiresLinkedCreator(role: TeamRole): boolean {
-  return isPortalRole(role);
+  return isCreatorPortalRole(role);
+}
+
+export function requiresLinkedSponsor(role: TeamRole): boolean {
+  return isSponsorPortalRole(role);
+}
+
+export function requiresPortalLink(role: TeamRole): boolean {
+  return requiresLinkedCreator(role) || requiresLinkedSponsor(role);
 }
 
 export function getPermissionLevel(

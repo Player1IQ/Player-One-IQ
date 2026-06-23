@@ -136,6 +136,50 @@ export async function getDeliverablesSummariesForContracts(
   return summaries;
 }
 
+export async function getSponsorPortalDeliverableMetrics(
+  sponsorId: string
+): Promise<PortalDeliverableMetrics> {
+  const empty: PortalDeliverableMetrics = {
+    openCount: 0,
+    overdueCount: 0,
+    nextDue: null,
+  };
+
+  const supabase = await createClient();
+  if (!supabase) return empty;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return empty;
+
+  const { data: contracts, error: contractsError } = await supabase
+    .from("contracts")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("sponsor_id", sponsorId);
+
+  if (contractsError || !contracts?.length) return empty;
+
+  const contractIds = contracts.map((c) => c.id);
+
+  const { data, error } = await supabase
+    .from("contract_deliverables")
+    .select(deliverableSelect)
+    .eq("organization_id", organizationId)
+    .in("contract_id", contractIds);
+
+  if (error || !data) return empty;
+
+  const deliverables = (data as ContractDeliverableRow[]).map(mapDeliverableRow);
+  const stats = getDeliverableStats(deliverables);
+  const summary = buildDeliverablesSummary(deliverables);
+
+  return {
+    openCount: stats.openCount,
+    overdueCount: stats.overdueCount,
+    nextDue: summary.nextDue,
+  };
+}
+
 export async function getPortalDeliverableMetrics(
   creatorId: string
 ): Promise<PortalDeliverableMetrics> {

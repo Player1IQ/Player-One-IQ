@@ -4,7 +4,13 @@ import {
   navFeatureRequirements,
 } from "@/lib/subscription/features";
 import type { FeatureKey } from "@/lib/subscription/types";
-import { canAccessStaffDashboard, hasReadAccess, type PermissionKey, type TeamRole } from "@/lib/team";
+import {
+  canAccessStaffDashboard,
+  hasReadAccess,
+  isSponsorPortalRole,
+  type PermissionKey,
+  type TeamRole,
+} from "@/lib/team";
 
 export type NavIconName =
   | "dashboard"
@@ -120,12 +126,41 @@ export const portalNavItems: NavItem[] = [
   { label: "Account", href: "/portal/account", icon: "settings" },
 ];
 
+export const sponsorPortalNavItems: NavItem[] = [
+  { label: "Home", href: "/portal", icon: "dashboard" },
+  { label: "Company", href: "/portal/profile", icon: "building" },
+  {
+    label: "Contracts",
+    href: "/contracts",
+    icon: "file-text",
+    requiredFeature: navFeatureRequirements["/contracts"],
+  },
+  {
+    label: "Campaigns",
+    href: "/campaigns",
+    icon: "target",
+    requiredFeature: navFeatureRequirements["/campaigns"],
+  },
+  {
+    label: "Messages",
+    href: "/messages",
+    icon: "message-square",
+    showUnreadBadge: true,
+    requiredFeature: navFeatureRequirements["/messages"],
+  },
+  { label: "Account", href: "/portal/account", icon: "settings" },
+];
+
 export function getAccessibleNavItems(
   features: Set<FeatureKey>,
   role?: TeamRole | null
 ): NavItem[] {
   let items =
-    role && !canAccessStaffDashboard(role) ? [...portalNavItems] : navItems;
+    role && isSponsorPortalRole(role)
+      ? [...sponsorPortalNavItems]
+      : role && !canAccessStaffDashboard(role)
+        ? [...portalNavItems]
+        : navItems;
 
   if (role === "content_creator" && !canAccessStaffDashboard(role)) {
     const campaignsItem = navItems.find((item) => item.href === "/campaigns");

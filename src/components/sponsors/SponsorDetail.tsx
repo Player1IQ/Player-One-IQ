@@ -39,6 +39,7 @@ interface SponsorDetailProps {
   campaigns?: SponsorCampaign[];
   canWrite?: boolean;
   canViewCampaigns?: boolean;
+  isPortalUser?: boolean;
 }
 
 function Section({
@@ -104,6 +105,7 @@ export function SponsorDetail({
   campaigns = [],
   canWrite = true,
   canViewCampaigns = false,
+  isPortalUser = false,
 }: SponsorDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -138,11 +140,11 @@ export function SponsorDetail({
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <Link
-            href="/sponsors"
+            href={isPortalUser ? "/portal" : "/sponsors"}
             className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Sponsors
+            {isPortalUser ? "Back to Portal" : "Back to Sponsors"}
           </Link>
           {canWrite && (
             <div className="flex gap-2">
@@ -354,7 +356,7 @@ export function SponsorDetail({
           />
         </Section>
 
-        {sponsor.internalNotes && (
+        {sponsor.internalNotes && !isPortalUser && (
           <Section
             title="Internal Notes"
             description="Confidential — visible to team members only"

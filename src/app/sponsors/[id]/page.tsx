@@ -4,7 +4,13 @@ import { SponsorDetail } from "@/components/sponsors/SponsorDetail";
 import { getSponsorById } from "@/lib/sponsors/queries";
 import { getContracts } from "@/lib/contracts/queries";
 import { getCampaignsBySponsor } from "@/lib/campaigns/queries";
-import { hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
+import {
+  canAccessSponsor,
+  hasFullAccess,
+  getCurrentUserMembership,
+  getCurrentUserRole,
+} from "@/lib/permissions";
+import { isPortalRole } from "@/lib/team";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 
@@ -16,6 +22,9 @@ export default async function SponsorDetailPage({
   params,
 }: SponsorDetailPageProps) {
   const { id } = await params;
+  const membership = await getCurrentUserMembership();
+  const isPortalUser = Boolean(membership && isPortalRole(membership.role));
+
   const [sponsor, role, contracts, subscription] = await Promise.all([
     getSponsorById(id),
     getCurrentUserRole(),
@@ -24,6 +33,10 @@ export default async function SponsorDetailPage({
   ]);
 
   if (!sponsor) {
+    notFound();
+  }
+
+  if (!(await canAccessSponsor(id))) {
     notFound();
   }
 
@@ -46,6 +59,7 @@ export default async function SponsorDetailPage({
         campaigns={campaigns}
         canWrite={hasFullAccess(role, "sponsors")}
         canViewCampaigns={canViewCampaigns}
+        isPortalUser={isPortalUser}
       />
     </DashboardLayout>
   );

@@ -27,10 +27,12 @@ import { ResendInviteModal } from "./ResendInviteModal";
 import { PresenceBadge } from "@/components/presence/PresenceBadge";
 
 import type { Creator } from "@/lib/creators";
+import type { Sponsor } from "@/lib/sponsors";
 
 interface TeamTableProps {
   members: TeamMember[];
   creators: Creator[];
+  sponsors: Sponsor[];
   canManageTeam: boolean;
   currentUserRole: TeamRole | null;
 }
@@ -48,6 +50,7 @@ const MENU_ESTIMATED_HEIGHT_PX = 220;
 export function TeamTable({
   members,
   creators,
+  sponsors,
   canManageTeam,
   currentUserRole,
 }: TeamTableProps) {
@@ -394,6 +397,7 @@ export function TeamTable({
         member={editingMember}
         currentUserRole={currentUserRole}
         creators={creators}
+        sponsors={sponsors}
       />
 
       <ResendInviteModal

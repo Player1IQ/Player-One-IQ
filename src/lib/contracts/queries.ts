@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { getCurrentUserMembership } from "@/lib/permissions";
-import { isPortalRole } from "@/lib/team";
+import {
+  isCreatorPortalRole,
+  isSponsorPortalRole,
+} from "@/lib/team";
 import {
   formatCurrency,
   mapContractRow,
@@ -30,9 +33,12 @@ export async function getContracts(): Promise<Contract[]> {
     .select(contractSelect)
     .eq("organization_id", organizationId);
 
-  if (membership && isPortalRole(membership.role)) {
+  if (membership && isCreatorPortalRole(membership.role)) {
     if (!membership.linkedCreatorId) return [];
     query = query.eq("creator_id", membership.linkedCreatorId);
+  } else if (membership && isSponsorPortalRole(membership.role)) {
+    if (!membership.linkedSponsorId) return [];
+    query = query.eq("sponsor_id", membership.linkedSponsorId);
   }
 
   const { data, error } = await query.order("created_at", { ascending: false });
@@ -56,9 +62,12 @@ export async function getContractById(id: string): Promise<Contract | null> {
     .eq("id", id)
     .eq("organization_id", organizationId);
 
-  if (membership && isPortalRole(membership.role)) {
+  if (membership && isCreatorPortalRole(membership.role)) {
     if (!membership.linkedCreatorId) return null;
     query = query.eq("creator_id", membership.linkedCreatorId);
+  } else if (membership && isSponsorPortalRole(membership.role)) {
+    if (!membership.linkedSponsorId) return null;
+    query = query.eq("sponsor_id", membership.linkedSponsorId);
   }
 
   const { data, error } = await query.maybeSingle();

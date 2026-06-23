@@ -12,12 +12,15 @@ import type { Creator } from "@/lib/creators";
 import { updateTeamMemberRole } from "@/app/team/actions";
 import { RoleSelectFields } from "./RoleSelectFields";
 
+import type { Sponsor } from "@/lib/sponsors";
+
 interface EditRoleModalProps {
   open: boolean;
   onClose: () => void;
   member: TeamMember | null;
   currentUserRole: TeamRole | null;
   creators: Creator[];
+  sponsors: Sponsor[];
 }
 
 export function EditRoleModal({
@@ -26,10 +29,12 @@ export function EditRoleModal({
   member,
   currentUserRole,
   creators,
+  sponsors,
 }: EditRoleModalProps) {
   const router = useRouter();
   const [role, setRole] = useState<TeamRole>("viewer");
   const [linkedCreatorId, setLinkedCreatorId] = useState("");
+  const [linkedSponsorId, setLinkedSponsorId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +42,7 @@ export function EditRoleModal({
     if (open && member && member.role !== "owner") {
       setRole(member.role);
       setLinkedCreatorId(member.linkedCreatorId ?? "");
+      setLinkedSponsorId(member.linkedSponsorId ?? "");
       setError("");
     }
   }, [open, member]);
@@ -58,7 +64,8 @@ export function EditRoleModal({
     const result = await updateTeamMemberRole(
       member!.id,
       role,
-      linkedCreatorId || null
+      linkedCreatorId || null,
+      linkedSponsorId || null
     );
 
     if ("error" in result && result.error) {
@@ -105,7 +112,10 @@ export function EditRoleModal({
             onRoleChange={setRole}
             linkedCreatorId={linkedCreatorId}
             onLinkedCreatorChange={setLinkedCreatorId}
+            linkedSponsorId={linkedSponsorId}
+            onLinkedSponsorChange={setLinkedSponsorId}
             creators={creators}
+            sponsors={sponsors}
             availableRoles={availableRoles}
           />
 

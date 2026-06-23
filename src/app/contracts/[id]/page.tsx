@@ -16,7 +16,7 @@ import {
   hasFullAccess,
   getCurrentUserMembership,
 } from "@/lib/permissions";
-import { isPortalRole } from "@/lib/team";
+import { isCreatorPortalRole, isPortalRole } from "@/lib/team";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 
@@ -50,7 +50,7 @@ export default async function ContractDetailPage({
     notFound();
   }
 
-  if (isPortalUser && membership?.linkedCreatorId === contract.creatorId) {
+  if (isCreatorPortalRole(role) && membership?.linkedCreatorId === contract.creatorId) {
     await syncPortalUserToContractDealRooms(contract.creatorId);
   }
 

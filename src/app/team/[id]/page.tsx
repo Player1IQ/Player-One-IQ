@@ -10,12 +10,15 @@ interface TeamMemberPageProps {
   params: Promise<{ id: string }>;
 }
 
+import { getSponsors } from "@/lib/sponsors/queries";
+
 export default async function TeamMemberPage({ params }: TeamMemberPageProps) {
   const { id } = await params;
-  const [member, currentUserRole, creators] = await Promise.all([
+  const [member, currentUserRole, creators, sponsors] = await Promise.all([
     getTeamMemberById(id),
     getCurrentUserRole(),
     getCreators(),
+    getSponsors(),
   ]);
 
   if (!member || member.isInvitation) {
@@ -30,6 +33,7 @@ export default async function TeamMemberPage({ params }: TeamMemberPageProps) {
       <TeamMemberProfile
         member={member}
         creators={creators}
+        sponsors={sponsors}
         canManageTeam={canManageTeam(currentUserRole)}
         currentUserRole={currentUserRole}
       />

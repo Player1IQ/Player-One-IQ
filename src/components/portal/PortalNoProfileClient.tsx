@@ -5,16 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 interface PortalNoProfileClientProps {
   roleLabel: string;
+  variant?: "creator" | "sponsor";
 }
 
-export function PortalNoProfileClient({ roleLabel }: PortalNoProfileClientProps) {
+export function PortalNoProfileClient({
+  roleLabel,
+  variant = "creator",
+}: PortalNoProfileClientProps) {
+  const isSponsor = variant === "sponsor";
+
   return (
     <div className="mx-auto max-w-lg animate-fade-in">
       <Card>
         <CardHeader>
           <CardTitle>Portal not linked yet</CardTitle>
           <CardDescription>
-            Your {roleLabel} account is active, but no roster profile is linked.
+            Your {roleLabel} account is active, but no{" "}
+            {isSponsor ? "sponsor company" : "roster profile"} is linked.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 pt-0 text-sm text-gray-400">
@@ -22,7 +29,7 @@ export function PortalNoProfileClient({ roleLabel }: PortalNoProfileClientProps)
             <Shield className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
             <p>
               Ask an admin on your team to edit your role and connect you to the
-              correct creator or player profile on the roster.
+              correct {isSponsor ? "sponsor record in the CRM" : "creator or player profile on the roster"}.
             </p>
           </div>
         </CardContent>

@@ -7,15 +7,20 @@ import {
   roleGroups,
   roleLabels,
   requiresLinkedCreator,
+  requiresLinkedSponsor,
 } from "@/lib/team";
 import type { Creator } from "@/lib/creators";
+import type { Sponsor } from "@/lib/sponsors";
 
 interface RoleSelectFieldsProps {
   role: TeamRole;
   onRoleChange: (role: TeamRole) => void;
   linkedCreatorId: string;
   onLinkedCreatorChange: (creatorId: string) => void;
+  linkedSponsorId: string;
+  onLinkedSponsorChange: (sponsorId: string) => void;
   creators: Creator[];
+  sponsors: Sponsor[];
   availableRoles?: TeamRole[];
 }
 
@@ -24,7 +29,10 @@ export function RoleSelectFields({
   onRoleChange,
   linkedCreatorId,
   onLinkedCreatorChange,
+  linkedSponsorId,
+  onLinkedSponsorChange,
   creators,
+  sponsors,
   availableRoles,
 }: RoleSelectFieldsProps) {
   const allowedRoles = availableRoles ?? invitableRoles;
@@ -53,8 +61,8 @@ export function RoleSelectFields({
           ))}
         </select>
         <p className="mt-2 text-xs leading-relaxed text-gray-500">
-            {roleDescriptions[role]}
-          </p>
+          {roleDescriptions[role]}
+        </p>
       </div>
 
       {requiresLinkedCreator(role) ? (
@@ -77,6 +85,30 @@ export function RoleSelectFields({
           </select>
           <p className="mt-2 text-xs text-gray-500">
             Portal users only see data for this roster profile.
+          </p>
+        </div>
+      ) : null}
+
+      {requiresLinkedSponsor(role) ? (
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-gray-300">
+            Linked sponsor company
+          </label>
+          <select
+            value={linkedSponsorId}
+            onChange={(e) => onLinkedSponsorChange(e.target.value)}
+            required
+            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+          >
+            <option value="">Select a sponsor</option>
+            {sponsors.map((sponsor) => (
+              <option key={sponsor.id} value={sponsor.id}>
+                {sponsor.companyName}
+              </option>
+            ))}
+          </select>
+          <p className="mt-2 text-xs text-gray-500">
+            Sponsor contacts only see partnerships for this company.
           </p>
         </div>
       ) : null}

@@ -16,7 +16,9 @@ import {
   canUseMessaging,
   hasFullAccess,
   hasReadAccess,
+  isCreatorPortalRole,
   isPortalRole,
+  isSponsorPortalRole,
   permissionMatrix,
 } from "@/lib/team";
 
@@ -24,6 +26,8 @@ export {
   canWriteData,
   canUseMessaging,
   isPortalRole,
+  isCreatorPortalRole,
+  isSponsorPortalRole,
   hasFullAccess,
   hasReadAccess,
 };
@@ -31,6 +35,7 @@ export {
 export interface CurrentUserMembership {
   role: TeamRole;
   linkedCreatorId: string | null;
+  linkedSponsorId: string | null;
 }
 
 export async function getCurrentUserMembership(): Promise<CurrentUserMembership | null> {
@@ -53,12 +58,12 @@ export async function getCurrentUserMembership(): Promise<CurrentUserMembership 
     .maybeSingle();
 
   if (ownedOrg) {
-    return { role: "owner", linkedCreatorId: null };
+    return { role: "owner", linkedCreatorId: null, linkedSponsorId: null };
   }
 
   const { data: membership } = await supabase
     .from("team_members")
-    .select("role, linked_creator_id")
+    .select("role, linked_creator_id, linked_sponsor_id")
     .eq("organization_id", organizationId)
     .eq("user_id", user.id)
     .eq("status", "active")
@@ -69,6 +74,7 @@ export async function getCurrentUserMembership(): Promise<CurrentUserMembership 
   return {
     role: membership.role as TeamRole,
     linkedCreatorId: membership.linked_creator_id ?? null,
+    linkedSponsorId: membership.linked_sponsor_id ?? null,
   };
 }
 
@@ -82,25 +88,50 @@ export async function getLinkedCreatorId(): Promise<string | null> {
   return membership?.linkedCreatorId ?? null;
 }
 
+export async function getLinkedSponsorId(): Promise<string | null> {
+  const membership = await getCurrentUserMembership();
+  return membership?.linkedSponsorId ?? null;
+}
+
 export async function canAccessCreator(creatorId: string): Promise<boolean> {
   const membership = await getCurrentUserMembership();
   if (!membership) return false;
 
-  if (isPortalRole(membership.role)) {
+  if (isCreatorPortalRole(membership.role)) {
     return membership.linkedCreatorId === creatorId;
+  }
+
+  if (isSponsorPortalRole(membership.role)) {
+    return false;
   }
 
   return hasReadAccess(membership.role, "creators");
 }
 
+export async function canAccessSponsor(sponsorId: string): Promise<boolean> {
+  const membership = await getCurrentUserMembership();
+  if (!membership) return false;
+
+  if (isSponsorPortalRole(membership.role)) {
+    return membership.linkedSponsorId === sponsorId;
+  }
+
+  return hasReadAccess(membership.role, "sponsors");
+}
+
 export async function canAccessContract(contract: {
   creatorId: string;
+  sponsorId: string;
 }): Promise<boolean> {
   const membership = await getCurrentUserMembership();
   if (!membership) return false;
 
-  if (isPortalRole(membership.role)) {
+  if (isCreatorPortalRole(membership.role)) {
     return membership.linkedCreatorId === contract.creatorId;
+  }
+
+  if (isSponsorPortalRole(membership.role)) {
+    return membership.linkedSponsorId === contract.sponsorId;
   }
 
   return hasReadAccess(membership.role, "contracts");
@@ -166,7 +197,7 @@ export function canUpdateDeliverable(
 
   if (hasFullAccess(membership.role, "contracts")) return true;
 
-  if (isPortalRole(membership.role)) {
+  if (isCreatorPortalRole(membership.role)) {
     return membership.linkedCreatorId === contract.creatorId;
   }
 
@@ -251,12 +282,28 @@ export async function canAccessCampaign(campaignId: string): Promise<boolean> {
 
   if (membership.role === "player") return false;
 
-  if (isPortalRole(membership.role)) {
+  if (isCreatorPortalRole(membership.role)) {
     if (!membership.linkedCreatorId) return false;
     const { isCreatorAssignedToCampaign } = await import(
       "@/lib/campaigns/creator-sync"
     );
     return isCreatorAssignedToCampaign(campaignId, membership.linkedCreatorId);
+  }
+
+  if (isSponsorPortalRole(membership.role)) {
+    if (!membership.linkedSponsorId) return false;
+    const supabase = await createClient();
+    if (!supabase) return false;
+    const organizationId = await getOrganizationId();
+    if (!organizationId) return false;
+    const { data } = await supabase
+      .from("sponsor_campaigns")
+      .select("id")
+      .eq("id", campaignId)
+      .eq("organization_id", organizationId)
+      .eq("sponsor_id", membership.linkedSponsorId)
+      .maybeSingle();
+    return Boolean(data);
   }
 
   return hasReadAccess(membership.role, "campaigns");
