@@ -25,12 +25,14 @@ import type { Sponsor } from "@/lib/sponsors";
 import type { Opportunity } from "@/lib/opportunities";
 import type { Creator } from "@/lib/creators";
 import type { CampaignCreatorAssignment } from "@/lib/campaigns/assignments";
+import type { RelatedContractSummary } from "@/lib/campaigns/contract-links";
 import {
   deleteCampaign,
   updateCampaignStatus,
 } from "@/app/campaigns/actions";
 import { CampaignCreatorsPanel } from "./CampaignCreatorsPanel";
 import { CampaignStatusBadge } from "./CampaignStatusBadge";
+import { ContractStatusBadge } from "@/components/contracts/ContractStatusBadge";
 import { CampaignFormModal } from "./CampaignFormModal";
 import { Button } from "@/components/ui/Button";
 
@@ -40,8 +42,10 @@ interface CampaignDetailProps {
   opportunities: Opportunity[];
   assignments: CampaignCreatorAssignment[];
   creators: Creator[];
+  relatedContracts?: RelatedContractSummary[];
   canWrite?: boolean;
   canManageCreators?: boolean;
+  isPortalUser?: boolean;
 }
 
 export function CampaignDetail({
@@ -50,8 +54,10 @@ export function CampaignDetail({
   opportunities,
   assignments,
   creators,
+  relatedContracts = [],
   canWrite = true,
   canManageCreators = false,
+  isPortalUser = false,
 }: CampaignDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -87,11 +93,11 @@ export function CampaignDetail({
       <div className="animate-fade-in space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
-            href="/campaigns"
+            href={isPortalUser ? "/portal" : "/campaigns"}
             className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Campaigns
+            {isPortalUser ? "Back to Portal" : "Back to Campaigns"}
           </Link>
           {canWrite ? (
             <div className="flex flex-wrap gap-2">
@@ -122,13 +128,20 @@ export function CampaignDetail({
                 <h1 className="text-2xl font-bold text-white">{campaign.name}</h1>
                 <CampaignStatusBadge status={campaign.status} />
               </div>
-              <Link
-                href={`/sponsors/${campaign.sponsorId}`}
-                className="mt-2 inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-accent-light"
-              >
-                <Building2 className="h-4 w-4" />
-                {campaign.sponsorName}
-              </Link>
+              {!isPortalUser ? (
+                <Link
+                  href={`/sponsors/${campaign.sponsorId}`}
+                  className="mt-2 inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-accent-light"
+                >
+                  <Building2 className="h-4 w-4" />
+                  {campaign.sponsorName}
+                </Link>
+              ) : (
+                <span className="mt-2 inline-flex items-center gap-1.5 text-sm text-gray-400">
+                  <Building2 className="h-4 w-4" />
+                  {campaign.sponsorName}
+                </span>
+              )}
             </div>
             <p className="text-2xl font-semibold text-accent-light">
               {campaign.budgetDisplay}
@@ -243,28 +256,64 @@ export function CampaignDetail({
           <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6">
             <h2 className="text-base font-semibold text-white">Linked opportunity</h2>
             {campaign.relatedOpportunityId ? (
-              <Link
-                href={`/opportunities/${campaign.relatedOpportunityId}`}
-                className="mt-4 inline-flex items-center gap-2 text-sm text-accent-light hover:text-white"
-              >
-                <Briefcase className="h-4 w-4" />
-                {campaign.relatedOpportunityTitle ?? "View opportunity"}
-              </Link>
+              isPortalUser ? (
+                <p className="mt-4 inline-flex items-center gap-2 text-sm text-gray-300">
+                  <Briefcase className="h-4 w-4" />
+                  {campaign.relatedOpportunityTitle ?? "Linked opportunity"}
+                </p>
+              ) : (
+                <Link
+                  href={`/opportunities/${campaign.relatedOpportunityId}`}
+                  className="mt-4 inline-flex items-center gap-2 text-sm text-accent-light hover:text-white"
+                >
+                  <Briefcase className="h-4 w-4" />
+                  {campaign.relatedOpportunityTitle ?? "View opportunity"}
+                </Link>
+              )
             ) : (
               <p className="mt-4 text-sm text-gray-500">
-                No opportunity linked. Edit the campaign to attach one from this
-                sponsor.
+                {isPortalUser
+                  ? "No opportunity linked to this campaign."
+                  : "No opportunity linked. Edit the campaign to attach one from this sponsor."}
               </p>
             )}
           </section>
         </div>
 
-        {campaign.notes ? (
+        {campaign.notes && !isPortalUser ? (
           <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6">
             <h2 className="text-base font-semibold text-white">Notes</h2>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-gray-300">
               {campaign.notes}
             </p>
+          </section>
+        ) : null}
+
+        {relatedContracts.length > 0 ? (
+          <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6">
+            <h2 className="text-base font-semibold text-white">Related contracts</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Deals with the same sponsor and assigned creators
+            </p>
+            <ul className="mt-4 divide-y divide-white/[0.06]">
+              {relatedContracts.map((contract) => (
+                <li key={contract.id}>
+                  <Link
+                    href={`/contracts/${contract.id}`}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3 transition-colors hover:text-accent-light"
+                  >
+                    <div>
+                      <p className="font-medium text-white">{contract.contractName}</p>
+                      <p className="text-sm text-gray-500">{contract.creatorName}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-300">{contract.valueDisplay}</span>
+                      <ContractStatusBadge status={contract.status} />
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
         ) : null}
 

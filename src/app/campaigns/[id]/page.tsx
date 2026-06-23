@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CampaignDetail } from "@/components/campaigns/CampaignDetail";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
+import { getContractsForCampaign } from "@/lib/campaigns/contract-links";
 import { getCampaignCreators } from "@/lib/campaigns/creator-sync";
 import { getCampaignById } from "@/lib/campaigns/queries";
 import { getCreators } from "@/lib/creators/queries";
@@ -10,8 +11,9 @@ import { getOpportunities } from "@/lib/opportunities/queries";
 import {
   canAccessCampaign,
   canWriteData,
-  getCurrentUserRole,
+  getCurrentUserMembership,
 } from "@/lib/permissions";
+import { isPortalRole } from "@/lib/team";
 
 interface CampaignDetailPageProps {
   params: Promise<{ id: string }>;
@@ -21,11 +23,14 @@ export default async function CampaignDetailPage({
   params,
 }: CampaignDetailPageProps) {
   const { id } = await params;
-  const [campaign, sponsors, opportunities, role, hasAccess] = await Promise.all([
+  const membership = await getCurrentUserMembership();
+  const role = membership?.role ?? null;
+  const isPortalUser = isPortalRole(role);
+
+  const [campaign, sponsors, opportunities, hasAccess] = await Promise.all([
     getCampaignById(id),
-    getSponsors(),
-    getOpportunities(),
-    getCurrentUserRole(),
+    isPortalUser ? Promise.resolve([]) : getSponsors(),
+    isPortalUser ? Promise.resolve([]) : getOpportunities(),
     canAccessCampaign(id),
   ]);
 
@@ -33,10 +38,11 @@ export default async function CampaignDetailPage({
     notFound();
   }
 
-  const canWrite = canWriteData(role);
-  const [assignments, creators] = await Promise.all([
+  const canWrite = canWriteData(role) && !isPortalUser;
+  const [assignments, creators, relatedContracts] = await Promise.all([
     getCampaignCreators(id),
     canWrite ? getCreators() : Promise.resolve([]),
+    getContractsForCampaign(id),
   ]);
 
   return (
@@ -51,8 +57,10 @@ export default async function CampaignDetailPage({
           opportunities={opportunities}
           assignments={assignments}
           creators={creators}
+          relatedContracts={relatedContracts}
           canWrite={canWrite}
           canManageCreators={canWrite}
+          isPortalUser={isPortalUser}
         />
       </SubscriptionPageGate>
     </DashboardLayout>

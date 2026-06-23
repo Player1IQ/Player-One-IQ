@@ -5,6 +5,7 @@ import { canRunLiveAi } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { syncPortalUserToContractDealRooms } from "@/app/messages/actions";
 import { findConversationByRelated } from "@/lib/messages/queries";
+import { getCampaignsForContract } from "@/lib/campaigns/contract-links";
 import { getContractById, getContractNegotiationContext } from "@/lib/contracts/queries";
 import { getDeliverablesForContract } from "@/lib/contract-deliverables/queries";
 import { getCreators } from "@/lib/creators/queries";
@@ -60,6 +61,7 @@ export default async function ContractDetailPage({
   const negotiationContext = isPortalUser
     ? null
     : await getContractNegotiationContext(contract);
+  const relatedCampaigns = await getCampaignsForContract(contract);
   const organizationId = await getOrganizationId();
   const aiLive =
     Boolean(organizationId) && (await canRunLiveAi(organizationId!));
@@ -79,6 +81,7 @@ export default async function ContractDetailPage({
         sponsors={sponsors}
         negotiationContext={negotiationContext}
         deliverables={deliverables}
+        relatedCampaigns={relatedCampaigns}
         canWrite={canWrite}
         canUpdateStatus={canUpdateStatus}
         isPortalUser={isPortalUser}

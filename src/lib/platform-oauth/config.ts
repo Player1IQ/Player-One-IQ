@@ -4,6 +4,7 @@ import {
   oauthPlatforms,
   type OAuthPlatform,
   type OAuthPlatformUi,
+  type OAuthPlatformUiStatus,
 } from "./types";
 
 export type { OAuthPlatform, OAuthPlatformUi, OAuthPlatformUiStatus } from "./types";
@@ -50,11 +51,14 @@ export function isPlatformOAuthLaunched(platform: OAuthPlatform): boolean {
 }
 
 export function isPlatformOAuthAvailable(platform: OAuthPlatform): boolean {
-  return (
-    isPlatformOAuthLaunched(platform) &&
-    isPlatformOAuthFeatureEnabled() &&
-    isPlatformOAuthConfigured(platform)
-  );
+  if (!isPlatformOAuthFeatureEnabled()) return false;
+  if (!isPlatformOAuthConfigured(platform)) return false;
+
+  if (launchOAuthPlatforms.includes(platform)) {
+    return true;
+  }
+
+  return platform === "Instagram" || platform === "TikTok";
 }
 
 export function getAvailableOAuthPlatforms(): OAuthPlatform[] {
@@ -67,10 +71,33 @@ export function getConfiguredOAuthPlatforms(): OAuthPlatform[] {
 }
 
 export function getOAuthPlatformUi(): OAuthPlatformUi[] {
-  return launchOAuthPlatforms.map((platform) => ({
+  return oauthPlatforms.map((platform) => ({
     platform,
-    status: isPlatformOAuthAvailable(platform) ? "available" : "coming_soon",
+    status: getOAuthPlatformUiStatus(platform),
   }));
+}
+
+function getOAuthPlatformUiStatus(platform: OAuthPlatform): OAuthPlatformUiStatus {
+  if (!isPlatformOAuthFeatureEnabled()) {
+    return "coming_soon";
+  }
+
+  if (launchOAuthPlatforms.includes(platform)) {
+    return isPlatformOAuthConfigured(platform) ? "available" : "coming_soon";
+  }
+
+  if (platform === "Instagram" || platform === "TikTok") {
+    return isPlatformOAuthConfigured(platform) ? "available" : "coming_soon";
+  }
+
+  return "coming_soon";
+}
+
+function formatOAuthPlatformList(platforms: OAuthPlatform[]): string {
+  if (platforms.length === 0) return "";
+  if (platforms.length === 1) return platforms[0];
+  if (platforms.length === 2) return `${platforms[0]} or ${platforms[1]}`;
+  return `${platforms.slice(0, -1).join(", ")}, or ${platforms[platforms.length - 1]}`;
 }
 
 export function getComingSoonOAuthPlatforms(): OAuthPlatform[] {
@@ -84,8 +111,13 @@ export function hasAvailablePlatformOAuth(
 }
 
 export function platformOAuthDescription(platforms: OAuthPlatformUi[]): string {
-  if (hasAvailablePlatformOAuth(platforms)) {
-    return "Connect YouTube or Twitch to sync profiles and revenue automatically, or add accounts manually.";
+  const available = platforms
+    .filter((entry) => entry.status === "available")
+    .map((entry) => entry.platform);
+
+  if (available.length > 0) {
+    return `Connect ${formatOAuthPlatformList(available)} to sync profiles and revenue automatically, or add accounts manually.`;
   }
-  return "Link platform accounts manually. YouTube and Twitch auto-sync unlock when OAuth is configured.";
+
+  return "Link platform accounts manually. YouTube, Twitch, and Instagram auto-sync unlock when OAuth is configured.";
 }

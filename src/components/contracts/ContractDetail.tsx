@@ -30,8 +30,10 @@ import { ContractDeliverablesPanel } from "./ContractDeliverablesPanel";
 import { ContractAiSummaryPanel } from "./ContractAiSummaryPanel";
 import { DealRoomButton } from "@/components/messages/DealRoomButton";
 import type { ContractDeliverable } from "@/lib/contract-deliverables";
+import type { RelatedCampaignSummary } from "@/lib/campaigns/contract-links";
 import { buildDeliverablesSummary } from "@/lib/contract-deliverables";
 import { ContractDeliverablesSummary } from "./ContractDeliverablesPanel";
+import { CampaignStatusBadge } from "@/components/campaigns/CampaignStatusBadge";
 
 interface ContractDetailProps {
   contract: Contract;
@@ -39,6 +41,7 @@ interface ContractDetailProps {
   sponsors: Sponsor[];
   negotiationContext: ContractNegotiationContext | null;
   deliverables: ContractDeliverable[];
+  relatedCampaigns?: RelatedCampaignSummary[];
   canWrite?: boolean;
   canUpdateStatus?: boolean;
   isPortalUser?: boolean;
@@ -73,6 +76,7 @@ export function ContractDetail({
   sponsors,
   negotiationContext,
   deliverables,
+  relatedCampaigns = [],
   canWrite = true,
   canUpdateStatus = false,
   isPortalUser = false,
@@ -277,6 +281,33 @@ export function ContractDetail({
           canWrite={canWrite}
           canUpdateStatus={canUpdateStatus}
         />
+
+        {relatedCampaigns.length > 0 ? (
+          <Section
+            title="Related campaigns"
+            description="Campaigns with the same sponsor where this creator is assigned"
+          >
+            <ul className="divide-y divide-white/[0.06]">
+              {relatedCampaigns.map((campaign) => (
+                <li key={campaign.id}>
+                  <Link
+                    href={`/campaigns/${campaign.id}`}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3 transition-colors hover:text-accent-light"
+                  >
+                    <div>
+                      <p className="font-medium text-white">{campaign.name}</p>
+                      <p className="text-sm text-gray-500">{campaign.sponsorName}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-gray-300">{campaign.budgetDisplay}</span>
+                      <CampaignStatusBadge status={campaign.status} />
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        ) : null}
 
         {!isPortalUser ? (
           <>

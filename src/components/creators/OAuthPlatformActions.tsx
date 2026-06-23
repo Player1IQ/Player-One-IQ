@@ -1,7 +1,3 @@
-import {
-  getComingSoonOAuthPlatforms,
-  isPlatformOAuthLaunched,
-} from "@/lib/platform-oauth/config";
 import type { OAuthPlatformUi } from "@/lib/platform-oauth/types";
 import { getOAuthPlatformSlug } from "@/lib/platform-oauth/platform-slug";
 
@@ -15,6 +11,15 @@ function oauthStartUrl(platform: OAuthPlatformUi["platform"], creatorId: string)
   return `/api/platform-oauth/${getOAuthPlatformSlug(platform)}/start?creatorId=${creatorId}`;
 }
 
+function isConnectableOAuthPlatform(platform: OAuthPlatformUi["platform"]): boolean {
+  return (
+    platform === "YouTube" ||
+    platform === "Twitch" ||
+    platform === "Instagram" ||
+    platform === "TikTok"
+  );
+}
+
 export function OAuthPlatformActions({
   creatorId,
   platforms,
@@ -23,15 +28,17 @@ export function OAuthPlatformActions({
   const containerClass =
     layout === "stack" ? "flex flex-col gap-2" : "flex flex-wrap gap-2";
 
-  const launched = platforms.filter((entry) =>
-    isPlatformOAuthLaunched(entry.platform)
+  const oauthEntries = platforms.filter((entry) =>
+    isConnectableOAuthPlatform(entry.platform)
   );
-  const comingSoonLabels = getComingSoonOAuthPlatforms();
+  const comingSoonLabels = oauthEntries
+    .filter((entry) => entry.status === "coming_soon")
+    .map((entry) => entry.platform);
 
   return (
     <div className="space-y-2">
       <div className={containerClass}>
-        {launched.map(({ platform, status }) =>
+        {oauthEntries.map(({ platform, status }) =>
           status === "available" ? (
             <a
               key={platform}
