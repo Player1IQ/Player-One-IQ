@@ -6,7 +6,8 @@ import {
   isPathAllowedForPortalUser,
   PORTAL_HOME,
 } from "@/lib/portal/paths";
-import type { TeamRole } from "@/lib/team";
+import { isPathAllowedForStaffUser } from "@/lib/staff/paths";
+import { canAccessStaffDashboard, type TeamRole } from "@/lib/team";
 
 export const ACTIVE_ORGANIZATION_COOKIE = "poiq_active_org";
 
@@ -191,6 +192,12 @@ export async function updateSession(request: NextRequest) {
         if (pathname === "/") {
           const url = request.nextUrl.clone();
           url.pathname = PORTAL_HOME;
+          return NextResponse.redirect(url);
+        }
+      } else if (role && canAccessStaffDashboard(role)) {
+        if (!isPathAllowedForStaffUser(pathname, role)) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/";
           return NextResponse.redirect(url);
         }
       }

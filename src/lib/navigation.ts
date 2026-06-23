@@ -4,11 +4,11 @@ import {
   navFeatureRequirements,
 } from "@/lib/subscription/features";
 import type { FeatureKey } from "@/lib/subscription/types";
+import { staffNavPermissionKeys } from "@/lib/staff/paths";
 import {
   canAccessStaffDashboard,
   hasReadAccess,
   isSponsorPortalRole,
-  type PermissionKey,
   type TeamRole,
 } from "@/lib/team";
 
@@ -94,18 +94,6 @@ export const navItems: NavItem[] = [
   { label: "Billing", href: "/billing", icon: "credit-card" },
   { label: "Settings", href: "/settings", icon: "settings" },
 ];
-
-const staffNavPermissionKeys: Partial<Record<string, PermissionKey>> = {
-  "/creators": "creators",
-  "/sponsors": "sponsors",
-  "/campaigns": "campaigns",
-  "/contracts": "contracts",
-  "/opportunities": "opportunities",
-  "/messages": "messages",
-  "/team": "team",
-  "/billing": "billing",
-  "/settings": "settings",
-};
 
 export const portalNavItems: NavItem[] = [
   { label: "Home", href: "/portal", icon: "dashboard" },
