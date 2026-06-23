@@ -278,6 +278,7 @@ export function ContractDetail({
         <ContractDeliverablesPanel
           contractId={contract.id}
           deliverables={deliverables}
+          relatedCampaigns={relatedCampaigns}
           canWrite={canWrite}
           canUpdateStatus={canUpdateStatus}
         />

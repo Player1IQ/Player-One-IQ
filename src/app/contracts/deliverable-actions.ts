@@ -20,6 +20,8 @@ import {
   type DeliverableStatus,
 } from "@/lib/contract-deliverables";
 import type { ActivityAction } from "@/lib/activity/queries";
+import { getCampaignsForContract } from "@/lib/campaigns/contract-links";
+import { getContractById } from "@/lib/contracts/queries";
 
 async function logActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -59,15 +61,45 @@ async function getContractForDeliverable(
   return data;
 }
 
-function revalidateContractPaths(contractId: string) {
+function revalidateContractPaths(contractId: string, campaignId?: string | null) {
   revalidatePath("/contracts");
   revalidatePath(`/contracts/${contractId}`);
   revalidatePath("/portal");
+  if (campaignId) {
+    revalidatePath("/campaigns");
+    revalidatePath(`/campaigns/${campaignId}`);
+  }
+}
+
+async function validateDeliverableCampaignLink(
+  contractId: string,
+  campaignId: string | null | undefined
+): Promise<{ error?: string }> {
+  if (campaignId === undefined) return {};
+  if (campaignId === null) return {};
+
+  const contract = await getContractById(contractId);
+  if (!contract) return { error: "Contract not found." };
+
+  const relatedCampaigns = await getCampaignsForContract(contract);
+  if (!relatedCampaigns.some((campaign) => campaign.id === campaignId)) {
+    return {
+      error:
+        "Campaign must match this contract's sponsor and assigned creator.",
+    };
+  }
+
+  return {};
 }
 
 export async function createDeliverable(
   contractId: string,
-  input: { title: string; dueDate?: string | null; status?: DeliverableStatus }
+  input: {
+    title: string;
+    dueDate?: string | null;
+    status?: DeliverableStatus;
+    campaignId?: string | null;
+  }
 ) {
   const featureError = await requireContractsFeature();
   if (featureError) return featureError;
@@ -96,6 +128,12 @@ export async function createDeliverable(
   );
   if (!contract) return { error: "Contract not found." };
 
+  const campaignError = await validateDeliverableCampaignLink(
+    contractId,
+    input.campaignId
+  );
+  if (campaignError.error) return campaignError;
+
   const { data: maxRow } = await supabase
     .from("contract_deliverables")
     .select("sort_order")
@@ -113,6 +151,7 @@ export async function createDeliverable(
     .insert({
       organization_id: organizationId,
       contract_id: contractId,
+      campaign_id: input.campaignId ?? null,
       title,
       status,
       due_date: input.dueDate || null,
@@ -132,7 +171,7 @@ export async function createDeliverable(
     metadata: { contractId },
   });
 
-  revalidateContractPaths(contractId);
+  revalidateContractPaths(contractId, input.campaignId);
   return { id: data.id };
 }
 
@@ -142,6 +181,7 @@ export async function updateDeliverable(
     title?: string;
     dueDate?: string | null;
     status?: DeliverableStatus;
+    campaignId?: string | null;
   }
 ) {
   const featureError = await requireContractsFeature();
@@ -155,7 +195,7 @@ export async function updateDeliverable(
 
   const { data: existing, error: fetchError } = await supabase
     .from("contract_deliverables")
-    .select("id, contract_id, title, status")
+    .select("id, contract_id, title, status, campaign_id")
     .eq("id", id)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -174,7 +214,11 @@ export async function updateDeliverable(
     !hasFullAccess(membership.role, "contracts");
 
   if (portalStatusOnly) {
-    if (input.title !== undefined || input.dueDate !== undefined) {
+    if (
+      input.title !== undefined ||
+      input.dueDate !== undefined ||
+      input.campaignId !== undefined
+    ) {
       return { error: "You can only update deliverable status." };
     }
     if (input.status === undefined) {
@@ -205,6 +249,15 @@ export async function updateDeliverable(
       input.status === "completed" ? new Date().toISOString() : null;
   }
 
+  if (input.campaignId !== undefined) {
+    const campaignError = await validateDeliverableCampaignLink(
+      existing.contract_id,
+      input.campaignId
+    );
+    if (campaignError.error) return campaignError;
+    updates.campaign_id = input.campaignId;
+  }
+
   const { error: updateError } = await supabase
     .from("contract_deliverables")
     .update(updates)
@@ -221,7 +274,10 @@ export async function updateDeliverable(
     metadata: { contractId: existing.contract_id },
   });
 
-  revalidateContractPaths(existing.contract_id);
+  revalidateContractPaths(
+    existing.contract_id,
+    input.campaignId ?? existing.campaign_id
+  );
   return { success: true };
 }
 

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Calendar,
   Check,
   Loader2,
+  Megaphone,
   Pencil,
   Plus,
   Trash2,
@@ -25,6 +27,7 @@ import {
   type ContractDeliverable,
   type DeliverableStatus,
 } from "@/lib/contract-deliverables";
+import type { RelatedCampaignSummary } from "@/lib/campaigns/contract-links";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -33,6 +36,7 @@ import { cn } from "@/lib/utils";
 interface ContractDeliverablesPanelProps {
   contractId: string;
   deliverables: ContractDeliverable[];
+  relatedCampaigns?: RelatedCampaignSummary[];
   canWrite?: boolean;
   canUpdateStatus?: boolean;
 }
@@ -50,6 +54,7 @@ const quickFilters: Array<{ value: DeliverableFilter; label: string }> = [
 export function ContractDeliverablesPanel({
   contractId,
   deliverables: initialDeliverables,
+  relatedCampaigns = [],
   canWrite = true,
   canUpdateStatus = false,
 }: ContractDeliverablesPanelProps) {
@@ -64,6 +69,7 @@ export function ContractDeliverablesPanel({
   const [editTitle, setEditTitle] = useState("");
   const [editDueDate, setEditDueDate] = useState("");
   const [editStatus, setEditStatus] = useState<DeliverableStatus>("pending");
+  const [editCampaignId, setEditCampaignId] = useState("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<DeliverableFilter>("all");
 
@@ -145,6 +151,7 @@ export function ContractDeliverablesPanel({
     setEditTitle(item.title);
     setEditDueDate(item.dueDate ?? "");
     setEditStatus(item.status);
+    setEditCampaignId(item.campaignId ?? "");
     setError("");
   }
 
@@ -153,6 +160,7 @@ export function ContractDeliverablesPanel({
     setEditTitle("");
     setEditDueDate("");
     setEditStatus("pending");
+    setEditCampaignId("");
   }
 
   async function handleSaveEdit(id: string) {
@@ -163,6 +171,7 @@ export function ContractDeliverablesPanel({
       title: editTitle,
       dueDate: editDueDate || null,
       status: editStatus,
+      campaignId: editCampaignId || null,
     });
     setLoadingId(null);
     if ("error" in result && result.error) {
@@ -179,6 +188,21 @@ export function ContractDeliverablesPanel({
     setLoadingId(id);
     setError("");
     const result = await deleteDeliverable(id);
+    setLoadingId(null);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    await refreshAfterAction();
+  }
+
+  async function handleCampaignChange(id: string, campaignId: string) {
+    if (!canWrite) return;
+    setLoadingId(id);
+    setError("");
+    const result = await updateDeliverable(id, {
+      campaignId: campaignId || null,
+    });
     setLoadingId(null);
     if ("error" in result && result.error) {
       setError(result.error);
@@ -340,6 +364,26 @@ export function ContractDeliverablesPanel({
                         </select>
                       </div>
                     </div>
+                    {relatedCampaigns.length > 0 ? (
+                      <div>
+                        <label className="mb-1 block text-xs text-gray-500">
+                          Linked campaign
+                        </label>
+                        <select
+                          value={editCampaignId}
+                          onChange={(e) => setEditCampaignId(e.target.value)}
+                          disabled={isLoading}
+                          className="w-full rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30 disabled:opacity-50"
+                        >
+                          <option value="">No campaign</option>
+                          {relatedCampaigns.map((campaign) => (
+                            <option key={campaign.id} value={campaign.id}>
+                              {campaign.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : null}
                     <div className="flex gap-2">
                       <Button
                         type="button"
@@ -423,6 +467,39 @@ export function ContractDeliverablesPanel({
                           <Calendar className="h-3 w-3" />
                           Due {item.dueDateDisplay}
                         </p>
+                      ) : null}
+                      {item.campaignId ? (
+                        <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
+                          <Megaphone className="h-3 w-3 shrink-0" />
+                          <Link
+                            href={`/campaigns/${item.campaignId}`}
+                            className="text-accent-light transition-colors hover:text-white"
+                          >
+                            {item.campaignName ?? "View campaign"}
+                          </Link>
+                        </p>
+                      ) : canWrite && relatedCampaigns.length > 0 ? (
+                        <div className="mt-2 max-w-xs">
+                          <label className="sr-only" htmlFor={`campaign-${item.id}`}>
+                            Link to campaign
+                          </label>
+                          <select
+                            id={`campaign-${item.id}`}
+                            value=""
+                            onChange={(e) =>
+                              handleCampaignChange(item.id, e.target.value)
+                            }
+                            disabled={isLoading}
+                            className="w-full rounded-lg border border-white/[0.08] bg-surface-raised/80 px-2.5 py-1.5 text-xs text-gray-400 focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30 disabled:opacity-50"
+                          >
+                            <option value="">Link to campaign…</option>
+                            {relatedCampaigns.map((campaign) => (
+                              <option key={campaign.id} value={campaign.id}>
+                                {campaign.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       ) : null}
                       {canUpdateStatus && !canWrite ? (
                         <div className="mt-2 flex flex-wrap gap-1.5">

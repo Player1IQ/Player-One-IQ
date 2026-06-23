@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { CampaignDetail } from "@/components/campaigns/CampaignDetail";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { getContractsForCampaign } from "@/lib/campaigns/contract-links";
+import { getLinkedDeliverablesForCampaign } from "@/lib/contract-deliverables/queries";
 import { getCampaignCreators } from "@/lib/campaigns/creator-sync";
 import { getCampaignById } from "@/lib/campaigns/queries";
 import { getCreators } from "@/lib/creators/queries";
@@ -39,10 +40,12 @@ export default async function CampaignDetailPage({
   }
 
   const canWrite = hasFullAccess(role, "campaigns") && !isPortalUser;
-  const [assignments, creators, relatedContracts] = await Promise.all([
+  const [assignments, creators, relatedContracts, linkedDeliverables] =
+    await Promise.all([
     getCampaignCreators(id),
     canWrite ? getCreators() : Promise.resolve([]),
     getContractsForCampaign(id),
+    getLinkedDeliverablesForCampaign(id),
   ]);
 
   return (
@@ -58,6 +61,7 @@ export default async function CampaignDetailPage({
           assignments={assignments}
           creators={creators}
           relatedContracts={relatedContracts}
+          linkedDeliverables={linkedDeliverables}
           canWrite={canWrite}
           canManageCreators={canWrite}
           isPortalUser={isPortalUser}

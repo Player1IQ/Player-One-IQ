@@ -8,7 +8,20 @@ import {
   type ContractDeliverable,
   type ContractDeliverableRow,
   type DeliverablesSummary,
+  type DeliverableDisplayStatus,
 } from "@/lib/contract-deliverables";
+
+const deliverableSelect = "*, sponsor_campaigns ( name )";
+
+export interface LinkedDeliverableSummary {
+  id: string;
+  title: string;
+  displayStatus: DeliverableDisplayStatus;
+  dueDateDisplay: string;
+  contractId: string;
+  contractName: string;
+  creatorName: string;
+}
 
 export interface PortalDeliverableMetrics {
   openCount: number;
@@ -55,7 +68,7 @@ export async function getDeliverablesForContract(
 
   const { data, error } = await supabase
     .from("contract_deliverables")
-    .select("*")
+    .select(deliverableSelect)
     .eq("contract_id", contractId)
     .eq("organization_id", organizationId)
     .order("sort_order", { ascending: true })
@@ -97,7 +110,7 @@ export async function getDeliverablesSummariesForContracts(
 
   const { data, error } = await supabase
     .from("contract_deliverables")
-    .select("*")
+    .select(deliverableSelect)
     .eq("organization_id", organizationId)
     .in("contract_id", contractIds)
     .order("sort_order", { ascending: true });
@@ -150,7 +163,7 @@ export async function getPortalDeliverableMetrics(
 
   const { data, error } = await supabase
     .from("contract_deliverables")
-    .select("*")
+    .select(deliverableSelect)
     .eq("organization_id", organizationId)
     .in("contract_id", contractIds);
 
@@ -165,4 +178,46 @@ export async function getPortalDeliverableMetrics(
     overdueCount: stats.overdueCount,
     nextDue: summary.nextDue,
   };
+}
+
+export async function getLinkedDeliverablesForCampaign(
+  campaignId: string
+): Promise<LinkedDeliverableSummary[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const { data, error } = await supabase
+    .from("contract_deliverables")
+    .select(
+      `${deliverableSelect}, contracts ( contract_name, creators ( name ) )`
+    )
+    .eq("organization_id", organizationId)
+    .eq("campaign_id", campaignId)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+
+  return (data as Array<
+    ContractDeliverableRow & {
+      contracts: {
+        contract_name: string;
+        creators: { name: string } | null;
+      } | null;
+    }
+  >).map((row) => {
+    const deliverable = mapDeliverableRow(row);
+    return {
+      id: deliverable.id,
+      title: deliverable.title,
+      displayStatus: deliverable.displayStatus,
+      dueDateDisplay: deliverable.dueDateDisplay,
+      contractId: deliverable.contractId,
+      contractName: row.contracts?.contract_name ?? "Contract",
+      creatorName: row.contracts?.creators?.name ?? "Creator",
+    };
+  });
 }

@@ -19,6 +19,7 @@ export interface ContractDeliverableRow {
   id: string;
   organization_id: string;
   contract_id: string;
+  campaign_id: string | null;
   title: string;
   status: DeliverableStatus;
   due_date: string | null;
@@ -26,12 +27,15 @@ export interface ContractDeliverableRow {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  sponsor_campaigns?: { name: string } | null;
 }
 
 export interface ContractDeliverable {
   id: string;
   organizationId: string;
   contractId: string;
+  campaignId: string | null;
+  campaignName: string | null;
   title: string;
   status: DeliverableStatus;
   displayStatus: DeliverableDisplayStatus;
@@ -92,6 +96,8 @@ export function mapDeliverableRow(row: ContractDeliverableRow): ContractDelivera
     id: row.id,
     organizationId: row.organization_id,
     contractId: row.contract_id,
+    campaignId: row.campaign_id ?? null,
+    campaignName: row.sponsor_campaigns?.name ?? null,
     title: row.title,
     status: row.status,
     displayStatus: resolveDisplayStatus(row.status, row.due_date),

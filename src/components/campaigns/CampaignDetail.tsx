@@ -26,6 +26,11 @@ import type { Opportunity } from "@/lib/opportunities";
 import type { Creator } from "@/lib/creators";
 import type { CampaignCreatorAssignment } from "@/lib/campaigns/assignments";
 import type { RelatedContractSummary } from "@/lib/campaigns/contract-links";
+import type { LinkedDeliverableSummary } from "@/lib/contract-deliverables/queries";
+import {
+  deliverableStatusBadgeVariant,
+  deliverableStatusLabels,
+} from "@/lib/contract-deliverables";
 import {
   deleteCampaign,
   updateCampaignStatus,
@@ -34,6 +39,7 @@ import { CampaignCreatorsPanel } from "./CampaignCreatorsPanel";
 import { CampaignStatusBadge } from "./CampaignStatusBadge";
 import { ContractStatusBadge } from "@/components/contracts/ContractStatusBadge";
 import { CampaignFormModal } from "./CampaignFormModal";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 
 interface CampaignDetailProps {
@@ -43,6 +49,7 @@ interface CampaignDetailProps {
   assignments: CampaignCreatorAssignment[];
   creators: Creator[];
   relatedContracts?: RelatedContractSummary[];
+  linkedDeliverables?: LinkedDeliverableSummary[];
   canWrite?: boolean;
   canManageCreators?: boolean;
   isPortalUser?: boolean;
@@ -55,6 +62,7 @@ export function CampaignDetail({
   assignments,
   creators,
   relatedContracts = [],
+  linkedDeliverables = [],
   canWrite = true,
   canManageCreators = false,
   isPortalUser = false,
@@ -309,6 +317,46 @@ export function CampaignDetail({
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-gray-300">{contract.valueDisplay}</span>
                       <ContractStatusBadge status={contract.status} />
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {linkedDeliverables.length > 0 ? (
+          <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6">
+            <h2 className="text-base font-semibold text-white">Linked deliverables</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Contract checklist items tied to this campaign
+            </p>
+            <ul className="mt-4 divide-y divide-white/[0.06]">
+              {linkedDeliverables.map((deliverable) => (
+                <li key={deliverable.id}>
+                  <Link
+                    href={`/contracts/${deliverable.contractId}`}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3 transition-colors hover:text-accent-light"
+                  >
+                    <div>
+                      <p className="font-medium text-white">{deliverable.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {deliverable.contractName} · {deliverable.creatorName}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {deliverable.dueDateDisplay !== "—" ? (
+                        <span className="text-sm text-gray-400">
+                          Due {deliverable.dueDateDisplay}
+                        </span>
+                      ) : null}
+                      <Badge
+                        variant={deliverableStatusBadgeVariant(
+                          deliverable.displayStatus
+                        )}
+                      >
+                        {deliverableStatusLabels[deliverable.displayStatus]}
+                      </Badge>
                     </div>
                   </Link>
                 </li>
