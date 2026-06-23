@@ -12,7 +12,10 @@ import {
   requireUsageWithinLimit,
   getCurrentUserRole,
 } from "@/lib/permissions";
-import { bootstrapPortalUserContractDealRooms } from "@/app/messages/actions";
+import {
+  bootstrapPortalUserContractDealRooms,
+  bootstrapPortalUserSponsorDealRooms,
+} from "@/app/messages/actions";
 import {
   type TeamRole,
   invitableRoles,
@@ -20,6 +23,7 @@ import {
   requiresLinkedCreator,
   requiresLinkedSponsor,
   isCreatorPortalRole,
+  isSponsorPortalRole,
 } from "@/lib/team";
 
 async function requireTeamFeature() {
@@ -256,7 +260,7 @@ export async function updateTeamMemberRole(
 
   const { data: member, error: fetchError } = await supabase
     .from("team_members")
-    .select("email, role")
+    .select("email, role, user_id")
     .eq("id", memberId)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -315,6 +319,23 @@ export async function updateTeamMemberRole(
     .eq("organization_id", organizationId);
 
   if (updateError) return { error: updateError.message };
+
+  if (member.user_id) {
+    if (isCreatorPortalRole(role) && normalizedLinkedCreatorId) {
+      await bootstrapPortalUserContractDealRooms(
+        organizationId,
+        member.user_id,
+        normalizedLinkedCreatorId
+      );
+    }
+    if (isSponsorPortalRole(role) && normalizedLinkedSponsorId) {
+      await bootstrapPortalUserSponsorDealRooms(
+        organizationId,
+        member.user_id,
+        normalizedLinkedSponsorId
+      );
+    }
+  }
 
   await logTeamActivity(
     supabase,
@@ -585,6 +606,17 @@ export async function acceptInvitation(token: string) {
       invite.organization_id,
       user.id,
       invite.linked_creator_id
+    );
+  }
+
+  if (
+    isSponsorPortalRole(invite.role as TeamRole) &&
+    invite.linked_sponsor_id
+  ) {
+    await bootstrapPortalUserSponsorDealRooms(
+      invite.organization_id,
+      user.id,
+      invite.linked_sponsor_id
     );
   }
 

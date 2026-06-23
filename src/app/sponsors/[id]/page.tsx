@@ -10,7 +10,9 @@ import {
   getCurrentUserMembership,
   getCurrentUserRole,
 } from "@/lib/permissions";
-import { isPortalRole } from "@/lib/team";
+import { isPortalRole, isSponsorPortalRole } from "@/lib/team";
+import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
+import { getUnreadMessageCount } from "@/lib/messages/queries";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 
@@ -40,6 +42,13 @@ export default async function SponsorDetailPage({
     notFound();
   }
 
+  if (
+    isSponsorPortalRole(membership?.role ?? null) &&
+    membership?.linkedSponsorId === id
+  ) {
+    await syncPortalUserToSponsorDealRooms(id);
+  }
+
   const canViewCampaigns = hasFeature(
     subscription.features,
     "campaign_tracking"
@@ -47,6 +56,11 @@ export default async function SponsorDetailPage({
   const campaigns = canViewCampaigns
     ? await getCampaignsBySponsor(id)
     : [];
+
+  const unreadMessages =
+    isPortalUser && membership?.linkedSponsorId === id
+      ? await getUnreadMessageCount()
+      : 0;
 
   return (
     <DashboardLayout
@@ -60,6 +74,7 @@ export default async function SponsorDetailPage({
         canWrite={hasFullAccess(role, "sponsors")}
         canViewCampaigns={canViewCampaigns}
         isPortalUser={isPortalUser}
+        unreadMessages={unreadMessages}
       />
     </DashboardLayout>
   );

@@ -24,6 +24,7 @@ import {
   isSponsorPortalRole,
 } from "@/lib/team";
 import { getCurrentUserMembership } from "@/lib/permissions";
+import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 
@@ -56,7 +57,9 @@ export default async function PortalHomePage() {
     ] = await Promise.all([
       getSponsorById(membership.linkedSponsorId),
       getContracts(),
-      getUnreadMessageCount(),
+      syncPortalUserToSponsorDealRooms(membership.linkedSponsorId).then(() =>
+        getUnreadMessageCount()
+      ),
       getOrganizationForUser(),
       getCampaigns(),
       getSponsorPortalDeliverableMetrics(membership.linkedSponsorId),

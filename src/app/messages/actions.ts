@@ -11,7 +11,12 @@ import {
   getCurrentUserMembership,
   canAccessContract,
 } from "@/lib/permissions";
-import { isPortalRole, type TeamRole } from "@/lib/team";
+import {
+  isCreatorPortalRole,
+  isPortalRole,
+  isSponsorPortalRole,
+  type TeamRole,
+} from "@/lib/team";
 import {
   getCurrentUserId,
   getOrganizationUsers,
@@ -54,7 +59,7 @@ async function logMessageActivity(
   });
 }
 
-const PORTAL_ROLES = ["player", "content_creator"] as const;
+const CREATOR_PORTAL_ROLES = ["player", "content_creator"] as const;
 
 async function getDealRoomParticipantUserIds(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -65,20 +70,31 @@ async function getDealRoomParticipantUserIds(
   if (!relatedId) return [];
 
   let creatorId: string | null = null;
+  let sponsorId: string | null = null;
+
   if (type === "contract") {
     const { data } = await supabase
       .from("contracts")
-      .select("creator_id")
+      .select("creator_id, sponsor_id")
       .eq("id", relatedId)
       .eq("organization_id", organizationId)
       .maybeSingle();
     creatorId = data?.creator_id ?? null;
+    sponsorId = data?.sponsor_id ?? null;
+  } else {
+    const { data } = await supabase
+      .from("opportunities")
+      .select("sponsor_id")
+      .eq("id", relatedId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    sponsorId = data?.sponsor_id ?? null;
   }
 
   const [{ data: members }, { data: org }] = await Promise.all([
     supabase
       .from("team_members")
-      .select("user_id, role, linked_creator_id")
+      .select("user_id, role, linked_creator_id, linked_sponsor_id")
       .eq("organization_id", organizationId)
       .eq("status", "active")
       .not("user_id", "is", null),
@@ -94,16 +110,25 @@ async function getDealRoomParticipantUserIds(
 
   for (const member of members ?? []) {
     if (!member.user_id) continue;
-    const isPortal = PORTAL_ROLES.includes(
-      member.role as (typeof PORTAL_ROLES)[number]
-    );
+    const memberRole = member.role as TeamRole;
 
-    if (type === "opportunity") {
-      if (!isPortal) userIds.add(member.user_id);
+    if (memberRole === "sponsor") {
+      if (sponsorId && member.linked_sponsor_id === sponsorId) {
+        userIds.add(member.user_id);
+      }
       continue;
     }
 
-    if (!isPortal) {
+    const isCreatorPortal = CREATOR_PORTAL_ROLES.includes(
+      memberRole as (typeof CREATOR_PORTAL_ROLES)[number]
+    );
+
+    if (type === "opportunity") {
+      if (!isCreatorPortal) userIds.add(member.user_id);
+      continue;
+    }
+
+    if (!isCreatorPortal) {
       userIds.add(member.user_id);
     } else if (creatorId && member.linked_creator_id === creatorId) {
       userIds.add(member.user_id);
@@ -190,6 +215,65 @@ async function ensureUserOnCreatorContractDealRooms(
   return { synced };
 }
 
+async function ensureUserOnSponsorDealRooms(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  organizationId: string,
+  userId: string,
+  sponsorId: string
+): Promise<{ error?: string; synced?: number }> {
+  const { data: contracts } = await supabase
+    .from("contracts")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("sponsor_id", sponsorId);
+
+  const contractIds = (contracts ?? []).map((row) => row.id);
+  const conversationIds = new Set<string>();
+
+  if (contractIds.length > 0) {
+    const { data: contractConversations } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("type", "contract")
+      .in("related_id", contractIds);
+
+    for (const conversation of contractConversations ?? []) {
+      conversationIds.add(conversation.id);
+    }
+  }
+
+  const { data: opportunities } = await supabase
+    .from("opportunities")
+    .select("id")
+    .eq("organization_id", organizationId)
+    .eq("sponsor_id", sponsorId);
+
+  const opportunityIds = (opportunities ?? []).map((row) => row.id);
+
+  if (opportunityIds.length > 0) {
+    const { data: opportunityConversations } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("type", "opportunity")
+      .in("related_id", opportunityIds);
+
+    for (const conversation of opportunityConversations ?? []) {
+      conversationIds.add(conversation.id);
+    }
+  }
+
+  let synced = 0;
+  for (const conversationId of conversationIds) {
+    const result = await ensureParticipant(supabase, conversationId, userId);
+    if (result.error) return result;
+    synced += 1;
+  }
+
+  return { synced };
+}
+
 export async function syncPortalUserToContractDealRooms(
   creatorId: string,
   organizationIdOverride?: string
@@ -201,8 +285,8 @@ export async function syncPortalUserToContractDealRooms(
   if (featureError) return featureError;
 
   const membership = await getCurrentUserMembership();
-  if (!membership || !isPortalRole(membership.role)) {
-    return { error: "Only portal users can sync contract deal rooms." };
+  if (!membership || !isCreatorPortalRole(membership.role)) {
+    return { error: "Only creator portal users can sync contract deal rooms." };
   }
   if (membership.linkedCreatorId !== creatorId) {
     return { error: "You do not have access to this creator's deal rooms." };
@@ -244,6 +328,68 @@ export async function bootstrapPortalUserContractDealRooms(
     organizationId,
     userId,
     creatorId
+  );
+  if (result.error) return result;
+
+  revalidatePath("/messages");
+  revalidatePath("/portal");
+  return result;
+}
+
+export async function syncPortalUserToSponsorDealRooms(
+  sponsorId: string,
+  organizationIdOverride?: string
+): Promise<{ error?: string; synced?: number }> {
+  const messagingError = await requireMessagingAccess();
+  if (messagingError) return messagingError;
+
+  const featureError = await requireFeatureAccess("messaging", "Messaging");
+  if (featureError) return featureError;
+
+  const membership = await getCurrentUserMembership();
+  if (!membership || !isSponsorPortalRole(membership.role)) {
+    return { error: "Only sponsor portal users can sync sponsor deal rooms." };
+  }
+  if (membership.linkedSponsorId !== sponsorId) {
+    return { error: "You do not have access to this sponsor's deal rooms." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId =
+    organizationIdOverride ?? (await getOrganizationId());
+  if (!organizationId) return { error: "Organization not found." };
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) return { error: "Not authenticated." };
+
+  const result = await ensureUserOnSponsorDealRooms(
+    supabase,
+    organizationId,
+    currentUserId,
+    sponsorId
+  );
+  if (result.error) return result;
+
+  revalidatePath("/messages");
+  revalidatePath("/portal");
+  return result;
+}
+
+export async function bootstrapPortalUserSponsorDealRooms(
+  organizationId: string,
+  userId: string,
+  sponsorId: string
+): Promise<{ error?: string; synced?: number }> {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const result = await ensureUserOnSponsorDealRooms(
+    supabase,
+    organizationId,
+    userId,
+    sponsorId
   );
   if (result.error) return result;
 

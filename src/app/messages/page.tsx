@@ -2,19 +2,39 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { MessagesInboxClient } from "@/components/messages/MessagesInboxClient";
 import {
+  syncPortalUserToContractDealRooms,
+  syncPortalUserToSponsorDealRooms,
+} from "@/app/messages/actions";
+import {
   getConversations,
   getCurrentUserId,
   getOrganizationUsers,
 } from "@/lib/messages/queries";
 import { getCurrentUserMembership } from "@/lib/permissions";
-import { isPortalRole, staffRoles, type TeamRole } from "@/lib/team";
+import {
+  isCreatorPortalRole,
+  isPortalRole,
+  isSponsorPortalRole,
+  staffRoles,
+  type TeamRole,
+} from "@/lib/team";
 
 export default async function MessagesPage() {
-  const [conversations, users, currentUserId, membership] = await Promise.all([
+  const membership = await getCurrentUserMembership();
+
+  if (isCreatorPortalRole(membership?.role ?? null) && membership?.linkedCreatorId) {
+    await syncPortalUserToContractDealRooms(membership.linkedCreatorId);
+  } else if (
+    isSponsorPortalRole(membership?.role ?? null) &&
+    membership?.linkedSponsorId
+  ) {
+    await syncPortalUserToSponsorDealRooms(membership.linkedSponsorId);
+  }
+
+  const [conversations, users, currentUserId] = await Promise.all([
     getConversations(),
     getOrganizationUsers(),
     getCurrentUserId(),
-    getCurrentUserMembership(),
   ]);
 
   const isPortalUser = membership ? isPortalRole(membership.role) : false;

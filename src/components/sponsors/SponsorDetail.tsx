@@ -17,6 +17,7 @@ import {
   Handshake,
   DollarSign,
   Target,
+  MessageSquare,
 } from "lucide-react";
 import type { Sponsor } from "@/lib/sponsors";
 import type { Contract } from "@/lib/contracts";
@@ -40,6 +41,7 @@ interface SponsorDetailProps {
   canWrite?: boolean;
   canViewCampaigns?: boolean;
   isPortalUser?: boolean;
+  unreadMessages?: number;
 }
 
 function Section({
@@ -106,6 +108,7 @@ export function SponsorDetail({
   canWrite = true,
   canViewCampaigns = false,
   isPortalUser = false,
+  unreadMessages = 0,
 }: SponsorDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -241,6 +244,37 @@ export function SponsorDetail({
             />
           )}
         </div>
+
+        {isPortalUser ? (
+          <Section
+            title="Partnership messaging"
+            description="Deal rooms for your contracts and agency conversations"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-4">
+              <div className="flex items-start gap-3">
+                <MessageSquare className="mt-0.5 h-5 w-5 text-accent-light" />
+                <div>
+                  <p className="text-sm font-medium text-gray-200">
+                    {unreadMessages > 0
+                      ? `${unreadMessages} unread message${unreadMessages === 1 ? "" : "s"}`
+                      : "Message your agency team"}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Open deal rooms from contract details or view all partnership
+                    conversations in your inbox.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/messages"
+                className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-accent/40 hover:text-accent-light"
+              >
+                <MessageSquare className="h-4 w-4" />
+                Open messages
+              </Link>
+            </div>
+          </Section>
+        ) : null}
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Section title="Company Information">

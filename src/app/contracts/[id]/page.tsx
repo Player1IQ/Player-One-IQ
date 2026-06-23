@@ -3,7 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ContractDetail } from "@/components/contracts/ContractDetail";
 import { canRunLiveAi } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { syncPortalUserToContractDealRooms } from "@/app/messages/actions";
+import { syncPortalUserToContractDealRooms, syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { findConversationByRelated } from "@/lib/messages/queries";
 import { getCampaignsForContract } from "@/lib/campaigns/contract-links";
 import { getContractById, getContractNegotiationContext } from "@/lib/contracts/queries";
@@ -16,7 +16,7 @@ import {
   hasFullAccess,
   getCurrentUserMembership,
 } from "@/lib/permissions";
-import { isCreatorPortalRole, isPortalRole } from "@/lib/team";
+import { isCreatorPortalRole, isPortalRole, isSponsorPortalRole } from "@/lib/team";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 
@@ -54,6 +54,10 @@ export default async function ContractDetailPage({
     await syncPortalUserToContractDealRooms(contract.creatorId);
   }
 
+  if (isSponsorPortalRole(role) && membership?.linkedSponsorId === contract.sponsorId) {
+    await syncPortalUserToSponsorDealRooms(contract.sponsorId);
+  }
+
   const resolvedDealRoomConversationId = isPortalUser
     ? await findConversationByRelated("contract", id)
     : dealRoomConversationId;
@@ -88,6 +92,9 @@ export default async function ContractDetailPage({
         canUseAi={hasFeature(subscription.features, "ai_contract_summaries")}
         aiMode={aiLive ? "live" : "demo"}
         dealRoomConversationId={resolvedDealRoomConversationId}
+        showDealRoom={
+          !isSponsorPortalRole(role) || Boolean(resolvedDealRoomConversationId)
+        }
       />
     </DashboardLayout>
   );

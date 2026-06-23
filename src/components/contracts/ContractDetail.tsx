@@ -48,6 +48,7 @@ interface ContractDetailProps {
   canUseAi?: boolean;
   aiMode?: "live" | "demo";
   dealRoomConversationId?: string | null;
+  showDealRoom?: boolean;
 }
 
 function Section({
@@ -83,6 +84,7 @@ export function ContractDetail({
   canUseAi = false,
   aiMode = "demo",
   dealRoomConversationId,
+  showDealRoom = true,
 }: ContractDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -122,11 +124,13 @@ export function ContractDetail({
             {isPortalUser ? "Back to Portal" : "Back to Contracts"}
           </Link>
           <div className="flex flex-wrap gap-2">
-            <DealRoomButton
-              type="contract"
-              relatedId={contract.id}
-              conversationId={dealRoomConversationId}
-            />
+            {showDealRoom ? (
+              <DealRoomButton
+                type="contract"
+                relatedId={contract.id}
+                conversationId={dealRoomConversationId}
+              />
+            ) : null}
             {canWrite && (
               <>
                 <button
