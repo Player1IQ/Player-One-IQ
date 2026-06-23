@@ -13,7 +13,7 @@ import { getSponsors } from "@/lib/sponsors/queries";
 import {
   canAccessContract,
   canUpdateDeliverable,
-  canWriteData,
+  hasFullAccess,
   getCurrentUserMembership,
 } from "@/lib/permissions";
 import { isPortalRole } from "@/lib/team";
@@ -65,7 +65,7 @@ export default async function ContractDetailPage({
   const organizationId = await getOrganizationId();
   const aiLive =
     Boolean(organizationId) && (await canRunLiveAi(organizationId!));
-  const canWrite = canWriteData(role);
+  const canWrite = hasFullAccess(role, "contracts");
   const canUpdateStatus = canUpdateDeliverable(membership, {
     creatorId: contract.creatorId,
   });

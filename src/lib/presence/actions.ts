@@ -118,8 +118,8 @@ export async function updateCreatorAvailability(
     return { error: "Invalid status." };
   }
 
-  const { requireWriteAccess } = await import("@/lib/permissions");
-  const permError = await requireWriteAccess();
+  const { requireResourceWriteAccess } = await import("@/lib/permissions");
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const supabase = await createClient();

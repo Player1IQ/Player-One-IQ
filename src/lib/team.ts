@@ -450,14 +450,11 @@ export function canManageTeam(role: TeamRole | null): boolean {
   return role === "owner" || role === "admin";
 }
 
+/** True when the role has full write on at least one staff resource area. */
 export function canWriteData(role: TeamRole | null): boolean {
   if (!role || isPortalRole(role)) return false;
-  return (
-    role === "owner" ||
-    role === "admin" ||
-    role === "manager" ||
-    role === "partnerships" ||
-    role === "talent_manager"
+  return (Object.keys(permissionMatrix[role]) as PermissionKey[]).some(
+    (key) => permissionMatrix[role][key] === "full"
   );
 }
 

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SeedTestDataButton } from "@/components/dev/SeedTestDataButton";
 import { DeployChecklistCard } from "@/components/settings/DeployChecklistCard";
@@ -55,7 +56,12 @@ export default async function SettingsPage() {
 
   const canView = canViewSettings(role);
   const canEdit = canManageSettings(role);
-  const aiIntegration = canView ? await getAiIntegrationForSettings() : null;
+
+  if (!canView) {
+    redirect("/");
+  }
+
+  const aiIntegration = await getAiIntegrationForSettings();
   const showDevTools = isSeedEnabled();
   const oauthEnabled = isPlatformOAuthFeatureEnabled();
 

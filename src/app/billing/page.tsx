@@ -1,14 +1,23 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { BillingPageClient } from "@/components/billing/BillingPageClient";
 import { getBillingOverview } from "@/lib/billing/queries";
-import { canManageBilling, getCurrentUserRole } from "@/lib/permissions";
+import {
+  canManageBilling,
+  canViewBilling,
+  getCurrentUserRole,
+} from "@/lib/permissions";
 
 export default async function BillingPage() {
   const [billing, role] = await Promise.all([
     getBillingOverview(),
     getCurrentUserRole(),
   ]);
+
+  if (!canViewBilling(role)) {
+    redirect("/");
+  }
 
   return (
     <DashboardLayout

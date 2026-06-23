@@ -6,7 +6,7 @@ import { getDeliverablesSummariesForContracts } from "@/lib/contract-deliverable
 import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
 import {
-  canWriteData,
+  hasFullAccess,
   getCurrentUserMembership,
   getCurrentUserRole,
 } from "@/lib/permissions";
@@ -52,7 +52,7 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
           creators={creators}
           sponsors={sponsors}
           deliverableSummaries={deliverableSummaries}
-          canWrite={canWriteData(role)}
+          canWrite={hasFullAccess(role, "contracts")}
           initialSummaryFilter={initialSummaryFilter}
           isPortalUser={isPortalUser}
         />

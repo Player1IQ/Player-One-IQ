@@ -9,7 +9,7 @@ import {
 } from "@/lib/creator-revenue/queries";
 import { canRunLiveAi } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { canAccessCreator, canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import { canAccessCreator, hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
 import { isPortalRole } from "@/lib/team";
 import { getOAuthPlatformUi } from "@/lib/platform-oauth/config";
 import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
@@ -73,7 +73,7 @@ export default async function CreatorDetailPage({
         oauthPlatformUi={getOAuthPlatformUi()}
         oauthSuccess={oauthSuccess ?? null}
         oauthError={oauthError ?? null}
-        canWrite={canWriteData(role)}
+        canWrite={hasFullAccess(role, "creators")}
         isPortalUser={isPortalUser}
         isContentCreator={role === "content_creator"}
         canUseContentAi={hasFeature(subscription.features, "ai_growth")}

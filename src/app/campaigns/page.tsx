@@ -6,7 +6,7 @@ import { getCampaigns } from "@/lib/campaigns/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
 import { getOpportunities } from "@/lib/opportunities/queries";
 import {
-  canWriteData,
+  hasFullAccess,
   getCurrentUserMembership,
   getCurrentUserRole,
 } from "@/lib/permissions";
@@ -45,7 +45,7 @@ export default async function CampaignsPage() {
           campaigns={campaigns}
           sponsors={sponsors}
           opportunities={opportunities}
-          canWrite={canWriteData(role)}
+          canWrite={hasFullAccess(role, "campaigns")}
           isPortalUser={isPortalUser}
         />
       </SubscriptionPageGate>

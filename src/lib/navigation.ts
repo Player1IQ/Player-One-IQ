@@ -4,7 +4,7 @@ import {
   navFeatureRequirements,
 } from "@/lib/subscription/features";
 import type { FeatureKey } from "@/lib/subscription/types";
-import { canAccessStaffDashboard, type TeamRole } from "@/lib/team";
+import { canAccessStaffDashboard, hasReadAccess, type PermissionKey, type TeamRole } from "@/lib/team";
 
 export type NavIconName =
   | "dashboard"
@@ -89,6 +89,18 @@ export const navItems: NavItem[] = [
   { label: "Settings", href: "/settings", icon: "settings" },
 ];
 
+const staffNavPermissionKeys: Partial<Record<string, PermissionKey>> = {
+  "/creators": "creators",
+  "/sponsors": "sponsors",
+  "/campaigns": "campaigns",
+  "/contracts": "contracts",
+  "/opportunities": "opportunities",
+  "/messages": "messages",
+  "/team": "team",
+  "/billing": "billing",
+  "/settings": "settings",
+};
+
 export const portalNavItems: NavItem[] = [
   { label: "Home", href: "/portal", icon: "dashboard" },
   { label: "My Profile", href: "/portal/profile", icon: "users" },
@@ -146,7 +158,12 @@ export function getAccessibleNavItems(
     }
   }
 
-  return items.filter((item) =>
-    navItemAccessible(features, item.requiredFeature)
-  );
+  return items
+    .filter((item) => navItemAccessible(features, item.requiredFeature))
+    .filter((item) => {
+      if (!role || !canAccessStaffDashboard(role)) return true;
+      const permissionKey = staffNavPermissionKeys[item.href];
+      if (!permissionKey) return true;
+      return hasReadAccess(role, permissionKey);
+    });
 }

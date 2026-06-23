@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CreatorsPageClient } from "@/components/creators/CreatorsPageClient";
 import { getCreators } from "@/lib/creators/queries";
-import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import { hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
 import { isSeedEnabled } from "@/lib/seed/constants";
 
 export default async function CreatorsPage() {
@@ -17,7 +17,7 @@ export default async function CreatorsPage() {
     >
       <CreatorsPageClient
         creators={creators}
-        canWrite={canWriteData(role)}
+        canWrite={hasFullAccess(role, "creators")}
         showSeedButton={isSeedEnabled()}
       />
     </DashboardLayout>

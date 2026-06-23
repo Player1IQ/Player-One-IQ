@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireWriteAccess } from "@/lib/permissions";
+import { requireTeamManageAccess } from "@/lib/permissions";
 import { isSeedEnabled, SEED_MARKER } from "@/lib/seed/constants";
 import {
   getSeedCreatorRows,
@@ -33,7 +33,7 @@ export async function seedTestData(): Promise<
     return { error: "Test data seeding is only available in development." };
   }
 
-  const permError = await requireWriteAccess();
+  const permError = await requireTeamManageAccess();
   if (permError) return permError;
 
   const supabase = await createClient();

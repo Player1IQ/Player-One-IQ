@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
   requireFeatureAccess,
-  requireWriteAccess,
+  requireResourceWriteAccess,
 } from "@/lib/permissions";
 import {
   type ContractInput,
@@ -104,7 +104,7 @@ function toDbPayload(input: ContractInput) {
 }
 
 export async function createContract(input: ContractInput) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("contracts");
   if (permError) return permError;
 
   const error = validateInput(input);
@@ -153,7 +153,7 @@ export async function createContract(input: ContractInput) {
 }
 
 export async function updateContract(id: string, input: ContractInput) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("contracts");
   if (permError) return permError;
 
   const error = validateInput(input);
@@ -236,7 +236,7 @@ export async function updateContractStatus(
   id: string,
   newStatus: ContractStatus
 ) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("contracts");
   if (permError) return permError;
 
   if (!contractStatuses.includes(newStatus)) {
@@ -310,7 +310,7 @@ export async function updateContractDealTerms(
   contractValue: number,
   negotiationNote?: string
 ) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("contracts");
   if (permError) return permError;
 
   if (!Number.isFinite(contractValue) || contractValue < 0) {
@@ -423,7 +423,7 @@ export async function updateContractDealTerms(
 }
 
 export async function deleteContract(id: string) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("contracts");
   if (permError) return permError;
 
   const supabase = await createClient();

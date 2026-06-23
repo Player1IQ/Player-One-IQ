@@ -20,7 +20,13 @@ import {
   permissionMatrix,
 } from "@/lib/team";
 
-export { canWriteData, canUseMessaging, isPortalRole, hasFullAccess, hasReadAccess };
+export {
+  canWriteData,
+  canUseMessaging,
+  isPortalRole,
+  hasFullAccess,
+  hasReadAccess,
+};
 
 export interface CurrentUserMembership {
   role: TeamRole;
@@ -100,13 +106,65 @@ export async function canAccessContract(contract: {
   return hasReadAccess(membership.role, "contracts");
 }
 
+export function canWriteResource(
+  role: TeamRole | null,
+  key: PermissionKey
+): boolean {
+  return hasFullAccess(role, key);
+}
+
+export async function requireResourceWriteAccess(
+  key: PermissionKey
+): Promise<{ error: string } | null> {
+  const role = await getCurrentUserRole();
+  if (!canWriteResource(role, key)) {
+    return {
+      error: "You do not have permission to modify this data.",
+    };
+  }
+  return null;
+}
+
+export function canPostDealRoomEvents(role: TeamRole | null): boolean {
+  if (!role || isPortalRole(role)) return false;
+  return (
+    hasFullAccess(role, "messages") ||
+    hasFullAccess(role, "contracts") ||
+    hasFullAccess(role, "opportunities")
+  );
+}
+
+export async function requireDealRoomEventAccess(): Promise<
+  { error: string } | null
+> {
+  const role = await getCurrentUserRole();
+  if (!canPostDealRoomEvents(role)) {
+    return {
+      error: "You do not have permission to post deal room updates.",
+    };
+  }
+  return null;
+}
+
+export async function requireMessagingWriteAccess(): Promise<
+  { error: string } | null
+> {
+  const role = await getCurrentUserRole();
+  if (!hasFullAccess(role, "messages")) {
+    return {
+      error: "You do not have permission to manage messaging.",
+    };
+  }
+  return null;
+}
+
 export function canUpdateDeliverable(
   membership: CurrentUserMembership | null,
   contract: { creatorId: string }
 ): boolean {
   if (!membership) return false;
 
-  if (canWriteData(membership.role)) return true;
+  if (hasFullAccess(membership.role, "contracts")) return true;
 
   if (isPortalRole(membership.role)) {
     return membership.linkedCreatorId === contract.creatorId;
@@ -204,6 +262,7 @@ export async function canAccessCampaign(campaignId: string): Promise<boolean> {
   return hasReadAccess(membership.role, "campaigns");
 }
 
+/** @deprecated Prefer requireResourceWriteAccess for resource-scoped checks. */
 export async function requireWriteAccess(): Promise<{ error: string } | null> {
   const role = await getCurrentUserRole();
   if (!canWriteData(role)) {
@@ -237,11 +296,7 @@ export async function requireTeamManageAccess(): Promise<
 }
 
 export function canManageOpportunities(role: TeamRole | null): boolean {
-  return (
-    role === "owner" ||
-    role === "admin" ||
-    role === "partnerships"
-  );
+  return hasFullAccess(role, "opportunities");
 }
 
 export function canApplyToOpportunities(role: TeamRole | null): boolean {

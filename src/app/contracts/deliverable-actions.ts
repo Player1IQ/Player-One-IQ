@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
-  canWriteData,
   getCurrentUserMembership,
   isPortalRole,
   requireDeliverableUpdateAccess,
   requireFeatureAccess,
-  requireWriteAccess,
+  requireResourceWriteAccess,
+  hasFullAccess,
 } from "@/lib/permissions";
 
 async function requireContractsFeature() {
@@ -72,7 +72,7 @@ export async function createDeliverable(
   const featureError = await requireContractsFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("contracts");
   if (permError) return permError;
 
   const title = input.title.trim();
@@ -171,7 +171,7 @@ export async function updateDeliverable(
   const portalStatusOnly =
     membership &&
     isPortalRole(membership.role) &&
-    !canWriteData(membership.role);
+    !hasFullAccess(membership.role, "contracts");
 
   if (portalStatusOnly) {
     if (input.title !== undefined || input.dueDate !== undefined) {
@@ -280,7 +280,7 @@ export async function deleteDeliverable(id: string) {
   const featureError = await requireContractsFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("contracts");
   if (permError) return permError;
 
   const supabase = await createClient();
@@ -327,7 +327,7 @@ export async function reorderDeliverables(
   const featureError = await requireContractsFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("contracts");
   if (permError) return permError;
 
   if (orderedIds.length === 0) return { success: true };

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireFeatureAccess, requireWriteAccess } from "@/lib/permissions";
+import { requireFeatureAccess, requireResourceWriteAccess } from "@/lib/permissions";
 import { platforms, type Platform } from "@/lib/creators";
 import {
   getCurrentPeriodMonth,
@@ -105,7 +105,7 @@ export async function connectCreatorPlatformAccount(
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   if (!platforms.includes(platform)) {
@@ -176,7 +176,7 @@ export async function disconnectCreatorPlatformAccount(accountId: string) {
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const supabase = await createClient();
@@ -221,7 +221,7 @@ export async function upsertCreatorPlatformRevenue(
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const supabase = await createClient();
@@ -268,7 +268,7 @@ export async function syncCreatorPlatformAccount(accountId: string) {
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const organizationId = await getOrganizationId();
@@ -305,7 +305,7 @@ export async function syncAllCreatorOAuthAccounts(creatorId: string) {
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
 
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const organizationId = await getOrganizationId();

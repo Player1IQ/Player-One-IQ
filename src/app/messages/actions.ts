@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
   requireFeatureAccess,
-  requireWriteAccess,
+  requireDealRoomEventAccess,
   requireMessagingAccess,
+  requireMessagingWriteAccess,
   getCurrentUserMembership,
   canAccessContract,
 } from "@/lib/permissions";
@@ -310,7 +311,7 @@ async function postConversationSystemEvent(
 }
 
 export async function notifyDealRoom(conversationId: string, content: string) {
-  const permError = await requireWriteAccess();
+  const permError = await requireDealRoomEventAccess();
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");
@@ -446,7 +447,7 @@ export async function createGroupConversation(
     return { error: "Portal users cannot create group chats." };
   }
 
-  const permError = await requireWriteAccess();
+  const permError = await requireMessagingWriteAccess();
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");
@@ -539,7 +540,7 @@ export async function addConversationParticipants(
   conversationId: string,
   userIds: string[]
 ) {
-  const permError = await requireWriteAccess();
+  const permError = await requireMessagingWriteAccess();
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");
@@ -632,7 +633,7 @@ export async function removeConversationParticipant(
   conversationId: string,
   userId: string
 ) {
-  const permError = await requireWriteAccess();
+  const permError = await requireMessagingWriteAccess();
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");
@@ -700,7 +701,7 @@ export async function removeConversationParticipant(
 }
 
 export async function syncConversationParticipants(conversationId: string) {
-  const permError = await requireWriteAccess();
+  const permError = await requireDealRoomEventAccess();
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");
@@ -750,8 +751,8 @@ export async function getOrCreateRelatedConversation(
     const messagingError = await requireMessagingAccess();
     if (messagingError) return messagingError;
   } else {
-    const permError = await requireWriteAccess();
-    if (permError) return permError;
+    const messagingError = await requireMessagingAccess();
+    if (messagingError) return messagingError;
   }
 
   const featureError = await requireFeatureAccess("messaging", "Messaging");

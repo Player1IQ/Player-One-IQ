@@ -6,7 +6,7 @@ import { getOrganizationId } from "@/lib/organization/queries";
 import {
   requireFeatureAccess,
   requireUsageWithinLimit,
-  requireWriteAccess,
+  requireResourceWriteAccess,
 } from "@/lib/permissions";
 import {
   type CreatorInput,
@@ -40,7 +40,7 @@ function validateInput(input: CreatorInput) {
 }
 
 export async function createCreator(input: CreatorInput) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const error = validateInput(input);
@@ -93,7 +93,7 @@ export async function createCreator(input: CreatorInput) {
 }
 
 export async function updateCreator(id: string, input: CreatorInput) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const error = validateInput(input);
@@ -128,7 +128,7 @@ export async function updateCreator(id: string, input: CreatorInput) {
 }
 
 export async function uploadCreatorAvatar(creatorId: string, formData: FormData) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const file = formData.get("file");
@@ -191,7 +191,7 @@ export async function uploadCreatorAvatar(creatorId: string, formData: FormData)
 }
 
 export async function removeCreatorAvatar(creatorId: string) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const supabase = await createClient();
@@ -234,7 +234,7 @@ export async function removeCreatorAvatar(creatorId: string) {
 }
 
 export async function deleteCreator(id: string) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) return permError;
 
   const supabase = await createClient();

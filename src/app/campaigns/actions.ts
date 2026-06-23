@@ -6,7 +6,7 @@ import { getOrganizationId } from "@/lib/organization/queries";
 import {
   requireFeatureAccess,
   requireUsageWithinLimit,
-  requireWriteAccess,
+  requireResourceWriteAccess,
 } from "@/lib/permissions";
 import {
   type CampaignInput,
@@ -76,7 +76,7 @@ async function validateOpportunityId(
 }
 
 export async function createCampaign(input: CampaignInput) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("campaigns");
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess(
@@ -146,7 +146,7 @@ export async function createCampaign(input: CampaignInput) {
 }
 
 export async function updateCampaign(id: string, input: CampaignInput) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("campaigns");
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess(
@@ -208,7 +208,7 @@ export async function updateCampaignStatus(
   id: string,
   status: CampaignInput["status"]
 ) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("campaigns");
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess(
@@ -258,7 +258,7 @@ export async function updateCampaignStatus(
 }
 
 export async function deleteCampaign(id: string) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("campaigns");
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess(
@@ -301,7 +301,7 @@ export async function assignCampaignCreator(
   campaignId: string,
   creatorId: string
 ) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("campaigns");
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess(
@@ -355,7 +355,7 @@ export async function removeCampaignCreator(
   campaignId: string,
   creatorId: string
 ) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("campaigns");
   if (permError) return permError;
 
   const featureError = await requireFeatureAccess(

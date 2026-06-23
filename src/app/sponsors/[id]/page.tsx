@@ -4,7 +4,7 @@ import { SponsorDetail } from "@/components/sponsors/SponsorDetail";
 import { getSponsorById } from "@/lib/sponsors/queries";
 import { getContracts } from "@/lib/contracts/queries";
 import { getCampaignsBySponsor } from "@/lib/campaigns/queries";
-import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import { hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 
@@ -44,7 +44,7 @@ export default async function SponsorDetailPage({
         sponsor={sponsor}
         contracts={contracts.filter((c) => c.sponsorId === id)}
         campaigns={campaigns}
-        canWrite={canWriteData(role)}
+        canWrite={hasFullAccess(role, "sponsors")}
         canViewCampaigns={canViewCampaigns}
       />
     </DashboardLayout>

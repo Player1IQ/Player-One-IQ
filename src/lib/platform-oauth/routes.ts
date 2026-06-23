@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireWriteAccess } from "@/lib/permissions";
+import { requireResourceWriteAccess } from "@/lib/permissions";
 import {
   isPlatformOAuthAvailable,
   isPlatformOAuthFeatureEnabled,
@@ -63,7 +63,7 @@ export async function handlePlatformOAuthStart(
   platform: OAuthPlatform,
   request: Request
 ) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("creators");
   if (permError) {
     return NextResponse.json(permError, { status: 403 });
   }

@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
   requireFeatureAccess,
-  requireWriteAccess,
+  requireResourceWriteAccess,
 } from "@/lib/permissions";
 import {
   type SponsorInput,
@@ -74,7 +74,7 @@ function toDbPayload(input: SponsorInput) {
 }
 
 export async function createSponsor(input: SponsorInput) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("sponsors");
   if (permError) return permError;
 
   const error = validateInput(input);
@@ -106,7 +106,7 @@ export async function createSponsor(input: SponsorInput) {
 }
 
 export async function updateSponsor(id: string, input: SponsorInput) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("sponsors");
   if (permError) return permError;
 
   const error = validateInput(input);
@@ -138,7 +138,7 @@ export async function updateSponsor(id: string, input: SponsorInput) {
 }
 
 export async function deleteSponsor(id: string) {
-  const permError = await requireWriteAccess();
+  const permError = await requireResourceWriteAccess("sponsors");
   if (permError) return permError;
 
   const supabase = await createClient();

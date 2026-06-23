@@ -10,7 +10,7 @@ import { getSponsors } from "@/lib/sponsors/queries";
 import { getOpportunities } from "@/lib/opportunities/queries";
 import {
   canAccessCampaign,
-  canWriteData,
+  hasFullAccess,
   getCurrentUserMembership,
 } from "@/lib/permissions";
 import { isPortalRole } from "@/lib/team";
@@ -38,7 +38,7 @@ export default async function CampaignDetailPage({
     notFound();
   }
 
-  const canWrite = canWriteData(role) && !isPortalUser;
+  const canWrite = hasFullAccess(role, "campaigns") && !isPortalUser;
   const [assignments, creators, relatedContracts] = await Promise.all([
     getCampaignCreators(id),
     canWrite ? getCreators() : Promise.resolve([]),

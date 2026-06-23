@@ -4,7 +4,7 @@ import { SponsorsPageClient } from "@/components/sponsors/SponsorsPageClient";
 import { getSponsors } from "@/lib/sponsors/queries";
 import { enrichSponsorsWithContractStats } from "@/lib/sponsors";
 import { getContracts } from "@/lib/contracts/queries";
-import { canWriteData, getCurrentUserRole } from "@/lib/permissions";
+import { hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
 
 export default async function SponsorsPage() {
   const [sponsors, contracts, role] = await Promise.all([
@@ -23,7 +23,7 @@ export default async function SponsorsPage() {
       <SubscriptionPageGate required="sponsor_crm" featureLabel="Sponsor CRM">
         <SponsorsPageClient
           sponsors={enrichedSponsors}
-          canWrite={canWriteData(role)}
+          canWrite={hasFullAccess(role, "sponsors")}
         />
       </SubscriptionPageGate>
     </DashboardLayout>
