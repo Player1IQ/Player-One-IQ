@@ -1,7 +1,12 @@
 "use server";
 
+import { getCampaigns } from "@/lib/campaigns/queries";
 import { getContracts } from "@/lib/contracts/queries";
-import { getCurrentPeriodMonth } from "@/lib/creator-revenue";
+import { getOrganizationDeliverables } from "@/lib/contract-deliverables/queries";
+import {
+  getCurrentPeriodMonth,
+  getPreviousPeriodMonth,
+} from "@/lib/creator-revenue";
 import {
   getConnectedPlatformAccountCount,
   getOrganizationRevenueEntries,
@@ -24,12 +29,16 @@ export async function fetchMonthlyReportExport() {
   if (permError) return permError;
 
   const periodMonth = getCurrentPeriodMonth();
+  const previousPeriodMonth = getPreviousPeriodMonth();
 
   const [
     creators,
     contracts,
     opportunities,
+    campaigns,
+    deliverables,
     revenueEntries,
+    previousMonthRevenueEntries,
     connectedAccountCount,
     subscription,
     aiUsage,
@@ -38,7 +47,10 @@ export async function fetchMonthlyReportExport() {
     getCreators(),
     getContracts(),
     getOpportunities(),
+    getCampaigns(),
+    getOrganizationDeliverables(),
     getOrganizationRevenueEntries(periodMonth),
+    getOrganizationRevenueEntries(previousPeriodMonth),
     getConnectedPlatformAccountCount(),
     getSubscriptionContext(),
     getAiUsageSummary(),
@@ -49,7 +61,11 @@ export async function fetchMonthlyReportExport() {
     creators,
     contracts,
     opportunities,
+    campaigns,
+    deliverables,
     revenueEntries,
+    previousMonthRevenueEntries,
+    previousPeriodMonth,
     connectedAccountCount,
     aiUsage,
     usage: subscription.usage,

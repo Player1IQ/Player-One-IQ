@@ -115,6 +115,11 @@ export function getCurrentPeriodMonth(date = new Date()): string {
   return `${year}-${month}-01`;
 }
 
+export function getPreviousPeriodMonth(date = new Date()): string {
+  const previous = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+  return getCurrentPeriodMonth(previous);
+}
+
 export function formatPeriodMonth(periodMonth: string): string {
   const date = new Date(periodMonth + "T00:00:00");
   return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });

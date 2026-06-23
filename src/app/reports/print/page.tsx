@@ -1,7 +1,12 @@
 import { notFound, redirect } from "next/navigation";
 import { ReportPrintClient } from "@/components/reports/ReportPrintClient";
+import { getCampaigns } from "@/lib/campaigns/queries";
 import { getContracts } from "@/lib/contracts/queries";
-import { getCurrentPeriodMonth } from "@/lib/creator-revenue";
+import { getOrganizationDeliverables } from "@/lib/contract-deliverables/queries";
+import {
+  getCurrentPeriodMonth,
+  getPreviousPeriodMonth,
+} from "@/lib/creator-revenue";
 import {
   getConnectedPlatformAccountCount,
   getOrganizationRevenueEntries,
@@ -32,12 +37,16 @@ export default async function ReportPrintPage() {
   }
 
   const periodMonth = getCurrentPeriodMonth();
+  const previousPeriodMonth = getPreviousPeriodMonth();
 
   const [
     creators,
     contracts,
     opportunities,
+    campaigns,
+    deliverables,
     revenueEntries,
+    previousMonthRevenueEntries,
     connectedAccountCount,
     aiUsage,
     organization,
@@ -45,7 +54,10 @@ export default async function ReportPrintPage() {
     getCreators(),
     getContracts(),
     getOpportunities(),
+    getCampaigns(),
+    getOrganizationDeliverables(),
     getOrganizationRevenueEntries(periodMonth),
+    getOrganizationRevenueEntries(previousPeriodMonth),
     getConnectedPlatformAccountCount(),
     getAiUsageSummary(),
     getOrganizationForUser(),
@@ -59,7 +71,11 @@ export default async function ReportPrintPage() {
     creators,
     contracts,
     opportunities,
+    campaigns,
+    deliverables,
     revenueEntries,
+    previousMonthRevenueEntries,
+    previousPeriodMonth,
     connectedAccountCount,
     aiUsage,
     usage: subscription.usage,

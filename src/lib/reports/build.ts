@@ -4,6 +4,8 @@ import {
   getContractStats,
   type Contract,
 } from "@/lib/contracts";
+import type { SponsorCampaign } from "@/lib/campaigns";
+import type { ContractDeliverable } from "@/lib/contract-deliverables";
 import type { Creator } from "@/lib/creators";
 import {
   summarizeCreatorIncome,
@@ -12,6 +14,16 @@ import {
 import { getDashboardRevenueSummary } from "@/lib/revenue/summary";
 import { getOpportunityStats, type Opportunity } from "@/lib/opportunities";
 import type { AiUsageSummary, UsageSnapshot } from "@/lib/subscription/types";
+import {
+  buildCampaignReportSummary,
+  buildDeliverableHealthReport,
+  buildRevenuePeriodComparison,
+  buildSponsorBreakdown,
+  type CampaignReportSummary,
+  type DeliverableHealthReport,
+  type RevenuePeriodComparison,
+  type SponsorBreakdownRow,
+} from "@/lib/reports/aggregates";
 
 export interface CreatorRevenueRow {
   id: string;
@@ -27,8 +39,12 @@ export interface MonthlyReportData {
   creatorCount: number;
   connectedAccountCount: number;
   revenue: ReturnType<typeof getDashboardRevenueSummary>;
+  revenueComparison: RevenuePeriodComparison | null;
   contractStats: ReturnType<typeof getContractStats>;
   opportunityStats: ReturnType<typeof getOpportunityStats>;
+  campaignSummary: CampaignReportSummary;
+  deliverableHealth: DeliverableHealthReport;
+  sponsorBreakdown: SponsorBreakdownRow[];
   creatorLeaderboard: CreatorRevenueRow[];
   platformBreakdown: Array<{
     platform: string;
@@ -38,6 +54,13 @@ export interface MonthlyReportData {
   aiUsage: AiUsageSummary[];
   usage: UsageSnapshot[];
 }
+
+export type {
+  CampaignReportSummary,
+  DeliverableHealthReport,
+  RevenuePeriodComparison,
+  SponsorBreakdownRow,
+};
 
 export function buildCreatorRevenueLeaderboard(
   creators: Creator[],
@@ -95,7 +118,11 @@ export function buildMonthlyReportData(params: {
   creators: Creator[];
   contracts: Contract[];
   opportunities: Opportunity[];
+  campaigns: SponsorCampaign[];
+  deliverables: ContractDeliverable[];
   revenueEntries: CreatorRevenueEntry[];
+  previousMonthRevenueEntries?: CreatorRevenueEntry[];
+  previousPeriodMonth?: string;
   connectedAccountCount: number;
   aiUsage: AiUsageSummary[];
   usage: UsageSnapshot[];
@@ -108,17 +135,35 @@ export function buildMonthlyReportData(params: {
     timeZone: "UTC",
   });
 
+  const revenue = getDashboardRevenueSummary(
+    params.contracts,
+    params.revenueEntries,
+    params.connectedAccountCount
+  );
+
+  const revenueComparison =
+    params.previousPeriodMonth && params.previousMonthRevenueEntries
+      ? buildRevenuePeriodComparison({
+          contracts: params.contracts,
+          currentMonthEntries: params.revenueEntries,
+          previousMonthEntries: params.previousMonthRevenueEntries,
+          currentPeriodMonth: params.periodMonth,
+          previousPeriodMonth: params.previousPeriodMonth,
+          currentTotal: revenue.total,
+        })
+      : null;
+
   return {
     periodLabel,
     creatorCount: params.creators.length,
     connectedAccountCount: params.connectedAccountCount,
-    revenue: getDashboardRevenueSummary(
-      params.contracts,
-      params.revenueEntries,
-      params.connectedAccountCount
-    ),
+    revenue,
+    revenueComparison,
     contractStats: getContractStats(params.contracts),
     opportunityStats: getOpportunityStats(params.opportunities),
+    campaignSummary: buildCampaignReportSummary(params.campaigns),
+    deliverableHealth: buildDeliverableHealthReport(params.deliverables),
+    sponsorBreakdown: buildSponsorBreakdown(params.contracts),
     creatorLeaderboard: buildCreatorRevenueLeaderboard(
       params.creators,
       params.contracts,

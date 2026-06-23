@@ -57,6 +57,24 @@ async function seedDeliverablesFromContractText(
     .map(mapDeliverableRow);
 }
 
+export async function getOrganizationDeliverables(): Promise<ContractDeliverable[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const { data, error } = await supabase
+    .from("contract_deliverables")
+    .select(deliverableSelect)
+    .eq("organization_id", organizationId)
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+  return (data as ContractDeliverableRow[]).map(mapDeliverableRow);
+}
+
 export async function getDeliverablesForContract(
   contractId: string
 ): Promise<ContractDeliverable[]> {

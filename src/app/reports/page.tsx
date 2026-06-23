@@ -1,8 +1,13 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ReportsPageClient } from "@/components/reports/ReportsPageClient";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
+import { getCampaigns } from "@/lib/campaigns/queries";
 import { getContracts } from "@/lib/contracts/queries";
-import { getCurrentPeriodMonth } from "@/lib/creator-revenue";
+import { getOrganizationDeliverables } from "@/lib/contract-deliverables/queries";
+import {
+  getCurrentPeriodMonth,
+  getPreviousPeriodMonth,
+} from "@/lib/creator-revenue";
 import {
   getConnectedPlatformAccountCount,
   getOrganizationRevenueEntries,
@@ -17,12 +22,16 @@ import {
 
 export default async function ReportsPage() {
   const periodMonth = getCurrentPeriodMonth();
+  const previousPeriodMonth = getPreviousPeriodMonth();
 
   const [
     creators,
     contracts,
     opportunities,
+    campaigns,
+    deliverables,
     revenueEntries,
+    previousMonthRevenueEntries,
     connectedAccountCount,
     subscription,
     aiUsage,
@@ -30,7 +39,10 @@ export default async function ReportsPage() {
     getCreators(),
     getContracts(),
     getOpportunities(),
+    getCampaigns(),
+    getOrganizationDeliverables(),
     getOrganizationRevenueEntries(periodMonth),
+    getOrganizationRevenueEntries(previousPeriodMonth),
     getConnectedPlatformAccountCount(),
     getSubscriptionContext(),
     getAiUsageSummary(),
@@ -40,7 +52,11 @@ export default async function ReportsPage() {
     creators,
     contracts,
     opportunities,
+    campaigns,
+    deliverables,
     revenueEntries,
+    previousMonthRevenueEntries,
+    previousPeriodMonth,
     connectedAccountCount,
     aiUsage,
     usage: subscription.usage,

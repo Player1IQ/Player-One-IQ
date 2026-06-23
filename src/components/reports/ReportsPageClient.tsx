@@ -3,15 +3,21 @@
 import Link from "next/link";
 import {
   Briefcase,
+  Building2,
+  CheckCircle2,
+  ClipboardList,
   DollarSign,
   FileText,
   Link2,
   Sparkles,
+  Target,
+  TrendingDown,
   TrendingUp,
   Users,
 } from "lucide-react";
 import type { MonthlyReportData } from "@/lib/reports/build";
 import { ExportReportMenu } from "@/components/reports/ExportReportMenu";
+import { CampaignStatusBadge } from "@/components/campaigns/CampaignStatusBadge";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
@@ -100,6 +106,20 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
                     report.connectedAccountCount === 1 ? "" : "s"
                   }`
                 : ""}
+              {report.revenueComparison ? (
+                <span
+                  className={
+                    report.revenueComparison.direction === "up"
+                      ? "text-emerald-400"
+                      : report.revenueComparison.direction === "down"
+                        ? "text-red-400"
+                        : "text-gray-500"
+                  }
+                >
+                  {" "}
+                  · vs last month: {report.revenueComparison.deltaDisplay}
+                </span>
+              ) : null}
             </p>
           </div>
           <ExportReportMenu canExport variant="page" />
@@ -140,6 +160,214 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
           iconColor="text-violet-400"
         />
       </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="border-white/[0.06] bg-surface-raised/80">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-accent-light" />
+              <CardTitle className="text-base">Campaign summary</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {report.campaignSummary.totalCount === 0 ? (
+              <ReportEmptyState
+                icon={Target}
+                title="No campaigns yet"
+                description="Create sponsor campaigns to track budgets and status across your deals."
+                actionHref="/campaigns"
+                actionLabel="View campaigns"
+              />
+            ) : (
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
+                    <p className="text-xs text-gray-500">Active</p>
+                    <p className="mt-1 text-lg font-semibold text-white">
+                      {report.campaignSummary.activeCount}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
+                    <p className="text-xs text-gray-500">Total budget</p>
+                    <p className="mt-1 text-lg font-semibold text-white">
+                      {report.campaignSummary.totalBudgetDisplay}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
+                    <p className="text-xs text-gray-500">Total campaigns</p>
+                    <p className="mt-1 text-lg font-semibold text-white">
+                      {report.campaignSummary.totalCount}
+                    </p>
+                  </div>
+                </div>
+                {report.campaignSummary.byStatus.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {report.campaignSummary.byStatus.map((row) => (
+                      <span
+                        key={row.status}
+                        className="rounded-full border border-white/[0.08] bg-surface px-3 py-1 text-xs text-gray-300"
+                      >
+                        {row.label}: {row.count}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                {report.campaignSummary.topByBudget.length > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                      Top by budget
+                    </p>
+                    {report.campaignSummary.topByBudget.map((campaign) => (
+                      <Link
+                        key={campaign.id}
+                        href={`/campaigns/${campaign.id}`}
+                        className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-surface px-4 py-3 transition-colors hover:border-accent/20"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-white">
+                            {campaign.name}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {campaign.sponsorName}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <CampaignStatusBadge status={campaign.status} />
+                          <p className="text-sm font-semibold text-accent-light">
+                            {campaign.budgetDisplay}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-white/[0.06] bg-surface-raised/80">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-accent-light" />
+              <CardTitle className="text-base">Deliverable health</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {report.deliverableHealth.totalCount === 0 ? (
+              <ReportEmptyState
+                icon={ClipboardList}
+                title="No deliverables tracked"
+                description="Add deliverables to contracts to monitor completion and overdue items."
+                actionHref="/contracts"
+                actionLabel="View contracts"
+              />
+            ) : (
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <MetricCard
+                    title="Completion rate"
+                    value={`${report.deliverableHealth.completionRatePercent}%`}
+                    subtitle={`${report.deliverableHealth.completedCount} of ${report.deliverableHealth.totalCount} done`}
+                    icon={CheckCircle2}
+                    iconColor="text-emerald-400"
+                  />
+                  <MetricCard
+                    title="Overdue"
+                    value={String(report.deliverableHealth.overdueCount)}
+                    subtitle="Past due date, not completed"
+                    icon={report.deliverableHealth.overdueCount > 0 ? TrendingDown : CheckCircle2}
+                    iconColor={
+                      report.deliverableHealth.overdueCount > 0
+                        ? "text-red-400"
+                        : "text-emerald-400"
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-xl border border-white/[0.06] bg-surface px-3 py-3 text-center">
+                    <p className="text-lg font-semibold text-white">
+                      {report.deliverableHealth.pendingCount}
+                    </p>
+                    <p className="text-xs text-gray-500">Pending</p>
+                  </div>
+                  <div className="rounded-xl border border-white/[0.06] bg-surface px-3 py-3 text-center">
+                    <p className="text-lg font-semibold text-white">
+                      {report.deliverableHealth.inProgressCount}
+                    </p>
+                    <p className="text-xs text-gray-500">In progress</p>
+                  </div>
+                  <div className="rounded-xl border border-white/[0.06] bg-surface px-3 py-3 text-center">
+                    <p className="text-lg font-semibold text-white">
+                      {report.deliverableHealth.completedCount}
+                    </p>
+                    <p className="text-xs text-gray-500">Completed</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-white/[0.06] bg-surface-raised/80">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-accent-light" />
+            <CardTitle className="text-base">Top sponsors by pipeline</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {report.sponsorBreakdown.length === 0 ? (
+            <ReportEmptyState
+              icon={Building2}
+              title="No sponsor pipeline yet"
+              description="Active and negotiating contracts will appear here grouped by sponsor."
+              actionHref="/sponsors"
+              actionLabel="View sponsors"
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/[0.06] text-left text-xs uppercase tracking-wide text-gray-500">
+                    <th className="pb-2 pr-4 font-medium">Sponsor</th>
+                    <th className="pb-2 pr-4 font-medium">Pipeline value</th>
+                    <th className="pb-2 pr-4 font-medium">Active contracts</th>
+                    <th className="pb-2 font-medium">Total contracts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.sponsorBreakdown.map((row) => (
+                    <tr
+                      key={row.sponsorId}
+                      className="border-b border-white/[0.04] last:border-0"
+                    >
+                      <td className="py-3 pr-4">
+                        <Link
+                          href={`/sponsors/${row.sponsorId}`}
+                          className="font-medium text-white hover:text-accent-light"
+                        >
+                          {row.sponsorName}
+                        </Link>
+                      </td>
+                      <td className="py-3 pr-4 font-semibold text-accent-light">
+                        {row.pipelineValueDisplay}
+                      </td>
+                      <td className="py-3 pr-4 text-gray-300">
+                        {row.activeContractCount}
+                      </td>
+                      <td className="py-3 text-gray-300">
+                        {row.totalContractCount}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-white/[0.06] bg-surface-raised/80">

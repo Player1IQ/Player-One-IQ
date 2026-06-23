@@ -1,4 +1,5 @@
 import type { MonthlyReportData } from "./build";
+import { campaignStatusLabels } from "@/lib/campaigns";
 
 function escapeHtml(value: string): string {
   return value
@@ -62,11 +63,50 @@ export function buildPrintableReportBody(
     )
     .join("");
 
+  const sponsorRows = report.sponsorBreakdown
+    .map(
+      (row) => `
+      <tr>
+        <td>${escapeHtml(row.sponsorName)}</td>
+        <td class="num">${escapeHtml(row.pipelineValueDisplay)}</td>
+        <td class="num">${row.activeContractCount}</td>
+        <td class="num">${row.totalContractCount}</td>
+      </tr>`
+    )
+    .join("");
+
+  const campaignStatusRows = report.campaignSummary.byStatus
+    .map(
+      (row) => `
+      <tr>
+        <td>${escapeHtml(row.label)}</td>
+        <td class="num">${row.count}</td>
+      </tr>`
+    )
+    .join("");
+
+  const topCampaignRows = report.campaignSummary.topByBudget
+    .map(
+      (row) => `
+      <tr>
+        <td>${escapeHtml(row.name)}</td>
+        <td>${escapeHtml(row.sponsorName)}</td>
+        <td class="num">${escapeHtml(row.budgetDisplay)}</td>
+        <td>${escapeHtml(campaignStatusLabels[row.status])}</td>
+      </tr>`
+    )
+    .join("");
+
   return `
   <h1>Monthly Performance Report</h1>
   <p class="meta">
     <strong>${escapeHtml(organizationName)}</strong> · ${escapeHtml(report.periodLabel)} ·
     Generated ${escapeHtml(new Date().toLocaleString("en-US"))}
+    ${
+      report.revenueComparison
+        ? ` · vs last month: ${escapeHtml(report.revenueComparison.deltaDisplay)}`
+        : ""
+    }
   </p>
 
   <h2>Summary</h2>
@@ -92,6 +132,69 @@ export function buildPrintableReportBody(
       <span>${report.revenue.connectedAccountCount} connected accounts</span>
     </div>
   </div>
+
+  <h2>Campaign summary</h2>
+  ${
+    report.campaignSummary.totalCount === 0
+      ? '<p class="empty">No campaigns recorded.</p>'
+      : `<div class="kpis">
+    <div class="kpi">
+      <label>Active campaigns</label>
+      <strong>${report.campaignSummary.activeCount}</strong>
+      <span>${report.campaignSummary.totalCount} total</span>
+    </div>
+    <div class="kpi">
+      <label>Total budget</label>
+      <strong>${escapeHtml(report.campaignSummary.totalBudgetDisplay)}</strong>
+      <span>Across all campaigns</span>
+    </div>
+  </div>
+  ${
+    report.campaignSummary.byStatus.length > 0
+      ? `<table>
+    <thead><tr><th>Status</th><th>Count</th></tr></thead>
+    <tbody>${campaignStatusRows}</tbody>
+  </table>`
+      : ""
+  }
+  ${
+    report.campaignSummary.topByBudget.length > 0
+      ? `<h2>Top campaigns by budget</h2>
+  <table>
+    <thead><tr><th>Campaign</th><th>Sponsor</th><th>Budget</th><th>Status</th></tr></thead>
+    <tbody>${topCampaignRows}</tbody>
+  </table>`
+      : ""
+  }`
+  }
+
+  <h2>Deliverable health</h2>
+  ${
+    report.deliverableHealth.totalCount === 0
+      ? '<p class="empty">No deliverables tracked.</p>'
+      : `<div class="kpis">
+    <div class="kpi">
+      <label>Completion rate</label>
+      <strong>${report.deliverableHealth.completionRatePercent}%</strong>
+      <span>${report.deliverableHealth.completedCount} of ${report.deliverableHealth.totalCount} done</span>
+    </div>
+    <div class="kpi">
+      <label>Overdue</label>
+      <strong>${report.deliverableHealth.overdueCount}</strong>
+      <span>Pending ${report.deliverableHealth.pendingCount} · In progress ${report.deliverableHealth.inProgressCount}</span>
+    </div>
+  </div>`
+  }
+
+  <h2>Top sponsors by pipeline</h2>
+  ${
+    report.sponsorBreakdown.length === 0
+      ? '<p class="empty">No sponsor pipeline recorded.</p>'
+      : `<table>
+    <thead><tr><th>Sponsor</th><th>Pipeline</th><th>Active</th><th>Total</th></tr></thead>
+    <tbody>${sponsorRows}</tbody>
+  </table>`
+  }
 
   <h2>Top creators by revenue</h2>
   ${

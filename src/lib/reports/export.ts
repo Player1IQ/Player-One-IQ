@@ -39,7 +39,52 @@ export function reportToCsv(
   lines.push(
     `Total Opportunities,${escapeCsv(report.opportunityStats.totalCount)}`
   );
+  if (report.revenueComparison) {
+    lines.push(
+      `Revenue vs Last Month,${escapeCsv(report.revenueComparison.deltaDisplay)}`
+    );
+  }
   lines.push("");
+
+  lines.push("Campaign Summary");
+  lines.push("Metric,Value");
+  lines.push(`Total Campaigns,${escapeCsv(report.campaignSummary.totalCount)}`);
+  lines.push(`Active Campaigns,${escapeCsv(report.campaignSummary.activeCount)}`);
+  lines.push(
+    `Total Campaign Budget,${escapeCsv(report.campaignSummary.totalBudgetDisplay)}`
+  );
+  for (const row of report.campaignSummary.byStatus) {
+    lines.push(`${escapeCsv(row.label)},${escapeCsv(row.count)}`);
+  }
+  lines.push("");
+
+  lines.push("Deliverable Health");
+  lines.push("Metric,Value");
+  lines.push(`Total Deliverables,${escapeCsv(report.deliverableHealth.totalCount)}`);
+  lines.push(`Pending,${escapeCsv(report.deliverableHealth.pendingCount)}`);
+  lines.push(`In Progress,${escapeCsv(report.deliverableHealth.inProgressCount)}`);
+  lines.push(`Completed,${escapeCsv(report.deliverableHealth.completedCount)}`);
+  lines.push(`Overdue,${escapeCsv(report.deliverableHealth.overdueCount)}`);
+  lines.push(
+    `Completion Rate,${escapeCsv(`${report.deliverableHealth.completionRatePercent}%`)}`
+  );
+  lines.push("");
+
+  if (report.sponsorBreakdown.length > 0) {
+    lines.push("Top Sponsors by Pipeline");
+    lines.push("Sponsor,Pipeline Value,Active Contracts,Total Contracts");
+    for (const row of report.sponsorBreakdown) {
+      lines.push(
+        [
+          escapeCsv(row.sponsorName),
+          escapeCsv(row.pipelineValue.toFixed(2)),
+          escapeCsv(row.activeContractCount),
+          escapeCsv(row.totalContractCount),
+        ].join(",")
+      );
+    }
+    lines.push("");
+  }
 
   lines.push("Top Creators by Revenue");
   lines.push("Creator,Contract Revenue,Platform Revenue,Total");
