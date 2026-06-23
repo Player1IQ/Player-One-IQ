@@ -102,7 +102,7 @@ export function isPathAllowedForPortalUser(
     return true;
   }
 
-  if (isCreatorPortalRole(role) && pathname.startsWith("/opportunities")) {
+  if (role === "content_creator" && pathname.startsWith("/opportunities")) {
     return true;
   }
 

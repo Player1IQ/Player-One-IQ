@@ -31,4 +31,6 @@ jobs:
 
       - run: npm run lint
 
+      - run: npm run test:guards
+
       - run: npm run build
