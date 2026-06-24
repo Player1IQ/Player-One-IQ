@@ -21,6 +21,7 @@ import {
 } from "@/app/messages/actions";
 import { contractTermsUpdatedMessage } from "@/lib/messages/system-events";
 import type { ActivityAction } from "@/lib/activity/queries";
+import { dispatchOrganizationWebhook } from "@/lib/api/webhooks";
 
 async function logActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -226,6 +227,16 @@ export async function updateContract(id: string, input: ContractInput) {
     },
   });
 
+  dispatchOrganizationWebhook(organizationId, "contract.updated", {
+    contract_id: id,
+    contract_name: input.contractName.trim(),
+    status: input.status,
+    previous_status: previousStatus,
+    creator_id: input.creatorId,
+    sponsor_id: input.sponsorId,
+    contract_value: input.contractValue,
+  });
+
   revalidatePath("/contracts");
   revalidatePath(`/contracts/${id}`);
   revalidatePath("/");
@@ -295,6 +306,13 @@ export async function updateContractStatus(
       previousStatus,
       newStatus,
     },
+  });
+
+  dispatchOrganizationWebhook(organizationId, "contract.updated", {
+    contract_id: id,
+    contract_name: existing.contract_name,
+    status: newStatus,
+    previous_status: previousStatus,
   });
 
   revalidatePath("/contracts");

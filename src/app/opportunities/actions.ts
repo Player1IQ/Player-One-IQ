@@ -31,6 +31,7 @@ import {
   applicationStatusChangedMessage,
   applicationSubmittedMessage,
 } from "@/lib/messages/system-events";
+import { dispatchOrganizationWebhook } from "@/lib/api/webhooks";
 
 async function logOpportunityActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -360,7 +361,7 @@ export async function applyToOpportunity(input: ApplicationInput) {
 
   if (existing) return { error: "This creator has already applied." };
 
-  const { error: insertError } = await supabase
+  const { data: application, error: insertError } = await supabase
     .from("opportunity_applications")
     .insert({
       opportunity_id: input.opportunityId,
@@ -368,9 +369,21 @@ export async function applyToOpportunity(input: ApplicationInput) {
       cover_message: input.coverMessage.trim(),
       proposed_rate: input.proposedRate,
       status: "applied",
-    });
+    })
+    .select("id")
+    .single();
 
   if (insertError) return { error: insertError.message };
+
+  dispatchOrganizationWebhook(organizationId, "application.created", {
+    application_id: application.id,
+    opportunity_id: input.opportunityId,
+    opportunity_title: opportunity.title,
+    creator_id: creatorId,
+    creator_name: creator.name,
+    status: "applied",
+    proposed_rate: input.proposedRate,
+  });
 
   await logOpportunityActivity(supabase, organizationId, {
     entityId: input.opportunityId,

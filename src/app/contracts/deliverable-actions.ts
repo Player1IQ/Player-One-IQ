@@ -22,6 +22,7 @@ import {
 import type { ActivityAction } from "@/lib/activity/queries";
 import { getCampaignsForContract } from "@/lib/campaigns/contract-links";
 import { getContractById } from "@/lib/contracts/queries";
+import { dispatchOrganizationWebhook } from "@/lib/api/webhooks";
 
 async function logActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -342,6 +343,17 @@ export async function updateDeliverable(
 
   if (updateError) return { error: updateError.message };
 
+  const completedNow =
+    input.status === "completed" && existing.status !== "completed";
+  if (completedNow) {
+    dispatchOrganizationWebhook(organizationId, "deliverable.completed", {
+      deliverable_id: id,
+      contract_id: existing.contract_id,
+      title: input.title?.trim() ?? existing.title,
+      completed_at: updates.completed_at as string,
+    });
+  }
+
   await logActivity(supabase, organizationId, {
     entityId: id,
     action: "updated",
@@ -383,18 +395,28 @@ export async function toggleDeliverableComplete(id: string) {
 
   const completing = existing.status !== "completed";
   const newStatus: DeliverableStatus = completing ? "completed" : "pending";
+  const completedAt = completing ? new Date().toISOString() : null;
 
   const { error: updateError } = await supabase
     .from("contract_deliverables")
     .update({
       status: newStatus,
-      completed_at: completing ? new Date().toISOString() : null,
+      completed_at: completedAt,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
     .eq("organization_id", organizationId);
 
   if (updateError) return { error: updateError.message };
+
+  if (completing) {
+    dispatchOrganizationWebhook(organizationId, "deliverable.completed", {
+      deliverable_id: id,
+      contract_id: existing.contract_id,
+      title: existing.title,
+      completed_at: completedAt!,
+    });
+  }
 
   await logActivity(supabase, organizationId, {
     entityId: id,
