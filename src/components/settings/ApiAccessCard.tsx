@@ -81,8 +81,10 @@ export function ApiAccessCard({
         <div className="flex-1">
           <h2 className="text-base font-semibold text-white">API access</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Create API keys to read creators, contracts, sponsors, and campaigns
-            from your Agency Pro workspace.
+            Create API keys to read and update creators, contracts, deliverables,
+            sponsors, campaigns, and opportunity applications from your Agency Pro
+            workspace. Keys are organization-scoped integration credentials with
+            write access to the fields documented below.
           </p>
 
           <div className="mt-4 rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
@@ -125,6 +127,21 @@ export function ApiAccessCard({
                 <span className="font-medium text-gray-300">GET</span>{" "}
                 <code className="text-xs text-accent-light">/api/v1/campaigns</code>{" "}
                 — list sponsor campaigns
+              </p>
+              <p>
+                <span className="font-medium text-gray-300">PATCH</span>{" "}
+                <code className="text-xs text-accent-light">/api/v1/contracts/:id</code>{" "}
+                — update contract status and/or value
+              </p>
+              <p>
+                <span className="font-medium text-gray-300">PATCH</span>{" "}
+                <code className="text-xs text-accent-light">/api/v1/deliverables/:id</code>{" "}
+                — update deliverable status
+              </p>
+              <p>
+                <span className="font-medium text-gray-300">POST</span>{" "}
+                <code className="text-xs text-accent-light">/api/v1/opportunities/:id/applications</code>{" "}
+                — apply on behalf of a creator
               </p>
             </div>
             <p className="mt-3 text-xs text-gray-500">

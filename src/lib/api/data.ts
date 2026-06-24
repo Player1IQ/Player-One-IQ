@@ -9,6 +9,11 @@ import {
   type Contract,
   type ContractRow,
 } from "@/lib/contracts";
+import {
+  mapDeliverableRow,
+  type ContractDeliverable,
+  type ContractDeliverableRow,
+} from "@/lib/contract-deliverables";
 import { mapCreatorRow, type Creator, type CreatorRow } from "@/lib/creators";
 import { mapSponsorRow, type Sponsor, type SponsorRow } from "@/lib/sponsors";
 
@@ -60,6 +65,42 @@ export async function getCreatorForOrganization(
 
   if (error || !data) return null;
   return mapCreatorRow(data as CreatorRow);
+}
+
+export async function getContractForOrganization(
+  organizationId: string,
+  contractId: string
+): Promise<Contract | null> {
+  const supabase = getServiceClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("contracts")
+    .select(contractSelect)
+    .eq("id", contractId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapContractRow(data as ContractRow);
+}
+
+export async function getDeliverableForOrganization(
+  organizationId: string,
+  deliverableId: string
+): Promise<ContractDeliverable | null> {
+  const supabase = getServiceClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("contract_deliverables")
+    .select("*")
+    .eq("id", deliverableId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapDeliverableRow(data as ContractDeliverableRow);
 }
 
 export async function listContractsForOrganization(
