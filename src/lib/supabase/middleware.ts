@@ -22,6 +22,7 @@ const PUBLIC_ROUTES = [
   "/invite",
   "/api/billing/webhook",
   "/api/health",
+  "/api/v1",
 ];
 
 const AUTH_ONLY_ROUTES = ["/login", "/signup", "/forgot-password"];
