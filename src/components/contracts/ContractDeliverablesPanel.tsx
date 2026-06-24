@@ -16,6 +16,7 @@ import {
 import {
   createDeliverable,
   deleteDeliverable,
+  linkUnlinkedDeliverablesToCampaign,
   toggleDeliverableComplete,
   updateDeliverable,
 } from "@/app/contracts/deliverable-actions";
@@ -63,7 +64,11 @@ export function ContractDeliverablesPanel({
   const [deliverables, setDeliverables] = useState(initialDeliverables);
   const [newTitle, setNewTitle] = useState("");
   const [newDueDate, setNewDueDate] = useState("");
+  const [newCampaignId, setNewCampaignId] = useState(
+    relatedCampaigns.length === 1 ? relatedCampaigns[0].id : ""
+  );
   const [adding, setAdding] = useState(false);
+  const [bulkLinking, setBulkLinking] = useState(false);
   const [error, setError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -76,6 +81,19 @@ export function ContractDeliverablesPanel({
   useEffect(() => {
     setDeliverables(initialDeliverables);
   }, [initialDeliverables]);
+
+  useEffect(() => {
+    setNewCampaignId(
+      relatedCampaigns.length === 1 ? relatedCampaigns[0].id : ""
+    );
+  }, [relatedCampaigns]);
+
+  const unlinkedCount = useMemo(
+    () => deliverables.filter((item) => !item.campaignId).length,
+    [deliverables]
+  );
+  const showBulkLink =
+    canWrite && relatedCampaigns.length > 1 && unlinkedCount > 1;
 
   const stats = getDeliverableStats(deliverables);
   const { completed, total, progressPercent } = stats;
@@ -109,6 +127,9 @@ export function ContractDeliverablesPanel({
     const result = await createDeliverable(contractId, {
       title: newTitle,
       dueDate: newDueDate || null,
+      ...(relatedCampaigns.length > 0
+        ? { campaignId: newCampaignId || null }
+        : {}),
     });
     setAdding(false);
     if ("error" in result && result.error) {
@@ -117,6 +138,9 @@ export function ContractDeliverablesPanel({
     }
     setNewTitle("");
     setNewDueDate("");
+    setNewCampaignId(
+      relatedCampaigns.length === 1 ? relatedCampaigns[0].id : ""
+    );
     await refreshAfterAction();
   }
 
@@ -211,15 +235,55 @@ export function ContractDeliverablesPanel({
     await refreshAfterAction();
   }
 
+  async function handleBulkLink(campaignId: string) {
+    if (!canWrite || !campaignId) return;
+    setBulkLinking(true);
+    setError("");
+    const result = await linkUnlinkedDeliverablesToCampaign(
+      contractId,
+      campaignId
+    );
+    setBulkLinking(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    await refreshAfterAction();
+  }
+
   return (
     <div className="space-y-5 rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
-      <div>
-        <h2 className="text-base font-semibold text-white">
-          Deliverables Checklist
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Track each deliverable from signed to completed
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-white">
+            Deliverables Checklist
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Track each deliverable from signed to completed
+          </p>
+        </div>
+        {showBulkLink ? (
+          <div className="min-w-[12rem] max-w-xs shrink-0">
+            <label className="mb-1 block text-xs text-gray-500">
+              Link unlinked to campaign
+            </label>
+            <select
+              value=""
+              onChange={(e) => handleBulkLink(e.target.value)}
+              disabled={bulkLinking}
+              className="w-full rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2 text-sm text-gray-200 focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30 disabled:opacity-50"
+            >
+              <option value="">
+                {bulkLinking ? "Linking…" : "Link unlinked to campaign…"}
+              </option>
+              {relatedCampaigns.map((campaign) => (
+                <option key={campaign.id} value={campaign.id}>
+                  {campaign.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
       </div>
 
       {total > 0 ? (
@@ -585,6 +649,26 @@ export function ContractDeliverablesPanel({
               Add
             </Button>
           </div>
+          {relatedCampaigns.length > 0 ? (
+            <div className="mt-3">
+              <label className="mb-1 block text-xs text-gray-500">
+                Linked campaign
+              </label>
+              <select
+                value={newCampaignId}
+                onChange={(e) => setNewCampaignId(e.target.value)}
+                disabled={adding}
+                className="w-full rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30 disabled:opacity-50 sm:max-w-xs"
+              >
+                <option value="">No campaign</option>
+                {relatedCampaigns.map((campaign) => (
+                  <option key={campaign.id} value={campaign.id}>
+                    {campaign.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
         </form>
       ) : !canChangeStatus ? (
         <p className="text-sm text-gray-500">

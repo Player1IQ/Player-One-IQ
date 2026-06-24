@@ -128,9 +128,20 @@ export async function createDeliverable(
   );
   if (!contract) return { error: "Contract not found." };
 
+  let resolvedCampaignId: string | null = input.campaignId ?? null;
+  if (input.campaignId === undefined) {
+    const fullContract = await getContractById(contractId);
+    if (fullContract) {
+      const relatedCampaigns = await getCampaignsForContract(fullContract);
+      if (relatedCampaigns.length === 1) {
+        resolvedCampaignId = relatedCampaigns[0].id;
+      }
+    }
+  }
+
   const campaignError = await validateDeliverableCampaignLink(
     contractId,
-    input.campaignId
+    resolvedCampaignId
   );
   if (campaignError.error) return campaignError;
 
@@ -151,7 +162,7 @@ export async function createDeliverable(
     .insert({
       organization_id: organizationId,
       contract_id: contractId,
-      campaign_id: input.campaignId ?? null,
+      campaign_id: resolvedCampaignId,
       title,
       status,
       due_date: input.dueDate || null,
@@ -171,8 +182,73 @@ export async function createDeliverable(
     metadata: { contractId },
   });
 
-  revalidateContractPaths(contractId, input.campaignId);
+  revalidateContractPaths(contractId, resolvedCampaignId);
   return { id: data.id };
+}
+
+export async function linkUnlinkedDeliverablesToCampaign(
+  contractId: string,
+  campaignId: string
+) {
+  const featureError = await requireContractsFeature();
+  if (featureError) return featureError;
+
+  const permError = await requireResourceWriteAccess("contracts");
+  if (permError) return permError;
+
+  if (!campaignId) {
+    return { error: "Select a campaign to link deliverables." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const contract = await getContractForDeliverable(
+    supabase,
+    contractId,
+    organizationId
+  );
+  if (!contract) return { error: "Contract not found." };
+
+  const campaignError = await validateDeliverableCampaignLink(
+    contractId,
+    campaignId
+  );
+  if (campaignError.error) return campaignError;
+
+  const { data: unlinked, error: fetchError } = await supabase
+    .from("contract_deliverables")
+    .select("id, title")
+    .eq("contract_id", contractId)
+    .eq("organization_id", organizationId)
+    .is("campaign_id", null);
+
+  if (fetchError) return { error: fetchError.message };
+  if (!unlinked?.length) return { success: true, updated: 0 };
+
+  const now = new Date().toISOString();
+  const { error: updateError } = await supabase
+    .from("contract_deliverables")
+    .update({ campaign_id: campaignId, updated_at: now })
+    .eq("contract_id", contractId)
+    .eq("organization_id", organizationId)
+    .is("campaign_id", null);
+
+  if (updateError) return { error: updateError.message };
+
+  await logActivity(supabase, organizationId, {
+    entityId: null,
+    action: "updated",
+    summary: "Deliverables linked to campaign",
+    detail: `${unlinked.length} deliverable${unlinked.length === 1 ? "" : "s"} on ${contract.contract_name}`,
+    metadata: { contractId, campaignId, count: unlinked.length },
+  });
+
+  revalidateContractPaths(contractId, campaignId);
+  return { success: true, updated: unlinked.length };
 }
 
 export async function updateDeliverable(
