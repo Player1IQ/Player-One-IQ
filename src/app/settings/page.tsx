@@ -5,6 +5,10 @@ import { DeployChecklistCard } from "@/components/settings/DeployChecklistCard";
 import { PlatformSyncCard } from "@/components/settings/PlatformSyncCard";
 import { SettingsPageClient } from "@/components/settings/SettingsPageClient";
 import { AiIntegrationCard } from "@/components/settings/AiIntegrationCard";
+import { ApiAccessCard } from "@/components/settings/ApiAccessCard";
+import { getOrganizationApiKeysForSettings } from "@/lib/api/key-management";
+import { hasFeature } from "@/lib/subscription/features";
+import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { getAiIntegrationForSettings } from "@/lib/ai/credentials";
 import { isAiCredentialsEncryptionConfigured } from "@/lib/ai/credentials-crypto";
 import { isPlatformOAuthFeatureEnabled } from "@/lib/platform-oauth/config";
@@ -62,6 +66,13 @@ export default async function SettingsPage() {
   }
 
   const aiIntegration = await getAiIntegrationForSettings();
+  const subscriptionContext = await getSubscriptionContext();
+  const hasApiAccess = hasFeature(subscriptionContext.features, "api_access");
+  const apiKeys =
+    hasApiAccess && canEdit ? await getOrganizationApiKeysForSettings() : [];
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+    "http://localhost:3000";
   const showDevTools = isSeedEnabled();
   const oauthEnabled = isPlatformOAuthFeatureEnabled();
 
@@ -107,6 +118,13 @@ export default async function SettingsPage() {
                 connectedCount={oauthConnectedCount}
                 canManage={canEdit}
               />
+              {hasApiAccess && canEdit ? (
+                <ApiAccessCard
+                  apiKeys={apiKeys}
+                  appUrl={appUrl}
+                  canManage={canEdit}
+                />
+              ) : null}
             </>
           ) : undefined
         }

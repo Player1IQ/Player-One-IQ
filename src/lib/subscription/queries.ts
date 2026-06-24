@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/admin";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   getOrganizationForUser,
   getOrganizationId,
 } from "@/lib/organization/queries";
+import { hasFeature } from "./features";
 import { getDefaultPlanForOrgType, parsePlanLimits, planCatalog } from "./plans";
 import { expirePlatformTrialIfNeeded } from "./trial-lifecycle";
 import {
@@ -129,12 +132,13 @@ export async function getOrganizationSubscription(): Promise<OrganizationSubscri
 }
 
 async function getFeatureFlagOverrides(
-  organizationId: string
+  organizationId: string,
+  supabase?: SupabaseClient | null
 ): Promise<Map<string, boolean>> {
-  const supabase = await createClient();
-  if (!supabase) return new Map();
+  const client = supabase ?? createServiceClient() ?? (await createClient());
+  if (!client) return new Map();
 
-  const { data } = await supabase
+  const { data } = await client
     .from("feature_flags")
     .select("flag_key, enabled, organization_id")
     .or(`organization_id.is.null,organization_id.eq.${organizationId}`);
@@ -155,10 +159,11 @@ async function getFeatureFlagOverrides(
 
 export async function resolveOrganizationFeatures(
   plan: SubscriptionPlan,
-  organizationId: string
+  organizationId: string,
+  supabase?: SupabaseClient | null
 ): Promise<Set<FeatureKey>> {
   const features = new Set(plan.features);
-  const overrides = await getFeatureFlagOverrides(organizationId);
+  const overrides = await getFeatureFlagOverrides(organizationId, supabase);
 
   for (const [key, enabled] of overrides) {
     if (enabled && featureKeysIncludes(key)) {
@@ -301,6 +306,113 @@ export async function getAiUsageSummary(): Promise<AiUsageSummary[]> {
     requestCount: summary.get(assistantType)?.requestCount ?? 0,
     tokensUsed: summary.get(assistantType)?.tokensUsed ?? 0,
   }));
+}
+
+export async function getOrganizationSubscriptionByOrganizationId(
+  organizationId: string
+): Promise<OrganizationSubscription | null> {
+  const supabase = createServiceClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("organization_subscriptions")
+    .select(
+      `
+      id,
+      organization_id,
+      status,
+      billing_interval,
+      current_period_start,
+      current_period_end,
+      trial_ends_at,
+      canceled_at,
+      stripe_customer_id,
+      stripe_subscription_id,
+      metadata,
+      plan:subscription_plans (
+        id,
+        code,
+        name,
+        description,
+        tier_group,
+        price_monthly_cents,
+        price_yearly_cents,
+        limits,
+        features,
+        sort_order
+      )
+    `
+    )
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (error) {
+    if (error.code !== "PGRST116" && error.code !== "42P01") {
+      console.error("organization_subscriptions query failed:", error.message);
+    }
+    return null;
+  }
+
+  if (!data?.plan) return null;
+
+  const plan = Array.isArray(data.plan) ? data.plan[0] : data.plan;
+  if (!plan) return null;
+
+  return {
+    id: data.id,
+    organizationId: data.organization_id,
+    plan: mapPlanRow(plan),
+    status: data.status,
+    billingInterval: data.billing_interval,
+    currentPeriodStart: data.current_period_start,
+    currentPeriodEnd: data.current_period_end,
+    trialEndsAt: data.trial_ends_at,
+    canceledAt: data.canceled_at,
+    stripeCustomerId: data.stripe_customer_id,
+    stripeSubscriptionId: data.stripe_subscription_id,
+    metadata:
+      data.metadata && typeof data.metadata === "object" && !Array.isArray(data.metadata)
+        ? (data.metadata as Record<string, unknown>)
+        : {},
+  };
+}
+
+function isSubscriptionEntitled(status: OrganizationSubscription["status"]): boolean {
+  return status === "active" || status === "trialing";
+}
+
+export async function organizationHasFeature(
+  organizationId: string,
+  feature: FeatureKey
+): Promise<boolean> {
+  const supabase = createServiceClient();
+  let subscription =
+    await getOrganizationSubscriptionByOrganizationId(organizationId);
+
+  if (subscription) {
+    subscription = await expirePlatformTrialIfNeeded(subscription);
+    if (!isSubscriptionEntitled(subscription.status)) {
+      return false;
+    }
+
+    const features = await resolveOrganizationFeatures(
+      subscription.plan,
+      organizationId,
+      supabase
+    );
+    return hasFeature(features, feature);
+  }
+
+  if (!supabase) return false;
+
+  const { data: organization } = await supabase
+    .from("organizations")
+    .select("type")
+    .eq("id", organizationId)
+    .maybeSingle();
+
+  const planCode = getDefaultPlanForOrgType(organization?.type ?? "");
+  return planCatalog[planCode].features.includes(feature);
 }
 
 async function getFallbackSubscriptionContext(): Promise<SubscriptionContext> {
