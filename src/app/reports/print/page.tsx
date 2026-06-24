@@ -13,6 +13,7 @@ import {
 } from "@/lib/creator-revenue/queries";
 import { getCreators } from "@/lib/creators/queries";
 import { getOrganizationForUser } from "@/lib/organization/queries";
+import { canViewReports, getCurrentUserRole } from "@/lib/permissions";
 import { getOpportunities } from "@/lib/opportunities/queries";
 import {
   buildPrintableReportBody,
@@ -26,7 +27,14 @@ import {
 } from "@/lib/subscription/queries";
 
 export default async function ReportPrintPage() {
-  const subscription = await getSubscriptionContext();
+  const [subscription, role] = await Promise.all([
+    getSubscriptionContext(),
+    getCurrentUserRole(),
+  ]);
+
+  if (!canViewReports(role)) {
+    redirect("/");
+  }
   const canExport = hasAnyFeature(subscription.features, [
     "advanced_analytics",
     "monthly_reports",

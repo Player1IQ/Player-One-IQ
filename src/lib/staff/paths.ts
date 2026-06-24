@@ -17,6 +17,8 @@ export const staffNavPermissionKeys: Partial<Record<string, PermissionKey>> = {
   "/team": "team",
   "/billing": "billing",
   "/settings": "settings",
+  "/ai": "ai",
+  "/reports": "reports",
 };
 
 type StaffRouteGuard = {
@@ -39,9 +41,11 @@ const STAFF_ROUTE_GUARDS: StaffRouteGuard[] = [
   { prefix: "/team", key: "team" },
   { prefix: "/billing", key: "billing", access: "billing" },
   { prefix: "/settings", key: "settings", access: "settings" },
+  { prefix: "/reports", key: "reports" },
+  { prefix: "/ai", key: "ai" },
 ];
 
-const STAFF_UNGUARDED_PREFIXES = ["/ai", "/reports", "/portal"];
+const STAFF_UNGUARDED_PREFIXES = ["/portal"];
 
 function matchesPrefix(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);

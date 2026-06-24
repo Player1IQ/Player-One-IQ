@@ -435,6 +435,14 @@ export function canViewBilling(role: TeamRole | null): boolean {
   return permissionMatrix[role].billing !== "none";
 }
 
+export function canViewAi(role: TeamRole | null): boolean {
+  return hasReadAccess(role, "ai");
+}
+
+export function canViewReports(role: TeamRole | null): boolean {
+  return hasReadAccess(role, "reports");
+}
+
 export async function requireBillingManageAccess(): Promise<
   { error: string } | null
 > {

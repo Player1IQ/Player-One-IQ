@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AiConnectionStrip } from "@/components/ai/AiConnectionStrip";
 import { AiDashboardClient } from "@/components/ai/AiDashboardClient";
@@ -7,7 +8,11 @@ import { getAiIntegrationPublicSummary } from "@/lib/ai/credentials";
 import { getAiDashboardData } from "@/lib/ai/queries";
 import { getAiLlmHealth } from "@/lib/ai/llm-health";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { canManageSettings, getCurrentUserRole } from "@/lib/permissions";
+import {
+  canManageSettings,
+  canViewAi,
+  getCurrentUserRole,
+} from "@/lib/permissions";
 import { hasAnyAiFeature } from "@/lib/subscription/features";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 
@@ -20,6 +25,10 @@ export default async function AiPage() {
     getAiIntegrationPublicSummary(),
     getCurrentUserRole(),
   ]);
+
+  if (!canViewAi(role)) {
+    redirect("/");
+  }
 
   const canManage = canManageSettings(role);
 

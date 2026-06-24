@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ReportsPageClient } from "@/components/reports/ReportsPageClient";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
@@ -13,6 +14,7 @@ import {
   getOrganizationRevenueEntries,
 } from "@/lib/creator-revenue/queries";
 import { getCreators } from "@/lib/creators/queries";
+import { canViewReports, getCurrentUserRole } from "@/lib/permissions";
 import { getOpportunities } from "@/lib/opportunities/queries";
 import { buildMonthlyReportData } from "@/lib/reports/build";
 import {
@@ -21,6 +23,11 @@ import {
 } from "@/lib/subscription/queries";
 
 export default async function ReportsPage() {
+  const role = await getCurrentUserRole();
+  if (!canViewReports(role)) {
+    redirect("/");
+  }
+
   const periodMonth = getCurrentPeriodMonth();
   const previousPeriodMonth = getPreviousPeriodMonth();
 

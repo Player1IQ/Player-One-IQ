@@ -23,7 +23,9 @@ export type PermissionKey =
   | "messages"
   | "team"
   | "settings"
-  | "billing";
+  | "billing"
+  | "ai"
+  | "reports";
 
 export const staffRoles: TeamRole[] = [
   "owner",
@@ -147,6 +149,16 @@ export const permissions: PermissionDefinition[] = [
     label: "Billing",
     description: "Subscription and payment management",
   },
+  {
+    key: "ai",
+    label: "AI",
+    description: "AI assistants and growth intelligence",
+  },
+  {
+    key: "reports",
+    label: "Reports",
+    description: "Monthly performance and revenue analytics",
+  },
 ];
 
 export const permissionMatrix: Record<
@@ -163,6 +175,8 @@ export const permissionMatrix: Record<
     team: "full",
     settings: "full",
     billing: "full",
+    ai: "full",
+    reports: "full",
   },
   admin: {
     creators: "full",
@@ -174,6 +188,8 @@ export const permissionMatrix: Record<
     team: "full",
     settings: "full",
     billing: "read",
+    ai: "full",
+    reports: "full",
   },
   manager: {
     creators: "full",
@@ -185,6 +201,8 @@ export const permissionMatrix: Record<
     team: "none",
     settings: "read",
     billing: "none",
+    ai: "read",
+    reports: "read",
   },
   partnerships: {
     creators: "read",
@@ -196,6 +214,8 @@ export const permissionMatrix: Record<
     team: "none",
     settings: "none",
     billing: "none",
+    ai: "read",
+    reports: "read",
   },
   talent_manager: {
     creators: "full",
@@ -207,6 +227,8 @@ export const permissionMatrix: Record<
     team: "none",
     settings: "none",
     billing: "none",
+    ai: "read",
+    reports: "read",
   },
   member: {
     creators: "read",
@@ -218,6 +240,8 @@ export const permissionMatrix: Record<
     team: "read",
     settings: "none",
     billing: "none",
+    ai: "read",
+    reports: "read",
   },
   viewer: {
     creators: "read",
@@ -229,6 +253,8 @@ export const permissionMatrix: Record<
     team: "read",
     settings: "none",
     billing: "none",
+    ai: "read",
+    reports: "read",
   },
   player: {
     creators: "scoped",
@@ -240,6 +266,8 @@ export const permissionMatrix: Record<
     team: "none",
     settings: "none",
     billing: "none",
+    ai: "none",
+    reports: "none",
   },
   content_creator: {
     creators: "scoped",
@@ -251,6 +279,8 @@ export const permissionMatrix: Record<
     team: "none",
     settings: "none",
     billing: "none",
+    ai: "none",
+    reports: "none",
   },
   sponsor: {
     creators: "none",
@@ -262,6 +292,8 @@ export const permissionMatrix: Record<
     team: "none",
     settings: "none",
     billing: "none",
+    ai: "none",
+    reports: "none",
   },
 };
 
