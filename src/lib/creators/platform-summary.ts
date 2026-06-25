@@ -6,6 +6,7 @@ export interface CreatorPlatformSummary {
   connectedCount: number;
   platforms: CreatorPlatformAccount[];
   totalRecentViews: number | null;
+  totalAudience: number | null;
   hasOAuthContent: boolean;
   youtubeConnected: boolean;
 }
@@ -24,10 +25,17 @@ export async function getCreatorPlatformSummary(
       account.connectionStatus !== "disconnected"
   );
 
+  const audienceTotal =
+    analytics?.platformBreakdown
+      .map((platform) => platform.audienceSize)
+      .filter((size): size is number => size != null && size > 0)
+      .reduce((sum, size) => sum + size, 0) ?? 0;
+
   return {
     connectedCount: platforms.length,
     platforms,
     totalRecentViews: analytics?.hasOAuthContent ? analytics.totalViews : null,
+    totalAudience: audienceTotal > 0 ? audienceTotal : null,
     hasOAuthContent: analytics?.hasOAuthContent ?? false,
     youtubeConnected,
   };

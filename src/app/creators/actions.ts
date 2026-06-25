@@ -7,6 +7,7 @@ import {
   requireFeatureAccess,
   requireUsageWithinLimit,
   requireResourceWriteAccess,
+  getCurrentUserMembership,
 } from "@/lib/permissions";
 import {
   type CreatorInput,
@@ -128,8 +129,17 @@ export async function updateCreator(id: string, input: CreatorInput) {
 }
 
 export async function uploadCreatorAvatar(creatorId: string, formData: FormData) {
-  const permError = await requireResourceWriteAccess("creators");
-  if (permError) return permError;
+  const membership = await getCurrentUserMembership();
+  const { isCreatorPortalRole } = await import("@/lib/team");
+  const isOwnPortalProfile =
+    membership &&
+    isCreatorPortalRole(membership.role) &&
+    membership.linkedCreatorId === creatorId;
+
+  if (!isOwnPortalProfile) {
+    const permError = await requireResourceWriteAccess("creators");
+    if (permError) return permError;
+  }
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
@@ -186,6 +196,7 @@ export async function uploadCreatorAvatar(creatorId: string, formData: FormData)
 
   revalidatePath("/creators");
   revalidatePath(`/creators/${creatorId}`);
+  revalidatePath("/portal");
   revalidatePath("/");
   return { success: true, avatarUrl: uploadResult.publicUrl };
 }

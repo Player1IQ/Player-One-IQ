@@ -312,7 +312,7 @@ export function ContractsPageClient({
           description={
             contracts.length === 0
               ? isPortalUser
-                ? "Your agency will add sponsorship agreements here as deals progress."
+                ? "No deals yet. Browse the open marketplace or land your first sponsorship to see agreements here."
                 : "Create your first sponsorship agreement to track value, status, and deliverables."
               : "Try a different search or filter."
           }

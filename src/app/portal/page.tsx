@@ -160,7 +160,8 @@ export default async function PortalHomePage() {
     platformAccounts.length,
     opportunityApplications,
     deliverableMetrics,
-    marketplaceOpportunities
+    marketplaceOpportunities,
+    openOpportunities
   );
 
   return (

@@ -23,6 +23,7 @@ import { CreatorAvatar } from "./CreatorAvatar";
 import { StatusBadge } from "./StatusBadge";
 import { PlatformBadge } from "./PlatformBadge";
 import { CreatorFormModal } from "./CreatorFormModal";
+import { CreatorPortalProfileModal } from "./CreatorPortalProfileModal";
 import { CreatorAvailabilityPicker } from "@/components/presence/CreatorAvailabilityPicker";
 import { CreatorPlatformAccounts } from "./CreatorPlatformAccounts";
 import { CreatorIncomeOverview } from "./CreatorIncomeOverview";
@@ -145,7 +146,7 @@ export function CreatorProfile({
           <ArrowLeft className="h-4 w-4" />
           {isPortalUser ? "Back to Portal" : "Back to Creators"}
         </Link>
-        {canWrite && (
+        {canWrite ? (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
               <Pencil className="h-4 w-4" />
@@ -161,7 +162,12 @@ export function CreatorProfile({
               {deleting ? "Removing..." : "Remove"}
             </Button>
           </div>
-        )}
+        ) : isPortalUser ? (
+          <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+            <Pencil className="h-4 w-4" />
+            Edit profile
+          </Button>
+        ) : null}
       </div>
 
       {/* Hero Banner */}
@@ -190,7 +196,7 @@ export function CreatorProfile({
                 <CreatorAvailabilityPicker
                   creatorId={creator.id}
                   initialStatus={creator.availabilityStatus}
-                  canEdit={canWrite}
+                  canEdit={canWrite || isPortalUser}
                 />
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -394,6 +400,12 @@ export function CreatorProfile({
 
       {canWrite ? (
         <CreatorFormModal
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          creator={creator}
+        />
+      ) : isPortalUser ? (
+        <CreatorPortalProfileModal
           open={editOpen}
           onClose={() => setEditOpen(false)}
           creator={creator}

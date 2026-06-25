@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { getCurrentUserMembership } from "@/lib/permissions";
-import { isPortalRole } from "@/lib/team";
+import { isCreatorPortalRole, isPortalRole } from "@/lib/team";
 import {
   mapCampaignCreatorRow,
   type CampaignCreatorAssignment,
@@ -116,7 +116,7 @@ export async function syncInferredCampaignCreators(
 export async function getPortalCampaignFilter(): Promise<string[] | null> {
   const membership = await getCurrentUserMembership();
   if (!membership || !isPortalRole(membership.role)) return null;
-  if (membership.role !== "content_creator" || !membership.linkedCreatorId) {
+  if (!isCreatorPortalRole(membership.role) || !membership.linkedCreatorId) {
     return [];
   }
 

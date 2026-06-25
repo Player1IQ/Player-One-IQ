@@ -26,6 +26,7 @@ import { PortalGrowthPanel } from "@/components/portal/PortalGrowthPanel";
 import { PortalEarningsCard } from "@/components/portal/PortalEarningsCard";
 import { PortalApplicationsPanel } from "@/components/portal/PortalApplicationsPanel";
 import { PortalMarketplaceSpotlight } from "@/components/portal/PortalMarketplaceSpotlight";
+import { PortalRecommendedOpportunities } from "@/components/portal/PortalRecommendedOpportunities";
 import { PortalProfileReadiness } from "@/components/portal/PortalProfileReadiness";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
 import type { CreatorPortalBenefits } from "@/lib/creators/portal-benefits";
@@ -74,6 +75,8 @@ export function PortalHomeClient({
       <PortalAlertsBanner
         overdueDeliverables={deliverableMetrics.overdueCount}
         unreadMessages={unreadMessages}
+        acceptedApplications={portalBenefits?.applicationStats.accepted ?? 0}
+        underReviewApplications={portalBenefits?.applicationStats.underReview ?? 0}
       />
 
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
@@ -233,6 +236,12 @@ export function PortalHomeClient({
             >
               View contract
             </Link>
+            <Link
+              href="/portal/deliverables"
+              className="text-sm font-medium text-gray-400 hover:text-white"
+            >
+              All deliverables
+            </Link>
           </div>
         </div>
       ) : null}
@@ -251,6 +260,12 @@ export function PortalHomeClient({
       {showOpportunities && portalBenefits ? (
         <PortalApplicationsPanel
           applications={portalBenefits.recentApplications}
+        />
+      ) : null}
+
+      {showOpportunities && portalBenefits ? (
+        <PortalRecommendedOpportunities
+          opportunities={portalBenefits.recommendedOpportunities}
         />
       ) : null}
 

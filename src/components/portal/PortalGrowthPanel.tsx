@@ -45,6 +45,16 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
               {summary.connectedCount}
             </p>
           </div>
+          {summary.totalAudience && summary.totalAudience > 0 ? (
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                Total audience
+              </p>
+              <p className="mt-1 text-2xl font-bold text-sky-300">
+                {formatViews(summary.totalAudience)}
+              </p>
+            </div>
+          ) : null}
           {summary.hasOAuthContent && summary.totalRecentViews !== null ? (
             <div className="text-right">
               <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -54,7 +64,7 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
                 {formatViews(summary.totalRecentViews)}
               </p>
             </div>
-          ) : (
+          ) : summary.totalAudience && summary.totalAudience > 0 ? null : (
             <p className="max-w-xs text-sm text-gray-500">
               {summary.youtubeConnected
                 ? "Syncing content metrics from your connected accounts."

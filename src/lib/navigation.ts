@@ -198,6 +198,22 @@ export function getAccessibleNavItems(
         ];
       }
     }
+
+    const deliverablesItem: NavItem = {
+      label: "Deliverables",
+      href: "/portal/deliverables",
+      icon: "file-text",
+    };
+    if (!items.some((item) => item.href === "/portal/deliverables")) {
+      const contractsIndex = items.findIndex((item) => item.href === "/contracts");
+      if (contractsIndex >= 0) {
+        items = [
+          ...items.slice(0, contractsIndex + 1),
+          deliverablesItem,
+          ...items.slice(contractsIndex + 1),
+        ];
+      }
+    }
   }
 
   return items

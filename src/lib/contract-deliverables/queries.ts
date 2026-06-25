@@ -29,6 +29,19 @@ export interface PortalDeliverableMetrics {
   nextDue: ContractDeliverable | null;
 }
 
+export interface PortalDeliverableListItem {
+  id: string;
+  title: string;
+  status: ContractDeliverable["status"];
+  displayStatus: DeliverableDisplayStatus;
+  dueDateDisplay: string;
+  isOverdue: boolean;
+  contractId: string;
+  contractName: string;
+  sponsorName: string;
+}
+
+
 async function seedDeliverablesFromContractText(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
   contractId: string,
@@ -240,6 +253,83 @@ export async function getPortalDeliverableMetrics(
     overdueCount: stats.overdueCount,
     nextDue: summary.nextDue,
   };
+}
+
+export async function getPortalDeliverablesForCreator(
+  creatorId: string
+): Promise<PortalDeliverableListItem[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const { data: contracts, error: contractsError } = await supabase
+    .from("contracts")
+    .select("id, contract_name, sponsors ( company_name )")
+    .eq("organization_id", organizationId)
+    .eq("creator_id", creatorId);
+
+  if (contractsError || !contracts?.length) return [];
+
+  const contractMap = new Map(
+    contracts.map((contract) => {
+      const sponsors = contract.sponsors as
+        | { company_name: string }
+        | { company_name: string }[]
+        | null;
+      const sponsorName = Array.isArray(sponsors)
+        ? sponsors[0]?.company_name
+        : sponsors?.company_name;
+
+      return [
+        contract.id,
+        {
+          contractName: contract.contract_name as string,
+          sponsorName: sponsorName ?? "Sponsor",
+        },
+      ];
+    })
+  );
+  const contractIds = contracts.map((contract) => contract.id);
+
+  const { data, error } = await supabase
+    .from("contract_deliverables")
+    .select(deliverableSelect)
+    .eq("organization_id", organizationId)
+    .in("contract_id", contractIds)
+    .order("due_date", { ascending: true, nullsFirst: false })
+    .order("sort_order", { ascending: true });
+
+  if (error || !data) return [];
+
+  return (data as ContractDeliverableRow[])
+    .map((row) => {
+      const deliverable = mapDeliverableRow(row);
+      const contract = contractMap.get(deliverable.contractId);
+      return {
+        id: deliverable.id,
+        title: deliverable.title,
+        status: deliverable.status,
+        displayStatus: deliverable.displayStatus,
+        dueDateDisplay: deliverable.dueDateDisplay,
+        isOverdue: deliverable.isOverdue,
+        contractId: deliverable.contractId,
+        contractName: contract?.contractName ?? "Contract",
+        sponsorName: contract?.sponsorName ?? "Sponsor",
+      };
+    })
+    .sort((left, right) => {
+      if (left.isOverdue !== right.isOverdue) {
+        return left.isOverdue ? -1 : 1;
+      }
+      const leftOpen = left.status !== "completed";
+      const rightOpen = right.status !== "completed";
+      if (leftOpen !== rightOpen) {
+        return leftOpen ? -1 : 1;
+      }
+      return 0;
+    });
 }
 
 export async function getLinkedDeliverablesForCampaign(

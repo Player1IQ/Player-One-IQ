@@ -118,9 +118,19 @@ export async function updateCreatorAvailability(
     return { error: "Invalid status." };
   }
 
-  const { requireResourceWriteAccess } = await import("@/lib/permissions");
-  const permError = await requireResourceWriteAccess("creators");
-  if (permError) return permError;
+  const { getCurrentUserMembership } = await import("@/lib/permissions");
+  const { isCreatorPortalRole } = await import("@/lib/team");
+  const membership = await getCurrentUserMembership();
+  const isOwnPortalProfile =
+    membership &&
+    isCreatorPortalRole(membership.role) &&
+    membership.linkedCreatorId === creatorId;
+
+  if (!isOwnPortalProfile) {
+    const { requireResourceWriteAccess } = await import("@/lib/permissions");
+    const permError = await requireResourceWriteAccess("creators");
+    if (permError) return permError;
+  }
 
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
@@ -140,5 +150,6 @@ export async function updateCreatorAvailability(
   const { revalidatePath } = await import("next/cache");
   revalidatePath("/creators");
   revalidatePath(`/creators/${creatorId}`);
+  revalidatePath("/portal");
   return { success: true as const, status };
 }

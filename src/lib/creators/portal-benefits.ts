@@ -12,6 +12,7 @@ import {
   type DashboardRevenueSummary,
 } from "@/lib/revenue/summary";
 import { getMarketplaceOpportunities } from "@/lib/opportunities/queries";
+import { getRecommendedOpportunitiesForCreator } from "@/lib/opportunities/recommendations";
 
 export interface ProfileReadinessItem {
   id: string;
@@ -31,6 +32,7 @@ export interface CreatorPortalBenefits {
   recentApplications: OpportunityApplication[];
   marketplaceOpportunities: Opportunity[];
   marketplaceCount: number;
+  recommendedOpportunities: Opportunity[];
   profileReadiness: ProfileReadiness;
 }
 
@@ -109,7 +111,8 @@ export async function getCreatorPortalBenefits(
   connectedAccountCount: number,
   applications: OpportunityApplication[],
   deliverableMetrics: PortalDeliverableMetrics,
-  marketplaceOpportunities?: Opportunity[]
+  marketplaceOpportunities?: Opportunity[],
+  openOpportunities?: Opportunity[]
 ): Promise<CreatorPortalBenefits> {
   const creatorContracts = contracts.filter(
     (contract) => contract.creatorId === creatorId
@@ -117,6 +120,8 @@ export async function getCreatorPortalBenefits(
   const marketplace =
     marketplaceOpportunities ?? (await getMarketplaceOpportunities());
   const applicationStats = getApplicationStats(applications);
+  const appliedOpportunityIds = new Set(applications.map((app) => app.opportunityId));
+  const recommendationPool = openOpportunities ?? marketplace;
   const recentApplications = [...applications]
     .sort(
       (left, right) =>
@@ -134,6 +139,12 @@ export async function getCreatorPortalBenefits(
     recentApplications,
     marketplaceOpportunities: marketplace.slice(0, 3),
     marketplaceCount: marketplace.length,
+    recommendedOpportunities: getRecommendedOpportunitiesForCreator(
+      recommendationPool,
+      appliedOpportunityIds,
+      creator,
+      5
+    ),
     profileReadiness: computeProfileReadiness({
       creatorId,
       creator,
