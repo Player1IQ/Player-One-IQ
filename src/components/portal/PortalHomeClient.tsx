@@ -23,7 +23,12 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { PortalAlertsBanner } from "@/components/portal/PortalAlertsBanner";
 import { PortalGrowthPanel } from "@/components/portal/PortalGrowthPanel";
+import { PortalEarningsCard } from "@/components/portal/PortalEarningsCard";
+import { PortalApplicationsPanel } from "@/components/portal/PortalApplicationsPanel";
+import { PortalMarketplaceSpotlight } from "@/components/portal/PortalMarketplaceSpotlight";
+import { PortalProfileReadiness } from "@/components/portal/PortalProfileReadiness";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
+import type { CreatorPortalBenefits } from "@/lib/creators/portal-benefits";
 
 interface PortalHomeClientProps {
   creator: Creator;
@@ -40,6 +45,7 @@ interface PortalHomeClientProps {
   pendingApplicationCount?: number;
   deliverableMetrics: PortalDeliverableMetrics;
   platformSummary?: CreatorPlatformSummary | null;
+  portalBenefits?: CreatorPortalBenefits | null;
 }
 
 export function PortalHomeClient({
@@ -57,6 +63,7 @@ export function PortalHomeClient({
   pendingApplicationCount = 0,
   deliverableMetrics,
   platformSummary = null,
+  portalBenefits = null,
 }: PortalHomeClientProps) {
   const activeContracts = contracts.filter((contract) =>
     ["active", "negotiating", "draft"].includes(contract.status)
@@ -181,11 +188,15 @@ export function PortalHomeClient({
         <MetricCard
           title="Availability"
           value={presenceLabels[creator.availabilityStatus]}
-          subtitle="Set by your agency"
+          subtitle="Your current status"
           icon={Briefcase}
           iconColor="text-sky-400"
         />
       </div>
+
+      {portalBenefits && portalBenefits.profileReadiness.score < 100 ? (
+        <PortalProfileReadiness readiness={portalBenefits.profileReadiness} />
+      ) : null}
 
       {deliverableMetrics.nextDue ? (
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
@@ -230,6 +241,26 @@ export function PortalHomeClient({
         <PortalGrowthPanel creatorId={creator.id} summary={platformSummary} />
       ) : null}
 
+      {portalBenefits ? (
+        <PortalEarningsCard
+          creatorId={creator.id}
+          summary={portalBenefits.revenueSummary}
+        />
+      ) : null}
+
+      {showOpportunities && portalBenefits ? (
+        <PortalApplicationsPanel
+          applications={portalBenefits.recentApplications}
+        />
+      ) : null}
+
+      {showOpportunities && portalBenefits ? (
+        <PortalMarketplaceSpotlight
+          opportunities={portalBenefits.marketplaceOpportunities}
+          marketplaceCount={portalBenefits.marketplaceCount}
+        />
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <Card>
           <CardHeader>
@@ -241,7 +272,8 @@ export function PortalHomeClient({
           <CardContent className="pt-0">
             {contracts.length === 0 ? (
               <p className="text-sm text-gray-500">
-                No contracts yet. Your agency will add deals here as they progress.
+                No sponsorship deals yet. Browse the open marketplace to find
+                opportunities, or check back as new agency deals are added.
               </p>
             ) : (
               <ul className="space-y-3">
@@ -312,6 +344,20 @@ export function PortalHomeClient({
                 {campaignCount > 0 ? (
                   <span className="text-xs text-gray-500">
                     {campaignCount} assigned
+                  </span>
+                ) : null}
+              </Link>
+            ) : null}
+            {showOpportunities ? (
+              <Link
+                href="/opportunities/applications"
+                className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
+              >
+                <Briefcase className="h-4 w-4 text-accent-light" />
+                <span className="flex-1">My applications</span>
+                {portalBenefits && portalBenefits.applicationStats.total > 0 ? (
+                  <span className="text-xs text-gray-500">
+                    {portalBenefits.applicationStats.total} submitted
                   </span>
                 ) : null}
               </Link>

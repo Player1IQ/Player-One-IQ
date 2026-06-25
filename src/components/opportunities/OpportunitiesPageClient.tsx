@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Plus, Search, Briefcase, FileText, Users } from "lucide-react";
 import {
   type Opportunity,
@@ -59,10 +60,19 @@ export function OpportunitiesPageClient({
   myApplicationCount = 0,
   myPendingCount = 0,
 }: OpportunitiesPageClientProps) {
+  const searchParams = useSearchParams();
+  const initialPortalTab = useMemo((): PortalTab => {
+    const tab = searchParams.get("tab");
+    return tab === "marketplace" ? "marketplace" : "agency";
+  }, [searchParams]);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [portalTab, setPortalTab] = useState<PortalTab>("agency");
+  const [portalTab, setPortalTab] = useState<PortalTab>(initialPortalTab);
+
+  useEffect(() => {
+    setPortalTab(initialPortalTab);
+  }, [initialPortalTab]);
 
   const sourceOpportunities = isPortalUser
     ? portalTab === "agency"

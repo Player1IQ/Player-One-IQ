@@ -180,6 +180,24 @@ export function getAccessibleNavItems(
         ];
       }
     }
+
+    const applicationsItem: NavItem = {
+      label: "My applications",
+      href: "/opportunities/applications",
+      icon: "briefcase",
+    };
+    if (!items.some((item) => item.href === "/opportunities/applications")) {
+      const opportunitiesIndex = items.findIndex(
+        (item) => item.href === "/opportunities"
+      );
+      if (opportunitiesIndex >= 0) {
+        items = [
+          ...items.slice(0, opportunitiesIndex + 1),
+          applicationsItem,
+          ...items.slice(opportunitiesIndex + 1),
+        ];
+      }
+    }
   }
 
   return items

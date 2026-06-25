@@ -14,6 +14,7 @@ import { getUnreadMessageCount } from "@/lib/messages/queries";
 import {
   getOpenOpportunitiesForPortal,
   getApplicationsForCreator,
+  getMarketplaceOpportunities,
 } from "@/lib/opportunities/queries";
 import { getApplicationStats } from "@/lib/opportunities";
 import { getOrganizationForUser } from "@/lib/organization/queries";
@@ -25,6 +26,11 @@ import {
   isCreatorPortalRole,
 } from "@/lib/team";
 import { getCreatorPlatformSummary } from "@/lib/creators/platform-summary";
+import { getCreatorPortalBenefits } from "@/lib/creators/portal-benefits";
+import {
+  getCreatorPlatformAccounts,
+  getCreatorRevenueEntries,
+} from "@/lib/creator-revenue/queries";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
@@ -119,6 +125,9 @@ export default async function PortalHomePage() {
     openOpportunities,
     opportunityApplications,
     platformSummary,
+    revenueEntries,
+    platformAccounts,
+    marketplaceOpportunities,
   ] = await Promise.all([
     getCreatorById(membership.linkedCreatorId),
     getContracts(),
@@ -132,6 +141,9 @@ export default async function PortalHomePage() {
       ? getApplicationsForCreator(membership.linkedCreatorId)
       : Promise.resolve([]),
     getCreatorPlatformSummary(membership.linkedCreatorId),
+    getCreatorRevenueEntries(membership.linkedCreatorId),
+    getCreatorPlatformAccounts(membership.linkedCreatorId),
+    showOpportunities ? getMarketplaceOpportunities() : Promise.resolve([]),
   ]);
 
   if (!creator) {
@@ -140,6 +152,16 @@ export default async function PortalHomePage() {
 
   const whiteLabelEnabled = hasFeature(subscription.features, "white_label");
   const opportunityApplicationStats = getApplicationStats(opportunityApplications);
+  const portalBenefits = await getCreatorPortalBenefits(
+    membership.linkedCreatorId,
+    creator,
+    contracts,
+    revenueEntries,
+    platformAccounts.length,
+    opportunityApplications,
+    deliverableMetrics,
+    marketplaceOpportunities
+  );
 
   return (
     <DashboardLayout
@@ -161,6 +183,7 @@ export default async function PortalHomePage() {
         pendingApplicationCount={opportunityApplicationStats.needsAction}
         deliverableMetrics={deliverableMetrics}
         platformSummary={platformSummary}
+        portalBenefits={portalBenefits}
       />
     </DashboardLayout>
   );

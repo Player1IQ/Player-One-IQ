@@ -10,7 +10,7 @@ import {
 import { canRunLiveAi } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { canAccessCreator, hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
-import { isPortalRole } from "@/lib/team";
+import { isCreatorPortalRole, isPortalRole } from "@/lib/team";
 import { getOAuthPlatformUi } from "@/lib/platform-oauth/config";
 import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
@@ -75,7 +75,7 @@ export default async function CreatorDetailPage({
         oauthError={oauthError ?? null}
         canWrite={hasFullAccess(role, "creators")}
         isPortalUser={isPortalUser}
-        isContentCreator={role === "content_creator"}
+        isContentCreator={isCreatorPortalRole(role)}
         canUseContentAi={hasFeature(subscription.features, "ai_growth")}
         aiMode={aiLive ? "live" : "demo"}
         audienceAnalytics={audienceAnalytics}

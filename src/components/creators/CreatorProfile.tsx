@@ -58,22 +58,26 @@ interface CreatorProfileProps {
 }
 
 function Section({
+  id,
   title,
   description,
   children,
 }: {
+  id?: string;
   title: string;
   description?: string;
   children: React.ReactNode;
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent className="pt-0">{children}</CardContent>
-    </Card>
+    <div id={id}>
+      <Card>
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          {description && <CardDescription>{description}</CardDescription>}
+        </CardHeader>
+        <CardContent className="pt-0">{children}</CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -87,7 +91,6 @@ export function CreatorProfile({
   oauthError = null,
   canWrite = true,
   isPortalUser = false,
-  isContentCreator = false,
   canUseContentAi = false,
   aiMode = "demo",
   audienceAnalytics,
@@ -314,33 +317,34 @@ export function CreatorProfile({
         </Section>
       </div>
 
-      {!isPortalUser ? (
-        <Section
-          title="Income Overview"
-          description="Combined platform and sponsorship revenue for this month"
-        >
-          <CreatorIncomeOverview
-            contracts={contracts}
-            revenueEntries={revenueEntries}
-          />
-        </Section>
-      ) : null}
+      <Section
+        id="income-overview"
+        title={isPortalUser ? "Your earnings this month" : "Income Overview"}
+        description={
+          isPortalUser
+            ? "Your sponsorship deals and connected platform income"
+            : "Combined platform and sponsorship revenue for this month"
+        }
+      >
+        <CreatorIncomeOverview
+          contracts={contracts}
+          revenueEntries={revenueEntries}
+        />
+      </Section>
 
-      {!isPortalUser || isContentCreator ? (
-        <Section
-          title="AI Content Coach"
-          description="Cross-platform recommendations from connected accounts"
-        >
-          <CreatorContentCoach
-            creatorId={creator.id}
-            creatorName={creator.name}
-            connectedOAuthPlatforms={connectedOAuthPlatforms}
-            oauthPlatformUi={oauthPlatformUi}
-            canUseAi={canUseContentAi}
-            aiMode={aiMode}
-          />
-        </Section>
-      ) : null}
+      <Section
+        title="AI Content Coach"
+        description="Cross-platform recommendations from connected accounts"
+      >
+        <CreatorContentCoach
+          creatorId={creator.id}
+          creatorName={creator.name}
+          connectedOAuthPlatforms={connectedOAuthPlatforms}
+          oauthPlatformUi={oauthPlatformUi}
+          canUseAi={canUseContentAi}
+          aiMode={aiMode}
+        />
+      </Section>
 
       <Section
         title="Connected Platforms"
@@ -361,10 +365,10 @@ export function CreatorProfile({
       </Section>
 
       <Section
-        title="Contracts"
+        title={isPortalUser ? "Your sponsorship deals" : "Contracts"}
         description={
           isPortalUser
-            ? "Your sponsorship agreements with this agency"
+            ? "Active and past sponsorship agreements on your profile"
             : "Sponsorship agreements for this creator"
         }
       >
@@ -372,7 +376,7 @@ export function CreatorProfile({
           contracts={contracts}
           emptyMessage={
             isPortalUser
-              ? "No contracts linked to your profile yet."
+              ? "No sponsorship deals yet. Browse the open marketplace to find opportunities."
               : "No contracts linked to this creator yet."
           }
         />
