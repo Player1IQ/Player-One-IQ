@@ -24,6 +24,7 @@ const STEPS = [
   { name: "Billing", script: "verify:billing", args: [baseUrl] },
   { name: "Team invites", script: "verify:invites", args: [baseUrl] },
   { name: "Platform OAuth", script: "verify:oauth", args: [baseUrl] },
+  { name: "Agency Pro API", script: "verify:api", args: [baseUrl] },
   { name: "Production smoke", script: "verify:production", args: [baseUrl] },
 ];
 
@@ -57,7 +58,7 @@ function main() {
 
   if (failed.length > 0) {
     console.log(
-      "Manual steps (not automated): Resend domain, Stripe live keys, Supabase leaked-password + prod auth URLs, OAuth prod callbacks, agency free-tier billing policy.\n"
+      "Manual steps (not automated): Resend domain, Stripe live keys, Supabase auth URLs, OAuth prod callbacks, Agency Pro API keys + webhooks in Settings, agency billing policy.\n"
     );
     process.exit(1);
   }

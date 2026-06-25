@@ -25,6 +25,8 @@ interface HealthResponse {
   launchOAuthPlatforms: string[];
   cronConfigured: boolean;
   serviceRoleConfigured: boolean;
+  apiV1AuthReady?: boolean;
+  apiKeyPepperConfigured?: boolean;
   stripeConfigured: boolean;
   stripeWebhookConfigured: boolean;
   resendConfigured: boolean;
@@ -48,10 +50,12 @@ export function DeployChecklistCard({
   const [routeChecks, setRouteChecks] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [apiV1Reachable, setApiV1Reachable] = useState(false);
+
   useEffect(() => {
     async function loadChecklist() {
       try {
-        const [healthRes, routeResults] = await Promise.all([
+        const [healthRes, routeResults, apiRes] = await Promise.all([
           fetch("/api/health").then((res) => res.json() as Promise<HealthResponse>),
           Promise.all(
             PUBLIC_ROUTE_CHECKS.map(async ({ path, label }) => {
@@ -63,9 +67,11 @@ export function DeployChecklistCard({
               }
             })
           ),
+          fetch("/api/v1/creators").then((res) => res.status === 401),
         ]);
         setHealth(healthRes);
         setRouteChecks(routeResults);
+        setApiV1Reachable(apiRes);
       } catch {
         setHealth(null);
         setRouteChecks(
@@ -93,8 +99,14 @@ export function DeployChecklistCard({
       done: health?.cronConfigured ?? false,
     },
     {
-      label: "Service role key (scheduled sync)",
+      label: "Service role key (cron sync + Agency Pro API)",
       done: health?.serviceRoleConfigured ?? false,
+    },
+    {
+      label: "Agency Pro API v1 reachable",
+      done:
+        (health?.apiV1AuthReady ?? health?.serviceRoleConfigured ?? false) &&
+        apiV1Reachable,
     },
     {
       label: "Platform OAuth enabled",
@@ -128,6 +140,11 @@ export function DeployChecklistCard({
       label: "Workspace AI key verified",
       done: !aiIntegrationProbeError,
       optional: !aiIntegrationHasKey,
+    },
+    {
+      label: "API key pepper (optional hardening)",
+      done: health?.apiKeyPepperConfigured ?? false,
+      optional: true,
     },
     {
       label: "Platform OpenAI fallback (optional)",
@@ -254,6 +271,14 @@ export function DeployChecklistCard({
           </p>
           <p className="mt-1 break-all font-mono text-gray-300">
             {oauthBase}/api/platform-oauth/twitch/callback
+          </p>
+          <p className="mt-3 font-medium text-gray-400">Agency Pro API</p>
+          <p className="mt-1 break-all font-mono text-gray-300">
+            {oauthBase}/api/v1/creators
+          </p>
+          <p className="mt-3 font-medium text-gray-400">Stripe webhook</p>
+          <p className="mt-1 break-all font-mono text-gray-300">
+            {oauthBase}/api/billing/webhook
           </p>
         </div>
       ) : null}

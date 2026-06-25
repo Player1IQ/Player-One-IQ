@@ -12,6 +12,7 @@
     "verify:billing": "node scripts/verify-billing.mjs",
     "verify:invites": "node scripts/verify-invites.mjs",
     "verify:oauth": "node scripts/verify-oauth.mjs",
+    "verify:api": "node scripts/verify-api.mjs",
     "verify:launch": "node scripts/verify-launch.mjs",
     "test:guards": "node --import tsx --test tests/guards/portal-paths.test.ts tests/guards/staff-paths.test.ts tests/api/keys.test.ts",
     "test:e2e": "playwright test"

@@ -123,6 +123,11 @@ const checks = [
     required: false,
     hint: "Stripe subscription sync webhook",
   },
+  {
+    key: "API_KEY_PEPPER",
+    required: false,
+    hint: "Optional extra secret for Agency Pro API key hashing",
+  },
 ];
 
 let failed = 0;

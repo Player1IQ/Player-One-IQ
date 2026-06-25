@@ -21,6 +21,7 @@ export async function GET() {
   const aiDeployReady =
     aiCredentialsEncryptionConfigured ||
     (openAiConfigured && openAiHealth === "available");
+  const serviceRoleConfigured = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   return NextResponse.json({
     ok: true,
@@ -28,7 +29,9 @@ export async function GET() {
     platformOAuth: isPlatformOAuthFeatureEnabled(),
     launchOAuthPlatforms,
     cronConfigured: Boolean(process.env.CRON_SECRET),
-    serviceRoleConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    serviceRoleConfigured,
+    apiV1AuthReady: serviceRoleConfigured,
+    apiKeyPepperConfigured: Boolean(process.env.API_KEY_PEPPER?.trim()),
     stripeConfigured: isStripeConfigured(),
     stripeWebhookConfigured: Boolean(getStripeWebhookSecret()),
     resendConfigured: Boolean(
