@@ -39,6 +39,7 @@ export interface OpportunityRow {
   deliverables: string | null;
   application_deadline: string | null;
   status: OpportunityStatus;
+  marketplace_listing?: boolean;
   created_at: string;
   updated_at: string;
   sponsors?: { company_name: string } | { company_name: string }[] | null;
@@ -71,6 +72,7 @@ export interface Opportunity {
   applicationDeadline: string | null;
   applicationDeadlineDisplay: string;
   status: OpportunityStatus;
+  marketplaceListing: boolean;
   createdAt: string;
   updatedAt: string;
   applicationCount: number;
@@ -102,6 +104,7 @@ export interface OpportunityInput {
   deliverables: string;
   applicationDeadline: string;
   status: OpportunityStatus;
+  marketplaceListing?: boolean;
 }
 
 export interface ApplicationInput {
@@ -163,6 +166,7 @@ export function mapOpportunityRow(
     applicationDeadline: row.application_deadline,
     applicationDeadlineDisplay: formatOpportunityDate(row.application_deadline),
     status: row.status,
+    marketplaceListing: row.marketplace_listing ?? false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     applicationCount,

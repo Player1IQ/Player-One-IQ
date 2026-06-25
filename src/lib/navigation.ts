@@ -8,6 +8,7 @@ import { staffNavPermissionKeys } from "@/lib/staff/paths";
 import {
   canAccessStaffDashboard,
   hasReadAccess,
+  isCreatorPortalRole,
   isSponsorPortalRole,
   type TeamRole,
 } from "@/lib/team";
@@ -150,7 +151,7 @@ export function getAccessibleNavItems(
         ? [...portalNavItems]
         : navItems;
 
-  if (role === "content_creator" && !canAccessStaffDashboard(role)) {
+  if (role && isCreatorPortalRole(role) && !canAccessStaffDashboard(role)) {
     const campaignsItem = navItems.find((item) => item.href === "/campaigns");
     if (campaignsItem && !items.some((item) => item.href === "/campaigns")) {
       const messagesIndex = items.findIndex((item) => item.href === "/messages");

@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OpportunitiesPageClient } from "@/components/opportunities/OpportunitiesPageClient";
 import {
   getOpportunities,
   getAllApplications,
-  getOpenOpportunitiesForPortal,
+  getAgencyOpenOpportunitiesForPortal,
+  getMarketplaceOpportunities,
   getApplicationsForCreator,
 } from "@/lib/opportunities/queries";
 import { getApplicationStats } from "@/lib/opportunities";
@@ -18,22 +18,23 @@ import { isPortalRole } from "@/lib/team";
 export default async function OpportunitiesPage() {
   const membership = await getCurrentUserMembership();
 
-  if (membership?.role === "player") {
-    redirect("/portal");
-  }
-
   const isPortalUser = Boolean(membership && isPortalRole(membership.role));
   const linkedCreatorId = membership?.linkedCreatorId ?? null;
 
-  const [opportunities, sponsors, applications] = await Promise.all([
-    isPortalUser
-      ? getOpenOpportunitiesForPortal()
-      : getOpportunities(),
+  const [opportunities, agencyOpportunities, marketplaceOpportunities, sponsors, applications] =
+    await Promise.all([
+    isPortalUser ? Promise.resolve([]) : getOpportunities(),
+    isPortalUser ? getAgencyOpenOpportunitiesForPortal() : Promise.resolve([]),
+    isPortalUser ? getMarketplaceOpportunities() : Promise.resolve([]),
     isPortalUser ? Promise.resolve([]) : getSponsors(),
     isPortalUser && linkedCreatorId
       ? getApplicationsForCreator(linkedCreatorId)
       : getAllApplications(),
   ]);
+
+  const portalOpportunities = isPortalUser
+    ? [...agencyOpportunities, ...marketplaceOpportunities]
+    : opportunities;
 
   const applicationStats = getApplicationStats(applications);
 
@@ -51,7 +52,9 @@ export default async function OpportunitiesPage() {
       }
     >
       <OpportunitiesPageClient
-        opportunities={opportunities}
+        opportunities={portalOpportunities}
+        agencyOpportunities={agencyOpportunities}
+        marketplaceOpportunities={marketplaceOpportunities}
         sponsors={sponsors}
         canManage={canManageOpportunities(membership?.role ?? null)}
         pendingReviewCount={pendingReviewCount}

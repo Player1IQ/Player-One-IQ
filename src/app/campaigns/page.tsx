@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { CampaignsPageClient } from "@/components/campaigns/CampaignsPageClient";
@@ -14,10 +13,6 @@ import { isPortalRole } from "@/lib/team";
 
 export default async function CampaignsPage() {
   const membership = await getCurrentUserMembership();
-
-  if (membership?.role === "player") {
-    redirect("/portal");
-  }
 
   const isPortalUser = Boolean(membership && isPortalRole(membership.role));
 

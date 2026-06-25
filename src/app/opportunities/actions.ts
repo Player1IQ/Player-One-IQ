@@ -32,6 +32,7 @@ import {
   applicationSubmittedMessage,
 } from "@/lib/messages/system-events";
 import { dispatchOrganizationWebhook } from "@/lib/api/webhooks";
+import { isCreatorPortalRole } from "@/lib/team";
 
 async function logOpportunityActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -104,6 +105,7 @@ function toOpportunityPayload(input: OpportunityInput) {
     deliverables: input.deliverables.trim() || null,
     application_deadline: input.applicationDeadline || null,
     status: input.status,
+    marketplace_listing: input.marketplaceListing ?? false,
   };
 }
 
@@ -303,7 +305,7 @@ export async function applyToOpportunity(input: ApplicationInput) {
   if (permError) return permError;
 
   const membership = await getCurrentUserMembership();
-  const isPortalCreator = membership?.role === "content_creator";
+  const isPortalCreator = isCreatorPortalRole(membership?.role ?? null);
 
   let creatorId = input.creatorId;
   if (isPortalCreator) {
@@ -333,14 +335,27 @@ export async function applyToOpportunity(input: ApplicationInput) {
 
   const { data: opportunity } = await supabase
     .from("opportunities")
-    .select("id, title, status")
+    .select("id, title, status, organization_id, marketplace_listing")
     .eq("id", input.opportunityId)
-    .eq("organization_id", organizationId)
     .maybeSingle();
 
   if (!opportunity) return { error: "Opportunity not found." };
   if (opportunity.status !== "open") {
     return { error: "This opportunity is not accepting applications." };
+  }
+
+  const isSameOrg = opportunity.organization_id === organizationId;
+  const isMarketplaceCrossOrg =
+    !isSameOrg && opportunity.marketplace_listing === true;
+
+  if (!isSameOrg && !isMarketplaceCrossOrg) {
+    return { error: "Opportunity not found." };
+  }
+
+  if (isMarketplaceCrossOrg && !isPortalCreator) {
+    return {
+      error: "Only creator portal users can apply to marketplace opportunities.",
+    };
   }
 
   const { data: creator } = await supabase

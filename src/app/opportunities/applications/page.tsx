@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ApplicationsPageClient } from "@/components/opportunities/ApplicationsPageClient";
 import {
@@ -14,10 +13,6 @@ import { isPortalRole } from "@/lib/team";
 
 export default async function ApplicationsPage() {
   const membership = await getCurrentUserMembership();
-
-  if (membership?.role === "player") {
-    redirect("/portal");
-  }
 
   const isPortalUser = Boolean(membership && isPortalRole(membership.role));
   const linkedCreatorId = membership?.linkedCreatorId ?? null;

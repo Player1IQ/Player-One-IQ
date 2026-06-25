@@ -37,6 +37,7 @@ function toInput(opportunity: Opportunity): OpportunityInput {
     deliverables: opportunity.deliverables,
     applicationDeadline: opportunity.applicationDeadline ?? "",
     status: opportunity.status,
+    marketplaceListing: opportunity.marketplaceListing,
   };
 }
 
@@ -50,6 +51,7 @@ const defaultInput = (sponsorId = ""): OpportunityInput => ({
   deliverables: "",
   applicationDeadline: "",
   status: "draft",
+  marketplaceListing: false,
 });
 
 export function OpportunityFormModal({
@@ -265,6 +267,26 @@ export function OpportunityFormModal({
               className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200"
             />
           </div>
+
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+            <input
+              type="checkbox"
+              checked={form.marketplaceListing ?? false}
+              onChange={(e) =>
+                setForm({ ...form, marketplaceListing: e.target.checked })
+              }
+              className="mt-0.5 rounded border-border bg-surface text-accent focus:ring-accent/30"
+            />
+            <span>
+              <span className="block text-sm font-medium text-gray-200">
+                List on open marketplace
+              </span>
+              <span className="mt-0.5 block text-xs text-gray-500">
+                When open, creators from other organizations can discover and apply
+                to this opportunity.
+              </span>
+            </span>
+          </label>
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm text-gray-400">

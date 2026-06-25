@@ -19,10 +19,12 @@ import { getApplicationStats } from "@/lib/opportunities";
 import { getOrganizationForUser } from "@/lib/organization/queries";
 import { getSponsorById } from "@/lib/sponsors/queries";
 import {
-  roleLabels,
+  getPortalRoleLabel,
   isPortalRole,
   isSponsorPortalRole,
+  isCreatorPortalRole,
 } from "@/lib/team";
+import { getCreatorPlatformSummary } from "@/lib/creators/platform-summary";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
@@ -39,7 +41,7 @@ export default async function PortalHomePage() {
       return (
         <DashboardLayout title="Portal" description="Your agency portal">
           <PortalNoProfileClient
-            roleLabel={roleLabels[membership.role]}
+            roleLabel={getPortalRoleLabel(membership.role)}
             variant="sponsor"
           />
         </DashboardLayout>
@@ -84,7 +86,7 @@ export default async function PortalHomePage() {
           organizationName={organization?.name ?? "Your organization"}
           organizationLogoUrl={organization?.logo_url ?? null}
           whiteLabelEnabled={whiteLabelEnabled}
-          roleLabel={roleLabels[membership.role]}
+          roleLabel={getPortalRoleLabel(membership.role)}
           campaignCount={campaigns.length}
           deliverableMetrics={deliverableMetrics}
         />
@@ -98,13 +100,13 @@ export default async function PortalHomePage() {
         title="Portal"
         description="Your agency portal"
       >
-        <PortalNoProfileClient roleLabel={roleLabels[membership.role]} />
+        <PortalNoProfileClient roleLabel={getPortalRoleLabel(membership.role)} />
       </DashboardLayout>
     );
   }
 
-  const showCampaigns = membership.role === "content_creator";
-  const showOpportunities = membership.role === "content_creator";
+  const showCampaigns = isCreatorPortalRole(membership.role);
+  const showOpportunities = isCreatorPortalRole(membership.role);
 
   const [
     creator,
@@ -116,6 +118,7 @@ export default async function PortalHomePage() {
     subscription,
     openOpportunities,
     opportunityApplications,
+    platformSummary,
   ] = await Promise.all([
     getCreatorById(membership.linkedCreatorId),
     getContracts(),
@@ -128,6 +131,7 @@ export default async function PortalHomePage() {
     showOpportunities
       ? getApplicationsForCreator(membership.linkedCreatorId)
       : Promise.resolve([]),
+    getCreatorPlatformSummary(membership.linkedCreatorId),
   ]);
 
   if (!creator) {
@@ -149,13 +153,14 @@ export default async function PortalHomePage() {
         organizationName={organization?.name ?? "Your organization"}
         organizationLogoUrl={organization?.logo_url ?? null}
         whiteLabelEnabled={whiteLabelEnabled}
-        roleLabel={roleLabels[membership.role]}
+        roleLabel={getPortalRoleLabel(membership.role)}
         showCampaigns={showCampaigns}
         campaignCount={campaigns.length}
         showOpportunities={showOpportunities}
         openOpportunityCount={openOpportunities.length}
         pendingApplicationCount={opportunityApplicationStats.needsAction}
         deliverableMetrics={deliverableMetrics}
+        platformSummary={platformSummary}
       />
     </DashboardLayout>
   );

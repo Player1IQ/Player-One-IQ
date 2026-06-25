@@ -184,6 +184,11 @@ export function OpportunityDetail({
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="text-3xl font-bold text-white">{opportunity.title}</h2>
               <OpportunityStatusBadge status={opportunity.status} />
+              {opportunity.marketplaceListing ? (
+                <span className="rounded-full bg-violet-500/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-violet-300 ring-1 ring-violet-500/25">
+                  Marketplace
+                </span>
+              ) : null}
               <IndustryBadge industry={opportunity.category} />
               <PlatformBadge platform={opportunity.platform} />
             </div>

@@ -80,14 +80,10 @@ export async function getOpportunityById(
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const organizationId = await getOrganizationId();
-  if (!organizationId) return null;
-
   const { data, error } = await supabase
     .from("opportunities")
     .select("*, sponsors ( company_name )")
     .eq("id", id)
-    .eq("organization_id", organizationId)
     .maybeSingle();
 
   if (error || !data) return null;
@@ -170,7 +166,7 @@ export async function getAllApplications(): Promise<OpportunityApplication[]> {
   return rows.map((row) => mapApplicationRow(row, contractIds[row.id] ?? null));
 }
 
-export async function getOpenOpportunitiesForPortal(): Promise<Opportunity[]> {
+export async function getAgencyOpenOpportunitiesForPortal(): Promise<Opportunity[]> {
   const supabase = await createClient();
   if (!supabase) return [];
 
@@ -190,23 +186,48 @@ export async function getOpenOpportunitiesForPortal(): Promise<Opportunity[]> {
   return rows.map((row) => mapOpportunityRow(row, 0));
 }
 
-export async function getApplicationsForCreator(
-  creatorId: string
-): Promise<OpportunityApplication[]> {
+export async function getMarketplaceOpportunities(): Promise<Opportunity[]> {
   const supabase = await createClient();
   if (!supabase) return [];
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return [];
 
-  const { data: opportunities } = await supabase
+  const { data, error } = await supabase
     .from("opportunities")
-    .select("id")
-    .eq("organization_id", organizationId);
+    .select("*, sponsors ( company_name )")
+    .eq("marketplace_listing", true)
+    .eq("status", "open")
+    .neq("organization_id", organizationId)
+    .order("created_at", { ascending: false });
 
-  if (!opportunities?.length) return [];
+  if (error || !data) return [];
 
-  const ids = opportunities.map((o) => o.id);
+  const rows = data as OpportunityRow[];
+  return rows.map((row) => mapOpportunityRow(row, 0));
+}
+
+export async function getOpenOpportunitiesForPortal(): Promise<Opportunity[]> {
+  const [agency, marketplace] = await Promise.all([
+    getAgencyOpenOpportunitiesForPortal(),
+    getMarketplaceOpportunities(),
+  ]);
+
+  const seen = new Set(agency.map((opportunity) => opportunity.id));
+  const merged = [...agency];
+  for (const opportunity of marketplace) {
+    if (!seen.has(opportunity.id)) {
+      merged.push(opportunity);
+    }
+  }
+  return merged;
+}
+
+export async function getApplicationsForCreator(
+  creatorId: string
+): Promise<OpportunityApplication[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
 
   const { data, error } = await supabase
     .from("opportunity_applications")
@@ -216,7 +237,6 @@ export async function getApplicationsForCreator(
       opportunities ( title, status )`
     )
     .eq("creator_id", creatorId)
-    .in("opportunity_id", ids)
     .order("created_at", { ascending: false });
 
   if (error || !data) return [];
@@ -235,18 +255,6 @@ export async function getApplicationForCreatorOnOpportunity(
 ): Promise<OpportunityApplication | null> {
   const supabase = await createClient();
   if (!supabase) return null;
-
-  const organizationId = await getOrganizationId();
-  if (!organizationId) return null;
-
-  const { data: opportunity } = await supabase
-    .from("opportunities")
-    .select("id")
-    .eq("id", opportunityId)
-    .eq("organization_id", organizationId)
-    .maybeSingle();
-
-  if (!opportunity) return null;
 
   const { data, error } = await supabase
     .from("opportunity_applications")

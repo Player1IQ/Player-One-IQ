@@ -22,6 +22,8 @@ import { ContractStatusBadge } from "@/components/contracts/ContractStatusBadge"
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { PortalAlertsBanner } from "@/components/portal/PortalAlertsBanner";
+import { PortalGrowthPanel } from "@/components/portal/PortalGrowthPanel";
+import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
 
 interface PortalHomeClientProps {
   creator: Creator;
@@ -37,6 +39,7 @@ interface PortalHomeClientProps {
   openOpportunityCount?: number;
   pendingApplicationCount?: number;
   deliverableMetrics: PortalDeliverableMetrics;
+  platformSummary?: CreatorPlatformSummary | null;
 }
 
 export function PortalHomeClient({
@@ -53,6 +56,7 @@ export function PortalHomeClient({
   openOpportunityCount = 0,
   pendingApplicationCount = 0,
   deliverableMetrics,
+  platformSummary = null,
 }: PortalHomeClientProps) {
   const activeContracts = contracts.filter((contract) =>
     ["active", "negotiating", "draft"].includes(contract.status)
@@ -220,6 +224,10 @@ export function PortalHomeClient({
             </Link>
           </div>
         </div>
+      ) : null}
+
+      {platformSummary ? (
+        <PortalGrowthPanel creatorId={creator.id} summary={platformSummary} />
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">

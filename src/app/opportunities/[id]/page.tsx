@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { OpportunityDetail } from "@/components/opportunities/OpportunityDetail";
 import { findConversationByRelated } from "@/lib/messages/queries";
@@ -25,10 +25,6 @@ export default async function OpportunityDetailPage({
 }: OpportunityDetailPageProps) {
   const { id } = await params;
   const membership = await getCurrentUserMembership();
-
-  if (membership?.role === "player") {
-    redirect("/portal");
-  }
 
   const isPortalUser = Boolean(membership && isPortalRole(membership.role));
   const linkedCreatorId = membership?.linkedCreatorId ?? null;

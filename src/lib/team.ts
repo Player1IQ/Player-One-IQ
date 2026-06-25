@@ -76,6 +76,13 @@ export const roleLabels: Record<TeamRole, string> = {
   sponsor: "Sponsor Contact",
 };
 
+/** Portal-facing label; player and content_creator are unified as Creator. */
+export function getPortalRoleLabel(role: TeamRole): string {
+  if (isCreatorPortalRole(role)) return "Creator";
+  if (isSponsorPortalRole(role)) return roleLabels[role];
+  return roleLabels[role];
+}
+
 export const roleDescriptions: Record<TeamRole, string> = {
   owner: "Full access including billing and ownership transfer",
   admin: "User and role management, settings, all data except billing transfer",
@@ -84,9 +91,10 @@ export const roleDescriptions: Record<TeamRole, string> = {
   talent_manager: "Creators, applications, and assigned deals",
   member: "General read access with messaging and limited collaboration",
   viewer: "Read-only access across the organization",
-  player: "Portal access to own roster profile, contracts, and deliverables",
+  player:
+    "Creator portal: profile, contracts, campaigns, opportunities, and growth",
   content_creator:
-    "Portal access to own profile, contracts, campaigns, opportunities, and content",
+    "Creator portal: profile, contracts, campaigns, opportunities, and growth",
   sponsor:
     "Portal access to your company profile, contracts, campaigns, and deal rooms (read-only)",
 };

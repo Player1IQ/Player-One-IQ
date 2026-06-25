@@ -280,8 +280,6 @@ export async function canAccessCampaign(campaignId: string): Promise<boolean> {
   const membership = await getCurrentUserMembership();
   if (!membership) return false;
 
-  if (membership.role === "player") return false;
-
   if (isCreatorPortalRole(membership.role)) {
     if (!membership.linkedCreatorId) return false;
     const { isCreatorAssignedToCampaign } = await import(
@@ -352,7 +350,8 @@ export function canApplyToOpportunities(role: TeamRole | null): boolean {
     role === "admin" ||
     role === "manager" ||
     role === "talent_manager" ||
-    role === "content_creator"
+    role === "content_creator" ||
+    role === "player"
   );
 }
 
@@ -360,7 +359,7 @@ export function canAccessOpportunityAsPortal(
   membership: CurrentUserMembership | null,
   creatorId?: string
 ): boolean {
-  if (!membership || membership.role !== "content_creator") return false;
+  if (!membership || !isCreatorPortalRole(membership.role)) return false;
   if (!membership.linkedCreatorId) return false;
   if (creatorId !== undefined) {
     return membership.linkedCreatorId === creatorId;

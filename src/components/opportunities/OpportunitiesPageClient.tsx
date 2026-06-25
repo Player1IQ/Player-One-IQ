@@ -36,6 +36,8 @@ const quickFilters: Array<{ value: StatusFilter; label: string }> = [
 
 interface OpportunitiesPageClientProps {
   opportunities: Opportunity[];
+  agencyOpportunities?: Opportunity[];
+  marketplaceOpportunities?: Opportunity[];
   sponsors: Sponsor[];
   canManage: boolean;
   pendingReviewCount?: number;
@@ -44,8 +46,12 @@ interface OpportunitiesPageClientProps {
   myPendingCount?: number;
 }
 
+type PortalTab = "agency" | "marketplace";
+
 export function OpportunitiesPageClient({
   opportunities,
+  agencyOpportunities = [],
+  marketplaceOpportunities = [],
   sponsors,
   canManage,
   pendingReviewCount = 0,
@@ -56,12 +62,19 @@ export function OpportunitiesPageClient({
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [portalTab, setPortalTab] = useState<PortalTab>("agency");
+
+  const sourceOpportunities = isPortalUser
+    ? portalTab === "agency"
+      ? agencyOpportunities
+      : marketplaceOpportunities
+    : opportunities;
 
   const stats = getOpportunityStats(opportunities);
 
   const filtered = useMemo(() => {
     const query = search.toLowerCase();
-    return opportunities.filter((o) => {
+    return sourceOpportunities.filter((o) => {
       const matchesSearch =
         o.title.toLowerCase().includes(query) ||
         o.description.toLowerCase().includes(query) ||
@@ -72,7 +85,7 @@ export function OpportunitiesPageClient({
       const matchesStatus = statusFilter === "all" || o.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [opportunities, search, statusFilter]);
+  }, [sourceOpportunities, search, statusFilter]);
 
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
 
@@ -103,11 +116,18 @@ export function OpportunitiesPageClient({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           <MetricCard
-            title="Open opportunities"
-            value={String(opportunities.length)}
-            subtitle="Available to apply"
+            title="Your agency"
+            value={String(agencyOpportunities.length)}
+            subtitle="Open opportunities from your organization"
             icon={Briefcase}
             iconColor="text-emerald-400"
+          />
+          <MetricCard
+            title="Open marketplace"
+            value={String(marketplaceOpportunities.length)}
+            subtitle="Cross-org opportunities to discover"
+            icon={Users}
+            iconColor="text-violet-400"
           />
           <MetricCard
             title="Your applications"
@@ -118,7 +138,7 @@ export function OpportunitiesPageClient({
                 : "Submitted applications"
             }
             icon={FileText}
-            iconColor="text-violet-400"
+            iconColor="text-sky-400"
           />
         </div>
       )}
@@ -244,6 +264,45 @@ export function OpportunitiesPageClient({
         </div>
       ) : null}
 
+      {isPortalUser ? (
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setPortalTab("agency")}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              portalTab === "agency"
+                ? "border-accent/40 bg-accent/15 text-accent-light"
+                : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
+            )}
+          >
+            Your agency
+            {agencyOpportunities.length > 0 ? (
+              <span className="ml-1.5 text-emerald-400">
+                ({agencyOpportunities.length})
+              </span>
+            ) : null}
+          </button>
+          <button
+            type="button"
+            onClick={() => setPortalTab("marketplace")}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              portalTab === "marketplace"
+                ? "border-accent/40 bg-accent/15 text-accent-light"
+                : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
+            )}
+          >
+            Open marketplace
+            {marketplaceOpportunities.length > 0 ? (
+              <span className="ml-1.5 text-violet-400">
+                ({marketplaceOpportunities.length})
+              </span>
+            ) : null}
+          </button>
+        </div>
+      ) : null}
+
       {filtered.length === 0 ? (
         <EmptyState
           icon={Briefcase}
@@ -253,9 +312,11 @@ export function OpportunitiesPageClient({
               : "No matching opportunities"
           }
           description={
-            opportunities.length === 0
+            sourceOpportunities.length === 0
               ? isPortalUser
-                ? "No open opportunities right now. Check back when your agency publishes new deals."
+                ? portalTab === "marketplace"
+                  ? "No open marketplace opportunities right now. Check back as brands publish public listings."
+                  : "No open opportunities from your agency right now."
                 : canManage
                   ? "Create your first sponsorship opportunity for creators to discover and apply."
                   : "Check back when opportunities are published."
@@ -293,7 +354,14 @@ export function OpportunitiesPageClient({
                 <h3 className="font-semibold text-gray-100 group-hover:text-accent-light">
                   {opportunity.title}
                 </h3>
-                <OpportunityStatusBadge status={opportunity.status} />
+                <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                  {opportunity.marketplaceListing ? (
+                    <span className="rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300 ring-1 ring-violet-500/25">
+                      Marketplace
+                    </span>
+                  ) : null}
+                  <OpportunityStatusBadge status={opportunity.status} />
+                </div>
               </div>
               <p className="mt-2 line-clamp-2 text-sm text-gray-500">
                 {opportunity.description || "No description."}

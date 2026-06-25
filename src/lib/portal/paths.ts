@@ -81,10 +81,6 @@ export function isPathAllowedForPortalUser(
     return false;
   }
 
-  if (role === "player" && pathname.startsWith("/campaigns")) {
-    return false;
-  }
-
   if (pathname.startsWith("/creators/")) {
     const creatorId = pathname.split("/")[2];
     return Boolean(linkedCreatorId && creatorId === linkedCreatorId);
@@ -98,16 +94,11 @@ export function isPathAllowedForPortalUser(
     return true;
   }
 
-  if (isCreatorPortalRole(role) && pathname.startsWith("/campaigns")) {
+  if (
+    isCreatorPortalRole(role) &&
+    (pathname.startsWith("/campaigns") || pathname.startsWith("/opportunities"))
+  ) {
     return true;
-  }
-
-  if (role === "content_creator" && pathname.startsWith("/opportunities")) {
-    return true;
-  }
-
-  if (role === "player" && pathname.startsWith("/opportunities")) {
-    return false;
   }
 
   return pathname === PORTAL_HOME || pathname.startsWith(`${PORTAL_HOME}/`);
