@@ -399,6 +399,9 @@ export function SchedulePageClient({
           setError(result.error);
           return;
         }
+        if ("emailWarning" in result && result.emailWarning) {
+          setEmailWarning(result.emailWarning);
+        }
         setEvents((prev) => prev.filter((item) => item.id !== event.id));
         router.refresh();
       } catch (err) {

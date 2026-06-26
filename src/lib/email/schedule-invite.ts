@@ -26,6 +26,35 @@ interface ScheduleInviteEmailParams extends ScheduleEmailBaseParams {
 
 type ScheduleUpdateEmailParams = ScheduleEmailBaseParams;
 
+type ScheduleCancellationEmailParams = ScheduleEmailBaseParams;
+
+export function scheduleCancellationEmailSubject(eventTitle: string): string {
+  return `Schedule cancelled: ${eventTitle}`;
+}
+
+export function buildScheduleCancellationText(
+  params: ScheduleCancellationEmailParams
+): string {
+  const when = formatScheduleWhen(
+    params.startsAt,
+    params.endsAt,
+    params.allDay
+  );
+
+  const lines = [
+    `A scheduled event on ${params.organizationName} has been cancelled.`,
+    "",
+    `Event: ${params.eventTitle}`,
+    `When: ${when}`,
+    params.location ? `Location: ${params.location}` : null,
+    "",
+    "View your schedule:",
+    params.scheduleUrl,
+  ].filter(Boolean);
+
+  return lines.join("\n");
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -139,6 +168,16 @@ function buildScheduleUpdateHtml(params: ScheduleUpdateEmailParams): string {
   });
 }
 
+function buildScheduleCancellationHtml(
+  params: ScheduleCancellationEmailParams
+): string {
+  return buildScheduleEmailHtml({
+    heading: "Schedule cancelled",
+    introHtml: `A scheduled event on <strong>${escapeHtml(params.organizationName)}</strong> has been cancelled.`,
+    params,
+  });
+}
+
 async function sendScheduleEmail(options: {
   to: string;
   subject: string;
@@ -200,5 +239,16 @@ export async function sendScheduleUpdateEmail(
     subject: `Schedule updated: ${params.eventTitle}`,
     html: buildScheduleUpdateHtml(params),
     text: buildScheduleUpdateText(params),
+  });
+}
+
+export async function sendScheduleCancellationEmail(
+  params: ScheduleCancellationEmailParams
+): Promise<{ sent: boolean; error?: string }> {
+  return sendScheduleEmail({
+    to: params.to,
+    subject: scheduleCancellationEmailSubject(params.eventTitle),
+    html: buildScheduleCancellationHtml(params),
+    text: buildScheduleCancellationText(params),
   });
 }

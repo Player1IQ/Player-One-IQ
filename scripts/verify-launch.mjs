@@ -25,6 +25,7 @@ const STEPS = [
   { name: "Team invites", script: "verify:invites", args: [baseUrl] },
   { name: "Platform OAuth", script: "verify:oauth", args: [baseUrl] },
   { name: "Agency Pro API", script: "verify:api", args: [baseUrl] },
+  { name: "Schedule", script: "verify:schedule" },
   { name: "Production smoke", script: "verify:production", args: [baseUrl] },
 ];
 

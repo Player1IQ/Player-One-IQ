@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAppOrigin } from "@/lib/email/app-url";
 import {
+  sendScheduleCancellationEmail,
   sendScheduleInviteEmail,
   sendScheduleUpdateEmail,
 } from "@/lib/email/schedule-invite";
@@ -127,10 +128,15 @@ function combineEmailWarnings(
 
 function emailFailureWarning(
   failureCount: number,
-  kind: "invitation" | "update"
+  kind: "invitation" | "update" | "cancellation",
+  action: "saved" | "deleted" = "saved"
 ): string {
-  const label = kind === "invitation" ? "invitation" : "update";
-  return `Event saved but ${failureCount} ${label} email(s) failed to send.`;
+  const labels = {
+    invitation: "invitation",
+    update: "update",
+    cancellation: "cancellation",
+  };
+  return `Event ${action} but ${failureCount} ${labels[kind]} email(s) failed to send.`;
 }
 
 async function resolveCreatorUserIds(
@@ -274,6 +280,43 @@ async function emailScheduleUpdates(params: {
   if (failureCount === 0) return {};
 
   return { emailWarning: emailFailureWarning(failureCount, "update") };
+}
+
+async function emailScheduleCancellations(params: {
+  organizationName: string;
+  eventTitle: string;
+  startsAt: string;
+  endsAt: string;
+  allDay?: boolean;
+  location?: string | null;
+  recipientEmails: string[];
+}): Promise<{ emailWarning?: string }> {
+  if (params.recipientEmails.length === 0) return {};
+
+  const origin = await getAppOrigin();
+  const scheduleUrl = `${origin}/schedule`;
+
+  const results = await Promise.all(
+    params.recipientEmails.map((to) =>
+      sendScheduleCancellationEmail({
+        to,
+        scheduleUrl,
+        organizationName: params.organizationName,
+        eventTitle: params.eventTitle,
+        startsAt: params.startsAt,
+        endsAt: params.endsAt,
+        allDay: params.allDay,
+        location: params.location,
+      })
+    )
+  );
+
+  const failureCount = results.filter((result) => !result.sent).length;
+  if (failureCount === 0) return {};
+
+  return {
+    emailWarning: emailFailureWarning(failureCount, "cancellation", "deleted"),
+  };
 }
 
 export async function createScheduleEvent(input: ScheduleEventInput) {
@@ -782,7 +825,9 @@ export async function deleteScheduleEvent(id: string) {
 
   const { data: existing } = await supabase
     .from("schedule_events")
-    .select("id, event_type, created_by")
+    .select(
+      "id, event_type, created_by, title, starts_at, ends_at, all_day, location"
+    )
     .eq("id", id)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -806,6 +851,43 @@ export async function deleteScheduleEvent(id: string) {
   const sessionError = await ensureAuthenticatedSession(supabase);
   if (sessionError) return sessionError;
 
+  const shouldNotify = canManage && existing.event_type !== "block";
+
+  let notifyUserIds: string[] = [];
+  let recipientEmails: string[] = [];
+
+  if (shouldNotify) {
+    const { data: existingParticipants } = await supabase
+      .from("schedule_event_participants")
+      .select("user_id, creator_id")
+      .eq("event_id", id)
+      .neq("role", "organizer");
+
+    const userIds = (existingParticipants ?? [])
+      .map((participant) => participant.user_id)
+      .filter((userId): userId is string => Boolean(userId));
+    const creatorIds = (existingParticipants ?? [])
+      .map((participant) => participant.creator_id)
+      .filter((creatorId): creatorId is string => Boolean(creatorId));
+
+    const creatorUserIds = await resolveCreatorUserIds(
+      supabase,
+      organizationId,
+      creatorIds
+    );
+    notifyUserIds = [...new Set([...userIds, ...creatorUserIds])];
+
+    const organizerEmail = user?.email?.toLowerCase();
+    recipientEmails = (
+      await resolveParticipantEmails(
+        supabase,
+        organizationId,
+        userIds,
+        creatorIds
+      )
+    ).filter((email) => email !== organizerEmail);
+  }
+
   const { error } = await supabase.rpc("delete_schedule_event", {
     p_event_id: id,
     p_organization_id: organizationId,
@@ -816,7 +898,41 @@ export async function deleteScheduleEvent(id: string) {
   revalidatePath("/schedule");
   revalidatePath("/");
   revalidatePath("/portal");
-  return { success: true };
+
+  if (!shouldNotify) {
+    return { success: true as const };
+  }
+
+  const notificationBody = formatScheduleNotificationBody(
+    existing.title,
+    existing.starts_at,
+    existing.ends_at,
+    existing.all_day
+  );
+
+  await notifyParticipants(
+    supabase,
+    organizationId,
+    id,
+    "Schedule cancelled",
+    notificationBody,
+    notifyUserIds
+  );
+
+  const organization = await getOrganizationForUser();
+  const { emailWarning } = await emailScheduleCancellations({
+    organizationName: organization?.name ?? "Your organization",
+    eventTitle: existing.title,
+    startsAt: existing.starts_at,
+    endsAt: existing.ends_at,
+    allDay: existing.all_day,
+    location: existing.location,
+    recipientEmails,
+  });
+
+  return emailWarning
+    ? { success: true as const, emailWarning }
+    : { success: true as const };
 }
 
 export async function fetchUnreadScheduleNotifications() {
