@@ -26,6 +26,9 @@ import {
   getCurrentUserRole,
 } from "@/lib/permissions";
 import { isSeedEnabled } from "@/lib/seed/constants";
+import { getCreators } from "@/lib/creators/queries";
+import { getPayoutRecipientsForOrg } from "@/lib/payments/queries";
+import { PayoutSettingsSection } from "@/components/payments/PayoutSettingsSection";
 
 function formatCreatedAt(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -52,12 +55,14 @@ async function getOAuthConnectedAccountCount(): Promise<number> {
 }
 
 export default async function SettingsPage() {
-  const [organization, role, memberCount, oauthConnectedCount] =
+  const [organization, role, memberCount, oauthConnectedCount, payoutRecipients, creators] =
     await Promise.all([
       getOrganizationForUser(),
       getCurrentUserRole(),
       getOrganizationMemberCount(),
       getOAuthConnectedAccountCount(),
+      getPayoutRecipientsForOrg(),
+      getCreators(),
     ]);
 
   const canView = canViewSettings(role);
@@ -79,6 +84,11 @@ export default async function SettingsPage() {
     "http://localhost:3000";
   const showDevTools = isSeedEnabled();
   const oauthEnabled = isPlatformOAuthFeatureEnabled();
+  const orgRecipient =
+    payoutRecipients.find((r) => r.recipientType === "organization") ?? null;
+  const creatorRecipients = payoutRecipients.filter(
+    (r) => r.recipientType === "creator"
+  );
 
   return (
     <DashboardLayout
@@ -99,6 +109,16 @@ export default async function SettingsPage() {
         canEdit={canEdit}
         canView={canView}
         showDevTools={showDevTools}
+        payoutSettings={
+          canView ? (
+            <PayoutSettingsSection
+              orgRecipient={orgRecipient}
+              creatorRecipients={creatorRecipients}
+              creators={creators}
+              canEdit={canEdit}
+            />
+          ) : undefined
+        }
         devTools={
           showDevTools ? <SeedTestDataButton variant="card" /> : undefined
         }

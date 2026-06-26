@@ -22,6 +22,7 @@ import {
 import { contractTermsUpdatedMessage } from "@/lib/messages/system-events";
 import type { ActivityAction } from "@/lib/activity/queries";
 import { dispatchOrganizationWebhook } from "@/lib/api/webhooks";
+import { ensureContractPaymentOnComplete } from "@/app/payments/actions";
 
 async function logActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -189,6 +190,9 @@ export async function updateContract(id: string, input: ContractInput) {
   }
 
   const previousStatus = existing.contract_status as ContractStatus;
+  const statusWillComplete =
+    previousStatus !== input.status && input.status === "completed";
+
   if (
     previousStatus !== input.status &&
     !canTransitionContractStatus(previousStatus, input.status)
@@ -210,6 +214,10 @@ export async function updateContract(id: string, input: ContractInput) {
   if (updateError) return { error: updateError.message };
 
   const statusChanged = previousStatus !== input.status;
+
+  if (statusWillComplete) {
+    await ensureContractPaymentOnComplete(id);
+  }
 
   await logActivity(supabase, organizationId, {
     entityType: "contract",
@@ -295,6 +303,10 @@ export async function updateContractStatus(
     .eq("organization_id", organizationId);
 
   if (updateError) return { error: updateError.message };
+
+  if (newStatus === "completed") {
+    await ensureContractPaymentOnComplete(id);
+  }
 
   await logActivity(supabase, organizationId, {
     entityType: "contract",

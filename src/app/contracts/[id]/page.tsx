@@ -10,6 +10,7 @@ import { getContractById, getContractNegotiationContext } from "@/lib/contracts/
 import { getDeliverablesForContract } from "@/lib/contract-deliverables/queries";
 import { getCreators } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
+import { getContractPayment } from "@/lib/payments/queries";
 import {
   canAccessContract,
   canUpdateDeliverable,
@@ -32,7 +33,7 @@ export default async function ContractDetailPage({
   const role = membership?.role ?? null;
   const isPortalUser = isPortalRole(role);
 
-  const [contract, creators, sponsors, deliverables, subscription, dealRoomConversationId] =
+  const [contract, creators, sponsors, deliverables, subscription, dealRoomConversationId, contractPayment] =
     await Promise.all([
       getContractById(id),
       getCreators(),
@@ -40,6 +41,7 @@ export default async function ContractDetailPage({
       getDeliverablesForContract(id),
       getSubscriptionContext(),
       findConversationByRelated("contract", id),
+      getContractPayment(id),
     ]);
 
   if (!contract) {
@@ -73,6 +75,10 @@ export default async function ContractDetailPage({
   const canUpdateStatus = canUpdateDeliverable(membership, {
     creatorId: contract.creatorId,
   });
+  const canRecordPayment =
+    hasFullAccess(role, "contracts") ||
+    (isSponsorPortalRole(role) &&
+      membership?.linkedSponsorId === contract.sponsorId);
 
   return (
     <DashboardLayout
@@ -95,6 +101,8 @@ export default async function ContractDetailPage({
         showDealRoom={
           !isSponsorPortalRole(role) || Boolean(resolvedDealRoomConversationId)
         }
+        contractPayment={contractPayment}
+        canRecordPayment={canRecordPayment}
       />
     </DashboardLayout>
   );

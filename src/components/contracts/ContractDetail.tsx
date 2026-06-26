@@ -29,8 +29,10 @@ import { ContractNegotiationPanel } from "./ContractNegotiationPanel";
 import { ContractDeliverablesPanel } from "./ContractDeliverablesPanel";
 import { ContractAiSummaryPanel } from "./ContractAiSummaryPanel";
 import { DealRoomButton } from "@/components/messages/DealRoomButton";
+import { ContractPaymentPanel } from "@/components/payments/ContractPaymentPanel";
 import type { ContractDeliverable } from "@/lib/contract-deliverables";
 import type { RelatedCampaignSummary } from "@/lib/campaigns/contract-links";
+import type { ContractPayment } from "@/lib/payments/types";
 import { buildDeliverablesSummary } from "@/lib/contract-deliverables";
 import { ContractDeliverablesSummary } from "./ContractDeliverablesPanel";
 import { CampaignStatusBadge } from "@/components/campaigns/CampaignStatusBadge";
@@ -49,6 +51,8 @@ interface ContractDetailProps {
   aiMode?: "live" | "demo";
   dealRoomConversationId?: string | null;
   showDealRoom?: boolean;
+  contractPayment?: ContractPayment | null;
+  canRecordPayment?: boolean;
 }
 
 function Section({
@@ -85,6 +89,8 @@ export function ContractDetail({
   aiMode = "demo",
   dealRoomConversationId,
   showDealRoom = true,
+  contractPayment = null,
+  canRecordPayment = false,
 }: ContractDetailProps) {
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
@@ -286,6 +292,14 @@ export function ContractDetail({
           canWrite={canWrite}
           canUpdateStatus={canUpdateStatus}
         />
+
+        {contract.status === "completed" && contractPayment ? (
+          <ContractPaymentPanel
+            contractId={contract.id}
+            payment={contractPayment}
+            canRecordPayment={canRecordPayment}
+          />
+        ) : null}
 
         {relatedCampaigns.length > 0 ? (
           <Section

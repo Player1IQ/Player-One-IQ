@@ -19,6 +19,7 @@ interface SettingsPageClientProps {
   showDevTools: boolean;
   devTools?: React.ReactNode;
   platformSync?: React.ReactNode;
+  payoutSettings?: React.ReactNode;
 }
 
 export function SettingsPageClient({
@@ -33,6 +34,7 @@ export function SettingsPageClient({
   showDevTools,
   devTools,
   platformSync,
+  payoutSettings,
 }: SettingsPageClientProps) {
   if (!canView) {
     return (
@@ -108,6 +110,8 @@ export function SettingsPageClient({
           </div>
         </div>
       </section>
+
+      {payoutSettings}
 
       {platformSync}
 
