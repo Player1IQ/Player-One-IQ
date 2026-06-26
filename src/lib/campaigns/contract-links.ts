@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { getCurrentUserMembership } from "@/lib/permissions";
-import { isPortalRole } from "@/lib/team";
+import { isCreatorPortalRole, isSponsorPortalRole } from "@/lib/team";
 import {
   mapContractRow,
   type Contract,
@@ -90,9 +90,14 @@ export async function getCampaignsForContract(
 
   const membership = await getCurrentUserMembership();
 
-  if (membership && isPortalRole(membership.role)) {
+  if (membership && isCreatorPortalRole(membership.role)) {
     if (!membership.linkedCreatorId) return [];
     if (membership.linkedCreatorId !== contract.creatorId) return [];
+  }
+
+  if (membership && isSponsorPortalRole(membership.role)) {
+    if (!membership.linkedSponsorId) return [];
+    if (membership.linkedSponsorId !== contract.sponsorId) return [];
   }
 
   const { data: assignmentRows, error: assignmentError } = await supabase
