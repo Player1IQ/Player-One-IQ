@@ -1,21 +1,15 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { CreatorsPageClient } from "@/components/creators/CreatorsPageClient";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
-import { PlanBillingSummary } from "@/components/subscription/PlanBillingSummary";
+import { PlanBillingSection } from "@/components/subscription/PlanBillingSection";
 import { getCreators } from "@/lib/creators/queries";
-import {
-  canViewBilling,
-  hasFullAccess,
-  getCurrentUserRole,
-} from "@/lib/permissions";
-import { getSubscriptionContext } from "@/lib/subscription/queries";
+import { hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
 import { isSeedEnabled } from "@/lib/seed/constants";
 
 export default async function CreatorsPage() {
-  const [creators, role, subscriptionContext] = await Promise.all([
+  const [creators, role] = await Promise.all([
     getCreators(),
     getCurrentUserRole(),
-    getSubscriptionContext(),
   ]);
 
   return (
@@ -28,13 +22,7 @@ export default async function CreatorsPage() {
         featureLabel="Creator profiles"
       >
         <div className="space-y-6">
-          {canViewBilling(role) ? (
-            <PlanBillingSummary
-              subscription={subscriptionContext.subscription}
-              usage={subscriptionContext.usage}
-              canViewBilling
-            />
-          ) : null}
+          <PlanBillingSection highlightMetrics={["creators"]} />
           <CreatorsPageClient
             creators={creators}
             canWrite={hasFullAccess(role, "creators")}

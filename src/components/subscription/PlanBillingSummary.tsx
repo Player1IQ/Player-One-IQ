@@ -2,8 +2,7 @@ import Link from "next/link";
 import { CreditCard, Sparkles } from "lucide-react";
 import { UsageMeter } from "@/components/subscription/UsageMeter";
 import { Badge } from "@/components/ui/Badge";
-import { formatPlanPrice } from "@/lib/subscription/plans";
-import { upgradePaths } from "@/lib/subscription/plans";
+import { formatPlanPrice, upgradePaths } from "@/lib/subscription/plans";
 import {
   formatTrialCountdown,
   isPlatformTrialActive,
@@ -14,6 +13,35 @@ import type {
   UsageMetricKey,
   UsageSnapshot,
 } from "@/lib/subscription/types";
+
+const metricLimitLabels: Partial<Record<UsageMetricKey, string>> = {
+  creators: "creator",
+  team_members: "team member",
+  campaigns: "campaign",
+  opportunities: "opportunity",
+  ai_requests: "AI request",
+};
+
+function getAtLimitMetrics(
+  usage: UsageSnapshot[],
+  metrics: UsageMetricKey[]
+): string[] {
+  return metrics
+    .filter((key) => {
+      const row = usage.find((item) => item.metricKey === key);
+      return row?.limit != null && row.count >= row.limit;
+    })
+    .map((key) => metricLimitLabels[key] ?? key.replace(/_/g, " "))
+    .filter(Boolean);
+}
+
+function formatLimitWarning(labels: string[]): string | null {
+  if (labels.length === 0) return null;
+  if (labels.length === 1) {
+    return `You've reached your ${labels[0]} limit on this plan. Upgrade to add more.`;
+  }
+  return `You've reached your ${labels.slice(0, -1).join(", ")} and ${labels.at(-1)} limits on this plan. Upgrade to add more.`;
+}
 
 interface PlanBillingSummaryProps {
   subscription: OrganizationSubscription | null;
@@ -37,9 +65,9 @@ export function PlanBillingSummary({
   const highlightedUsage = usage.filter((row) =>
     highlightMetrics.includes(row.metricKey)
   );
-  const creatorUsage = usage.find((row) => row.metricKey === "creators");
-  const atCreatorLimit =
-    creatorUsage?.limit != null && creatorUsage.count >= creatorUsage.limit;
+  const limitWarning = formatLimitWarning(
+    getAtLimitMetrics(usage, highlightMetrics)
+  );
 
   const onPlatformTrial =
     subscription &&
@@ -84,11 +112,8 @@ export function PlanBillingSummary({
           {onPlatformTrial && trialLabel ? (
             <p className="mt-2 text-xs text-amber-200">{trialLabel}</p>
           ) : null}
-          {atCreatorLimit ? (
-            <p className="mt-2 text-sm text-amber-300">
-              You&apos;ve reached your creator limit on this plan. Upgrade to add
-              more roster profiles.
-            </p>
+          {limitWarning ? (
+            <p className="mt-2 text-sm text-amber-300">{limitWarning}</p>
           ) : null}
         </div>
 

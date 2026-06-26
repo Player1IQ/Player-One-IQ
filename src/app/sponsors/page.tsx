@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
+import { PlanBillingSection } from "@/components/subscription/PlanBillingSection";
 import { SponsorsPageClient } from "@/components/sponsors/SponsorsPageClient";
 import { getSponsors } from "@/lib/sponsors/queries";
 import { enrichSponsorsWithContractStats } from "@/lib/sponsors";
@@ -21,10 +22,15 @@ export default async function SponsorsPage() {
       description="Track sponsor relationships and brand partnerships"
     >
       <SubscriptionPageGate required="sponsor_crm" featureLabel="Sponsor CRM">
-        <SponsorsPageClient
-          sponsors={enrichedSponsors}
-          canWrite={hasFullAccess(role, "sponsors")}
-        />
+        <div className="space-y-6">
+          <PlanBillingSection
+            highlightMetrics={["creators", "team_members"]}
+          />
+          <SponsorsPageClient
+            sponsors={enrichedSponsors}
+            canWrite={hasFullAccess(role, "sponsors")}
+          />
+        </div>
       </SubscriptionPageGate>
     </DashboardLayout>
   );

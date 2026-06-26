@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
+import { PlanBillingSection } from "@/components/subscription/PlanBillingSection";
 import { CampaignsPageClient } from "@/components/campaigns/CampaignsPageClient";
 import { getCampaigns } from "@/lib/campaigns/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
@@ -36,13 +37,18 @@ export default async function CampaignsPage() {
         required="campaign_tracking"
         featureLabel="Campaign tracking"
       >
-        <CampaignsPageClient
-          campaigns={campaigns}
-          sponsors={sponsors}
-          opportunities={opportunities}
-          canWrite={hasFullAccess(role, "campaigns")}
-          isPortalUser={isPortalUser}
-        />
+        <div className="space-y-6">
+          {!isPortalUser ? (
+            <PlanBillingSection highlightMetrics={["campaigns"]} />
+          ) : null}
+          <CampaignsPageClient
+            campaigns={campaigns}
+            sponsors={sponsors}
+            opportunities={opportunities}
+            canWrite={hasFullAccess(role, "campaigns")}
+            isPortalUser={isPortalUser}
+          />
+        </div>
       </SubscriptionPageGate>
     </DashboardLayout>
   );
