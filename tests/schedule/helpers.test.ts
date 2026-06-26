@@ -12,6 +12,8 @@ import {
   isSameDay,
   resolveScheduleTimes,
   findCreatorBlockConflicts,
+  formatCreatorBlockConflictMessage,
+  CREATOR_BLOCK_SCHEDULING_ERROR,
 } from "@/lib/schedule/helpers";
 import { mapScheduleEventRow, type ScheduleEventRow } from "@/lib/schedule/types";
 
@@ -185,6 +187,50 @@ test("findCreatorBlockConflicts detects overlapping creator blocks", () => {
 
   assert.equal(conflicts.length, 1);
   assert.equal(conflicts[0]?.title, "Unavailable");
+});
+
+test("formatCreatorBlockConflictMessage uses singular and plural copy", () => {
+  const block = mapScheduleEventRow({
+    id: "block-1",
+    organization_id: "org-1",
+    title: "Unavailable",
+    description: null,
+    event_type: "block",
+    starts_at: "2026-06-25T14:00:00.000Z",
+    ends_at: "2026-06-25T16:00:00.000Z",
+    all_day: false,
+    created_by: "creator-user",
+    location: null,
+    color: null,
+    created_at: "2026-06-25T14:00:00.000Z",
+    updated_at: "2026-06-25T14:00:00.000Z",
+    schedule_event_participants: [
+      {
+        id: "part-1",
+        event_id: "block-1",
+        organization_id: "org-1",
+        user_id: null,
+        creator_id: "creator-1",
+        role: "organizer",
+        response_status: "accepted",
+        created_at: "2026-06-25T14:00:00.000Z",
+        creators: { name: "Alex Creator" },
+      },
+    ],
+  } satisfies ScheduleEventRow);
+
+  const singular = formatCreatorBlockConflictMessage([block], ["creator-1"]);
+  assert.match(singular, /Alex Creator has blocked it/);
+
+  const plural = formatCreatorBlockConflictMessage([block, block], ["creator-1"]);
+  assert.match(plural, /2 invited creators have blocked it/);
+});
+
+test("CREATOR_BLOCK_SCHEDULING_ERROR is the server guard message", () => {
+  assert.match(
+    CREATOR_BLOCK_SCHEDULING_ERROR,
+    /Cannot schedule during blocked time/
+  );
 });
 
 test("formatScheduleWhen formats local date and time range", () => {

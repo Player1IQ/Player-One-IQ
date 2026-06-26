@@ -26,6 +26,7 @@ import {
   filterEventsForDay,
   findCreatorBlockConflicts,
   formatActionError,
+  formatCreatorBlockConflictMessage,
   formatSchedulePreview,
   getWeekDays,
   isSameDay,
@@ -901,10 +902,11 @@ export function SchedulePageClient({
               {isStaff && participantOptions.length > 0 && !isBlockMode ? (
                 <div>
                   {creatorConflicts.length > 0 ? (
-                    <p className="mb-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
-                      {creatorConflicts.length === 1
-                        ? `"${creatorConflicts[0]?.title}" overlaps with a creator block during this time.`
-                        : `${creatorConflicts.length} creator blocks overlap with this time.`}
+                    <p className="mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+                      {formatCreatorBlockConflictMessage(
+                        creatorConflicts,
+                        form.selectedCreatorIds
+                      )}
                     </p>
                   ) : null}
                   <p className="text-xs font-medium text-gray-400">Participants</p>
@@ -949,7 +951,10 @@ export function SchedulePageClient({
                 </button>
                 <button
                   type="submit"
-                  disabled={pending}
+                  disabled={
+                    pending ||
+                    (isStaff && !isBlockMode && creatorConflicts.length > 0)
+                  }
                   className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-60"
                 >
                   {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}

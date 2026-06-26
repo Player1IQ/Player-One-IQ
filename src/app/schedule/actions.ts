@@ -15,7 +15,15 @@ import {
   type ScheduleEventInput,
   type ScheduleEventType,
 } from "@/lib/schedule";
-import { formatScheduleNotificationBody } from "@/lib/schedule/helpers";
+import {
+  CREATOR_BLOCK_SCHEDULING_ERROR,
+  findCreatorBlockConflicts,
+  formatScheduleNotificationBody,
+} from "@/lib/schedule/helpers";
+import {
+  mapScheduleEventRow,
+  type ScheduleEventRow,
+} from "@/lib/schedule/types";
 import {
   canManageOrgSchedule,
   getUnreadScheduleNotifications,
@@ -36,6 +44,45 @@ async function ensureAuthenticatedSession(
     };
   }
 
+  return null;
+}
+
+const blockConflictSelect = `
+  *,
+  schedule_event_participants (
+    id,
+    event_id,
+    organization_id,
+    user_id,
+    creator_id,
+    role,
+    response_status,
+    created_at,
+    creators ( name )
+  )
+`;
+
+async function assertNoCreatorBlockConflicts(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  organizationId: string,
+  creatorIds: string[],
+  proposed: { startsAt: string; endsAt: string }
+): Promise<string | null> {
+  if (creatorIds.length === 0) return null;
+
+  const { data, error } = await supabase
+    .from("schedule_events")
+    .select(blockConflictSelect)
+    .eq("organization_id", organizationId)
+    .eq("event_type", "block")
+    .lte("starts_at", proposed.endsAt)
+    .gte("ends_at", proposed.startsAt);
+
+  if (error) return error.message;
+
+  const events = ((data ?? []) as ScheduleEventRow[]).map(mapScheduleEventRow);
+  const conflicts = findCreatorBlockConflicts(events, creatorIds, proposed);
+  if (conflicts.length > 0) return CREATOR_BLOCK_SCHEDULING_ERROR;
   return null;
 }
 
@@ -247,6 +294,15 @@ export async function createScheduleEvent(input: ScheduleEventInput) {
   const sessionError = await ensureAuthenticatedSession(supabase);
   if (sessionError) return sessionError;
 
+  const creatorIds = input.participantCreatorIds ?? [];
+  const blockConflictError = await assertNoCreatorBlockConflicts(
+    supabase,
+    organizationId,
+    creatorIds,
+    { startsAt: input.startsAt, endsAt: input.endsAt }
+  );
+  if (blockConflictError) return { error: blockConflictError };
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -280,7 +336,6 @@ export async function createScheduleEvent(input: ScheduleEventInput) {
   const userIds = Array.from(
     new Set(input.participantUserIds ?? []).values()
   ).filter((userId) => userId !== user.id);
-  const creatorIds = input.participantCreatorIds ?? [];
 
   const { error: participantError } = await supabase.rpc(
     "sync_schedule_event_participants",
@@ -530,6 +585,15 @@ export async function updateScheduleEvent(
     });
   }
 
+  const creatorIds = input.participantCreatorIds ?? [];
+  const blockConflictError = await assertNoCreatorBlockConflicts(
+    supabase,
+    organizationId,
+    creatorIds,
+    { startsAt: input.startsAt, endsAt: input.endsAt }
+  );
+  if (blockConflictError) return { error: blockConflictError };
+
   const trimmedTitle = input.title.trim();
   const trimmedDescription = input.description?.trim() || null;
   const trimmedLocation = input.location?.trim() || null;
@@ -561,7 +625,6 @@ export async function updateScheduleEvent(
   const userIds = Array.from(
     new Set(input.participantUserIds ?? []).values()
   ).filter((userId) => userId !== user.id);
-  const creatorIds = input.participantCreatorIds ?? [];
 
   const { error: participantError } = await supabase.rpc(
     "sync_schedule_event_participants",

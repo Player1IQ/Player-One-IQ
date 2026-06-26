@@ -1,24 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { login } from "./helpers/auth";
 
 const portalEmail = process.env.E2E_PORTAL_EMAIL;
 const portalPassword = process.env.E2E_PORTAL_PASSWORD;
 const staffEmail = process.env.E2E_STAFF_EMAIL;
 const staffPassword = process.env.E2E_STAFF_PASSWORD;
-
-async function login(
-  page: import("@playwright/test").Page,
-  email: string,
-  password: string,
-  redirect?: string
-) {
-  const loginPath = redirect
-    ? `/login?redirect=${encodeURIComponent(redirect)}`
-    : "/login";
-  await page.goto(loginPath);
-  await page.getByLabel("Email address").fill(email);
-  await page.locator("#password").fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-}
 
 test.describe("authenticated portal user", () => {
   test.beforeEach(() => {

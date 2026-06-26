@@ -266,6 +266,9 @@ export function scheduleTimesOverlap(
   return leftStart < rightEnd && rightStart < leftEnd;
 }
 
+export const CREATOR_BLOCK_SCHEDULING_ERROR =
+  "Cannot schedule during blocked time for one or more invited creators.";
+
 export function findCreatorBlockConflicts(
   events: ScheduleEvent[],
   creatorIds: string[],
@@ -284,4 +287,28 @@ export function findCreatorBlockConflicts(
           creatorIdSet.has(participant.creatorId)
       )
   );
+}
+
+function creatorNameFromBlock(
+  block: ScheduleEvent,
+  invitedCreatorIds: string[]
+): string {
+  const match = block.participants.find(
+    (participant) =>
+      participant.creatorId !== null &&
+      invitedCreatorIds.includes(participant.creatorId)
+  );
+  return match?.creatorName ?? "A creator";
+}
+
+export function formatCreatorBlockConflictMessage(
+  conflicts: ScheduleEvent[],
+  invitedCreatorIds: string[]
+): string {
+  if (conflicts.length === 0) return "";
+  if (conflicts.length === 1) {
+    const name = creatorNameFromBlock(conflicts[0]!, invitedCreatorIds);
+    return `Cannot schedule during this time — ${name} has blocked it.`;
+  }
+  return `Cannot schedule during this time — ${conflicts.length} invited creators have blocked it.`;
 }

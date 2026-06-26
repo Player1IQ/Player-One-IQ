@@ -365,6 +365,7 @@ async function provision() {
   };
 
   console.log("\n✅ QA schedule accounts provisioned.\n");
+  console.log("SCHEDULE_QA_CREDENTIALS_JSON");
   console.log(JSON.stringify(credentials, null, 2));
 }
 
