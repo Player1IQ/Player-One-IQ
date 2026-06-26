@@ -204,6 +204,7 @@ export function SchedulePageClient({
     defaultFormState(new Date())
   );
   const [error, setError] = useState<string | null>(null);
+  const [emailWarning, setEmailWarning] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const weekDays = useMemo(() => getWeekDays(anchorDate), [anchorDate]);
@@ -250,6 +251,7 @@ export function SchedulePageClient({
     setEditingEvent(null);
     setForm(forBlock ? blockFormState(selectedDay) : defaultFormState(selectedDay));
     setError(null);
+    setEmailWarning(null);
     setModalOpen(true);
   }
 
@@ -258,6 +260,7 @@ export function SchedulePageClient({
     setEditingEvent(event);
     setForm(formStateFromEvent(event));
     setError(null);
+    setEmailWarning(null);
     setModalOpen(true);
   }
 
@@ -331,7 +334,12 @@ export function SchedulePageClient({
 
       try {
         let result:
-          | { error?: string; id?: string; success?: boolean }
+          | {
+              error?: string;
+              id?: string;
+              success?: boolean;
+              emailWarning?: string;
+            }
           | undefined;
 
         if (isBlockMode) {
@@ -367,6 +375,10 @@ export function SchedulePageClient({
         if (result?.error) {
           setError(result.error);
           return;
+        }
+
+        if (result?.emailWarning) {
+          setEmailWarning(result.emailWarning);
         }
 
         setModalOpen(false);
@@ -418,6 +430,12 @@ export function SchedulePageClient({
       {error && !modalOpen ? (
         <p className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {error}
+        </p>
+      ) : null}
+
+      {emailWarning ? (
+        <p className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+          {emailWarning}
         </p>
       ) : null}
 

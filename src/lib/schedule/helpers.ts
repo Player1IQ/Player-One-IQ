@@ -123,6 +123,49 @@ export function addHoursToDateTimeLocal(
   return toDateTimeLocalValue(date);
 }
 
+export function formatScheduleWhen(
+  startsAt: string,
+  endsAt: string,
+  allDay?: boolean
+): string {
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+
+  if (allDay) {
+    return start.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
+  const datePart = start.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  const startTime = start.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const endTime = end.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  return `${datePart} · ${startTime} – ${endTime}`;
+}
+
+export function formatScheduleNotificationBody(
+  title: string,
+  startsAt: string,
+  endsAt: string,
+  allDay?: boolean
+): string {
+  return `${title} — ${formatScheduleWhen(startsAt, endsAt, allDay)}`;
+}
+
 export function formatSchedulePreview(
   startsAt: Date,
   endsAt: Date,

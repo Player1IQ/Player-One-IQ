@@ -4,6 +4,8 @@ import {
   combineDateAndTime,
   filterEventsForDay,
   filterEventsInRange,
+  formatScheduleNotificationBody,
+  formatScheduleWhen,
   getDayBounds,
   getWeekDays,
   getWeekStart,
@@ -183,4 +185,31 @@ test("findCreatorBlockConflicts detects overlapping creator blocks", () => {
 
   assert.equal(conflicts.length, 1);
   assert.equal(conflicts[0]?.title, "Unavailable");
+});
+
+test("formatScheduleWhen formats local date and time range", () => {
+  const start = new Date(2026, 5, 25, 10, 0, 0);
+  const end = new Date(2026, 5, 25, 12, 0, 0);
+  const when = formatScheduleWhen(start.toISOString(), end.toISOString());
+  assert.match(when, /June 25/);
+  assert.match(when, /·/);
+});
+
+test("formatScheduleNotificationBody combines title and when", () => {
+  const start = new Date(2026, 5, 25, 10, 0, 0);
+  const end = new Date(2026, 5, 25, 12, 0, 0);
+  const body = formatScheduleNotificationBody(
+    "Team sync",
+    start.toISOString(),
+    end.toISOString()
+  );
+  assert.match(body, /^Team sync — /);
+  assert.match(body, /June 25/);
+});
+
+test("formatScheduleWhen formats all-day events", () => {
+  const start = new Date(2026, 5, 25, 12, 0, 0);
+  const end = new Date(2026, 5, 25, 13, 0, 0);
+  const when = formatScheduleWhen(start.toISOString(), end.toISOString(), true);
+  assert.match(when, /June 25, 2026/);
 });

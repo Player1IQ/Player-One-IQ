@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getAppOrigin } from "@/lib/email/app-url";
-import { sendScheduleInviteEmail } from "@/lib/email/schedule-invite";
+import {
+  sendScheduleInviteEmail,
+  sendScheduleUpdateEmail,
+} from "@/lib/email/schedule-invite";
 import { getOrganizationForUser, getOrganizationId } from "@/lib/organization/queries";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import {
@@ -12,6 +15,7 @@ import {
   type ScheduleEventInput,
   type ScheduleEventType,
 } from "@/lib/schedule";
+import { formatScheduleNotificationBody } from "@/lib/schedule/helpers";
 import {
   canManageOrgSchedule,
   getUnreadScheduleNotifications,
@@ -49,8 +53,8 @@ async function notifyParticipants(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
   organizationId: string,
   eventId: string,
-  title: string,
-  startsAt: string,
+  notificationTitle: string,
+  body: string,
   participantUserIds: string[]
 ) {
   if (participantUserIds.length === 0) return;
@@ -58,10 +62,28 @@ async function notifyParticipants(
   await supabase.rpc("insert_schedule_notifications", {
     p_organization_id: organizationId,
     p_event_id: eventId,
-    p_title: title,
-    p_starts_at: startsAt,
+    p_notification_title: notificationTitle,
+    p_body: body,
     p_user_ids: participantUserIds,
   });
+}
+
+function combineEmailWarnings(
+  ...warnings: Array<string | undefined>
+): string | undefined {
+  const messages = warnings.filter((message): message is string =>
+    Boolean(message)
+  );
+  if (messages.length === 0) return undefined;
+  return messages.join(" ");
+}
+
+function emailFailureWarning(
+  failureCount: number,
+  kind: "invitation" | "update"
+): string {
+  const label = kind === "invitation" ? "invitation" : "update";
+  return `Event saved but ${failureCount} ${label} email(s) failed to send.`;
 }
 
 async function resolveCreatorUserIds(
@@ -143,13 +165,13 @@ async function emailScheduleInvites(params: {
   allDay?: boolean;
   location?: string | null;
   recipientEmails: string[];
-}) {
-  if (params.recipientEmails.length === 0) return;
+}): Promise<{ emailWarning?: string }> {
+  if (params.recipientEmails.length === 0) return {};
 
   const origin = await getAppOrigin();
   const scheduleUrl = `${origin}/schedule`;
 
-  await Promise.all(
+  const results = await Promise.all(
     params.recipientEmails.map((to) =>
       sendScheduleInviteEmail({
         to,
@@ -165,6 +187,46 @@ async function emailScheduleInvites(params: {
       })
     )
   );
+
+  const failureCount = results.filter((result) => !result.sent).length;
+  if (failureCount === 0) return {};
+
+  return { emailWarning: emailFailureWarning(failureCount, "invitation") };
+}
+
+async function emailScheduleUpdates(params: {
+  organizationName: string;
+  eventTitle: string;
+  startsAt: string;
+  endsAt: string;
+  allDay?: boolean;
+  location?: string | null;
+  recipientEmails: string[];
+}): Promise<{ emailWarning?: string }> {
+  if (params.recipientEmails.length === 0) return {};
+
+  const origin = await getAppOrigin();
+  const scheduleUrl = `${origin}/schedule`;
+
+  const results = await Promise.all(
+    params.recipientEmails.map((to) =>
+      sendScheduleUpdateEmail({
+        to,
+        scheduleUrl,
+        organizationName: params.organizationName,
+        eventTitle: params.eventTitle,
+        startsAt: params.startsAt,
+        endsAt: params.endsAt,
+        allDay: params.allDay,
+        location: params.location,
+      })
+    )
+  );
+
+  const failureCount = results.filter((result) => !result.sent).length;
+  if (failureCount === 0) return {};
+
+  return { emailWarning: emailFailureWarning(failureCount, "update") };
 }
 
 export async function createScheduleEvent(input: ScheduleEventInput) {
@@ -245,12 +307,19 @@ export async function createScheduleEvent(input: ScheduleEventInput) {
   );
   const notifyUserIds = [...userIds, ...creatorUserIds];
 
+  const notificationBody = formatScheduleNotificationBody(
+    event.title,
+    input.startsAt,
+    input.endsAt,
+    input.allDay
+  );
+
   await notifyParticipants(
     supabase,
     organizationId,
     event.id,
-    event.title,
-    event.starts_at,
+    "New schedule event",
+    notificationBody,
     [...new Set(notifyUserIds)]
   );
 
@@ -266,7 +335,7 @@ export async function createScheduleEvent(input: ScheduleEventInput) {
     (email) => email !== organizerEmail
   );
 
-  await emailScheduleInvites({
+  const { emailWarning } = await emailScheduleInvites({
     organizationName: organization?.name ?? "Your organization",
     organizerEmail: user.email,
     eventTitle: input.title.trim(),
@@ -281,7 +350,7 @@ export async function createScheduleEvent(input: ScheduleEventInput) {
   revalidatePath("/schedule");
   revalidatePath("/");
   revalidatePath("/portal");
-  return { id: event.id };
+  return emailWarning ? { id: event.id, emailWarning } : { id: event.id };
 }
 
 export async function createCreatorBlock(input: ScheduleBlockInput) {
@@ -403,19 +472,21 @@ export async function updateScheduleEvent(
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
 
-  const existing = await supabase
+  const { data: existingEvent, error: existingError } = await supabase
     .from("schedule_events")
-    .select("id, event_type, created_by")
+    .select(
+      "id, event_type, created_by, title, description, starts_at, ends_at, all_day, location"
+    )
     .eq("id", id)
     .eq("organization_id", organizationId)
     .maybeSingle();
 
-  if (!existing.data) return { error: "Event not found." };
+  if (existingError || !existingEvent) return { error: "Event not found." };
 
   const membership = await getCurrentUserMembership();
   const canManage = await canManageOrgSchedule();
   const isOwnBlock =
-    existing.data.event_type === "block" &&
+    existingEvent.event_type === "block" &&
     Boolean(membership?.linkedCreatorId);
 
   if (!canManage && !isOwnBlock) {
@@ -428,6 +499,28 @@ export async function updateScheduleEvent(
   const sessionError = await ensureAuthenticatedSession(supabase);
   if (sessionError) return sessionError;
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated." };
+
+  const { data: existingParticipants } = await supabase
+    .from("schedule_event_participants")
+    .select("user_id, creator_id")
+    .eq("event_id", id)
+    .neq("role", "organizer");
+
+  const previousUserIds = new Set(
+    (existingParticipants ?? [])
+      .map((participant) => participant.user_id)
+      .filter((userId): userId is string => Boolean(userId))
+  );
+  const previousCreatorIds = new Set(
+    (existingParticipants ?? [])
+      .map((participant) => participant.creator_id)
+      .filter((creatorId): creatorId is string => Boolean(creatorId))
+  );
+
   if (isOwnBlock) {
     return updateCreatorBlock(id, {
       title: input.title,
@@ -437,22 +530,37 @@ export async function updateScheduleEvent(
     });
   }
 
+  const trimmedTitle = input.title.trim();
+  const trimmedDescription = input.description?.trim() || null;
+  const trimmedLocation = input.location?.trim() || null;
+  const allDay = input.allDay ?? false;
+
+  const detailsChanged =
+    existingEvent.title !== trimmedTitle ||
+    (existingEvent.description ?? null) !== trimmedDescription ||
+    existingEvent.starts_at !== input.startsAt ||
+    existingEvent.ends_at !== input.endsAt ||
+    existingEvent.all_day !== allDay ||
+    (existingEvent.location ?? null) !== trimmedLocation;
+
   const { error: updateError } = await supabase.rpc("update_org_schedule_event", {
     p_event_id: id,
     p_organization_id: organizationId,
-    p_title: input.title.trim(),
-    p_description: input.description?.trim() || null,
+    p_title: trimmedTitle,
+    p_description: trimmedDescription,
     p_event_type: input.eventType,
     p_starts_at: input.startsAt,
     p_ends_at: input.endsAt,
-    p_all_day: input.allDay ?? false,
-    p_location: input.location?.trim() || null,
+    p_all_day: allDay,
+    p_location: trimmedLocation,
     p_color: input.color ?? null,
   });
 
   if (updateError) return { error: updateError.message };
 
-  const userIds = input.participantUserIds ?? [];
+  const userIds = Array.from(
+    new Set(input.participantUserIds ?? []).values()
+  ).filter((userId) => userId !== user.id);
   const creatorIds = input.participantCreatorIds ?? [];
 
   const { error: participantError } = await supabase.rpc(
@@ -467,10 +575,117 @@ export async function updateScheduleEvent(
 
   if (participantError) return { error: participantError.message };
 
+  const newUserIds = userIds.filter((userId) => !previousUserIds.has(userId));
+  const newCreatorIds = creatorIds.filter(
+    (creatorId) => !previousCreatorIds.has(creatorId)
+  );
+  const existingUserIds = userIds.filter((userId) =>
+    previousUserIds.has(userId)
+  );
+  const existingCreatorIds = creatorIds.filter((creatorId) =>
+    previousCreatorIds.has(creatorId)
+  );
+
+  const notificationBody = formatScheduleNotificationBody(
+    trimmedTitle,
+    input.startsAt,
+    input.endsAt,
+    allDay
+  );
+
+  const organization = await getOrganizationForUser();
+  const organizationName = organization?.name ?? "Your organization";
+  const organizerEmail = user.email?.toLowerCase();
+  const emailWarnings: Array<string | undefined> = [];
+
+  if (newUserIds.length > 0 || newCreatorIds.length > 0) {
+    const newCreatorUserIds = await resolveCreatorUserIds(
+      supabase,
+      organizationId,
+      newCreatorIds
+    );
+    const newNotifyUserIds = [...new Set([...newUserIds, ...newCreatorUserIds])];
+
+    await notifyParticipants(
+      supabase,
+      organizationId,
+      id,
+      "New schedule event",
+      notificationBody,
+      newNotifyUserIds
+    );
+
+    const newRecipientEmails = (
+      await resolveParticipantEmails(
+        supabase,
+        organizationId,
+        newUserIds,
+        newCreatorIds
+      )
+    ).filter((email) => email !== organizerEmail);
+
+    const inviteResult = await emailScheduleInvites({
+      organizationName,
+      organizerEmail: user.email,
+      eventTitle: trimmedTitle,
+      eventType: input.eventType,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      allDay,
+      location: trimmedLocation,
+      recipientEmails: newRecipientEmails,
+    });
+    emailWarnings.push(inviteResult.emailWarning);
+  }
+
+  if (detailsChanged) {
+    const existingCreatorUserIds = await resolveCreatorUserIds(
+      supabase,
+      organizationId,
+      existingCreatorIds
+    );
+    const updateNotifyUserIds = [
+      ...new Set([...existingUserIds, ...existingCreatorUserIds]),
+    ];
+
+    if (updateNotifyUserIds.length > 0) {
+      await notifyParticipants(
+        supabase,
+        organizationId,
+        id,
+        "Schedule updated",
+        notificationBody,
+        updateNotifyUserIds
+      );
+    }
+
+    const updateRecipientEmails = (
+      await resolveParticipantEmails(
+        supabase,
+        organizationId,
+        existingUserIds,
+        existingCreatorIds
+      )
+    ).filter((email) => email !== organizerEmail);
+
+    const updateResult = await emailScheduleUpdates({
+      organizationName,
+      eventTitle: trimmedTitle,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      allDay,
+      location: trimmedLocation,
+      recipientEmails: updateRecipientEmails,
+    });
+    emailWarnings.push(updateResult.emailWarning);
+  }
+
   revalidatePath("/schedule");
   revalidatePath("/");
   revalidatePath("/portal");
-  return { id };
+
+  const emailWarning = combineEmailWarnings(...emailWarnings);
+  return emailWarning ? { id, emailWarning } : { id };
 }
 
 export async function respondToScheduleInvite(
