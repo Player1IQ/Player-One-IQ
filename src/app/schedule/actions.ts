@@ -364,6 +364,28 @@ export async function updateScheduleEvent(
   return { id };
 }
 
+export async function respondToScheduleInvite(
+  participantId: string,
+  response: "accepted" | "declined"
+) {
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const sessionError = await ensureAuthenticatedSession(supabase);
+  if (sessionError) return sessionError;
+
+  const { error } = await supabase.rpc("respond_to_schedule_invite", {
+    p_participant_id: participantId,
+    p_response: response,
+  });
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/schedule");
+  revalidatePath("/portal");
+  return { success: true as const };
+}
+
 export async function deleteScheduleEvent(id: string) {
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };

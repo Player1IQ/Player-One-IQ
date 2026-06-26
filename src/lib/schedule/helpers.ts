@@ -211,3 +211,34 @@ export function formatActionError(error: unknown): string {
   if (typeof error === "string" && error.trim()) return error;
   return "Something went wrong while saving. Please try again.";
 }
+
+export function scheduleTimesOverlap(
+  left: Pick<ScheduleEvent, "startsAt" | "endsAt">,
+  right: Pick<ScheduleEvent, "startsAt" | "endsAt">
+): boolean {
+  const leftStart = new Date(left.startsAt).getTime();
+  const leftEnd = new Date(left.endsAt).getTime();
+  const rightStart = new Date(right.startsAt).getTime();
+  const rightEnd = new Date(right.endsAt).getTime();
+  return leftStart < rightEnd && rightStart < leftEnd;
+}
+
+export function findCreatorBlockConflicts(
+  events: ScheduleEvent[],
+  creatorIds: string[],
+  proposed: Pick<ScheduleEvent, "startsAt" | "endsAt">
+): ScheduleEvent[] {
+  if (creatorIds.length === 0) return [];
+
+  const creatorIdSet = new Set(creatorIds);
+  return events.filter(
+    (event) =>
+      event.isBlock &&
+      scheduleTimesOverlap(event, proposed) &&
+      event.participants.some(
+        (participant) =>
+          participant.creatorId !== null &&
+          creatorIdSet.has(participant.creatorId)
+      )
+  );
+}

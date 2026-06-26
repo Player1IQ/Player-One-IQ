@@ -47,6 +47,7 @@ export default async function SchedulePage() {
         rangeEndIso={rangeEnd.toISOString()}
         isStaff={isStaff}
         isCreatorPortal={isCreatorPortal}
+        linkedCreatorId={membership?.linkedCreatorId ?? null}
         participantOptions={participantOptions}
       />
     </DashboardLayout>

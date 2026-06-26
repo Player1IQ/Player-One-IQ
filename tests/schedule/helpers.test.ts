@@ -9,6 +9,7 @@ import {
   getWeekStart,
   isSameDay,
   resolveScheduleTimes,
+  findCreatorBlockConflicts,
 } from "@/lib/schedule/helpers";
 import { mapScheduleEventRow, type ScheduleEventRow } from "@/lib/schedule/types";
 
@@ -140,4 +141,46 @@ test("resolveScheduleTimes builds all-day bounds", () => {
   const end = new Date(result.endsAt);
   assert.equal(start.getHours(), 0);
   assert.equal(end.getHours(), 23);
+});
+
+test("findCreatorBlockConflicts detects overlapping creator blocks", () => {
+  const block = mapScheduleEventRow({
+    id: "block-1",
+    organization_id: "org-1",
+    title: "Unavailable",
+    description: null,
+    event_type: "block",
+    starts_at: "2026-06-25T14:00:00.000Z",
+    ends_at: "2026-06-25T16:00:00.000Z",
+    all_day: false,
+    created_by: "creator-user",
+    location: null,
+    color: null,
+    created_at: "2026-06-25T14:00:00.000Z",
+    updated_at: "2026-06-25T14:00:00.000Z",
+    schedule_event_participants: [
+      {
+        id: "part-1",
+        event_id: "block-1",
+        organization_id: "org-1",
+        user_id: null,
+        creator_id: "creator-1",
+        role: "organizer",
+        response_status: "accepted",
+        created_at: "2026-06-25T14:00:00.000Z",
+      },
+    ],
+  } satisfies ScheduleEventRow);
+
+  const conflicts = findCreatorBlockConflicts(
+    [block],
+    ["creator-1"],
+    {
+      startsAt: "2026-06-25T15:00:00.000Z",
+      endsAt: "2026-06-25T17:00:00.000Z",
+    }
+  );
+
+  assert.equal(conflicts.length, 1);
+  assert.equal(conflicts[0]?.title, "Unavailable");
 });

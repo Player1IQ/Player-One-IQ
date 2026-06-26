@@ -14,6 +14,7 @@ import {
   createCreatorBlock,
   createScheduleEvent,
   deleteScheduleEvent,
+  respondToScheduleInvite,
   updateCreatorBlock,
   updateScheduleEvent,
   type ScheduleParticipantOption,
@@ -23,6 +24,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import {
   addHoursToDateTimeLocal,
   filterEventsForDay,
+  findCreatorBlockConflicts,
   formatActionError,
   formatSchedulePreview,
   getWeekDays,
@@ -36,6 +38,7 @@ import {
   scheduleEventTypes,
   type ScheduleEvent,
   type ScheduleEventType,
+  type ScheduleParticipant,
 } from "@/lib/schedule";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +48,7 @@ interface SchedulePageClientProps {
   rangeEndIso: string;
   isStaff: boolean;
   isCreatorPortal: boolean;
+  linkedCreatorId?: string | null;
   participantOptions?: ScheduleParticipantOption[];
 }
 
@@ -132,12 +136,25 @@ function formStateFromEvent(event: ScheduleEvent): EventFormState {
   };
 }
 
+function getCreatorParticipation(
+  event: ScheduleEvent,
+  linkedCreatorId: string | null | undefined
+): ScheduleParticipant | null {
+  if (!linkedCreatorId || event.isBlock) return null;
+  return (
+    event.participants.find(
+      (participant) => participant.creatorId === linkedCreatorId
+    ) ?? null
+  );
+}
+
 export function SchedulePageClient({
   initialEvents,
   rangeStartIso,
   rangeEndIso,
   isStaff,
   isCreatorPortal,
+  linkedCreatorId = null,
   participantOptions = [],
 }: SchedulePageClientProps) {
   const router = useRouter();
@@ -176,6 +193,18 @@ export function SchedulePageClient({
     );
   }, [form]);
 
+  const creatorConflicts = useMemo(() => {
+    if (!isStaff || isBlockMode) return [];
+    const resolved = resolveScheduleTimes({
+      allDay: form.allDay,
+      allDayDate: form.allDayDate,
+      startsAtLocal: form.startsAtLocal,
+      endsAtLocal: form.endsAtLocal,
+    });
+    if ("error" in resolved) return [];
+    return findCreatorBlockConflicts(events, form.selectedCreatorIds, resolved);
+  }, [events, form, isBlockMode, isStaff]);
+
   useEffect(() => {
     setEvents(initialEvents);
   }, [initialEvents]);
@@ -188,6 +217,7 @@ export function SchedulePageClient({
   }
 
   function openEditModal(event: ScheduleEvent) {
+    if (!isStaff && !event.isBlock) return;
     setEditingEvent(event);
     setForm(formStateFromEvent(event));
     setError(null);
@@ -320,6 +350,25 @@ export function SchedulePageClient({
           return;
         }
         setEvents((prev) => prev.filter((item) => item.id !== event.id));
+        router.refresh();
+      } catch (err) {
+        setError(formatActionError(err));
+      }
+    });
+  }
+
+  function handleRespond(
+    participantId: string,
+    response: "accepted" | "declined"
+  ) {
+    startTransition(async () => {
+      setError(null);
+      try {
+        const result = await respondToScheduleInvite(participantId, response);
+        if ("error" in result && result.error) {
+          setError(result.error);
+          return;
+        }
         router.refresh();
       } catch (err) {
         setError(formatActionError(err));
@@ -496,7 +545,14 @@ export function SchedulePageClient({
               />
             ) : (
               <ul className="space-y-2">
-                {dayEvents.map((event) => (
+                {dayEvents.map((event) => {
+                  const participation = getCreatorParticipation(
+                    event,
+                    linkedCreatorId
+                  );
+                  const canEdit = isStaff || event.isBlock;
+
+                  return (
                   <li
                     key={event.id}
                     className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
@@ -505,7 +561,11 @@ export function SchedulePageClient({
                       <button
                         type="button"
                         onClick={() => openEditModal(event)}
-                        className="min-w-0 flex-1 text-left"
+                        disabled={!canEdit}
+                        className={cn(
+                          "min-w-0 flex-1 text-left",
+                          !canEdit && "cursor-default"
+                        )}
                       >
                         <div className="flex items-center gap-2">
                           <span
@@ -534,6 +594,45 @@ export function SchedulePageClient({
                           </p>
                         ) : null}
                       </button>
+                      {participation ? (
+                        <div className="flex shrink-0 flex-col items-end gap-2">
+                          {participation.responseStatus === "pending" ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRespond(participation.id, "accepted")
+                                }
+                                disabled={pending}
+                                className="rounded-lg bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25"
+                              >
+                                Accept
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRespond(participation.id, "declined")
+                                }
+                                disabled={pending}
+                                className="rounded-lg bg-white/[0.04] px-3 py-1 text-xs font-medium text-gray-400 hover:bg-white/[0.08]"
+                              >
+                                Decline
+                              </button>
+                            </>
+                          ) : (
+                            <span
+                              className={cn(
+                                "rounded-lg px-2 py-1 text-xs font-medium capitalize",
+                                participation.responseStatus === "accepted"
+                                  ? "bg-emerald-500/10 text-emerald-300"
+                                  : "bg-white/[0.04] text-gray-500"
+                              )}
+                            >
+                              {participation.responseStatus}
+                            </span>
+                          )}
+                        </div>
+                      ) : null}
                       {(isStaff || event.isBlock) && (
                         <button
                           type="button"
@@ -547,7 +646,8 @@ export function SchedulePageClient({
                       )}
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
           </CardContent>
@@ -736,6 +836,13 @@ export function SchedulePageClient({
 
               {isStaff && participantOptions.length > 0 && !isBlockMode ? (
                 <div>
+                  {creatorConflicts.length > 0 ? (
+                    <p className="mb-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+                      {creatorConflicts.length === 1
+                        ? `"${creatorConflicts[0]?.title}" overlaps with a creator block during this time.`
+                        : `${creatorConflicts.length} creator blocks overlap with this time.`}
+                    </p>
+                  ) : null}
                   <p className="text-xs font-medium text-gray-400">Participants</p>
                   <div className="mt-2 max-h-40 space-y-1 overflow-y-auto rounded-xl border border-white/[0.06] p-2">
                     {participantOptions.map((option) => {
