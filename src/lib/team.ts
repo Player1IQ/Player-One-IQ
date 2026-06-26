@@ -551,6 +551,17 @@ export function canAccessStaffDashboard(role: TeamRole | null): boolean {
   return !isPortalRole(role);
 }
 
+/** Matches user_can_write_org: roles that can manage org schedule events. */
+export function canManageOrgScheduleRole(role: TeamRole | null): boolean {
+  return (
+    role === "owner" ||
+    role === "admin" ||
+    role === "manager" ||
+    role === "partnerships" ||
+    role === "talent_manager"
+  );
+}
+
 export function canUseMessaging(role: TeamRole | null): boolean {
   if (!role) return false;
   const level = getPermissionLevel(role, "messages");

@@ -97,7 +97,7 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
           </Link>
           {summary.hasOAuthContent ? (
             <Link
-              href={profileHref}
+              href="/portal/growth"
               className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:border-accent/20 hover:text-gray-200"
             >
               <BarChart3 className="h-4 w-4" />

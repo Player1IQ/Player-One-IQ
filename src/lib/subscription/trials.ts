@@ -18,6 +18,7 @@ export function supportsPlatformTrial(planCode: PlanCode): boolean {
 /** Paid entry plan each org type starts on during signup trial. */
 export function getTrialPlanForOrgType(orgType: string): PlanCode {
   if (orgType === "Brand / Sponsor") return "sponsor_pro";
+  if (orgType === "Creator / Player") return "creator_pro";
   if (
     [
       "Gaming Agency",

@@ -14,7 +14,7 @@ import {
   formatInboxTime,
   mapMessageRow,
   truncatePreview,
-} from "@/lib/messages";
+} from "./types";
 import { displayNameFromEmail } from "@/lib/team";
 
 export async function getCurrentUserId(): Promise<string | null> {

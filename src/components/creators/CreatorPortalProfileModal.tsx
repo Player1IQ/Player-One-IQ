@@ -213,6 +213,19 @@ export function CreatorPortalProfileModal({
           </div>
 
           <label className="block space-y-1.5">
+            <span className="text-sm text-gray-300">About you</span>
+            <textarea
+              value={form.about}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, about: event.target.value }))
+              }
+              rows={4}
+              placeholder="Tell sponsors what you create, your audience, and what makes you a great partner."
+              className="w-full rounded-xl border border-white/[0.08] bg-surface px-3 py-2.5 text-sm text-gray-200"
+            />
+          </label>
+
+          <label className="block space-y-1.5">
             <span className="text-sm text-gray-300">Profile photo</span>
             <input
               type="file"

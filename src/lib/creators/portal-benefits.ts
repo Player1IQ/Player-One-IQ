@@ -1,4 +1,4 @@
-import type { Creator } from "@/lib/creators";
+import type { Creator } from "./types";
 import type { Contract } from "@/lib/contracts";
 import type { CreatorRevenueEntry } from "@/lib/creator-revenue";
 import type { PortalDeliverableMetrics } from "@/lib/contract-deliverables/queries";
@@ -77,15 +77,6 @@ export function computeProfileReadiness({
       href: "/opportunities?tab=marketplace",
     },
   ];
-
-  if (applicationCount === 0) {
-    items.push({
-      id: "apply_opportunity",
-      label: "Apply to an opportunity",
-      done: false,
-      href: "/opportunities",
-    });
-  }
 
   if (openDeliverableCount > 0) {
     items.push({

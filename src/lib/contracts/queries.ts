@@ -11,7 +11,7 @@ import {
   type Contract,
   type ContractNegotiationContext,
   type ContractRow,
-} from "@/lib/contracts";
+} from "./types";
 
 const contractSelect = `
   *,

@@ -1,14 +1,26 @@
+"use client";
+
 import type { OAuthPlatformUi } from "@/lib/platform-oauth/types";
 import { getOAuthPlatformSlug } from "@/lib/platform-oauth/platform-slug";
+import { storeOnboardingStepClient } from "@/lib/onboarding/client";
 
 interface OAuthPlatformActionsProps {
   creatorId: string;
   platforms: OAuthPlatformUi[];
   layout?: "row" | "stack";
+  returnTo?: string;
 }
 
-function oauthStartUrl(platform: OAuthPlatformUi["platform"], creatorId: string) {
-  return `/api/platform-oauth/${getOAuthPlatformSlug(platform)}/start?creatorId=${creatorId}`;
+function oauthStartUrl(
+  platform: OAuthPlatformUi["platform"],
+  creatorId: string,
+  returnTo?: string
+) {
+  const params = new URLSearchParams({ creatorId });
+  if (returnTo) {
+    params.set("returnTo", returnTo);
+  }
+  return `/api/platform-oauth/${getOAuthPlatformSlug(platform)}/start?${params.toString()}`;
 }
 
 function isConnectableOAuthPlatform(platform: OAuthPlatformUi["platform"]): boolean {
@@ -20,10 +32,17 @@ function isConnectableOAuthPlatform(platform: OAuthPlatformUi["platform"]): bool
   );
 }
 
+function persistOnboardingConnectStep(returnTo?: string) {
+  if (returnTo?.includes("/onboarding")) {
+    storeOnboardingStepClient("connect");
+  }
+}
+
 export function OAuthPlatformActions({
   creatorId,
   platforms,
   layout = "row",
+  returnTo,
 }: OAuthPlatformActionsProps) {
   const containerClass =
     layout === "stack" ? "flex flex-col gap-2" : "flex flex-wrap gap-2";
@@ -42,10 +61,10 @@ export function OAuthPlatformActions({
           status === "available" ? (
             <a
               key={platform}
-              href={oauthStartUrl(platform, creatorId)}
+              href={oauthStartUrl(platform, creatorId, returnTo)}
+              onClick={() => persistOnboardingConnectStep(returnTo)}
               className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-sm text-gray-200 transition-colors hover:border-accent/30 hover:text-white"
-            >
-              Connect {platform}
+            >              Connect {platform}
             </a>
           ) : (
             <span

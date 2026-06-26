@@ -31,6 +31,7 @@ import { IndustryBadge } from "@/components/sponsors/IndustryBadge";
 import { DealRoomButton } from "@/components/messages/DealRoomButton";
 import { ApplicationContractLink } from "./ApplicationContractLink";
 import { ApplicationReviewActions } from "./ApplicationReviewActions";
+import { OpportunityFitBadge } from "./OpportunityFitBadge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -191,6 +192,12 @@ export function OpportunityDetail({
               ) : null}
               <IndustryBadge industry={opportunity.category} />
               <PlatformBadge platform={opportunity.platform} />
+              {isPortalUser && creators[0] ? (
+                <OpportunityFitBadge
+                  opportunity={opportunity}
+                  creator={creators[0]}
+                />
+              ) : null}
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-relaxed text-gray-400">
               {opportunity.description || "No description provided."}

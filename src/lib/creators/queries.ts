@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { getCurrentUserMembership } from "@/lib/permissions";
-import { mapCreatorRow, type Creator, type CreatorRow } from "@/lib/creators";
+import { mapCreatorRow, type Creator, type CreatorRow } from "./types";
 import { isPortalRole } from "@/lib/team";
 
 export async function getCreators(): Promise<Creator[]> {

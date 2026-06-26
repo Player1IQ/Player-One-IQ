@@ -323,6 +323,24 @@ export function CreatorProfile({
         </Section>
       </div>
 
+      {isPortalUser ? (
+        <Section
+          title="About you"
+          description="Your pitch to sponsors — edit this on your profile"
+        >
+          <p className="text-sm leading-relaxed text-gray-300">
+            {creator.notes?.trim() ||
+              "Add a short bio about your content, audience, and partnership style to stand out when applying."}
+          </p>
+          <Link
+            href={`/creators/${creator.id}`}
+            className="mt-3 inline-block text-sm font-medium text-accent-light hover:text-white"
+          >
+            Edit on your profile
+          </Link>
+        </Section>
+      ) : null}
+
       <Section
         id="income-overview"
         title={isPortalUser ? "Your earnings this month" : "Income Overview"}

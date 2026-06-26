@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, Clock, MessageSquare, X } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Clock, MessageSquare, X, XCircle } from "lucide-react";
 
 interface PortalAlertsBannerProps {
   overdueDeliverables: number;
   unreadMessages: number;
   acceptedApplications?: number;
   underReviewApplications?: number;
+  rejectedApplications?: number;
 }
 
-type AlertType = "overdue" | "messages" | "accepted" | "under_review";
+type AlertType = "overdue" | "messages" | "accepted" | "under_review" | "rejected";
 
 function dismissKey(type: AlertType): string {
   return `portal-alert-dismiss-${type}`;
@@ -22,12 +23,14 @@ export function PortalAlertsBanner({
   unreadMessages,
   acceptedApplications = 0,
   underReviewApplications = 0,
+  rejectedApplications = 0,
 }: PortalAlertsBannerProps) {
   const [dismissed, setDismissed] = useState({
     overdue: false,
     messages: false,
     accepted: false,
     under_review: false,
+    rejected: false,
   });
 
   useEffect(() => {
@@ -36,6 +39,7 @@ export function PortalAlertsBanner({
       messages: sessionStorage.getItem(dismissKey("messages")) === "1",
       accepted: sessionStorage.getItem(dismissKey("accepted")) === "1",
       under_review: sessionStorage.getItem(dismissKey("under_review")) === "1",
+      rejected: sessionStorage.getItem(dismissKey("rejected")) === "1",
     });
   }, []);
 
@@ -49,8 +53,9 @@ export function PortalAlertsBanner({
   const showAccepted = acceptedApplications > 0 && !dismissed.accepted;
   const showUnderReview =
     underReviewApplications > 0 && !dismissed.under_review;
+  const showRejected = rejectedApplications > 0 && !dismissed.rejected;
 
-  if (!showOverdue && !showMessages && !showAccepted && !showUnderReview) {
+  if (!showOverdue && !showMessages && !showAccepted && !showUnderReview && !showRejected) {
     return null;
   }
 
@@ -108,6 +113,35 @@ export function PortalAlertsBanner({
             onClick={() => dismiss("under_review")}
             className="shrink-0 rounded-lg p-1 text-sky-300/80 hover:bg-sky-500/10 hover:text-sky-100"
             aria-label="Dismiss under review applications alert"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      ) : null}
+
+      {showRejected ? (
+        <div className="flex items-start gap-3 rounded-xl border border-orange-500/25 bg-orange-500/10 px-4 py-3">
+          <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-orange-100">
+              {rejectedApplications} application
+              {rejectedApplications === 1 ? "" : "s"} not selected
+            </p>
+            <p className="mt-0.5 text-xs text-orange-200/80">
+              Keep applying — browse recommended opportunities matched to your profile.
+            </p>
+            <Link
+              href="/opportunities?tab=recommended"
+              className="mt-2 inline-block text-sm font-medium text-orange-100 underline decoration-orange-300/50 underline-offset-2 hover:text-white"
+            >
+              See recommendations
+            </Link>
+          </div>
+          <button
+            type="button"
+            onClick={() => dismiss("rejected")}
+            className="shrink-0 rounded-lg p-1 text-orange-300/80 hover:bg-orange-500/10 hover:text-orange-100"
+            aria-label="Dismiss rejected applications alert"
           >
             <X className="h-4 w-4" />
           </button>

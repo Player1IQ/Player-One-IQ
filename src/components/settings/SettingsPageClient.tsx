@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { Bell, CreditCard, Users } from "lucide-react";
+import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
+import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
 import { OrganizationSettingsForm } from "./OrganizationSettingsForm";
 import { OrganizationLogoUpload } from "./OrganizationLogoUpload";
 
@@ -108,6 +110,17 @@ export function SettingsPageClient({
       </section>
 
       {platformSync}
+
+      <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
+        <h2 className="text-base font-semibold text-white">Getting started</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Re-run setup and the in-portal guided walkthrough without signing up again.
+        </p>
+        <div className="mt-4 space-y-3">
+          <ReplayOnboardingButton variant="inline" />
+          <ReplayPortalTourButton />
+        </div>
+      </section>
 
       <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
         <div className="flex items-start gap-3">

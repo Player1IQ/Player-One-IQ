@@ -14,7 +14,7 @@
     "verify:oauth": "node scripts/verify-oauth.mjs",
     "verify:api": "node scripts/verify-api.mjs",
     "verify:launch": "node scripts/verify-launch.mjs",
-    "test:guards": "node --import tsx --test tests/guards/portal-paths.test.ts tests/guards/staff-paths.test.ts tests/api/keys.test.ts tests/creators/portal-benefits.test.ts tests/opportunities/recommendations.test.ts",
+    "test:guards": "node --import tsx --test tests/guards/portal-paths.test.ts tests/guards/staff-paths.test.ts tests/api/keys.test.ts tests/creators/portal-benefits.test.ts tests/opportunities/recommendations.test.ts tests/onboarding/step-resolution.test.ts tests/onboarding/portal-tour-state.test.ts tests/schedule/helpers.test.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {

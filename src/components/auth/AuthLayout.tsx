@@ -67,7 +67,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-white sm:text-3xl">{title}</h1>
-            <p className="mt-2 text-sm text-gray-400">{subtitle}</p>
+            <div className="mt-2 text-sm text-gray-400">{subtitle}</div>
           </div>
 
           <SupabaseConfigBanner />

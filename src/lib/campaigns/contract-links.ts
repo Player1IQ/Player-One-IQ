@@ -7,12 +7,12 @@ import {
   type Contract,
   type ContractRow,
   type ContractStatus,
-} from "@/lib/contracts";
+} from "../contracts/types";
 import {
   mapCampaignRow,
   type SponsorCampaignRow,
   type CampaignStatus,
-} from "@/lib/campaigns";
+} from "./types";
 import { getCampaignById } from "@/lib/campaigns/queries";
 import { getCampaignCreators } from "@/lib/campaigns/creator-sync";
 

@@ -1,5 +1,30 @@
-import type { Creator } from "@/lib/creators";
-import type { Opportunity } from "@/lib/opportunities";
+import type { Creator } from "../creators/types";
+import type { Opportunity } from "./types";
+
+export type OpportunityFitLevel = "great" | "good" | "fair";
+
+export function getOpportunityFitScore(
+  opportunity: Opportunity,
+  creator: Creator
+): number {
+  return recommendationScore(opportunity, creator);
+}
+
+export function getOpportunityFitLevel(
+  opportunity: Opportunity,
+  creator: Creator
+): OpportunityFitLevel {
+  const score = recommendationScore(opportunity, creator);
+  if (score >= 5) return "great";
+  if (score >= 3) return "good";
+  return "fair";
+}
+
+export const opportunityFitLabels: Record<OpportunityFitLevel, string> = {
+  great: "Great fit",
+  good: "Good fit",
+  fair: "Fair fit",
+};
 
 function recommendationScore(
   opportunity: Opportunity,

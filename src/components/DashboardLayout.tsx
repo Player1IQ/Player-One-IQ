@@ -13,6 +13,8 @@ import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { getCurrentUserRole } from "@/lib/permissions";
 import { enforcePortalRouteAccess } from "@/lib/portal/guard";
 import { canAccessStaffDashboard } from "@/lib/team";
+import { getPortalTourSteps } from "@/lib/onboarding/tour";
+import { resolvePortalTourPending } from "@/lib/onboarding/queries";
 import { hasAnyFeature } from "@/lib/subscription/features";
 import { ExportReportMenu } from "@/components/reports/ExportReportMenu";
 import { PortalPoweredByFooter } from "@/components/portal/PortalPoweredByFooter";
@@ -57,6 +59,11 @@ export async function DashboardLayout({
   const messagingEnabled = subscriptionContext.features.has("messaging");
   const showPortalPoweredBy =
     isPortalUser && !hasFeature(subscriptionContext.features, "white_label");
+  const portalTourSteps =
+    currentUserRole && (isPortalUser || canAccessStaffDashboard(currentUserRole))
+      ? getPortalTourSteps(currentUserRole)
+      : [];
+  const portalTourEnabled = await resolvePortalTourPending();
   const canExportReports =
     !isPortalUser &&
     hasAnyFeature(subscriptionContext.features, [
@@ -108,6 +115,8 @@ export async function DashboardLayout({
         organizationLogoUrl={activeOrganization?.logo_url ?? null}
         teamRole={currentUserRole}
         mobileTitle={title}
+        portalTourSteps={portalTourSteps}
+        portalTourEnabled={portalTourEnabled}
         mobileHeaderActions={
           !isPortalUser ? (
             <ExportReportMenu canExport={canExportReports} variant="mobile" />

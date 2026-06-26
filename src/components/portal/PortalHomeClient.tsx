@@ -28,8 +28,10 @@ import { PortalApplicationsPanel } from "@/components/portal/PortalApplicationsP
 import { PortalMarketplaceSpotlight } from "@/components/portal/PortalMarketplaceSpotlight";
 import { PortalRecommendedOpportunities } from "@/components/portal/PortalRecommendedOpportunities";
 import { PortalProfileReadiness } from "@/components/portal/PortalProfileReadiness";
+import { TodayScheduleCard } from "@/components/schedule/TodayScheduleCard";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
 import type { CreatorPortalBenefits } from "@/lib/creators/portal-benefits";
+import type { ScheduleEvent } from "@/lib/schedule";
 
 interface PortalHomeClientProps {
   creator: Creator;
@@ -47,6 +49,7 @@ interface PortalHomeClientProps {
   deliverableMetrics: PortalDeliverableMetrics;
   platformSummary?: CreatorPlatformSummary | null;
   portalBenefits?: CreatorPortalBenefits | null;
+  todaySchedule?: ScheduleEvent[];
 }
 
 export function PortalHomeClient({
@@ -65,6 +68,7 @@ export function PortalHomeClient({
   deliverableMetrics,
   platformSummary = null,
   portalBenefits = null,
+  todaySchedule = [],
 }: PortalHomeClientProps) {
   const activeContracts = contracts.filter((contract) =>
     ["active", "negotiating", "draft"].includes(contract.status)
@@ -77,9 +81,13 @@ export function PortalHomeClient({
         unreadMessages={unreadMessages}
         acceptedApplications={portalBenefits?.applicationStats.accepted ?? 0}
         underReviewApplications={portalBenefits?.applicationStats.underReview ?? 0}
+        rejectedApplications={portalBenefits?.applicationStats.rejected ?? 0}
       />
 
-      <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
+      <div
+        className="relative overflow-hidden rounded-2xl border border-white/[0.06]"
+        data-tour-spot="portal-home-hero"
+      >
         <div className="absolute inset-0 bg-gradient-to-br from-amber-600/10 via-surface-raised to-surface" />
         <div className="relative flex flex-col gap-5 px-6 py-8 sm:flex-row sm:items-center sm:px-8">
           {organizationLogoUrl ? (
@@ -200,6 +208,11 @@ export function PortalHomeClient({
       {portalBenefits && portalBenefits.profileReadiness.score < 100 ? (
         <PortalProfileReadiness readiness={portalBenefits.profileReadiness} />
       ) : null}
+
+      <TodayScheduleCard
+        events={todaySchedule}
+        description="Your blocks and events for today"
+      />
 
       {deliverableMetrics.nextDue ? (
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">

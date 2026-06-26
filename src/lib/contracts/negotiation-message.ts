@@ -1,4 +1,4 @@
-import { formatCurrency, type ContractStatus, contractStatusLabels } from "@/lib/contracts";
+import { formatCurrency, type ContractStatus, contractStatusLabels } from "./types";
 
 export function buildContractNegotiationMessage(params: {
   contractName: string;

@@ -7,7 +7,7 @@ import {
   type Opportunity,
   type OpportunityApplication,
   type OpportunityRow,
-} from "@/lib/opportunities";
+} from "./types";
 
 async function getContractIdsByApplicationIds(
   applicationIds: string[]

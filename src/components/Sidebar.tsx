@@ -6,6 +6,7 @@ import {
   BarChart3,
   Briefcase,
   Building2,
+  Calendar,
   CreditCard,
   FileText,
   LayoutDashboard,
@@ -41,6 +42,7 @@ const navIcons: Record<NavIconName, LucideIcon> = {
   "bar-chart": BarChart3,
   "credit-card": CreditCard,
   settings: Settings,
+  calendar: Calendar,
 };
 
 interface SidebarProps {
@@ -117,7 +119,7 @@ export function Sidebar({
         />
       ) : null}
 
-      <nav className="flex-1 space-y-0.5 overflow-y-auto p-3">
+      <nav className="flex-1 space-y-0.5 overflow-y-auto p-3" data-tour-sidebar>
         {items.map((item) => {
           const isActive =
             item.href === "/"
@@ -134,6 +136,7 @@ export function Sidebar({
             <Link
               key={item.href}
               href={item.href}
+              data-tour-nav={item.href}
               onClick={onNavigate}
               className={cn(
                 "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",

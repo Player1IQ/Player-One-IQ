@@ -1,5 +1,5 @@
-import { platforms, type Platform } from "@/lib/creators";
-import { industries, type Industry } from "@/lib/sponsors";
+import { platforms, type Platform } from "../creators/types";
+import { industries, type Industry } from "../sponsors/types";
 
 export type OpportunityStatus = "draft" | "open" | "closed" | "filled";
 

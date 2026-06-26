@@ -22,7 +22,13 @@ const STAFF_ONLY_PREFIXES = [
   "/settings",
 ];
 
-const SHARED_PREFIXES = ["/messages", "/contracts", "/portal"];
+const SHARED_PREFIXES = [
+  "/messages",
+  "/contracts",
+  "/schedule",
+  "/portal",
+  "/onboarding",
+];
 
 export function isPortalUser(role: TeamRole | null | undefined): boolean {
   return Boolean(role && isPortalRole(role));

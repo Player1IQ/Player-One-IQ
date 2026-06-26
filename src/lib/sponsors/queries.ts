@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { mapSponsorRow, type Sponsor, type SponsorRow } from "@/lib/sponsors";
+import { mapSponsorRow, type Sponsor, type SponsorRow } from "./types";
 
 export async function getSponsors(): Promise<Sponsor[]> {
   const supabase = await createClient();

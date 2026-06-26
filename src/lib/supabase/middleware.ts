@@ -8,6 +8,10 @@ import {
 } from "@/lib/portal/paths";
 import { isPathAllowedForStaffUser } from "@/lib/staff/paths";
 import { canAccessStaffDashboard, type TeamRole } from "@/lib/team";
+import {
+  ONBOARDING_STARTED_COOKIE,
+  resolveOnboardingRequired,
+} from "@/lib/onboarding/queries";
 
 export const ACTIVE_ORGANIZATION_COOKIE = "poiq_active_org";
 
@@ -64,7 +68,9 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith(route)
   );
   const isOrgSetup = pathname.startsWith("/organization-setup");
+  const isOnboarding = pathname.startsWith("/onboarding");
   const isInviteRoute = pathname.startsWith("/invite/");
+  const isPlatformOAuthRoute = pathname.startsWith("/api/platform-oauth");
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
@@ -112,9 +118,30 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (!hasOrganization && !isOrgSetup && !isInviteRoute) {
+    if (!hasOrganization && !isOrgSetup && !isInviteRoute && !isOnboarding) {
       const url = request.nextUrl.clone();
       url.pathname = "/organization-setup";
+      return NextResponse.redirect(url);
+    }
+
+    const startedOnboardingCookie =
+      request.cookies.get(ONBOARDING_STARTED_COOKIE)?.value === "1";
+
+    const onboardingRequired = await resolveOnboardingRequired(supabase, user, {
+      startedCookie: startedOnboardingCookie,
+    });
+
+    if (
+      hasOrganization &&
+      onboardingRequired &&
+      !isOnboarding &&
+      !isOrgSetup &&
+      !isInviteRoute &&
+      !isPublicRoute &&
+      !isPlatformOAuthRoute
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
       return NextResponse.redirect(url);
     }
 
@@ -123,6 +150,10 @@ export async function updateSession(request: NextRequest) {
       (isOrgSetup || AUTH_ONLY_ROUTES.includes(pathname))
     ) {
       const url = request.nextUrl.clone();
+      if (onboardingRequired) {
+        url.pathname = "/onboarding";
+        return NextResponse.redirect(url);
+      }
       const activeOrgId =
         request.cookies.get(ACTIVE_ORGANIZATION_COOKIE)?.value ??
         organization?.id ??
@@ -133,19 +164,22 @@ export async function updateSession(request: NextRequest) {
 
       if (activeOrgId) {
         const isOwner = Boolean(organization && organization.id === activeOrgId);
-        let role: TeamRole | null = isOwner ? "owner" : null;
+        const { data: member } = await supabase
+          .from("team_members")
+          .select("role, linked_creator_id, linked_sponsor_id")
+          .eq("user_id", user.id)
+          .eq("organization_id", activeOrgId)
+          .eq("status", "active")
+          .maybeSingle();
 
-        if (!role) {
-          const { data: member } = await supabase
-            .from("team_members")
-            .select("role")
-            .eq("user_id", user.id)
-            .eq("organization_id", activeOrgId)
-            .eq("status", "active")
-            .maybeSingle();
-
-          role = (member?.role as TeamRole | undefined) ?? null;
-        }
+        const memberRole = (member?.role as TeamRole | undefined) ?? null;
+        const portalRole =
+          memberRole === "player" ||
+          memberRole === "content_creator" ||
+          memberRole === "sponsor"
+            ? memberRole
+            : null;
+        const role: TeamRole | null = portalRole ?? (isOwner ? "owner" : memberRole);
 
         if (role === "player" || role === "content_creator" || role === "sponsor") {
           redirectPath = PORTAL_HOME;
@@ -162,25 +196,33 @@ export async function updateSession(request: NextRequest) {
       memberships?.[0]?.organization_id ??
       null;
 
-    if (activeOrgId && !isPublicRoute && !isOrgSetup && !isInviteRoute) {
+    if (
+      activeOrgId &&
+      !isPublicRoute &&
+      !isOrgSetup &&
+      !isOnboarding &&
+      !isInviteRoute &&
+      !isPlatformOAuthRoute
+    ) {
       const isOwner = Boolean(organization && organization.id === activeOrgId);
-      let role: TeamRole | null = isOwner ? "owner" : null;
-      let linkedCreatorId: string | null = null;
-      let linkedSponsorId: string | null = null;
+      const { data: member } = await supabase
+        .from("team_members")
+        .select("role, linked_creator_id, linked_sponsor_id")
+        .eq("user_id", user.id)
+        .eq("organization_id", activeOrgId)
+        .eq("status", "active")
+        .maybeSingle();
 
-      if (!role) {
-        const { data: member } = await supabase
-          .from("team_members")
-          .select("role, linked_creator_id, linked_sponsor_id")
-          .eq("user_id", user.id)
-          .eq("organization_id", activeOrgId)
-          .eq("status", "active")
-          .maybeSingle();
-
-        role = (member?.role as TeamRole | undefined) ?? null;
-        linkedCreatorId = member?.linked_creator_id ?? null;
-        linkedSponsorId = member?.linked_sponsor_id ?? null;
-      }
+      const memberRole = (member?.role as TeamRole | undefined) ?? null;
+      const portalRole =
+        memberRole === "player" ||
+        memberRole === "content_creator" ||
+        memberRole === "sponsor"
+          ? memberRole
+          : null;
+      const role: TeamRole | null = portalRole ?? (isOwner ? "owner" : memberRole);
+      const linkedCreatorId = member?.linked_creator_id ?? null;
+      const linkedSponsorId = member?.linked_sponsor_id ?? null;
 
       if (role === "player" || role === "content_creator" || role === "sponsor") {
         const portalContext = { linkedCreatorId, linkedSponsorId };

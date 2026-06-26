@@ -20,7 +20,9 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
+import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
+import { OpportunityFitBadge } from "./OpportunityFitBadge";
 
 const selectClassName =
   "rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 backdrop-blur-sm focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30";
@@ -45,9 +47,11 @@ interface OpportunitiesPageClientProps {
   isPortalUser?: boolean;
   myApplicationCount?: number;
   myPendingCount?: number;
+  portalCreator?: Creator | null;
+  recommendedOpportunities?: Opportunity[];
 }
 
-type PortalTab = "agency" | "marketplace";
+type PortalTab = "agency" | "marketplace" | "recommended";
 
 export function OpportunitiesPageClient({
   opportunities,
@@ -59,11 +63,15 @@ export function OpportunitiesPageClient({
   isPortalUser = false,
   myApplicationCount = 0,
   myPendingCount = 0,
+  portalCreator = null,
+  recommendedOpportunities = [],
 }: OpportunitiesPageClientProps) {
   const searchParams = useSearchParams();
   const initialPortalTab = useMemo((): PortalTab => {
     const tab = searchParams.get("tab");
-    return tab === "marketplace" ? "marketplace" : "agency";
+    if (tab === "marketplace") return "marketplace";
+    if (tab === "recommended") return "recommended";
+    return "agency";
   }, [searchParams]);
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -77,7 +85,9 @@ export function OpportunitiesPageClient({
   const sourceOpportunities = isPortalUser
     ? portalTab === "agency"
       ? agencyOpportunities
-      : marketplaceOpportunities
+      : portalTab === "marketplace"
+        ? marketplaceOpportunities
+        : recommendedOpportunities
     : opportunities;
 
   const stats = getOpportunityStats(opportunities);
@@ -295,6 +305,23 @@ export function OpportunitiesPageClient({
           </button>
           <button
             type="button"
+            onClick={() => setPortalTab("recommended")}
+            className={cn(
+              "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+              portalTab === "recommended"
+                ? "border-accent/40 bg-accent/15 text-accent-light"
+                : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
+            )}
+          >
+            Recommended
+            {recommendedOpportunities.length > 0 ? (
+              <span className="ml-1.5 text-amber-400">
+                ({recommendedOpportunities.length})
+              </span>
+            ) : null}
+          </button>
+          <button
+            type="button"
             onClick={() => setPortalTab("marketplace")}
             className={cn(
               "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
@@ -326,7 +353,9 @@ export function OpportunitiesPageClient({
               ? isPortalUser
                 ? portalTab === "marketplace"
                   ? "No open marketplace opportunities right now. Check back as brands publish public listings."
-                  : "No open opportunities from your agency right now."
+                  : portalTab === "recommended"
+                    ? "No recommended opportunities right now. Connect more platforms or update your profile to improve matches."
+                    : "No open opportunities from your agency right now."
                 : canManage
                   ? "Create your first sponsorship opportunity for creators to discover and apply."
                   : "Check back when opportunities are published."
@@ -379,6 +408,12 @@ export function OpportunitiesPageClient({
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <IndustryBadge industry={opportunity.category} />
                 <PlatformBadge platform={opportunity.platform} />
+                {isPortalUser && portalCreator ? (
+                  <OpportunityFitBadge
+                    opportunity={opportunity}
+                    creator={portalCreator}
+                  />
+                ) : null}
               </div>
               {opportunity.sponsorName ? (
                 <p className="mt-3 text-sm text-gray-400">

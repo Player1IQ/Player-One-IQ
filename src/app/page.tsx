@@ -32,6 +32,7 @@ import {
   getLastNMonthKeys,
   groupRevenueEntriesByMonth,
 } from "@/lib/dashboard/charts";
+import { getTodayScheduleEvents } from "@/lib/schedule/queries";
 
 export default async function DashboardPage() {
   const role = await getCurrentUserRole();
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
     platformRevenueEntries,
     connectedAccountCount,
     applications,
+    todaySchedule,
   ] = await Promise.all([
     getCreators(),
     getSponsors(),
@@ -63,6 +65,7 @@ export default async function DashboardPage() {
     getOrganizationRevenueEntriesForMonths(monthKeys),
     getConnectedPlatformAccountCount(),
     getAllApplications(),
+    getTodayScheduleEvents(),
   ]);
 
   const opportunityStats = getOpportunityStats(opportunities);
@@ -110,6 +113,7 @@ export default async function DashboardPage() {
         pendingApplications={pendingApplications}
         revenueTrend={revenueTrend}
         creatorGrowth={creatorGrowth}
+        todaySchedule={todaySchedule}
       />
     </DashboardLayout>
   );

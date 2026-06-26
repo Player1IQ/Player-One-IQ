@@ -28,6 +28,7 @@ const memberCases: StaffCase[] = [
   { role: "member", pathname: "/team", expected: true },
   { role: "member", pathname: "/creators", expected: true },
   { role: "member", pathname: "/contracts", expected: true },
+  { role: "member", pathname: "/schedule", expected: true },
   { role: "member", pathname: "/ai", expected: true },
   { role: "member", pathname: "/reports", expected: true },
   { role: "member", pathname: "/reports/print", expected: true },

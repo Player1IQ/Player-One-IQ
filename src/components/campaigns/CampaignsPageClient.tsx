@@ -209,7 +209,7 @@ export function CampaignsPageClient({
           description={
             campaigns.length === 0
               ? isPortalUser
-                ? "Your agency will assign you to campaigns when they go live."
+                ? "No campaigns assigned yet. Focus on marketplace opportunities and building your profile while your agency lines up deals."
                 : "Create your first sponsor campaign to track budgets and status."
               : "Try a different search or status filter."
           }

@@ -35,6 +35,7 @@ import { getCurrentUserMembership } from "@/lib/permissions";
 import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
+import { getTodayScheduleEvents } from "@/lib/schedule/queries";
 
 export default async function PortalHomePage() {
   const membership = await getCurrentUserMembership();
@@ -128,6 +129,7 @@ export default async function PortalHomePage() {
     revenueEntries,
     platformAccounts,
     marketplaceOpportunities,
+    todaySchedule,
   ] = await Promise.all([
     getCreatorById(membership.linkedCreatorId),
     getContracts(),
@@ -144,10 +146,18 @@ export default async function PortalHomePage() {
     getCreatorRevenueEntries(membership.linkedCreatorId),
     getCreatorPlatformAccounts(membership.linkedCreatorId),
     showOpportunities ? getMarketplaceOpportunities() : Promise.resolve([]),
+    getTodayScheduleEvents(),
   ]);
 
   if (!creator) {
-    redirect("/");
+    return (
+      <DashboardLayout
+        title="Portal"
+        description="Your creator portal"
+      >
+        <PortalNoProfileClient roleLabel={getPortalRoleLabel(membership.role)} />
+      </DashboardLayout>
+    );
   }
 
   const whiteLabelEnabled = hasFeature(subscription.features, "white_label");
@@ -185,6 +195,7 @@ export default async function PortalHomePage() {
         deliverableMetrics={deliverableMetrics}
         platformSummary={platformSummary}
         portalBenefits={portalBenefits}
+        todaySchedule={todaySchedule}
       />
     </DashboardLayout>
   );

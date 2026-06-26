@@ -1,10 +1,11 @@
-import type { Platform, SocialHandle } from "@/lib/creators";
+import type { Platform, SocialHandle } from "./types";
 
 export interface CreatorPortalProfileInput {
   name: string;
   email: string;
   primaryPlatform: Platform;
   socialHandles: SocialHandle[];
+  about: string;
 }
 
 export function creatorToPortalProfileInput(creator: {
@@ -12,6 +13,7 @@ export function creatorToPortalProfileInput(creator: {
   email: string | null;
   primaryPlatform: Platform;
   socialHandles: SocialHandle[];
+  notes: string | null;
 }): CreatorPortalProfileInput {
   return {
     name: creator.name,
@@ -21,5 +23,6 @@ export function creatorToPortalProfileInput(creator: {
       creator.socialHandles.length > 0
         ? creator.socialHandles
         : [{ platform: "YouTube", handle: "" }],
+    about: creator.notes ?? "",
   };
 }

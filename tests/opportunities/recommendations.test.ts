@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import type { Creator } from "@/lib/creators";
 import type { Opportunity } from "@/lib/opportunities";
-import { getRecommendedOpportunitiesForCreator } from "@/lib/opportunities/recommendations";
+import { getRecommendedOpportunitiesForCreator, getOpportunityFitLevel } from "@/lib/opportunities/recommendations";
 
 const creator: Creator = {
   id: "creator-1",
@@ -67,5 +67,14 @@ describe("getRecommendedOpportunitiesForCreator", () => {
       recommended.map((item) => item.id),
       ["2", "1"]
     );
+  });
+
+  it("labels strong platform matches as great fit", () => {
+    const opportunity = makeOpportunity("fit-1", "YouTube", {
+      marketplaceListing: true,
+      budget: 5000,
+    });
+
+    assert.equal(getOpportunityFitLevel(opportunity, creator), "great");
   });
 });

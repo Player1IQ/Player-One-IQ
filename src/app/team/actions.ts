@@ -628,6 +628,13 @@ export async function acceptInvitation(token: string) {
     "created"
   );
 
+  await supabase.auth.updateUser({
+    data: {
+      onboarding_pending: true,
+      onboarding_version: 1,
+    },
+  });
+
   revalidatePath("/team");
   revalidatePath("/messages");
   revalidatePath("/");

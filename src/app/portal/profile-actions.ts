@@ -51,6 +51,7 @@ export async function updateCreatorPortalProfile(
       email: input.email.trim() || null,
       primary_platform: input.primaryPlatform,
       social_handles: input.socialHandles.filter((handle) => handle.handle.trim()),
+      notes: input.about.trim() || null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", creatorId)

@@ -8,7 +8,9 @@ import {
   getApplicationsForCreator,
 } from "@/lib/opportunities/queries";
 import { getApplicationStats } from "@/lib/opportunities";
+import { getCreatorById } from "@/lib/creators/queries";
 import { getSponsors } from "@/lib/sponsors/queries";
+import { getRecommendedOpportunitiesForCreator } from "@/lib/opportunities/recommendations";
 import {
   getCurrentUserMembership,
   canManageOpportunities,
@@ -21,7 +23,7 @@ export default async function OpportunitiesPage() {
   const isPortalUser = Boolean(membership && isPortalRole(membership.role));
   const linkedCreatorId = membership?.linkedCreatorId ?? null;
 
-  const [opportunities, agencyOpportunities, marketplaceOpportunities, sponsors, applications] =
+  const [opportunities, agencyOpportunities, marketplaceOpportunities, sponsors, applications, creator] =
     await Promise.all([
     isPortalUser ? Promise.resolve([]) : getOpportunities(),
     isPortalUser ? getAgencyOpenOpportunitiesForPortal() : Promise.resolve([]),
@@ -30,6 +32,9 @@ export default async function OpportunitiesPage() {
     isPortalUser && linkedCreatorId
       ? getApplicationsForCreator(linkedCreatorId)
       : getAllApplications(),
+    isPortalUser && linkedCreatorId
+      ? getCreatorById(linkedCreatorId)
+      : Promise.resolve(null),
   ]);
 
   const portalOpportunities = isPortalUser
@@ -37,6 +42,18 @@ export default async function OpportunitiesPage() {
     : opportunities;
 
   const applicationStats = getApplicationStats(applications);
+  const appliedOpportunityIds = new Set(
+    applications.map((application) => application.opportunityId)
+  );
+  const recommendedOpportunities =
+    isPortalUser && creator
+      ? getRecommendedOpportunitiesForCreator(
+          portalOpportunities,
+          appliedOpportunityIds,
+          creator,
+          50
+        )
+      : [];
 
   const pendingReviewCount = applicationStats.needsAction;
   const myApplicationCount = isPortalUser ? applicationStats.total : undefined;
@@ -61,6 +78,8 @@ export default async function OpportunitiesPage() {
         isPortalUser={isPortalUser}
         myApplicationCount={myApplicationCount}
         myPendingCount={myPendingCount}
+        portalCreator={creator}
+        recommendedOpportunities={recommendedOpportunities}
       />
     </DashboardLayout>
   );

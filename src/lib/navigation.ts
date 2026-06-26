@@ -25,7 +25,8 @@ export type NavIconName =
   | "bar-chart"
   | "user-cog"
   | "credit-card"
-  | "settings";
+  | "settings"
+  | "calendar";
 
 export interface NavItem {
   label: string;
@@ -74,6 +75,7 @@ export const navItems: NavItem[] = [
     showUnreadBadge: true,
     requiredFeature: navFeatureRequirements["/messages"],
   },
+  { label: "Schedule", href: "/schedule", icon: "calendar" },
   {
     label: "AI",
     href: "/ai",
@@ -98,6 +100,7 @@ export const navItems: NavItem[] = [
 
 export const portalNavItems: NavItem[] = [
   { label: "Home", href: "/portal", icon: "dashboard" },
+  { label: "Schedule", href: "/schedule", icon: "calendar" },
   { label: "My Profile", href: "/portal/profile", icon: "users" },
   {
     label: "Contracts",
@@ -117,6 +120,7 @@ export const portalNavItems: NavItem[] = [
 
 export const sponsorPortalNavItems: NavItem[] = [
   { label: "Home", href: "/portal", icon: "dashboard" },
+  { label: "Schedule", href: "/schedule", icon: "calendar" },
   { label: "Company", href: "/portal/profile", icon: "building" },
   {
     label: "Contracts",
@@ -211,6 +215,22 @@ export function getAccessibleNavItems(
           ...items.slice(0, contractsIndex + 1),
           deliverablesItem,
           ...items.slice(contractsIndex + 1),
+        ];
+      }
+    }
+
+    const growthItem: NavItem = {
+      label: "Growth",
+      href: "/portal/growth",
+      icon: "bar-chart",
+    };
+    if (!items.some((item) => item.href === "/portal/growth")) {
+      const homeIndex = items.findIndex((item) => item.href === "/portal");
+      if (homeIndex >= 0) {
+        items = [
+          ...items.slice(0, homeIndex + 1),
+          growthItem,
+          ...items.slice(homeIndex + 1),
         ];
       }
     }

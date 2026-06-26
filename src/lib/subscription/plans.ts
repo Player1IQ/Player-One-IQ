@@ -176,6 +176,7 @@ export const upgradePaths: Record<PlanCode, PlanCode[]> = {
 
 export function getDefaultPlanForOrgType(orgType: string): PlanCode {
   if (orgType === "Brand / Sponsor") return "sponsor";
+  if (orgType === "Creator / Player") return "free_creator";
   if (
     [
       "Gaming Agency",

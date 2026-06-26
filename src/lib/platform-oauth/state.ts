@@ -9,6 +9,8 @@ export interface OAuthStatePayload {
   platform: OAuthPlatform;
   nonce: string;
   issuedAt: number;
+  /** Relative app path to return to after OAuth, e.g. /onboarding?step=connect */
+  returnTo?: string;
   /** TikTok Login Kit requires PKCE; verifier is round-tripped in signed state. */
   pkceVerifier?: string;
 }
@@ -31,7 +33,7 @@ function getStateSecret(): string {
 export function createOAuthState(
   payload: Pick<
     OAuthStatePayload,
-    "creatorId" | "organizationId" | "platform" | "pkceVerifier"
+    "creatorId" | "organizationId" | "platform" | "pkceVerifier" | "returnTo"
   >
 ): string {
   const data: OAuthStatePayload = {

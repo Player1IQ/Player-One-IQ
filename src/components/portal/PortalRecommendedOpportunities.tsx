@@ -57,10 +57,10 @@ export function PortalRecommendedOpportunities({
           ))}
         </ul>
         <Link
-          href="/opportunities"
+          href="/opportunities?tab=recommended"
           className="inline-flex text-sm font-medium text-accent-light hover:text-white"
         >
-          Browse all opportunities
+          Browse recommended opportunities
         </Link>
       </CardContent>
     </Card>

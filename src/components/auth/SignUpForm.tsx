@@ -9,6 +9,8 @@ import { formatAuthError } from "@/lib/auth/errors";
 import { getErrorMessage } from "@/lib/safe-action";
 import { AuthInput } from "./AuthInput";
 import { InviteAuthBanner } from "./InviteAuthContext";
+import { SignupAccountTypePicker } from "./SignupAccountTypePicker";
+import type { SignupAccountType } from "@/lib/organization";
 
 function buildAuthQuery(params: {
   redirect?: string | null;
@@ -37,6 +39,7 @@ export function SignUpForm() {
   const [email, setEmail] = useState(inviteEmail ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [accountType, setAccountType] = useState<SignupAccountType>("creator");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
@@ -67,7 +70,9 @@ export function SignUpForm() {
       return;
     }
 
-    const nextPath = redirect ?? "/organization-setup";
+    const nextPath =
+      redirect ??
+      `/organization-setup?account=${inviteEmail ? "agency" : accountType}`;
 
     try {
       const { data, error: authError } = await supabase.auth.signUp({
@@ -123,8 +128,15 @@ export function SignUpForm() {
         </p>
       )}
 
+      {inviteEmail ? null : (
+        <SignupAccountTypePicker
+          value={accountType}
+          onChange={setAccountType}
+        />
+      )}
+
       <AuthInput
-        label="Work email"
+        label={accountType === "creator" ? "Email" : "Work email"}
         type="email"
         placeholder="you@company.com"
         value={email}

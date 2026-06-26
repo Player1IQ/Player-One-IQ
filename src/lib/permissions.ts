@@ -50,6 +50,30 @@ export async function getCurrentUserMembership(): Promise<CurrentUserMembership 
   const organizationId = await getOrganizationId();
   if (!organizationId) return null;
 
+  const { data: membership } = await supabase
+    .from("team_members")
+    .select("role, linked_creator_id, linked_sponsor_id")
+    .eq("organization_id", organizationId)
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  const memberRole = (membership?.role as TeamRole | undefined) ?? null;
+  const portalRole =
+    memberRole === "player" ||
+    memberRole === "content_creator" ||
+    memberRole === "sponsor"
+      ? memberRole
+      : null;
+
+  if (portalRole) {
+    return {
+      role: portalRole,
+      linkedCreatorId: membership?.linked_creator_id ?? null,
+      linkedSponsorId: membership?.linked_sponsor_id ?? null,
+    };
+  }
+
   const { data: ownedOrg } = await supabase
     .from("organizations")
     .select("id")
@@ -58,16 +82,15 @@ export async function getCurrentUserMembership(): Promise<CurrentUserMembership 
     .maybeSingle();
 
   if (ownedOrg) {
+    if (membership?.linked_creator_id || membership?.linked_sponsor_id) {
+      return {
+        role: (membership.role as TeamRole) ?? "owner",
+        linkedCreatorId: membership.linked_creator_id ?? null,
+        linkedSponsorId: membership.linked_sponsor_id ?? null,
+      };
+    }
     return { role: "owner", linkedCreatorId: null, linkedSponsorId: null };
   }
-
-  const { data: membership } = await supabase
-    .from("team_members")
-    .select("role, linked_creator_id, linked_sponsor_id")
-    .eq("organization_id", organizationId)
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .maybeSingle();
 
   if (!membership?.role) return null;
 
@@ -154,6 +177,22 @@ export async function requireResourceWriteAccess(
     };
   }
   return null;
+}
+
+export async function requireCreatorPlatformConnectAccess(
+  creatorId: string
+): Promise<{ error: string } | null> {
+  const membership = await getCurrentUserMembership();
+  if (membership && isCreatorPortalRole(membership.role)) {
+    if (membership.linkedCreatorId !== creatorId) {
+      return {
+        error: "You can only connect platforms on your own creator profile.",
+      };
+    }
+    return null;
+  }
+
+  return requireResourceWriteAccess("creators");
 }
 
 export function canPostDealRoomEvents(role: TeamRole | null): boolean {

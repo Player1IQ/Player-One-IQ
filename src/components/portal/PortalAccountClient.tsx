@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { ArrowLeft, Building2, Shield, User } from "lucide-react";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
+import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 
 interface PortalAccountClientProps {
@@ -72,6 +74,9 @@ export function PortalAccountClient({
           </div>
         </CardContent>
       </Card>
+
+      <ReplayOnboardingButton />
+      <ReplayPortalTourButton />
 
       <div className="flex justify-end">
         <SignOutButton />

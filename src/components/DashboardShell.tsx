@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { MessageNotificationBell } from "@/components/messages/MessageNotificationBell";
 import { PresenceHeartbeat } from "@/components/presence/PresenceHeartbeat";
+import { PortalGuidedTour } from "@/components/onboarding/PortalGuidedTour";
 import { Sidebar } from "./Sidebar";
 import type { FeatureKey } from "@/lib/subscription/types";
 import type { UserOrganization } from "@/lib/organization/queries";
 import type { TeamRole } from "@/lib/team";
+import type { PortalTourStep } from "@/lib/onboarding/types";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -21,6 +23,8 @@ interface DashboardShellProps {
   organizationName?: string;
   organizationLogoUrl?: string | null;
   teamRole?: TeamRole | null;
+  portalTourSteps?: PortalTourStep[];
+  portalTourEnabled?: boolean;
 }
 
 export function DashboardShell({
@@ -35,6 +39,8 @@ export function DashboardShell({
   organizationName,
   organizationLogoUrl,
   teamRole = null,
+  portalTourSteps = [],
+  portalTourEnabled = false,
 }: DashboardShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -94,6 +100,16 @@ export function DashboardShell({
         {header}
         <main className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
+
+      {portalTourSteps.length > 0 ? (
+        <Suspense fallback={null}>
+          <PortalGuidedTour
+            steps={portalTourSteps}
+            enabled={portalTourEnabled}
+            onRequestOpenNav={() => setMobileOpen(true)}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

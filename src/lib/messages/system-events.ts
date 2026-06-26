@@ -1,5 +1,5 @@
-import { applicationStatusLabels, type ApplicationStatus } from "@/lib/opportunities";
-import { contractStatusLabels, formatCurrency, type ContractStatus } from "@/lib/contracts";
+import { applicationStatusLabels, type ApplicationStatus } from "../opportunities/types";
+import { contractStatusLabels, formatCurrency, type ContractStatus } from "../contracts/types";
 
 export function dealRoomOpenedMessage(label: string): string {
   return `${label} deal room opened. Team members can collaborate here.`;

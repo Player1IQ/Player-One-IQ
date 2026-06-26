@@ -1,16 +1,16 @@
-import type { ConversationType } from "@/lib/messages";
+import type { ConversationType } from "./types";
 import { getContractById } from "@/lib/contracts/queries";
 import {
   contractStatusLabels,
   formatCurrency,
-} from "@/lib/contracts";
+} from "../contracts/types";
 import {
   getApplicationsForOpportunity,
   getOpportunityById,
 } from "@/lib/opportunities/queries";
 import {
   opportunityStatusLabels,
-} from "@/lib/opportunities";
+} from "../opportunities/types";
 
 export interface DealRoomContextDetail {
   label: string;

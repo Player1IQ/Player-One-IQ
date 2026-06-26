@@ -6,7 +6,7 @@ import {
   mapCampaignRow,
   type SponsorCampaign,
   type SponsorCampaignRow,
-} from "@/lib/campaigns";
+} from "./types";
 
 const campaignSelect = `
   *,

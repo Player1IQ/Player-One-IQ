@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireResourceWriteAccess } from "@/lib/permissions";
+import { requireCreatorPlatformConnectAccess } from "@/lib/permissions";
 import {
   isPlatformOAuthAvailable,
   isPlatformOAuthFeatureEnabled,
@@ -18,6 +18,21 @@ import { exchangeTwitchCode, getTwitchAuthorizeUrl } from "./twitch";
 import { exchangeYouTubeCode, getYouTubeAuthorizeUrl } from "./youtube";
 import { syncCreatorPlatformAccountById } from "./sync-account";
 import { getAppOrigin } from "@/lib/email/app-url";
+
+function appendQueryParam(base: string, key: string, value: string): string {
+  const separator = base.includes("?") ? "&" : "?";
+  return `${base}${separator}${key}=${encodeURIComponent(value)}`;
+}
+
+function sanitizeOAuthReturnTo(returnTo: string | null | undefined): string | null {
+  if (!returnTo) return null;
+  if (!returnTo.startsWith("/")) return null;
+  if (returnTo.startsWith("//")) return null;
+  if (!returnTo.startsWith("/onboarding") && !returnTo.startsWith("/portal") && !returnTo.startsWith("/creators")) {
+    return null;
+  }
+  return returnTo;
+}
 
 async function getAuthorizeUrl(
   platform: OAuthPlatform,
@@ -63,11 +78,6 @@ export async function handlePlatformOAuthStart(
   platform: OAuthPlatform,
   request: Request
 ) {
-  const permError = await requireResourceWriteAccess("creators");
-  if (permError) {
-    return NextResponse.json(permError, { status: 403 });
-  }
-
   if (!isPlatformOAuthFeatureEnabled()) {
     return NextResponse.json(
       { error: "Platform OAuth is not enabled yet." },
@@ -84,8 +94,14 @@ export async function handlePlatformOAuthStart(
 
   const { searchParams } = new URL(request.url);
   const creatorId = searchParams.get("creatorId");
+  const returnTo = sanitizeOAuthReturnTo(searchParams.get("returnTo"));
   if (!creatorId) {
     return NextResponse.json({ error: "creatorId is required." }, { status: 400 });
+  }
+
+  const permError = await requireCreatorPlatformConnectAccess(creatorId);
+  if (permError) {
+    return NextResponse.json(permError, { status: 403 });
   }
 
   const supabase = await createClient();
@@ -119,6 +135,7 @@ export async function handlePlatformOAuthStart(
     organizationId,
     platform,
     pkceVerifier: tiktokPkce?.codeVerifier,
+    returnTo: returnTo ?? undefined,
   });
 
   await supabase.from("creator_platform_accounts").upsert(
@@ -156,21 +173,29 @@ export async function handlePlatformOAuthCallback(
 
   const payload = state ? verifyOAuthState(state) : null;
   const creatorId = payload?.creatorId;
-  const redirectBase = creatorId ? `${origin}/creators/${creatorId}` : `${origin}/creators`;
+  const redirectBase = payload?.returnTo
+    ? `${origin}${payload.returnTo}`
+    : creatorId
+      ? `${origin}/creators/${creatorId}`
+      : `${origin}/creators`;
 
   if (oauthError) {
     return NextResponse.redirect(
-      `${redirectBase}?oauth_error=${encodeURIComponent(oauthError)}`
+      appendQueryParam(redirectBase, "oauth_error", oauthError)
     );
   }
 
   if (!code || !payload || payload.platform !== platform) {
-    return NextResponse.redirect(`${redirectBase}?oauth_error=invalid_state`);
+    return NextResponse.redirect(
+      appendQueryParam(redirectBase, "oauth_error", "invalid_state")
+    );
   }
 
   const supabase = await createClient();
   if (!supabase) {
-    return NextResponse.redirect(`${redirectBase}?oauth_error=supabase_not_configured`);
+    return NextResponse.redirect(
+      appendQueryParam(redirectBase, "oauth_error", "supabase_not_configured")
+    );
   }
 
   try {
@@ -207,11 +232,13 @@ export async function handlePlatformOAuthCallback(
 
     if ("error" in syncResult) {
       return NextResponse.redirect(
-        `${redirectBase}?oauth_error=${encodeURIComponent(syncResult.error)}`
+        appendQueryParam(redirectBase, "oauth_error", syncResult.error)
       );
     }
 
-    return NextResponse.redirect(`${redirectBase}?oauth_success=${platform}`);
+    return NextResponse.redirect(
+      appendQueryParam(redirectBase, "oauth_success", platform)
+    );
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Platform authorization failed.";
@@ -228,7 +255,7 @@ export async function handlePlatformOAuthCallback(
       .eq("platform", platform);
 
     return NextResponse.redirect(
-      `${redirectBase}?oauth_error=${encodeURIComponent(message)}`
+      appendQueryParam(redirectBase, "oauth_error", message)
     );
   }
 }

@@ -29,11 +29,11 @@ test("computeProfileReadiness scores zero when nothing is complete", () => {
     marketplaceCount: 3,
   });
 
-  assert.equal(readiness.items.length, 4);
+  assert.equal(readiness.items.length, 3);
   assert.equal(readiness.score, 0);
   assert.equal(
     readiness.items.some((item) => item.id === "apply_opportunity"),
-    true
+    false
   );
   assert.equal(
     readiness.items.some((item) => item.id === "complete_deliverable"),

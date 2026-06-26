@@ -40,6 +40,8 @@ import type { DashboardRevenueSummary } from "@/lib/revenue/summary";
 import { StatusBadge } from "@/components/creators/StatusBadge";
 import { CreatorAvatar } from "@/components/creators/CreatorAvatar";
 import { PresenceBadge } from "@/components/presence/PresenceBadge";
+import { TodayScheduleCard } from "@/components/schedule/TodayScheduleCard";
+import type { ScheduleEvent } from "@/lib/schedule";
 
 interface ActivityItem {
   id: string;
@@ -82,6 +84,7 @@ interface DashboardHomeClientProps {
   pendingApplications?: number;
   revenueTrend: RevenueTrendPoint[];
   creatorGrowth: CreatorGrowthPoint[];
+  todaySchedule?: ScheduleEvent[];
 }
 
 function activityLabel(
@@ -212,6 +215,7 @@ export function DashboardHomeClient({
   pendingApplications = 0,
   revenueTrend,
   creatorGrowth,
+  todaySchedule = [],
 }: DashboardHomeClientProps) {
   const hasRevenueTrend = revenueTrend.some(
     (point) => point.contract > 0 || point.platform > 0
@@ -266,7 +270,7 @@ export function DashboardHomeClient({
   ];
 
   return (
-    <div className="command-center-bg space-y-8 animate-fade-in pb-2">
+    <div className="command-center-bg space-y-8 animate-fade-in pb-2" data-tour-spot="dashboard-home">
       <CommandCenterHeader
         organizationName={organizationName}
         attentionCount={opsQueueItems.length}
@@ -454,7 +458,8 @@ export function DashboardHomeClient({
           title="Creators and activity"
           description="Roster highlights and recent workspace updates"
         />
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
+          <TodayScheduleCard events={todaySchedule} />
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
