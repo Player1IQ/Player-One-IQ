@@ -35,7 +35,7 @@ import { getCurrentUserMembership } from "@/lib/permissions";
 import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
-import { getTodayScheduleEvents } from "@/lib/schedule/queries";
+import { getTodayScheduleEvents, creatorHasScheduleBlocks } from "@/lib/schedule/queries";
 
 export default async function PortalHomePage() {
   const membership = await getCurrentUserMembership();
@@ -130,6 +130,7 @@ export default async function PortalHomePage() {
     platformAccounts,
     marketplaceOpportunities,
     todaySchedule,
+    hasScheduleBlock,
   ] = await Promise.all([
     getCreatorById(membership.linkedCreatorId),
     getContracts(),
@@ -147,6 +148,7 @@ export default async function PortalHomePage() {
     getCreatorPlatformAccounts(membership.linkedCreatorId),
     showOpportunities ? getMarketplaceOpportunities() : Promise.resolve([]),
     getTodayScheduleEvents(),
+    creatorHasScheduleBlocks(membership.linkedCreatorId),
   ]);
 
   if (!creator) {
@@ -171,7 +173,8 @@ export default async function PortalHomePage() {
     opportunityApplications,
     deliverableMetrics,
     marketplaceOpportunities,
-    openOpportunities
+    openOpportunities,
+    hasScheduleBlock
   );
 
   return (

@@ -60,6 +60,26 @@ export async function getTodayScheduleEvents(
   return filterEventsForDay(events, now);
 }
 
+export async function creatorHasScheduleBlocks(
+  creatorId: string
+): Promise<boolean> {
+  const supabase = await createClient();
+  if (!supabase) return false;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return false;
+
+  const { count, error } = await supabase
+    .from("schedule_event_participants")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .eq("creator_id", creatorId)
+    .eq("role", "organizer");
+
+  if (error) return false;
+  return (count ?? 0) > 0;
+}
+
 export async function getScheduleEventById(
   id: string
 ): Promise<ScheduleEvent | null> {

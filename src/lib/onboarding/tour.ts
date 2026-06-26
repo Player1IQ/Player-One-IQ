@@ -57,6 +57,13 @@ const creatorTour: OnboardingTourItem[] = [
     icon: "message-square",
   },
   {
+    title: "Schedule",
+    description:
+      "Block time when you are unavailable and see meetings you are invited to.",
+    href: "/schedule",
+    icon: "calendar",
+  },
+  {
     title: "My profile",
     description:
       "Update your bio, availability, social handles, and platform connections anytime.",
@@ -114,6 +121,13 @@ const agencyTour: OnboardingTourItem[] = [
       "Keep deal conversations in sync with creators, sponsors, and your team.",
     href: "/messages",
     icon: "message-square",
+  },
+  {
+    title: "Schedule",
+    description:
+      "Plan meetings, practice sessions, and see creator availability at a glance.",
+    href: "/schedule",
+    icon: "calendar",
   },
 ];
 

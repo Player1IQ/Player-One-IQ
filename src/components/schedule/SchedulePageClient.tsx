@@ -315,7 +315,7 @@ export function SchedulePageClient({
     startTransition(async () => {
       try {
         const result = await deleteScheduleEvent(event.id);
-        if (result.error) {
+        if ("error" in result && result.error) {
           setError(result.error);
           return;
         }

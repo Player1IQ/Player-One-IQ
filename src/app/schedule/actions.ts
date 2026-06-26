@@ -53,26 +53,13 @@ async function notifyParticipants(
 ) {
   if (participantUserIds.length === 0) return;
 
-  const startDisplay = new Date(startsAt).toLocaleString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+  await supabase.rpc("insert_schedule_notifications", {
+    p_organization_id: organizationId,
+    p_event_id: eventId,
+    p_title: title,
+    p_starts_at: startsAt,
+    p_user_ids: participantUserIds,
   });
-
-  const rows = participantUserIds.map((userId) => ({
-    organization_id: organizationId,
-    user_id: userId,
-    notification_type: "schedule",
-    title: "New schedule event",
-    body: `${title} — ${startDisplay}`,
-    link: "/schedule",
-    entity_type: "schedule_event",
-    entity_id: eventId,
-  }));
-
-  await supabase.from("user_notifications").insert(rows);
 }
 
 async function resolveCreatorUserIds(
@@ -143,52 +130,35 @@ export async function createScheduleEvent(input: ScheduleEventInput) {
     starts_at: input.startsAt,
   };
 
-  const participantRows: Array<{
-    event_id: string;
-    organization_id: string;
-    user_id?: string;
-    creator_id?: string;
-    role: string;
-  }> = [];
+  const userIds = Array.from(
+    new Set(input.participantUserIds ?? []).values()
+  ).filter((userId) => userId !== user.id);
+  const creatorIds = input.participantCreatorIds ?? [];
 
-  const userIds = new Set<string>(input.participantUserIds ?? []);
-  for (const userId of userIds) {
-    if (userId === user.id) continue;
-    participantRows.push({
-      event_id: event.id,
-      organization_id: organizationId,
-      user_id: userId,
-      role: "attendee",
-    });
-  }
-
-  for (const creatorId of input.participantCreatorIds ?? []) {
-    participantRows.push({
-      event_id: event.id,
-      organization_id: organizationId,
-      creator_id: creatorId,
-      role: "attendee",
-    });
-  }
-
-  const { error: participantError } = await supabase
-    .from("schedule_event_participants")
-    .insert(participantRows);
+  const { error: participantError } = await supabase.rpc(
+    "sync_schedule_event_participants",
+    {
+      p_event_id: event.id,
+      p_organization_id: organizationId,
+      p_user_ids: userIds,
+      p_creator_ids: creatorIds,
+    }
+  );
 
   if (participantError) {
-    await supabase.from("schedule_events").delete().eq("id", event.id);
+    await supabase.rpc("delete_schedule_event", {
+      p_event_id: event.id,
+      p_organization_id: organizationId,
+    });
     return { error: participantError.message };
   }
 
   const creatorUserIds = await resolveCreatorUserIds(
     supabase,
     organizationId,
-    input.participantCreatorIds ?? []
+    creatorIds
   );
-  const notifyUserIds = [
-    ...Array.from(userIds).filter((id) => id !== user.id),
-    ...creatorUserIds,
-  ];
+  const notifyUserIds = [...userIds, ...creatorUserIds];
 
   await notifyParticipants(
     supabase,
@@ -346,59 +316,47 @@ export async function updateScheduleEvent(
     return { error: "Portal users can only manage blocked time." };
   }
 
-  const { error: updateError } = await supabase
-    .from("schedule_events")
-    .update({
-      title: input.title.trim(),
-      description: input.description?.trim() || null,
-      event_type: input.eventType,
-      starts_at: input.startsAt,
-      ends_at: input.endsAt,
-      all_day: input.allDay ?? false,
-      location: input.location?.trim() || null,
-      color: input.color ?? null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id);
+  const sessionError = await ensureAuthenticatedSession(supabase);
+  if (sessionError) return sessionError;
+
+  if (isOwnBlock) {
+    return updateCreatorBlock(id, {
+      title: input.title,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      allDay: input.allDay,
+    });
+  }
+
+  const { error: updateError } = await supabase.rpc("update_org_schedule_event", {
+    p_event_id: id,
+    p_organization_id: organizationId,
+    p_title: input.title.trim(),
+    p_description: input.description?.trim() || null,
+    p_event_type: input.eventType,
+    p_starts_at: input.startsAt,
+    p_ends_at: input.endsAt,
+    p_all_day: input.allDay ?? false,
+    p_location: input.location?.trim() || null,
+    p_color: input.color ?? null,
+  });
 
   if (updateError) return { error: updateError.message };
 
-  if (canManage) {
-    await supabase
-      .from("schedule_event_participants")
-      .delete()
-      .eq("event_id", id)
-      .neq("role", "organizer");
+  const userIds = input.participantUserIds ?? [];
+  const creatorIds = input.participantCreatorIds ?? [];
 
-    const rows: Array<{
-      event_id: string;
-      organization_id: string;
-      user_id?: string;
-      creator_id?: string;
-      role: string;
-    }> = [];
+  const { error: participantError } = await supabase.rpc(
+    "sync_schedule_event_participants",
+    {
+      p_event_id: id,
+      p_organization_id: organizationId,
+      p_user_ids: userIds,
+      p_creator_ids: creatorIds,
+    }
+  );
 
-    for (const userId of input.participantUserIds ?? []) {
-      rows.push({
-        event_id: id,
-        organization_id: organizationId,
-        user_id: userId,
-        role: "attendee",
-      });
-    }
-    for (const creatorId of input.participantCreatorIds ?? []) {
-      rows.push({
-        event_id: id,
-        organization_id: organizationId,
-        creator_id: creatorId,
-        role: "attendee",
-      });
-    }
-
-    if (rows.length > 0) {
-      await supabase.from("schedule_event_participants").insert(rows);
-    }
-  }
+  if (participantError) return { error: participantError.message };
 
   revalidatePath("/schedule");
   revalidatePath("/");
@@ -436,11 +394,13 @@ export async function deleteScheduleEvent(id: string) {
     return { error: "You do not have permission to delete this event." };
   }
 
-  const { error } = await supabase
-    .from("schedule_events")
-    .delete()
-    .eq("id", id)
-    .eq("organization_id", organizationId);
+  const sessionError = await ensureAuthenticatedSession(supabase);
+  if (sessionError) return sessionError;
+
+  const { error } = await supabase.rpc("delete_schedule_event", {
+    p_event_id: id,
+    p_organization_id: organizationId,
+  });
 
   if (error) return { error: error.message };
 

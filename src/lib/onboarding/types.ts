@@ -28,6 +28,7 @@ export interface OnboardingTourItem {
     | "file-text"
     | "message-square"
     | "bar-chart"
+    | "calendar"
     | "sparkles"
     | "user-cog";
 }

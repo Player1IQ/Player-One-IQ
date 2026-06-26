@@ -29,7 +29,7 @@ test("computeProfileReadiness scores zero when nothing is complete", () => {
     marketplaceCount: 3,
   });
 
-  assert.equal(readiness.items.length, 3);
+  assert.equal(readiness.items.length, 4);
   assert.equal(readiness.score, 0);
   assert.equal(
     readiness.items.some((item) => item.id === "apply_opportunity"),
@@ -52,6 +52,7 @@ test("computeProfileReadiness reaches 100 when all applicable items are done", (
     applicationCount: 1,
     openDeliverableCount: 0,
     marketplaceCount: 5,
+    hasScheduleBlock: true,
   });
 
   assert.equal(readiness.score, 100);
@@ -80,7 +81,7 @@ test("computeProfileReadiness includes deliverable item when work is open", () =
   assert.ok(deliverableItem);
   assert.equal(deliverableItem.done, false);
   assert.equal(deliverableItem.href, "/contracts");
-  assert.equal(readiness.score, 75);
+  assert.equal(readiness.score, 60);
 });
 
 test("computeProfileReadiness marks marketplace browse done when no listings exist", () => {

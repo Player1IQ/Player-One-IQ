@@ -43,6 +43,7 @@ export interface ComputeProfileReadinessInput {
   applicationCount: number;
   openDeliverableCount: number;
   marketplaceCount: number;
+  hasScheduleBlock?: boolean;
 }
 
 export function computeProfileReadiness({
@@ -52,6 +53,7 @@ export function computeProfileReadiness({
   applicationCount,
   openDeliverableCount,
   marketplaceCount,
+  hasScheduleBlock = false,
 }: ComputeProfileReadinessInput): ProfileReadiness {
   const profileHref = `/creators/${creatorId}`;
   const hasContactInfo =
@@ -75,6 +77,12 @@ export function computeProfileReadiness({
       label: "Browse the open marketplace",
       done: applicationCount > 0 || marketplaceCount === 0,
       href: "/opportunities?tab=marketplace",
+    },
+    {
+      id: "block_schedule",
+      label: "Block time on your calendar",
+      done: hasScheduleBlock,
+      href: "/schedule",
     },
   ];
 
@@ -103,7 +111,8 @@ export async function getCreatorPortalBenefits(
   applications: OpportunityApplication[],
   deliverableMetrics: PortalDeliverableMetrics,
   marketplaceOpportunities?: Opportunity[],
-  openOpportunities?: Opportunity[]
+  openOpportunities?: Opportunity[],
+  hasScheduleBlock = false
 ): Promise<CreatorPortalBenefits> {
   const creatorContracts = contracts.filter(
     (contract) => contract.creatorId === creatorId
@@ -143,6 +152,7 @@ export async function getCreatorPortalBenefits(
       applicationCount: applicationStats.total,
       openDeliverableCount: deliverableMetrics.openCount,
       marketplaceCount: marketplace.length,
+      hasScheduleBlock,
     }),
   };
 }
