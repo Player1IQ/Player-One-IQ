@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { getOrganizationId } from "@/lib/organization/queries";
+import { getAppOrigin } from "@/lib/email/app-url";
+import { sendScheduleInviteEmail } from "@/lib/email/schedule-invite";
+import { getOrganizationForUser, getOrganizationId } from "@/lib/organization/queries";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import {
   scheduleEventTypes,
@@ -80,6 +82,89 @@ async function resolveCreatorUserIds(
   return (data ?? [])
     .map((row) => row.user_id)
     .filter((id): id is string => Boolean(id));
+}
+
+async function resolveParticipantEmails(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  organizationId: string,
+  userIds: string[],
+  creatorIds: string[]
+): Promise<string[]> {
+  const emails = new Set<string>();
+
+  if (userIds.length > 0) {
+    const { data } = await supabase
+      .from("team_members")
+      .select("email")
+      .eq("organization_id", organizationId)
+      .in("user_id", userIds)
+      .not("email", "is", null);
+
+    for (const row of data ?? []) {
+      if (row.email?.trim()) emails.add(row.email.trim().toLowerCase());
+    }
+  }
+
+  if (creatorIds.length > 0) {
+    const [{ data: creators }, { data: linkedMembers }] = await Promise.all([
+      supabase
+        .from("creators")
+        .select("email")
+        .eq("organization_id", organizationId)
+        .in("id", creatorIds)
+        .not("email", "is", null),
+      supabase
+        .from("team_members")
+        .select("email")
+        .eq("organization_id", organizationId)
+        .eq("status", "active")
+        .in("linked_creator_id", creatorIds)
+        .not("email", "is", null),
+    ]);
+
+    for (const row of creators ?? []) {
+      if (row.email?.trim()) emails.add(row.email.trim().toLowerCase());
+    }
+    for (const row of linkedMembers ?? []) {
+      if (row.email?.trim()) emails.add(row.email.trim().toLowerCase());
+    }
+  }
+
+  return Array.from(emails);
+}
+
+async function emailScheduleInvites(params: {
+  organizationName: string;
+  organizerEmail?: string | null;
+  eventTitle: string;
+  eventType: ScheduleEventInput["eventType"];
+  startsAt: string;
+  endsAt: string;
+  allDay?: boolean;
+  location?: string | null;
+  recipientEmails: string[];
+}) {
+  if (params.recipientEmails.length === 0) return;
+
+  const origin = await getAppOrigin();
+  const scheduleUrl = `${origin}/schedule`;
+
+  await Promise.all(
+    params.recipientEmails.map((to) =>
+      sendScheduleInviteEmail({
+        to,
+        scheduleUrl,
+        organizationName: params.organizationName,
+        eventTitle: params.eventTitle,
+        eventType: params.eventType,
+        startsAt: params.startsAt,
+        endsAt: params.endsAt,
+        allDay: params.allDay,
+        location: params.location,
+        organizerEmail: params.organizerEmail,
+      })
+    )
+  );
 }
 
 export async function createScheduleEvent(input: ScheduleEventInput) {
@@ -168,6 +253,30 @@ export async function createScheduleEvent(input: ScheduleEventInput) {
     event.starts_at,
     [...new Set(notifyUserIds)]
   );
+
+  const organization = await getOrganizationForUser();
+  const recipientEmails = await resolveParticipantEmails(
+    supabase,
+    organizationId,
+    userIds,
+    creatorIds
+  );
+  const organizerEmail = user.email?.toLowerCase();
+  const filteredEmails = recipientEmails.filter(
+    (email) => email !== organizerEmail
+  );
+
+  await emailScheduleInvites({
+    organizationName: organization?.name ?? "Your organization",
+    organizerEmail: user.email,
+    eventTitle: input.title.trim(),
+    eventType: input.eventType,
+    startsAt: input.startsAt,
+    endsAt: input.endsAt,
+    allDay: input.allDay,
+    location: input.location?.trim() || null,
+    recipientEmails: filteredEmails,
+  });
 
   revalidatePath("/schedule");
   revalidatePath("/");

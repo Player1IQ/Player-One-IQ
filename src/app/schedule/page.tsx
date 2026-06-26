@@ -9,11 +9,17 @@ import {
 import { getWeekStart } from "@/lib/schedule/helpers";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import { canAccessStaffDashboard, isCreatorPortalRole } from "@/lib/team";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function SchedulePage() {
+  const supabase = await createClient();
   const membership = await getCurrentUserMembership();
   const isStaff = await canManageOrgSchedule();
   const isCreatorPortal = await canCreateCreatorBlocks();
+
+  const {
+    data: { user },
+  } = (await supabase?.auth.getUser()) ?? { data: { user: null } };
 
   const anchor = new Date();
   const rangeStart = getWeekStart(anchor);
@@ -48,6 +54,7 @@ export default async function SchedulePage() {
         isStaff={isStaff}
         isCreatorPortal={isCreatorPortal}
         linkedCreatorId={membership?.linkedCreatorId ?? null}
+        currentUserId={user?.id ?? null}
         participantOptions={participantOptions}
       />
     </DashboardLayout>

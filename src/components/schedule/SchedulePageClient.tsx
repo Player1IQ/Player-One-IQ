@@ -49,6 +49,7 @@ interface SchedulePageClientProps {
   isStaff: boolean;
   isCreatorPortal: boolean;
   linkedCreatorId?: string | null;
+  currentUserId?: string | null;
   participantOptions?: ScheduleParticipantOption[];
 }
 
@@ -136,16 +137,51 @@ function formStateFromEvent(event: ScheduleEvent): EventFormState {
   };
 }
 
-function getCreatorParticipation(
+function getEventParticipation(
   event: ScheduleEvent,
-  linkedCreatorId: string | null | undefined
+  linkedCreatorId: string | null | undefined,
+  currentUserId: string | null | undefined
 ): ScheduleParticipant | null {
-  if (!linkedCreatorId || event.isBlock) return null;
+  if (event.isBlock) return null;
+
+  if (currentUserId) {
+    const userParticipation = event.participants.find(
+      (participant) =>
+        participant.userId === currentUserId && participant.role !== "organizer"
+    );
+    if (userParticipation) return userParticipation;
+  }
+
+  if (!linkedCreatorId) return null;
   return (
     event.participants.find(
-      (participant) => participant.creatorId === linkedCreatorId
+      (participant) =>
+        participant.creatorId === linkedCreatorId &&
+        participant.role !== "organizer"
     ) ?? null
   );
+}
+
+function formatAttendeeResponses(event: ScheduleEvent): string | null {
+  const attendees = event.participants.filter(
+    (participant) => participant.role !== "organizer"
+  );
+  if (attendees.length === 0) return null;
+
+  const accepted = attendees.filter(
+    (participant) => participant.responseStatus === "accepted"
+  ).length;
+  const declined = attendees.filter(
+    (participant) => participant.responseStatus === "declined"
+  ).length;
+  const pending = attendees.length - accepted - declined;
+
+  const parts: string[] = [];
+  if (accepted > 0) parts.push(`${accepted} accepted`);
+  if (pending > 0) parts.push(`${pending} pending`);
+  if (declined > 0) parts.push(`${declined} declined`);
+
+  return parts.join(" · ");
 }
 
 export function SchedulePageClient({
@@ -155,6 +191,7 @@ export function SchedulePageClient({
   isStaff,
   isCreatorPortal,
   linkedCreatorId = null,
+  currentUserId = null,
   participantOptions = [],
 }: SchedulePageClientProps) {
   const router = useRouter();
@@ -546,10 +583,14 @@ export function SchedulePageClient({
             ) : (
               <ul className="space-y-2">
                 {dayEvents.map((event) => {
-                  const participation = getCreatorParticipation(
+                  const participation = getEventParticipation(
                     event,
-                    linkedCreatorId
+                    linkedCreatorId,
+                    currentUserId
                   );
+                  const responseSummary = isStaff
+                    ? formatAttendeeResponses(event)
+                    : null;
                   const canEdit = isStaff || event.isBlock;
 
                   return (
@@ -585,6 +626,11 @@ export function SchedulePageClient({
                         {event.location ? (
                           <p className="mt-1 text-xs text-gray-600">
                             {event.location}
+                          </p>
+                        ) : null}
+                        {responseSummary ? (
+                          <p className="mt-1 text-xs text-gray-600">
+                            {responseSummary}
                           </p>
                         ) : null}
                         {event.participants.length > 0 && isStaff ? (
