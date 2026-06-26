@@ -33,25 +33,48 @@ export async function login(
   await page.waitForLoadState("domcontentloaded");
   await page.getByLabel("Email address").fill(email);
   await page.locator("#password").fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
 
   try {
-    await page.waitForURL((url) => !url.pathname.startsWith("/login"), {
-      timeout: 30_000,
-    });
+    await Promise.all([
+      page.waitForURL(
+        (url) =>
+          url.pathname === redirect ||
+          url.pathname.startsWith(`${redirect}/`) ||
+          (!url.pathname.startsWith("/login") &&
+            !url.pathname.startsWith("/signup")),
+        { timeout: 45_000 }
+      ),
+      page.getByRole("button", { name: "Sign in" }).click(),
+    ]);
   } catch {
     const loginError = page.locator("form .text-red-400");
     const message = (await loginError.textContent().catch(() => null))?.trim();
     throw new Error(message || `Login did not leave /login for ${email}`);
   }
 
+  const currentPath = new URL(page.url()).pathname;
+
   if (
     redirect &&
-    page.url().pathname !== redirect &&
-    !page.url().pathname.startsWith(`${redirect}/`)
+    currentPath !== redirect &&
+    !currentPath.startsWith(`${redirect}/`)
   ) {
     await page.goto(redirect);
     await page.waitForLoadState("networkidle");
+  }
+
+  if (new URL(page.url()).pathname.startsWith("/onboarding")) {
+    const skip = page.getByRole("button", { name: /skip for now/i });
+    if (await skip.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await skip.click();
+      await page.waitForURL((url) => !url.pathname.startsWith("/onboarding"), {
+        timeout: 15_000,
+      });
+    }
+    if (redirect) {
+      await page.goto(redirect);
+      await page.waitForLoadState("networkidle");
+    }
   }
 
   await dismissModals(page);

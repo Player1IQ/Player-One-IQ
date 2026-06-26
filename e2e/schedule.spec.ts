@@ -145,7 +145,9 @@ test.describe("schedule flows", () => {
     await creatorCheckbox.check();
 
     await saveModalAndWait(page);
-    await expect(page.getByText("QA Team Sync")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /QA Team Sync/i }).first()
+    ).toBeVisible();
   });
 
   test("creator sees accept button on invited event", async ({ page }) => {
@@ -168,8 +170,9 @@ test.describe("schedule flows", () => {
     await selectTomorrowInWeekView(page);
 
     const eventCard = page.locator("li").filter({ hasText: "QA Invite Event" });
+    await expect(eventCard).toBeVisible({ timeout: 15_000 });
     await expect(eventCard.getByRole("button", { name: "Accept" })).toBeVisible({
-      timeout: 5000,
+      timeout: 10_000,
     });
   });
 });

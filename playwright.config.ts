@@ -31,6 +31,12 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
+  webServer: {
+    command: process.env.CI ? "npm run build && npm run start" : "npm run dev",
+    url: `${baseURL}/api/health`,
+    reuseExistingServer: !process.env.CI,
+    timeout: 180_000,
+  },
   projects: [
     {
       name: "chromium",

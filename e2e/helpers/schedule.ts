@@ -44,17 +44,25 @@ export async function fillDateTimeRange(
 }
 
 export async function saveModalAndWait(page: Page) {
-  await page.getByRole("button", { name: "Save" }).click();
-  await page.waitForTimeout(500);
-  const modalError = page.locator("form .text-red-400");
-  if (await modalError.isVisible({ timeout: 1000 }).catch(() => false)) {
-    const msg = await modalError.textContent();
-    throw new Error(msg ?? "Save failed");
-  }
-  await page.getByRole("heading", { name: /Block time|New event|Edit event/ }).waitFor({
-    state: "hidden",
-    timeout: 10000,
+  const modalHeading = page.getByRole("heading", {
+    name: /Block time|New event|Edit event/,
   });
-  await page.waitForLoadState("networkidle");
-  await page.waitForTimeout(1000);
+  const saveButton = page.getByRole("button", { name: "Save" });
+
+  await saveButton.click();
+
+  const modalError = page.locator("form .text-red-400");
+  for (let attempt = 0; attempt < 60; attempt++) {
+    if (await modalError.isVisible().catch(() => false)) {
+      const msg = await modalError.textContent();
+      throw new Error(msg?.trim() || "Save failed");
+    }
+    if (!(await modalHeading.isVisible().catch(() => false))) {
+      await page.waitForLoadState("networkidle").catch(() => undefined);
+      return;
+    }
+    await page.waitForTimeout(500);
+  }
+
+  throw new Error("Modal did not close after save");
 }

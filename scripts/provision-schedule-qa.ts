@@ -32,6 +32,10 @@ loadEnvLocal();
 const QA_ORG_NAME = "QA Schedule Agency";
 const QA_CREATOR_NOTES = "QA_SCHEDULE";
 const DEFAULT_PASSWORD = "ScheduleQa!2026";
+/** Avoid forced onboarding redirect (72h recent-workspace window). */
+const QA_SEASONED_JOINED_AT = new Date(
+  Date.now() - 4 * 24 * 60 * 60 * 1000
+).toISOString();
 
 const args = process.argv.slice(2);
 const cleanup = args.includes("--cleanup");
@@ -324,7 +328,7 @@ async function provision() {
     role: "content_creator",
     linked_creator_id: creatorRow.id,
     status: "active",
-    joined_at: new Date().toISOString(),
+    joined_at: QA_SEASONED_JOINED_AT,
   });
 
   if (creatorMemberError) {
@@ -344,10 +348,15 @@ async function provision() {
     email: emails.member,
     role: "member",
     status: "active",
-    joined_at: new Date().toISOString(),
+    joined_at: QA_SEASONED_JOINED_AT,
   });
 
   if (memberError) throw new Error(`insert member team_member: ${memberError.message}`);
+
+  await supabase
+    .from("team_members")
+    .update({ joined_at: QA_SEASONED_JOINED_AT })
+    .eq("organization_id", orgId);
 
   const credentials = {
     password,
