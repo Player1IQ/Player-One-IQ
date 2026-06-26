@@ -143,7 +143,7 @@ test.describe("contract payout flows", () => {
     await expect(payoutSection.getByText("Reference: WIRE-QA-001")).toBeVisible();
   });
 
-  test.fixme("sponsor portal user can record external payment", async ({ page }) => {
+  test("sponsor portal user can record external payment", async ({ page }) => {
     const contractPath = `/contracts/${credentials.contract.id}`;
 
     if (!supabaseUrl || !serviceRoleKey) return;

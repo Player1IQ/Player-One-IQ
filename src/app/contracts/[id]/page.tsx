@@ -36,8 +36,8 @@ export default async function ContractDetailPage({
   const [contract, creators, sponsors, deliverables, subscription, dealRoomConversationId, contractPayment] =
     await Promise.all([
       getContractById(id),
-      getCreators(),
-      getSponsors(),
+      isPortalUser ? Promise.resolve([]) : getCreators(),
+      isPortalUser ? Promise.resolve([]) : getSponsors(),
       getDeliverablesForContract(id),
       getSubscriptionContext(),
       findConversationByRelated("contract", id),
@@ -53,11 +53,11 @@ export default async function ContractDetailPage({
   }
 
   if (isCreatorPortalRole(role) && membership?.linkedCreatorId === contract.creatorId) {
-    await syncPortalUserToContractDealRooms(contract.creatorId);
+    void syncPortalUserToContractDealRooms(contract.creatorId);
   }
 
   if (isSponsorPortalRole(role) && membership?.linkedSponsorId === contract.sponsorId) {
-    await syncPortalUserToSponsorDealRooms(contract.sponsorId);
+    void syncPortalUserToSponsorDealRooms(contract.sponsorId);
   }
 
   const resolvedDealRoomConversationId = isPortalUser
