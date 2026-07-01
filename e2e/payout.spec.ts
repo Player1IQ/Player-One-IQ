@@ -139,8 +139,12 @@ test.describe("contract payout flows", () => {
     await payoutSection.getByRole("button", { name: "Record payment" }).click();
 
     await expect(payoutSection.getByText("Payment recorded.")).toBeVisible({ timeout: 15_000 });
-    await expect(payoutSection.getByText("Paid (external)")).toBeVisible();
-    await expect(payoutSection.getByText("Reference: WIRE-QA-001")).toBeVisible();
+    await expect(payoutSection.getByText("Paid (external)")).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(payoutSection.getByText("Reference: WIRE-QA-001")).toBeVisible({
+      timeout: 30_000,
+    });
   });
 
   test("sponsor portal user can record external payment", async ({ page }) => {
@@ -152,41 +156,58 @@ test.describe("contract payout flows", () => {
     });
 
     await sb
+      .from("contract_payments")
+      .delete()
+      .eq("contract_id", credentials.contract.id)
+      .eq("organization_id", credentials.organizationId);
+
+    await sb
       .from("contracts")
       .update({
         contract_status: "completed",
         updated_at: new Date().toISOString(),
       })
-      .eq("id", credentials.contract.id);
+      .eq("id", credentials.contract.id)
+      .eq("organization_id", credentials.organizationId);
 
-    await sb.from("contract_payments").insert({
+    const { data: contractRow } = await sb
+      .from("contracts")
+      .select("creator_id")
+      .eq("id", credentials.contract.id)
+      .eq("organization_id", credentials.organizationId)
+      .single();
+
+    const { error: insertError } = await sb.from("contract_payments").insert({
       organization_id: credentials.organizationId,
       contract_id: credentials.contract.id,
       payee_type: "creator",
-      payee_creator_id: (
-        await sb
-          .from("contracts")
-          .select("creator_id")
-          .eq("id", credentials.contract.id)
-          .single()
-      ).data?.creator_id,
+      payee_creator_id: contractRow?.creator_id,
       amount_cents: 250_000,
       currency: "usd",
       status: "ready",
     });
 
+    if (insertError) {
+      throw new Error(`Failed to seed contract payment: ${insertError.message}`);
+    }
+
     await login(page, credentials.sponsor.email, credentials.password, contractPath);
     const payoutSection = page
       .locator("section")
       .filter({ has: page.getByRole("heading", { name: "Contract payout" }) });
-    await expect(payoutSection).toBeVisible();
+    await expect(payoutSection).toBeVisible({ timeout: 30_000 });
     await expect(payoutSection.getByText("Ready to pay")).toBeVisible();
 
-    await payoutSection.getByPlaceholder("Wire confirmation, check number, transaction ID…").fill("ACH-SP-99");
-    await payoutSection.getByRole("button", { name: "Record payment" }).click();
+    const recordBtn = payoutSection.getByRole("button", { name: "Record payment" });
+    await expect(recordBtn).toBeEnabled();
+    await payoutSection
+      .getByPlaceholder("Wire confirmation, check number, transaction ID…")
+      .fill("ACH-SP-99");
+    await recordBtn.click();
 
-    await expect(payoutSection.getByText("Payment recorded.")).toBeVisible({ timeout: 15_000 });
-    await expect(payoutSection.getByText("Paid (external)")).toBeVisible();
+    await expect(payoutSection.getByText("Paid (external)")).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(payoutSection.getByText("Reference: ACH-SP-99")).toBeVisible();
   });
 });

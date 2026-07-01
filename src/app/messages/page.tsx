@@ -23,12 +23,16 @@ export default async function MessagesPage() {
   const membership = await getCurrentUserMembership();
 
   if (isCreatorPortalRole(membership?.role ?? null) && membership?.linkedCreatorId) {
-    void syncPortalUserToContractDealRooms(membership.linkedCreatorId);
+    void syncPortalUserToContractDealRooms(membership.linkedCreatorId, undefined, {
+      revalidate: false,
+    });
   } else if (
     isSponsorPortalRole(membership?.role ?? null) &&
     membership?.linkedSponsorId
   ) {
-    void syncPortalUserToSponsorDealRooms(membership.linkedSponsorId);
+    void syncPortalUserToSponsorDealRooms(membership.linkedSponsorId, undefined, {
+      revalidate: false,
+    });
   }
 
   const [conversations, users, currentUserId] = await Promise.all([

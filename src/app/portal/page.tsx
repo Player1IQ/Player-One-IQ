@@ -66,9 +66,9 @@ export default async function PortalHomePage() {
     ] = await Promise.all([
       getSponsorById(membership.linkedSponsorId),
       getContracts(),
-      syncPortalUserToSponsorDealRooms(membership.linkedSponsorId).then(() =>
-        getUnreadMessageCount()
-      ),
+      syncPortalUserToSponsorDealRooms(membership.linkedSponsorId, undefined, {
+        revalidate: false,
+      }).then(() => getUnreadMessageCount()),
       getOrganizationForUser(),
       getCampaigns(),
       getSponsorPortalDeliverableMetrics(membership.linkedSponsorId),

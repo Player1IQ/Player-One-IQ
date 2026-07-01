@@ -53,11 +53,15 @@ export default async function ContractDetailPage({
   }
 
   if (isCreatorPortalRole(role) && membership?.linkedCreatorId === contract.creatorId) {
-    void syncPortalUserToContractDealRooms(contract.creatorId);
+    void syncPortalUserToContractDealRooms(contract.creatorId, undefined, {
+      revalidate: false,
+    });
   }
 
   if (isSponsorPortalRole(role) && membership?.linkedSponsorId === contract.sponsorId) {
-    void syncPortalUserToSponsorDealRooms(contract.sponsorId);
+    void syncPortalUserToSponsorDealRooms(contract.sponsorId, undefined, {
+      revalidate: false,
+    });
   }
 
   const resolvedDealRoomConversationId = isPortalUser

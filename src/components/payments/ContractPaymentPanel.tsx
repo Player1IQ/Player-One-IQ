@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { CreditCard, Loader2 } from "lucide-react";
 import type { ContractPayment } from "@/lib/payments/types";
 import { contractPaymentStatusLabels } from "@/lib/payments/types";
@@ -35,6 +36,7 @@ export function ContractPaymentPanel({
   payment,
   canRecordPayment,
 }: ContractPaymentPanelProps) {
+  const router = useRouter();
   const [reference, setReference] = useState("");
   const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("");
@@ -65,6 +67,7 @@ export function ContractPaymentPanel({
       setMessage("Payment recorded.");
       setReference("");
       setNotes("");
+      router.refresh();
     });
   }
 

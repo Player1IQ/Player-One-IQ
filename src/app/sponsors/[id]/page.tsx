@@ -46,7 +46,7 @@ export default async function SponsorDetailPage({
     isSponsorPortalRole(membership?.role ?? null) &&
     membership?.linkedSponsorId === id
   ) {
-    void syncPortalUserToSponsorDealRooms(id);
+    void syncPortalUserToSponsorDealRooms(id, undefined, { revalidate: false });
   }
 
   const canViewCampaigns = hasFeature(

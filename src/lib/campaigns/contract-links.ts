@@ -57,10 +57,15 @@ export async function getContractsForCampaign(
     .eq("sponsor_id", campaign.sponsorId)
     .in("creator_id", creatorIds);
 
-  if (membership && isPortalRole(membership.role)) {
+  if (membership && isCreatorPortalRole(membership.role)) {
     if (!membership.linkedCreatorId) return [];
     if (!creatorIds.includes(membership.linkedCreatorId)) return [];
     query = query.eq("creator_id", membership.linkedCreatorId);
+  }
+
+  if (membership && isSponsorPortalRole(membership.role)) {
+    if (!membership.linkedSponsorId) return [];
+    if (membership.linkedSponsorId !== campaign.sponsorId) return [];
   }
 
   const { data, error } = await query.order("created_at", { ascending: false });

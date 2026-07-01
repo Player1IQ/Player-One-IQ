@@ -276,7 +276,8 @@ async function ensureUserOnSponsorDealRooms(
 
 export async function syncPortalUserToContractDealRooms(
   creatorId: string,
-  organizationIdOverride?: string
+  organizationIdOverride?: string,
+  options?: { revalidate?: boolean }
 ): Promise<{ error?: string; synced?: number }> {
   const messagingError = await requireMessagingAccess();
   if (messagingError) return messagingError;
@@ -310,8 +311,10 @@ export async function syncPortalUserToContractDealRooms(
   );
   if (result.error) return result;
 
-  revalidatePath("/messages");
-  revalidatePath("/portal");
+  if (options?.revalidate !== false) {
+    revalidatePath("/messages");
+    revalidatePath("/portal");
+  }
   return result;
 }
 
@@ -338,7 +341,8 @@ export async function bootstrapPortalUserContractDealRooms(
 
 export async function syncPortalUserToSponsorDealRooms(
   sponsorId: string,
-  organizationIdOverride?: string
+  organizationIdOverride?: string,
+  options?: { revalidate?: boolean }
 ): Promise<{ error?: string; synced?: number }> {
   const messagingError = await requireMessagingAccess();
   if (messagingError) return messagingError;
@@ -372,8 +376,10 @@ export async function syncPortalUserToSponsorDealRooms(
   );
   if (result.error) return result;
 
-  revalidatePath("/messages");
-  revalidatePath("/portal");
+  if (options?.revalidate !== false) {
+    revalidatePath("/messages");
+    revalidatePath("/portal");
+  }
   return result;
 }
 
