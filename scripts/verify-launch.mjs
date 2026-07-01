@@ -27,6 +27,7 @@ const STEPS = [
   { name: "Agency Pro API", script: "verify:api", args: [baseUrl] },
   { name: "Schedule", script: "verify:schedule" },
   { name: "Production smoke", script: "verify:production", args: [baseUrl] },
+  { name: "Capacity smoke", script: "verify:capacity", args: [baseUrl] },
 ];
 
 function runStep({ name, script, args = [] }) {
