@@ -1,0 +1,25 @@
+Subject: You're invited to the Player One IQ beta
+
+Hi [Name],
+
+You're invited to try Player One IQ — we're building the operating system for gaming agencies, creators, and sponsors.
+
+Sign up here:
+https://player-one-iq.vercel.app/signup
+
+What to expect:
+- Create your workspace in a few minutes (pick your org type: agency, creator, or sponsor).
+- Explore the full product during your beta access — roster, contracts, campaigns, messaging, and more.
+- This is a beta: you may hit rough edges. Reply to this email with feedback, bugs, or feature ideas — we read every note.
+
+Your free trial:
+- Every new workspace gets a 14-day trial on the paid plan for your org type (Creator Pro, Agency, or Sponsor Pro).
+- No credit card required to start.
+- After 14 days, your workspace moves to the free tier unless you subscribe from Billing.
+- Each paid plan can only be trialed once per workspace; you can subscribe anytime during or after the trial.
+
+Need help getting started? Reply to this email and we'll walk you through setup.
+
+Thanks for being an early user,
+[Your name]
+Player One IQ

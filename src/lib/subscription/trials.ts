@@ -1,7 +1,7 @@
 import type { PlanCode, PlanLimits, SubscriptionPlan } from "./types";
 
 /** Platform trial length for new workspaces (no Stripe subscription yet). */
-export const PLATFORM_TRIAL_DAYS = 5;
+export const PLATFORM_TRIAL_DAYS = 14;
 
 /** Every paid catalog plan can be tried once per workspace without Stripe. */
 export const PLATFORM_TRIAL_PLANS: PlanCode[] = [
