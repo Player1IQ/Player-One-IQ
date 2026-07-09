@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PortalAccountClient } from "@/components/portal/PortalAccountClient";
+import { CreatorPortalPayoutSection } from "@/components/portal/CreatorPortalPayoutSection";
+import { getCreatorPayoutRecipient } from "@/lib/payments/queries";
 import { getCreatorById } from "@/lib/creators/queries";
 import { getSponsorById } from "@/lib/sponsors/queries";
 import { getOrganizationForUser } from "@/lib/organization/queries";
@@ -45,7 +47,10 @@ export default async function PortalAccountPage() {
   }
 
   const { linkedCreatorId } = await requireCreatorPortalUser();
-  const creator = await getCreatorById(linkedCreatorId);
+  const [creator, payoutRecipient] = await Promise.all([
+    getCreatorById(linkedCreatorId),
+    getCreatorPayoutRecipient(linkedCreatorId),
+  ]);
 
   if (!creator) {
     redirect("/portal");
@@ -53,13 +58,19 @@ export default async function PortalAccountPage() {
 
   return (
     <DashboardLayout title="Account" description="Your portal access">
-      <PortalAccountClient
-        organizationName={organization?.name ?? "Your organization"}
-        roleLabel={roleLabels[membership.role]}
-        email={email}
-        profileLabel={creator.name}
-        profileHref={`/creators/${creator.id}`}
-      />
+      <div className="mx-auto max-w-2xl space-y-6">
+        <PortalAccountClient
+          organizationName={organization?.name ?? "Your organization"}
+          roleLabel={roleLabels[membership.role]}
+          email={email}
+          profileLabel={creator.name}
+          profileHref={`/creators/${creator.id}`}
+        />
+        <CreatorPortalPayoutSection
+          creatorId={linkedCreatorId}
+          recipient={payoutRecipient}
+        />
+      </div>
     </DashboardLayout>
   );
 }

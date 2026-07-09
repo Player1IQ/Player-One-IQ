@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CreditCard, Loader2 } from "lucide-react";
 import type { ContractPayment } from "@/lib/payments/types";
@@ -77,7 +78,7 @@ export function ContractPaymentPanel({
         <div>
           <h2 className="text-base font-semibold text-white">Contract payout</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Off-platform payment tracking — funds are not held in Player One IQ.
+            Track off-platform payouts — funds are not held in Player One IQ.
           </p>
         </div>
         <PaymentStatusBadge status={payment.status} />
@@ -112,10 +113,21 @@ export function ContractPaymentPanel({
           </p>
         </div>
       ) : payment.status === "ready" ? (
-        <p className="mt-4 text-sm text-amber-200/80">
-          No payout instructions on file for this payee. Add them in Settings
-          before sending payment.
-        </p>
+        <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+          <p className="text-sm font-medium text-amber-200/90">
+            No payout instructions on file
+          </p>
+          <p className="mt-1 text-sm text-gray-400">
+            Add wire or ACH details in{" "}
+            <Link
+              href="/settings"
+              className="text-accent-light underline hover:text-white"
+            >
+              Settings → Payout settings
+            </Link>{" "}
+            before sending payment.
+          </p>
+        </div>
       ) : null}
 
       {payment.status === "paid_external" || payment.status === "paid_platform" ? (

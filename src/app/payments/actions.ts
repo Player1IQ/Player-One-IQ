@@ -15,6 +15,31 @@ import {
   parseContractValueToCents,
   canRecordExternalPayment,
 } from "@/lib/payments/helpers";
+import { formatAmountCents } from "@/lib/payments/types";
+import type { ActivityAction } from "@/lib/activity/queries";
+
+async function logActivity(
+  supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
+  organizationId: string,
+  params: {
+    entityType: string;
+    entityId: string | null;
+    action: ActivityAction;
+    summary: string;
+    detail?: string;
+    metadata?: Record<string, unknown>;
+  }
+) {
+  await supabase.from("activity_log").insert({
+    organization_id: organizationId,
+    entity_type: params.entityType,
+    entity_id: params.entityId,
+    action: params.action,
+    summary: params.summary,
+    detail: params.detail ?? null,
+    metadata: params.metadata ?? {},
+  });
+}
 
 export async function savePayoutRecipient(input: {
   payoutInstructions: string;
@@ -251,7 +276,7 @@ export async function recordExternalPayment(input: {
 
   const { data: contract } = await supabase
     .from("contracts")
-    .select("id, sponsor_id")
+    .select("id, sponsor_id, contract_name")
     .eq("id", input.contractId)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -268,7 +293,7 @@ export async function recordExternalPayment(input: {
 
   const { data: payment, error: fetchError } = await supabase
     .from("contract_payments")
-    .select("id, status")
+    .select("id, status, amount_cents")
     .eq("contract_id", input.contractId)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -302,7 +327,29 @@ export async function recordExternalPayment(input: {
 
   if (updateError) return { error: updateError.message };
 
+  const amountDisplay = formatAmountCents(payment.amount_cents ?? 0);
+  const reference = input.externalReference?.trim();
+  const detailParts = [
+    `${contract.contract_name}: ${amountDisplay} paid externally`,
+    reference ? `Ref: ${reference}` : null,
+  ].filter(Boolean);
+
+  await logActivity(supabase, organizationId, {
+    entityType: "contract",
+    entityId: input.contractId,
+    action: "status_changed",
+    summary: "External payment recorded",
+    detail: detailParts.join(" · "),
+    metadata: {
+      paymentId: payment.id,
+      status: "paid_external",
+      amountCents: payment.amount_cents,
+      externalReference: reference ?? null,
+    },
+  });
+
   revalidatePath(`/contracts/${input.contractId}`);
   revalidatePath("/contracts");
+  revalidatePath("/");
   return { success: true };
 }

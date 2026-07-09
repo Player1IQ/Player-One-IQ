@@ -17,7 +17,7 @@ interface PayoutSettingsSectionProps {
   canEdit: boolean;
 }
 
-function PayoutInstructionsForm({
+export function PayoutInstructionsForm({
   initialInstructions,
   initialLabel,
   onSave,
