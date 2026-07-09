@@ -4,10 +4,10 @@ Hi [Name],
 
 You're invited to try Player One IQ — we're building the operating system for gaming agencies, creators, and sponsors.
 
-Sign up here:
+Sign up here (you'll create your own workspace — not join mine):
 https://player-one-iq.vercel.app/signup
 
-On signup, choose Agency, Creator, or Sponsor — that sets your workspace type and trial plan.
+On signup, choose Agency, Creator, or Sponsor — that sets your workspace type and 14-day trial plan.
 
 After signing up, check your inbox for a confirmation link before completing workspace setup.
 
