@@ -20,6 +20,11 @@ import { ExportReportMenu } from "@/components/reports/ExportReportMenu";
 import { PortalPoweredByFooter } from "@/components/portal/PortalPoweredByFooter";
 import { Calendar } from "lucide-react";
 import { hasFeature } from "@/lib/subscription/features";
+import {
+  formatTrialCountdown,
+  isPlatformTrialActive,
+} from "@/lib/subscription/trials";
+import { PlatformTrialBanner } from "@/components/subscription/PlatformTrialBanner";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -70,6 +75,17 @@ export async function DashboardLayout({
       "advanced_analytics",
       "monthly_reports",
     ]);
+
+  const subscription = subscriptionContext.subscription;
+  const onPlatformTrial =
+    !isPortalUser &&
+    subscription &&
+    isPlatformTrialActive(
+      subscription.status,
+      subscription.trialEndsAt,
+      subscription.stripeSubscriptionId
+    );
+  const trialLabel = formatTrialCountdown(subscription?.trialEndsAt ?? null);
 
   const header = (
     <header className="sticky top-0 z-20 hidden border-b border-white/[0.06] bg-surface/80 backdrop-blur-xl lg:block">
@@ -126,6 +142,12 @@ export async function DashboardLayout({
       >
         <SupabaseConfigBanner />
         <PendingInviteBannerWrapper />
+        {onPlatformTrial && trialLabel && subscription?.plan ? (
+          <PlatformTrialBanner
+            planName={subscription.plan.name}
+            trialLabel={trialLabel}
+          />
+        ) : null}
         {children}
         {showPortalPoweredBy ? <PortalPoweredByFooter /> : null}
       </DashboardShell>
