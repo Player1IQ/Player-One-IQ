@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { enforceAuthenticatedRouteAccess } from "@/lib/auth/route-guard";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,11 +33,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await enforceAuthenticatedRouteAccess();
+
   return (
     <html lang="en" className="dark">
       <body
