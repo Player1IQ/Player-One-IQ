@@ -7,8 +7,12 @@ You're invited to try Player One IQ — we're building the operating system for 
 Sign up here:
 https://player-one-iq.vercel.app/signup
 
+On signup, choose Agency, Creator, or Sponsor — that sets your workspace type and trial plan.
+
+After signing up, check your inbox for a confirmation link before completing workspace setup.
+
 What to expect:
-- Create your workspace in a few minutes (pick your org type: agency, creator, or sponsor).
+- Create your workspace in a few minutes.
 - Explore the full product during your beta access — roster, contracts, campaigns, messaging, and more.
 - This is a beta: you may hit rough edges. Reply to this email with feedback, bugs, or feature ideas — we read every note.
 
