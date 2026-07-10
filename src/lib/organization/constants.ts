@@ -1,5 +1,13 @@
 export const creatorPlayerOrgType = "Creator / Player" as const;
 
+export const sponsorBrandOrgType = "Brand / Sponsor" as const;
+
+export function isSponsorBrandOrganizationType(
+  type: string | null | undefined
+): boolean {
+  return type === sponsorBrandOrgType;
+}
+
 export const agencyOrganizationTypes = [
   "Gaming Agency",
   "Esports Team",

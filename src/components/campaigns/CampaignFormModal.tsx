@@ -21,6 +21,7 @@ interface CampaignFormModalProps {
   sponsors: Sponsor[];
   opportunities?: Opportunity[];
   defaultSponsorId?: string;
+  lockSponsorSelection?: boolean;
 }
 
 function toInput(campaign: SponsorCampaign): CampaignInput {
@@ -54,6 +55,7 @@ export function CampaignFormModal({
   sponsors,
   opportunities = [],
   defaultSponsorId = "",
+  lockSponsorSelection = false,
 }: CampaignFormModalProps) {
   const router = useRouter();
   const isEdit = !!campaign;
@@ -140,30 +142,42 @@ export function CampaignFormModal({
             />
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-gray-400">
-              Sponsor *
-            </label>
-            <select
-              value={form.sponsorId}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  sponsorId: e.target.value,
-                  relatedOpportunityId: null,
-                })
-              }
-              className="w-full rounded-xl border border-white/[0.08] bg-surface px-4 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
-              required
-            >
-              <option value="">Select sponsor</option>
-              {sponsors.map((sponsor) => (
-                <option key={sponsor.id} value={sponsor.id}>
-                  {sponsor.companyName}
-                </option>
-              ))}
-            </select>
-          </div>
+          {lockSponsorSelection ? (
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-gray-400">
+                Brand
+              </label>
+              <p className="rounded-xl border border-white/[0.08] bg-surface px-4 py-2.5 text-sm text-gray-200">
+                {sponsors.find((s) => s.id === form.sponsorId)?.companyName ??
+                  "Your brand"}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-gray-400">
+                Sponsor *
+              </label>
+              <select
+                value={form.sponsorId}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    sponsorId: e.target.value,
+                    relatedOpportunityId: null,
+                  })
+                }
+                className="w-full rounded-xl border border-white/[0.08] bg-surface px-4 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+                required
+              >
+                <option value="">Select sponsor</option>
+                {sponsors.map((sponsor) => (
+                  <option key={sponsor.id} value={sponsor.id}>
+                    {sponsor.companyName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>

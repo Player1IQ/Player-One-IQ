@@ -11,11 +11,20 @@ import {
   getCurrentUserRole,
 } from "@/lib/permissions";
 import { isPortalRole } from "@/lib/team";
+import { getOrganizationForUser } from "@/lib/organization/queries";
+import { isSponsorBrandOrganizationType } from "@/lib/organization/constants";
+import { ensureSponsorBrandProfile } from "@/lib/organization/sponsor-setup";
 
 export default async function CampaignsPage() {
   const membership = await getCurrentUserMembership();
+  const organization = await getOrganizationForUser();
 
   const isPortalUser = Boolean(membership && isPortalRole(membership.role));
+  const isSponsorOrg = isSponsorBrandOrganizationType(organization?.type);
+
+  if (isSponsorOrg && !isPortalUser) {
+    await ensureSponsorBrandProfile();
+  }
 
   const [campaigns, sponsors, opportunities, role] = await Promise.all([
     getCampaigns(),
@@ -47,6 +56,8 @@ export default async function CampaignsPage() {
             opportunities={opportunities}
             canWrite={hasFullAccess(role, "campaigns")}
             isPortalUser={isPortalUser}
+            isSponsorOrg={isSponsorOrg}
+            defaultSponsorId={isSponsorOrg ? sponsors[0]?.id : undefined}
           />
         </div>
       </SubscriptionPageGate>

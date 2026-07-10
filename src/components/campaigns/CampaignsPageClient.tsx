@@ -39,6 +39,8 @@ interface CampaignsPageClientProps {
   opportunities: Opportunity[];
   canWrite?: boolean;
   isPortalUser?: boolean;
+  isSponsorOrg?: boolean;
+  defaultSponsorId?: string;
 }
 
 export function CampaignsPageClient({
@@ -47,6 +49,8 @@ export function CampaignsPageClient({
   opportunities,
   canWrite = true,
   isPortalUser = false,
+  isSponsorOrg = false,
+  defaultSponsorId,
 }: CampaignsPageClientProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -68,6 +72,10 @@ export function CampaignsPageClient({
   }, [campaigns, search, statusFilter]);
 
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
+
+  const canCreateCampaign =
+    canWrite && (sponsors.length > 0 || isSponsorOrg);
+  const createButtonLabel = isSponsorOrg ? "Start a campaign" : "New Campaign";
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -149,10 +157,10 @@ export function CampaignsPageClient({
               </option>
             ))}
           </select>
-          {canWrite && sponsors.length > 0 ? (
+          {canCreateCampaign && sponsors.length > 0 ? (
             <Button onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              New Campaign
+              {createButtonLabel}
             </Button>
           ) : null}
         </div>
@@ -185,15 +193,29 @@ export function CampaignsPageClient({
       {sponsors.length === 0 && !isPortalUser ? (
         <EmptyState
           icon={Target}
-          title="Add a sponsor first"
-          description="Create a sponsor in your CRM before tracking campaigns."
+          title={isSponsorOrg ? "Setting up your brand profile" : "Add a sponsor first"}
+          description={
+            isSponsorOrg
+              ? "Refresh the page — your brand profile should appear momentarily so you can start a campaign."
+              : "Create a sponsor in your CRM before tracking campaigns."
+          }
           action={
-            <Link
-              href="/sponsors"
-              className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-dark"
-            >
-              Go to Sponsors
-            </Link>
+            isSponsorOrg ? (
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-dark"
+              >
+                Refresh page
+              </button>
+            ) : (
+              <Link
+                href="/sponsors"
+                className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-dark"
+              >
+                Go to Sponsors
+              </Link>
+            )
           }
         />
       ) : filtered.length === 0 ? (
@@ -210,14 +232,16 @@ export function CampaignsPageClient({
             campaigns.length === 0
               ? isPortalUser
                 ? "No campaigns assigned yet. Focus on marketplace opportunities and building your profile while your agency lines up deals."
-                : "Create your first sponsor campaign to track budgets and status."
+                : isSponsorOrg
+                  ? "Launch your first sponsorship campaign to track budget, status, and creators."
+                  : "Create your first sponsor campaign to track budgets and status."
               : "Try a different search or status filter."
           }
           action={
-            canWrite && campaigns.length === 0 ? (
+            canWrite && campaigns.length === 0 && sponsors.length > 0 ? (
               <Button onClick={() => setModalOpen(true)}>
                 <Plus className="h-4 w-4" />
-                Create Campaign
+                {createButtonLabel}
               </Button>
             ) : hasActiveFilters ? (
               <button
@@ -325,6 +349,8 @@ export function CampaignsPageClient({
           onClose={() => setModalOpen(false)}
           sponsors={sponsors}
           opportunities={opportunities}
+          defaultSponsorId={defaultSponsorId}
+          lockSponsorSelection={isSponsorOrg && sponsors.length === 1}
         />
       ) : null}
     </div>
