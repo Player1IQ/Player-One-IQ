@@ -6,4 +6,5 @@ export { MetricCard } from "./MetricCard";
 export { GlowCard } from "./GlowCard";
 export { PageHeader } from "./PageHeader";
 export { Input } from "./Input";
+export { DatePickerField } from "./DatePickerField";
 export { EmptyState } from "./EmptyState";

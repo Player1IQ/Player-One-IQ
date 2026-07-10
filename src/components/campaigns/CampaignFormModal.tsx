@@ -13,6 +13,7 @@ import {
 import type { Sponsor } from "@/lib/sponsors";
 import type { Opportunity } from "@/lib/opportunities";
 import { createCampaign, updateCampaign } from "@/app/campaigns/actions";
+import { DatePickerField } from "@/components/ui/DatePickerField";
 
 interface CampaignFormModalProps {
   open: boolean;
@@ -223,38 +224,28 @@ export function CampaignFormModal({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-400">
-                Start date
-              </label>
-              <input
-                type="date"
-                value={form.startDate ?? ""}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    startDate: e.target.value || null,
-                  })
-                }
-                className="w-full rounded-xl border border-white/[0.08] bg-surface px-4 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-400">
-                End date
-              </label>
-              <input
-                type="date"
-                value={form.endDate ?? ""}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    endDate: e.target.value || null,
-                  })
-                }
-                className="w-full rounded-xl border border-white/[0.08] bg-surface px-4 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
-              />
-            </div>
+            <DatePickerField
+              label="Start date"
+              value={form.startDate}
+              onChange={(startDate) =>
+                setForm({
+                  ...form,
+                  startDate,
+                  endDate:
+                    form.endDate && startDate && form.endDate < startDate
+                      ? null
+                      : form.endDate,
+                })
+              }
+              placeholder="Select start date"
+            />
+            <DatePickerField
+              label="End date"
+              value={form.endDate}
+              onChange={(endDate) => setForm({ ...form, endDate })}
+              placeholder="Select end date"
+              minDate={form.startDate}
+            />
           </div>
 
           {sponsorOpportunities.length > 0 && (
