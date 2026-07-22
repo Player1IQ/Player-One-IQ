@@ -27,6 +27,7 @@ import { getAccessibleNavItems, type NavIconName } from "@/lib/navigation";
 import type { TeamRole } from "@/lib/team";
 import { SidebarUser } from "@/components/SidebarUser";
 import { UnreadBadge } from "@/components/messages/UnreadBadge";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 const navIcons: Record<NavIconName, LucideIcon> = {
@@ -122,8 +123,8 @@ export function Sidebar({
       <nav className="flex-1 space-y-0.5 overflow-y-auto p-3" data-tour-sidebar>
         {items.map((item) => {
           const isActive =
-            item.href === "/"
-              ? pathname === "/"
+            item.href === STAFF_DASHBOARD_PATH
+              ? pathname === STAFF_DASHBOARD_PATH
               : item.href === "/portal"
                 ? pathname === "/portal"
                 : item.href === "/portal/profile"

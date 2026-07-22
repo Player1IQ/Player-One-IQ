@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isPublicAppPath } from "@/lib/auth/public-routes";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ACTIVE_ORGANIZATION_COOKIE } from "@/lib/organization/context";
 import {
@@ -14,17 +15,7 @@ import {
   ONBOARDING_STARTED_COOKIE,
   resolveOnboardingRequired,
 } from "@/lib/onboarding/queries";
-
-const PUBLIC_ROUTES = [
-  "/login",
-  "/signup",
-  "/forgot-password",
-  "/auth/callback",
-  "/terms",
-  "/privacy",
-  "/welcome",
-  "/invite",
-];
+import { MARKETING_HOME_PATH, STAFF_DASHBOARD_PATH } from "@/lib/routes";
 
 const AUTH_ONLY_ROUTES = ["/login", "/signup", "/forgot-password"];
 
@@ -40,9 +31,7 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
   const pathname = headerList.get("x-pathname") ?? "";
   if (!pathname) return;
 
-  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
-    pathname.startsWith(route)
-  );
+  const isPublicRoute = isPublicAppPath(pathname);
   const isOrgSetup = pathname.startsWith("/organization-setup");
   const isOnboarding = pathname.startsWith("/onboarding");
   const isInviteRoute = pathname.startsWith("/invite/");
@@ -130,7 +119,7 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
       memberships?.[0]?.organization_id ??
       null;
 
-    let redirectPath = "/";
+    let redirectPath = STAFF_DASHBOARD_PATH;
 
     if (activeOrgId) {
       const isOwner = Boolean(organization && organization.id === activeOrgId);
@@ -209,12 +198,60 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
         redirect(getPortalRedirectPath(pathname, portalContext));
       }
 
-      if (pathname === "/") {
+      if (pathname === STAFF_DASHBOARD_PATH) {
         redirect(PORTAL_HOME);
       }
     } else if (role && canAccessStaffDashboard(role)) {
       if (!isPathAllowedForStaffUser(pathname, role)) {
-        redirect("/");
+        redirect(STAFF_DASHBOARD_PATH);
+      }
+    }
+  }
+
+  if (
+    pathname === MARKETING_HOME_PATH &&
+    hasOrganization &&
+    !onboardingRequired &&
+    !isInviteRoute &&
+    !isOrgSetup &&
+    !isOnboarding
+  ) {
+    const activeOrgId =
+      cookieStore.get(ACTIVE_ORGANIZATION_COOKIE)?.value ??
+      organization?.id ??
+      memberships?.[0]?.organization_id ??
+      null;
+
+    if (activeOrgId) {
+      const isOwner = Boolean(organization && organization.id === activeOrgId);
+      const { data: member } = await supabase
+        .from("team_members")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("organization_id", activeOrgId)
+        .eq("status", "active")
+        .maybeSingle();
+
+      const memberRole = (member?.role as TeamRole | undefined) ?? null;
+      const portalRole =
+        memberRole === "player" ||
+        memberRole === "content_creator" ||
+        memberRole === "sponsor"
+          ? memberRole
+          : null;
+      const role: TeamRole | null =
+        portalRole ?? (isOwner ? "owner" : memberRole);
+
+      if (
+        role === "player" ||
+        role === "content_creator" ||
+        role === "sponsor"
+      ) {
+        redirect(PORTAL_HOME);
+      }
+
+      if (role && canAccessStaffDashboard(role)) {
+        redirect(STAFF_DASHBOARD_PATH);
       }
     }
   }

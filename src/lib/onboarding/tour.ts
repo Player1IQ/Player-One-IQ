@@ -1,3 +1,4 @@
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import type { TeamRole } from "@/lib/team";
 import {
   canAccessStaffDashboard,
@@ -77,7 +78,7 @@ const agencyTour: OnboardingTourItem[] = [
     title: "Dashboard",
     description:
       "A snapshot of creators, sponsors, pipeline value, and what needs attention today.",
-    href: "/",
+    href: STAFF_DASHBOARD_PATH,
     icon: "home",
   },
   {

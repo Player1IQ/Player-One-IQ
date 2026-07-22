@@ -1,3 +1,4 @@
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import {
   aiFeatureKeys,
   navItemAccessible,
@@ -37,7 +38,7 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: "dashboard" },
+  { label: "Dashboard", href: STAFF_DASHBOARD_PATH, icon: "dashboard" },
   {
     label: "Creators",
     href: "/creators",

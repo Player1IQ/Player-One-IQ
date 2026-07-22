@@ -1,8 +1,9 @@
-import type { TeamRole } from "@/lib/team";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import {
   isCreatorPortalRole,
   isPortalRole,
   isSponsorPortalRole,
+  type TeamRole,
 } from "@/lib/team";
 
 export const PORTAL_HOME = "/portal";
@@ -50,7 +51,10 @@ export function isPathAllowedForPortalUser(
       ? (context.linkedSponsorId ?? null)
       : null;
 
-  if (pathname === "/" || pathname === "/creators") {
+  if (
+    pathname === STAFF_DASHBOARD_PATH ||
+    pathname === "/creators"
+  ) {
     return false;
   }
 

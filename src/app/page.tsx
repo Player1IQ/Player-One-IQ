@@ -1,120 +1,17 @@
-import { getOrganizationForUser } from "@/lib/organization/queries";
-import { redirect } from "next/navigation";
-import { DashboardLayout } from "@/components/DashboardLayout";
-import { DashboardHomeClient } from "@/components/dashboard/DashboardHomeClient";
-import { getCreators } from "@/lib/creators/queries";
-import { getCurrentUserRole } from "@/lib/permissions";
-import { canAccessStaffDashboard } from "@/lib/team";
-import { getSponsors } from "@/lib/sponsors/queries";
-import { getContracts } from "@/lib/contracts/queries";
-import { getRecentActivity } from "@/lib/activity/queries";
-import { getOpportunities } from "@/lib/opportunities/queries";
-import { getAllApplications } from "@/lib/opportunities/queries";
-import { getOpportunityStats, getApplicationStats } from "@/lib/opportunities";
-import {
-  getConversations,
-  getUnreadMessageCount,
-} from "@/lib/messages/queries";
-import {
-  getContractStats,
-  getOverdueContracts,
-  getUpcomingExpirations,
-} from "@/lib/contracts";
-import {
-  getConnectedPlatformAccountCount,
-  getOrganizationRevenueEntriesForMonths,
-} from "@/lib/creator-revenue/queries";
-import { getCurrentPeriodMonth } from "@/lib/creator-revenue";
-import { getDashboardRevenueSummary } from "@/lib/revenue/summary";
-import {
-  buildCreatorGrowthData,
-  buildRevenueTrendData,
-  getLastNMonthKeys,
-  groupRevenueEntriesByMonth,
-} from "@/lib/dashboard/charts";
-import { getTodayScheduleEvents } from "@/lib/schedule/queries";
+import type { Metadata } from "next";
+import { MarketingLanding } from "@/components/marketing/MarketingLanding";
 
-export default async function DashboardPage() {
-  const role = await getCurrentUserRole();
-  if (role && !canAccessStaffDashboard(role)) {
-    redirect("/portal");
-  }
+export const metadata: Metadata = {
+  title: "Player One IQ — Creator economy management",
+  description:
+    "Manage creators, sponsors, campaigns, and contracts in one platform built for gaming agencies and creator organizations.",
+  openGraph: {
+    title: "Player One IQ",
+    description:
+      "Manage creators, sponsors, campaigns, and contracts in one platform built for gaming agencies and creator organizations.",
+  },
+};
 
-  const monthKeys = getLastNMonthKeys(6).map((month) => month.key);
-
-  const [
-    creators,
-    sponsors,
-    contracts,
-    opportunities,
-    conversations,
-    unreadMessages,
-    activity,
-    platformRevenueEntries,
-    connectedAccountCount,
-    applications,
-    todaySchedule,
-  ] = await Promise.all([
-    getCreators(),
-    getSponsors(),
-    getContracts(),
-    getOpportunities(),
-    getConversations(),
-    getUnreadMessageCount(),
-    getRecentActivity(10),
-    getOrganizationRevenueEntriesForMonths(monthKeys),
-    getConnectedPlatformAccountCount(),
-    getAllApplications(),
-    getTodayScheduleEvents(),
-  ]);
-
-  const opportunityStats = getOpportunityStats(opportunities);
-  const pendingApplications = getApplicationStats(applications).needsAction;
-  const activeCreators = creators.filter((c) => c.status === "active");
-  const activeSponsors = sponsors.filter((s) => s.status === "active");
-  const contractStats = getContractStats(contracts);
-  const currentMonth = getCurrentPeriodMonth();
-  const currentMonthEntries = platformRevenueEntries.filter(
-    (entry) => entry.periodMonth === currentMonth
-  );
-  const monthlyRevenue = getDashboardRevenueSummary(
-    contracts,
-    currentMonthEntries,
-    connectedAccountCount
-  );
-  const entriesByMonth = groupRevenueEntriesByMonth(platformRevenueEntries);
-  const revenueTrend = buildRevenueTrendData(contracts, entriesByMonth).map(
-    ({ month, contract, platform }) => ({ month, contract, platform })
-  );
-  const creatorGrowth = buildCreatorGrowthData(creators);
-  const upcomingExpirations = getUpcomingExpirations(contracts);
-  const overdueContracts = getOverdueContracts(contracts);
-  const organization = await getOrganizationForUser();
-
-  return (
-    <DashboardLayout
-      title="Dashboard"
-      description="Executive overview of your creator ecosystem"
-    >
-      <DashboardHomeClient
-        organizationName={organization?.name ?? "Your workspace"}
-        creators={creators}
-        activeCreators={activeCreators}
-        contractStats={contractStats}
-        monthlyRevenue={monthlyRevenue}
-        activeSponsorsCount={activeSponsors.length}
-        totalSponsors={sponsors.length}
-        opportunityStats={opportunityStats}
-        unreadMessages={unreadMessages}
-        conversationCount={conversations.length}
-        activity={activity}
-        upcomingExpirations={upcomingExpirations}
-        overdueContracts={overdueContracts}
-        pendingApplications={pendingApplications}
-        revenueTrend={revenueTrend}
-        creatorGrowth={creatorGrowth}
-        todaySchedule={todaySchedule}
-      />
-    </DashboardLayout>
-  );
+export default function MarketingHomePage() {
+  return <MarketingLanding />;
 }

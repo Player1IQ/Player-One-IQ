@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@keyframes marketing-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marketing-landing {
+  background: #06060f;
+  color: #f1f5f9;
+}
+
+.marketing-landing .font-display {
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+}
+
+.marketing-landing .font-data {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+}
+
+.marketing-landing .animate-marquee {
+  animation: marketing-marquee 40s linear infinite;
+}
+
+.marketing-landing .scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.marketing-landing .scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

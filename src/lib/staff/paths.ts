@@ -1,3 +1,4 @@
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import {
   hasReadAccess,
   isPortalRole,
@@ -55,7 +56,7 @@ function matchesPrefix(pathname: string, prefix: string): boolean {
 
 /** Resolve a staff pathname to its permission guard, if any. */
 export function getStaffRouteGuard(pathname: string): StaffRouteGuard | null {
-  if (pathname === "/") return null;
+  if (pathname === STAFF_DASHBOARD_PATH) return null;
 
   if (STAFF_UNGUARDED_PREFIXES.some((prefix) => matchesPrefix(pathname, prefix))) {
     return null;

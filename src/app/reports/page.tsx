@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ReportsPageClient } from "@/components/reports/ReportsPageClient";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
@@ -25,7 +26,7 @@ import {
 export default async function ReportsPage() {
   const role = await getCurrentUserRole();
   if (!canViewReports(role)) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
 
   const periodMonth = getCurrentPeriodMonth();

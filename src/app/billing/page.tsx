@@ -1,3 +1,4 @@
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -16,7 +17,7 @@ export default async function BillingPage() {
   ]);
 
   if (!canViewBilling(role)) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
 
   return (

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PortalHomeClient } from "@/components/portal/PortalHomeClient";
 import { PortalSponsorHomeClient } from "@/components/portal/PortalSponsorHomeClient";
@@ -40,7 +41,7 @@ import { getTodayScheduleEvents, creatorHasScheduleBlocks } from "@/lib/schedule
 export default async function PortalHomePage() {
   const membership = await getCurrentUserMembership();
   if (!membership || !isPortalRole(membership.role)) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
 
   if (isSponsorPortalRole(membership.role)) {
@@ -76,7 +77,7 @@ export default async function PortalHomePage() {
     ]);
 
     if (!sponsor) {
-      redirect("/");
+      redirect(STAFF_DASHBOARD_PATH);
     }
 
     const whiteLabelEnabled = hasFeature(subscription.features, "white_label");

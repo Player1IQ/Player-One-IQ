@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 const siteDescription =
-  "Creator and sponsor management dashboard for gaming agencies";
+  "Creator and sponsor management platform for gaming agencies and creator organizations";
 
 export const metadata: Metadata = {
   title: {

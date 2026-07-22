@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AiConnectionStrip } from "@/components/ai/AiConnectionStrip";
 import { AiDashboardClient } from "@/components/ai/AiDashboardClient";
@@ -27,7 +28,7 @@ export default async function AiPage() {
   ]);
 
   if (!canViewAi(role)) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
 
   const canManage = canManageSettings(role);

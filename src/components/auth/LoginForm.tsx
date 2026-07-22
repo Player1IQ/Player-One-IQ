@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { formatAuthError } from "@/lib/auth/errors";
 import { getErrorMessage } from "@/lib/safe-action";
 import { AuthInput } from "./AuthInput";
@@ -26,11 +27,11 @@ function buildAuthQuery(params: {
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/";
+  const redirect = searchParams.get("redirect") ?? STAFF_DASHBOARD_PATH;
   const inviteEmail = searchParams.get("email");
   const inviteOrg = searchParams.get("org");
   const signupHref = `/signup${buildAuthQuery({
-    redirect: redirect !== "/" ? redirect : null,
+    redirect: redirect !== STAFF_DASHBOARD_PATH ? redirect : null,
     email: inviteEmail,
     org: inviteOrg,
   })}`;

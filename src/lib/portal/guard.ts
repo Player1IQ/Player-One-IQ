@@ -1,3 +1,4 @@
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getCurrentUserMembership } from "@/lib/permissions";
@@ -46,7 +47,7 @@ export async function requireCreatorPortalUser(): Promise<{
   const membership = await getCurrentUserMembership();
 
   if (!membership || !isCreatorPortalRole(membership.role)) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
 
   if (!membership.linkedCreatorId) {
@@ -65,7 +66,7 @@ export async function requireSponsorPortalUser(): Promise<{
   const membership = await getCurrentUserMembership();
 
   if (!membership || !isSponsorPortalRole(membership.role)) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
 
   if (!membership.linkedSponsorId) {

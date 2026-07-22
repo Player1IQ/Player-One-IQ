@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { ReportPrintClient } from "@/components/reports/ReportPrintClient";
 import { getCampaigns } from "@/lib/campaigns/queries";
 import { getContracts } from "@/lib/contracts/queries";
@@ -33,7 +34,7 @@ export default async function ReportPrintPage() {
   ]);
 
   if (!canViewReports(role)) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
   const canExport = hasAnyFeature(subscription.features, [
     "advanced_analytics",

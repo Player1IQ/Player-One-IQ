@@ -1,20 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isPublicMiddlewarePath } from "@/lib/auth/public-routes";
 import { isSupabaseConfigured } from "./config";
-
-const PUBLIC_ROUTES = [
-  "/login",
-  "/signup",
-  "/forgot-password",
-  "/auth/callback",
-  "/terms",
-  "/privacy",
-  "/welcome",
-  "/invite",
-  "/api/billing/webhook",
-  "/api/health",
-  "/api/v1",
-];
 
 /**
  * Lightweight middleware: refresh the Supabase session and gate unauthenticated
@@ -54,9 +41,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
-    pathname.startsWith(route)
-  );
+  const isPublicRoute = isPublicMiddlewarePath(pathname);
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
