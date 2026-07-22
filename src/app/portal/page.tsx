@@ -32,6 +32,7 @@ import {
   getCreatorPlatformAccounts,
   getCreatorRevenueEntries,
 } from "@/lib/creator-revenue/queries";
+import { isConnectedPlatformAccount } from "@/lib/creator-revenue";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
@@ -170,7 +171,7 @@ export default async function PortalHomePage() {
     creator,
     contracts,
     revenueEntries,
-    platformAccounts.length,
+    platformAccounts.filter(isConnectedPlatformAccount).length,
     opportunityApplications,
     deliverableMetrics,
     marketplaceOpportunities,

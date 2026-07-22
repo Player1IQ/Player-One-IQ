@@ -3,10 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { requireFeatureAccess, requireResourceWriteAccess } from "@/lib/permissions";
+import {
+  requireCreatorPlatformConnectAccess,
+  requireFeatureAccess,
+  requireResourceWriteAccess,
+} from "@/lib/permissions";
 import { platforms, type Platform } from "@/lib/creators";
 import {
   getCurrentPeriodMonth,
+  isIncompleteOAuthPlatformAccount,
   revenueTypes,
   type RevenueType,
 } from "@/lib/creator-revenue";
@@ -211,6 +216,52 @@ export async function disconnectCreatorPlatformAccount(accountId: string) {
 
   revalidatePath(`/creators/${account.creator_id}`);
   revalidatePath("/");
+  return { success: true };
+}
+
+export async function cancelCreatorPlatformOAuthAttempt(accountId: string) {
+  const featureError = await requireCreatorProfilesFeature();
+  if (featureError) return featureError;
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return { error: "Organization not found." };
+
+  const { data: account, error: fetchError } = await supabase
+    .from("creator_platform_accounts")
+    .select("creator_id, connection_status")
+    .eq("id", accountId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (fetchError || !account) {
+    return { error: "Platform account not found." };
+  }
+
+  if (!isIncompleteOAuthPlatformAccount({ connectionStatus: account.connection_status })) {
+    return { error: "Only incomplete platform connections can be cancelled." };
+  }
+
+  const permError = await requireCreatorPlatformConnectAccess(account.creator_id);
+  if (permError) return permError;
+
+  const { error } = await supabase
+    .from("creator_platform_accounts")
+    .update({
+      connection_status: "disconnected",
+      oauth_metadata: {},
+      sync_error: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", accountId)
+    .eq("organization_id", organizationId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/creators/${account.creator_id}`);
+  revalidatePath("/portal");
   return { success: true };
 }
 

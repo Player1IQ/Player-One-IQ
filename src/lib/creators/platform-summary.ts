@@ -1,6 +1,9 @@
 import { getCreatorPlatformAccounts } from "@/lib/creator-revenue/queries";
 import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
-import type { CreatorPlatformAccount } from "@/lib/creator-revenue";
+import {
+  isConnectedPlatformAccount,
+  type CreatorPlatformAccount,
+} from "@/lib/creator-revenue";
 
 export interface CreatorPlatformSummary {
   connectedCount: number;
@@ -19,10 +22,10 @@ export async function getCreatorPlatformSummary(
     getCreatorAudienceAnalytics(creatorId).catch(() => null),
   ]);
 
-  const youtubeConnected = platforms.some(
-    (account) =>
-      account.platform === "YouTube" &&
-      account.connectionStatus !== "disconnected"
+  const connectedPlatforms = platforms.filter(isConnectedPlatformAccount);
+
+  const youtubeConnected = connectedPlatforms.some(
+    (account) => account.platform === "YouTube"
   );
 
   const audienceTotal =
@@ -32,8 +35,8 @@ export async function getCreatorPlatformSummary(
       .reduce((sum, size) => sum + size, 0) ?? 0;
 
   return {
-    connectedCount: platforms.length,
-    platforms,
+    connectedCount: connectedPlatforms.length,
+    platforms: connectedPlatforms,
     totalRecentViews: analytics?.hasOAuthContent ? analytics.totalViews : null,
     totalAudience: audienceTotal > 0 ? audienceTotal : null,
     hasOAuthContent: analytics?.hasOAuthContent ?? false,

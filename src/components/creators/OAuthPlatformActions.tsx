@@ -1,7 +1,7 @@
 "use client";
 
 import type { OAuthPlatformUi } from "@/lib/platform-oauth/types";
-import { getOAuthPlatformSlug } from "@/lib/platform-oauth/platform-slug";
+import { getPlatformOAuthStartUrl } from "@/lib/platform-oauth/start-url";
 import { storeOnboardingStepClient } from "@/lib/onboarding/client";
 
 interface OAuthPlatformActionsProps {
@@ -16,11 +16,7 @@ function oauthStartUrl(
   creatorId: string,
   returnTo?: string
 ) {
-  const params = new URLSearchParams({ creatorId });
-  if (returnTo) {
-    params.set("returnTo", returnTo);
-  }
-  return `/api/platform-oauth/${getOAuthPlatformSlug(platform)}/start?${params.toString()}`;
+  return getPlatformOAuthStartUrl(platform, creatorId, returnTo);
 }
 
 function isConnectableOAuthPlatform(platform: OAuthPlatformUi["platform"]): boolean {

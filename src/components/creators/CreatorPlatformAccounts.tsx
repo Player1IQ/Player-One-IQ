@@ -8,15 +8,20 @@ import { OAuthPlatformActions } from "./OAuthPlatformActions";
 import type { Creator } from "@/lib/creators";
 import {
   connectionStatusLabel,
+  isConnectedPlatformAccount,
+  isIncompleteOAuthPlatformAccount,
   type CreatorPlatformAccount,
   type CreatorRevenueEntry,
 } from "@/lib/creator-revenue";
 import {
+  cancelCreatorPlatformOAuthAttempt,
   disconnectCreatorPlatformAccount,
   syncAllCreatorOAuthAccounts,
   syncCreatorPlatformAccount,
   upsertCreatorPlatformRevenue,
 } from "@/app/creators/revenue-actions";
+import { getPlatformOAuthStartUrl } from "@/lib/platform-oauth/start-url";
+import { isOAuthPlatform } from "@/lib/platform-oauth/types";
 import { PlatformBadge } from "./PlatformBadge";
 import { ConnectPlatformModal } from "./ConnectPlatformModal";
 
@@ -143,6 +148,18 @@ export function CreatorPlatformAccounts({
     router.refresh();
   }
 
+  async function handleCancelOAuthAttempt(accountId: string) {
+    if (!confirm("Cancel this platform connection attempt?")) return;
+    setLoadingId(accountId);
+    const result = await cancelCreatorPlatformOAuthAttempt(accountId);
+    setLoadingId(null);
+    if ("error" in result && result.error) {
+      setError(result.error);
+      return;
+    }
+    router.refresh();
+  }
+
   return (
     <>
       <div className="space-y-4">
@@ -197,6 +214,17 @@ export function CreatorPlatformAccounts({
               {accounts.map((account) => {
                 const revenue = getAccountRevenue(account.id, revenueEntries);
                 const isEditing = editingId === account.id;
+                const isIncompleteOAuth = isIncompleteOAuthPlatformAccount(account);
+                const oauthRetryUrl =
+                  allowPlatformOAuth &&
+                  isIncompleteOAuth &&
+                  isOAuthPlatform(account.platform)
+                    ? getPlatformOAuthStartUrl(
+                        account.platform,
+                        creator.id,
+                        `/creators/${creator.id}`
+                      )
+                    : null;
 
                 return (
                   <li
@@ -208,9 +236,18 @@ export function CreatorPlatformAccounts({
                         <PlatformBadge platform={account.platform} />
                         <div>
                           <p className="font-medium text-gray-100">
-                            {account.accountHandle}
+                            {account.accountHandle === "authorizing" ||
+                            account.accountHandle === "connected"
+                              ? account.platform
+                              : account.accountHandle}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p
+                            className={`text-xs ${
+                              isIncompleteOAuth
+                                ? "text-amber-400"
+                                : "text-gray-500"
+                            }`}
+                          >
                             {connectionStatusLabel(account.connectionStatus)}
                           </p>
                           {account.syncError && (
@@ -233,7 +270,16 @@ export function CreatorPlatformAccounts({
                         </div>
                       </div>
                       {canManagePlatforms ? (
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
+                          {oauthRetryUrl ? (
+                            <a
+                              href={oauthRetryUrl}
+                              className="inline-flex items-center gap-1 rounded-lg border border-accent/30 bg-accent/10 px-2.5 py-1.5 text-xs text-accent-light hover:text-white"
+                            >
+                              <Link2 className="h-3.5 w-3.5" />
+                              Retry connect
+                            </a>
+                          ) : null}
                           {account.connectionStatus === "connected_oauth" && (
                             <button
                               onClick={() => handleSync(account.id)}
@@ -274,6 +320,20 @@ export function CreatorPlatformAccounts({
                                 Disconnect
                               </button>
                             </>
+                          ) : allowPlatformOAuth &&
+                            isIncompleteOAuth ? (
+                            <button
+                              onClick={() => handleCancelOAuthAttempt(account.id)}
+                              disabled={loadingId === account.id}
+                              className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 px-2.5 py-1.5 text-xs text-red-400"
+                            >
+                              {loadingId === account.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Unlink className="h-3.5 w-3.5" />
+                              )}
+                              Cancel
+                            </button>
                           ) : allowPlatformOAuth &&
                             account.connectionStatus === "connected_oauth" ? (
                             <button
@@ -361,6 +421,23 @@ export function CreatorPlatformAccounts({
               })}
             </ul>
 
+            {canManagePlatforms && allowPlatformOAuth ? (
+              <OAuthPlatformActions
+                creatorId={creator.id}
+                platforms={oauthPlatformUi.filter(
+                  (entry) =>
+                    entry.status === "available" &&
+                    !accounts.some(
+                      (account) =>
+                        account.platform === entry.platform &&
+                        (isConnectedPlatformAccount(account) ||
+                          isIncompleteOAuthPlatformAccount(account))
+                    )
+                )}
+                returnTo={`/creators/${creator.id}`}
+              />
+            ) : null}
+
             {canWrite && accounts.length < 5 ? (
               <button
                 onClick={() => setConnectOpen(true)}
@@ -378,7 +455,9 @@ export function CreatorPlatformAccounts({
         open={connectOpen}
         onClose={() => setConnectOpen(false)}
         creator={creator}
-        connectedPlatforms={accounts.map((account) => account.platform)}
+        connectedPlatforms={accounts
+          .filter(isConnectedPlatformAccount)
+          .map((account) => account.platform)}
         oauthPlatformUi={oauthPlatformUi}
       />
     </>

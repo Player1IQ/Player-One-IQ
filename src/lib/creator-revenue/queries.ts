@@ -4,6 +4,7 @@ import {
   getCurrentPeriodMonth,
   mapPlatformAccountRow,
   mapRevenueEntryRow,
+  STALE_PENDING_OAUTH_MS,
   type CreatorPlatformAccount,
   type CreatorRevenueEntry,
 } from "@/lib/creator-revenue";
@@ -16,6 +17,19 @@ export async function getCreatorPlatformAccounts(
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return [];
+
+  const staleCutoff = new Date(Date.now() - STALE_PENDING_OAUTH_MS).toISOString();
+  await supabase
+    .from("creator_platform_accounts")
+    .update({
+      connection_status: "disconnected",
+      sync_error: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("organization_id", organizationId)
+    .eq("creator_id", creatorId)
+    .eq("connection_status", "pending_oauth")
+    .lt("updated_at", staleCutoff);
 
   const { data, error } = await supabase
     .from("creator_platform_accounts")

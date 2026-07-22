@@ -235,3 +235,23 @@ export function connectionStatusLabel(status: ConnectionStatus): string {
   };
   return labels[status];
 }
+
+export function isConnectedPlatformAccount(
+  account: Pick<CreatorPlatformAccount, "connectionStatus">
+): boolean {
+  return (
+    account.connectionStatus === "connected_manual" ||
+    account.connectionStatus === "connected_oauth"
+  );
+}
+
+export function isIncompleteOAuthPlatformAccount(
+  account: Pick<CreatorPlatformAccount, "connectionStatus">
+): boolean {
+  return (
+    account.connectionStatus === "pending_oauth" ||
+    account.connectionStatus === "sync_error"
+  );
+}
+
+export const STALE_PENDING_OAUTH_MS = 30 * 60 * 1000;
