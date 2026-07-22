@@ -107,6 +107,7 @@ export function PortalSponsorHomeClient({
               ? `${deliverableMetrics.overdueCount} overdue`
               : "Across your partnerships"
           }
+          href="/contracts"
           icon={CheckSquare}
           iconColor={
             deliverableMetrics.overdueCount > 0
@@ -118,6 +119,7 @@ export function PortalSponsorHomeClient({
           title="Active deals"
           value={String(activeContracts.length)}
           subtitle={`${contracts.length} total contracts`}
+          href="/contracts"
           icon={FileText}
           iconColor="text-emerald-400"
         />
@@ -127,6 +129,7 @@ export function PortalSponsorHomeClient({
           subtitle={
             campaignCount === 1 ? "Active partnership" : "Partnership campaigns"
           }
+          href="/campaigns"
           icon={Target}
           iconColor="text-violet-400"
         />
@@ -134,6 +137,7 @@ export function PortalSponsorHomeClient({
           title="Messages"
           value={String(unreadMessages)}
           subtitle={unreadMessages === 1 ? "Unread conversation" : "Unread conversations"}
+          href="/messages"
           icon={MessageSquare}
           iconColor="text-violet-400"
         />

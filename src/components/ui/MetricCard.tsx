@@ -33,7 +33,7 @@ export function MetricCard({
         highlight
           ? "border-orange-500/25 hover:border-orange-500/40"
           : "border-white/[0.06] hover:border-white/[0.1]",
-        href && "cursor-pointer",
+        href && "cursor-pointer hover:border-accent/30",
         className
       )}
     >

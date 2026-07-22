@@ -149,6 +149,7 @@ export function PortalHomeClient({
               ? `${deliverableMetrics.overdueCount} overdue`
               : "Across your contracts"
           }
+          href="/portal/deliverables"
           icon={CheckSquare}
           iconColor={
             deliverableMetrics.overdueCount > 0
@@ -160,6 +161,7 @@ export function PortalHomeClient({
           title="Active deals"
           value={String(activeContracts.length)}
           subtitle={`${contracts.length} total contracts`}
+          href="/contracts"
           icon={FileText}
           iconColor="text-emerald-400"
         />
@@ -172,6 +174,7 @@ export function PortalHomeClient({
                 ? "Assigned campaign"
                 : "Assigned campaigns"
             }
+            href="/campaigns"
             icon={Target}
             iconColor="text-amber-400"
           />
@@ -185,6 +188,7 @@ export function PortalHomeClient({
                 ? `${pendingApplicationCount} pending review`
                 : "Open to apply"
             }
+            href="/opportunities"
             icon={Briefcase}
             iconColor="text-sky-400"
           />
@@ -193,14 +197,16 @@ export function PortalHomeClient({
           title="Messages"
           value={String(unreadMessages)}
           subtitle={unreadMessages === 1 ? "Unread conversation" : "Unread conversations"}
+          href="/messages"
           icon={MessageSquare}
           iconColor="text-violet-400"
         />
         <MetricCard
           title="Availability"
           value={presenceLabels[creator.availabilityStatus]}
-          subtitle="Your current status"
-          icon={Briefcase}
+          subtitle="Tap to update your status"
+          href={`/creators/${creator.id}`}
+          icon={Calendar}
           iconColor="text-sky-400"
         />
       </div>
