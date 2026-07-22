@@ -6,11 +6,13 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { fetchMyPresence } from "@/lib/presence/actions";
 import { PresencePicker } from "@/components/presence/PresencePicker";
 import type { PresenceStatus } from "@/lib/presence/types";
+import { Avatar } from "@/components/ui/Avatar";
 
 export function SidebarUser() {
   const [email, setEmail] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string | null>(null);
   const [initials, setInitials] = useState("PO");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [presenceStatus, setPresenceStatus] =
     useState<PresenceStatus>("inactive");
   const [presenceReady, setPresenceReady] = useState(false);
@@ -57,6 +59,13 @@ export function SidebarUser() {
           if (org?.name) setOrgName(org.name);
         }
 
+        const { data: profile } = await client
+          .from("user_profiles")
+          .select("avatar_url")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        setAvatarUrl(profile?.avatar_url ?? null);
+
         const status = await fetchMyPresence();
         setPresenceStatus(status);
         setPresenceReady(true);
@@ -69,9 +78,13 @@ export function SidebarUser() {
   return (
     <div className="border-t border-white/[0.06] p-3">
       <div className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2.5 ring-1 ring-white/[0.04]">
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-muted text-xs font-bold text-white shadow-glow-active">
-          {initials}
-        </div>
+        <Avatar
+          imageUrl={avatarUrl}
+          initials={initials}
+          color="from-accent to-accent-muted"
+          size="sm"
+          alt={email ? `${email} avatar` : "User avatar"}
+        />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-gray-200">
             {orgName ?? "My Organization"}

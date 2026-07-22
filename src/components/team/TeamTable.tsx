@@ -181,6 +181,8 @@ export function TeamTable({
                 <TeamMemberAvatar
                   initials={member.avatarInitials}
                   color={member.avatarColor}
+                  imageUrl={member.avatarUrl}
+                  name={member.name}
                   size="sm"
                 />
                 <div className="min-w-0 flex-1">
@@ -306,6 +308,8 @@ export function TeamTable({
                         <TeamMemberAvatar
                           initials={member.avatarInitials}
                           color={member.avatarColor}
+                          imageUrl={member.avatarUrl}
+                          name={member.name}
                           size="sm"
                         />
                         <div>

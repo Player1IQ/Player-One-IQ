@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Platform OAuth readiness (v1: YouTube + Twitch).
+ * Platform OAuth readiness (YouTube, Twitch, Instagram, TikTok).
  * Usage: node scripts/verify-oauth.mjs [appUrl]
  */
 
@@ -40,17 +40,31 @@ const appUrl = (
 const launchPlatforms = [
   {
     name: "YouTube",
-    enabled: env.PLATFORM_OAUTH_ENABLED === "true",
+    required: true,
     clientId: env.YOUTUBE_CLIENT_ID?.trim(),
     clientSecret: env.YOUTUBE_CLIENT_SECRET?.trim(),
     callback: `${appUrl}/api/platform-oauth/youtube/callback`,
   },
   {
     name: "Twitch",
-    enabled: env.PLATFORM_OAUTH_ENABLED === "true",
+    required: true,
     clientId: env.TWITCH_CLIENT_ID?.trim(),
     clientSecret: env.TWITCH_CLIENT_SECRET?.trim(),
     callback: `${appUrl}/api/platform-oauth/twitch/callback`,
+  },
+  {
+    name: "Instagram (Meta)",
+    required: false,
+    clientId: env.INSTAGRAM_CLIENT_ID?.trim(),
+    clientSecret: env.INSTAGRAM_CLIENT_SECRET?.trim(),
+    callback: `${appUrl}/api/platform-oauth/instagram/callback`,
+  },
+  {
+    name: "TikTok",
+    required: false,
+    clientId: env.TIKTOK_CLIENT_KEY?.trim(),
+    clientSecret: env.TIKTOK_CLIENT_SECRET?.trim(),
+    callback: `${appUrl}/api/platform-oauth/tiktok/callback`,
   },
 ];
 
@@ -88,24 +102,27 @@ async function main() {
     console.log("✓ CRON_SECRET");
   }
 
-  console.log("\nLaunch platforms:\n");
+  console.log("\nPlatforms:\n");
   for (const platform of launchPlatforms) {
     const creds = platform.clientId && platform.clientSecret;
     if (creds) {
       console.log(`✓ ${platform.name} credentials`);
-    } else {
+    } else if (platform.required) {
       console.log(`✗ ${platform.name} credentials incomplete`);
       failed += 1;
+    } else {
+      console.log(`○ ${platform.name} credentials not set (optional)`);
     }
     console.log(`  Register redirect: ${platform.callback}`);
   }
 
   console.log("\nManual E2E test:");
-  console.log("  1. Creators → open a creator → Connect YouTube or Twitch");
+  console.log("  1. Creators → open a creator → Connect YouTube / Twitch / Instagram");
   console.log("  2. Complete OAuth → confirm account shows connected");
-  console.log("  3. Verify revenue/profile sync (or wait for 06:00 UTC cron)");
+  console.log("  3. Instagram requires a Business or Creator Instagram account");
+  console.log("  4. Verify revenue/profile sync (or wait for 06:00 UTC cron)");
   console.log(
-    `  4. Cron test: curl -H "Authorization: Bearer $CRON_SECRET" ${appUrl}/api/cron/sync-platform-revenue\n`
+    `  5. Cron test: curl -H "Authorization: Bearer $CRON_SECRET" ${appUrl}/api/cron/sync-platform-revenue\n`
   );
 
   console.log(

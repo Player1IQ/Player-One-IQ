@@ -142,6 +142,8 @@ export function TeamMemberProfile({
               <TeamMemberAvatar
                 initials={member.avatarInitials}
                 color={member.avatarColor}
+                imageUrl={member.avatarUrl}
+                name={member.name}
                 size="lg"
               />
               <div className="flex-1">

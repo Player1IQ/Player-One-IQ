@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SeedTestDataButton } from "@/components/dev/SeedTestDataButton";
 import { DeployChecklistCard } from "@/components/settings/DeployChecklistCard";
@@ -29,6 +30,7 @@ import { isSeedEnabled } from "@/lib/seed/constants";
 import { getCreators } from "@/lib/creators/queries";
 import { getPayoutRecipientsForOrg } from "@/lib/payments/queries";
 import { PayoutSettingsSection } from "@/components/payments/PayoutSettingsSection";
+import { getMyAvatarUrl } from "@/app/account/actions";
 
 function formatCreatedAt(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -55,7 +57,7 @@ async function getOAuthConnectedAccountCount(): Promise<number> {
 }
 
 export default async function SettingsPage() {
-  const [organization, role, memberCount, oauthConnectedCount, payoutRecipients, creators] =
+  const [organization, role, memberCount, oauthConnectedCount, payoutRecipients, creators, avatarUrl] =
     await Promise.all([
       getOrganizationForUser(),
       getCurrentUserRole(),
@@ -63,14 +65,22 @@ export default async function SettingsPage() {
       getOAuthConnectedAccountCount(),
       getPayoutRecipientsForOrg(),
       getCreators(),
+      getMyAvatarUrl(),
     ]);
 
   const canView = canViewSettings(role);
   const canEdit = canManageSettings(role);
 
   if (!canView) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = supabase
+    ? await supabase.auth.getUser()
+    : { data: { user: null } };
 
   const aiIntegration = await getAiIntegrationForSettings();
   const subscriptionContext = await getSubscriptionContext();
@@ -109,6 +119,9 @@ export default async function SettingsPage() {
         canEdit={canEdit}
         canView={canView}
         showDevTools={showDevTools}
+        currentUserId={user?.id}
+        currentUserEmail={user?.email ?? undefined}
+        currentUserAvatarUrl={avatarUrl}
         payoutSettings={
           canView ? (
             <PayoutSettingsSection

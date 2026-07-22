@@ -348,6 +348,7 @@ export interface TeamMember {
   linkedCreatorId: string | null;
   linkedSponsorId: string | null;
   presenceStatus: PresenceStatus;
+  avatarUrl: string | null;
   avatarInitials: string;
   avatarColor: string;
   joinedDate: string;
@@ -404,7 +405,8 @@ export function displayNameFromEmail(email: string): string {
 
 export function mapTeamMemberRow(
   row: TeamMemberRow,
-  presenceStatus: PresenceStatus = "inactive"
+  presenceStatus: PresenceStatus = "inactive",
+  avatarUrl: string | null = null
 ): TeamMember {
   const name = displayNameFromEmail(row.email);
 
@@ -419,6 +421,7 @@ export function mapTeamMemberRow(
     linkedCreatorId: row.linked_creator_id,
     linkedSponsorId: row.linked_sponsor_id,
     presenceStatus,
+    avatarUrl,
     avatarInitials: getAvatarInitials(name, row.email),
     avatarColor: getAvatarColor(row.id),
     joinedDate: formatJoinedDate(row.joined_at ?? row.created_at),
@@ -440,6 +443,7 @@ export function mapInvitationRow(row: TeamInvitationRow): TeamMember {
     linkedCreatorId: row.linked_creator_id,
     linkedSponsorId: row.linked_sponsor_id,
     presenceStatus: "inactive",
+    avatarUrl: null,
     avatarInitials: getAvatarInitials(name, row.email),
     avatarColor: getAvatarColor(row.id),
     joinedDate: "—",

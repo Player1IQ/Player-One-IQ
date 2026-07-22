@@ -8,6 +8,26 @@ import {
   type TeamMember,
   type TeamMemberRow,
 } from "@/lib/team";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+async function getAvatarUrlsForUserIds(
+  supabase: SupabaseClient,
+  userIds: string[]
+): Promise<Map<string, string | null>> {
+  const map = new Map<string, string | null>();
+  if (userIds.length === 0) return map;
+
+  const { data } = await supabase
+    .from("user_profiles")
+    .select("user_id, avatar_url")
+    .in("user_id", userIds);
+
+  for (const row of data ?? []) {
+    map.set(row.user_id, row.avatar_url ?? null);
+  }
+
+  return map;
+}
 
 export async function getTeamMembers(): Promise<TeamMember[]> {
   const supabase = await createClient();
@@ -37,12 +57,16 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
   const userIds = memberRows
     .map((row) => row.user_id)
     .filter((id): id is string => Boolean(id));
-  const presenceMap = await getPresenceForUserIds(userIds);
+  const [presenceMap, avatarMap] = await Promise.all([
+    getPresenceForUserIds(userIds),
+    getAvatarUrlsForUserIds(supabase, userIds),
+  ]);
 
   const memberList = memberRows.map((row) =>
     mapTeamMemberRow(
       row,
-      row.user_id ? (presenceMap.get(row.user_id) ?? "inactive") : "inactive"
+      row.user_id ? (presenceMap.get(row.user_id) ?? "inactive") : "inactive",
+      row.user_id ? (avatarMap.get(row.user_id) ?? null) : null
     )
   );
   const inviteList =

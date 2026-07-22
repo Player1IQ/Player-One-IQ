@@ -167,7 +167,9 @@ export async function handlePlatformOAuthCallback(
 ) {
   const origin = await getAppOrigin();
   const { searchParams } = new URL(request.url);
-  const code = searchParams.get("code");
+  // Meta may append #_ to Instagram redirects; browsers strip the fragment,
+  // but normalize anyway in case a proxy forwarded it.
+  const code = searchParams.get("code")?.replace(/#_+$/, "") ?? null;
   const state = searchParams.get("state");
   const oauthError = searchParams.get("error");
 

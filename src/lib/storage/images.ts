@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const ORG_ASSETS_BUCKET = "org-assets";
 export const CREATOR_AVATARS_BUCKET = "creator-avatars";
+export const USER_AVATARS_BUCKET = "user-avatars";
 export const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024;
 
 export const ALLOWED_IMAGE_TYPES = [
@@ -44,6 +45,10 @@ export function buildCreatorAvatarPath(
   extension: string
 ): string {
   return `${organizationId}/${creatorId}.${extension}`;
+}
+
+export function buildUserAvatarPath(userId: string, extension: string): string {
+  return `${userId}/avatar.${extension}`;
 }
 
 export function getPublicStorageUrl(bucket: string, path: string): string {

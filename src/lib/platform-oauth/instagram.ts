@@ -19,13 +19,16 @@ function getInstagramCredentials() {
   return { clientId, clientSecret };
 }
 
+/** Valid Instagram Login scopes only — "manage_insights" is not a real Meta scope. */
+const INSTAGRAM_OAUTH_SCOPES = "instagram_business_basic";
+
 export async function getInstagramAuthorizeUrl(state: string): Promise<string> {
   const { clientId } = getInstagramCredentials();
   const redirectUri = await getOAuthRedirectUri("Instagram");
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
-    scope: "instagram_business_basic,instagram_business_manage_insights",
+    scope: INSTAGRAM_OAUTH_SCOPES,
     response_type: "code",
     state,
   });
@@ -33,9 +36,46 @@ export async function getInstagramAuthorizeUrl(state: string): Promise<string> {
   return `https://www.instagram.com/oauth/authorize?${params.toString()}`;
 }
 
+function parseShortLivedTokenResponse(body: unknown): {
+  access_token: string;
+  user_id: string;
+} {
+  const record = body as {
+    access_token?: string;
+    user_id?: string | number;
+    data?: Array<{
+      access_token?: string;
+      user_id?: string | number;
+    }>;
+    error_type?: string;
+    error_message?: string;
+    error?: { message?: string };
+  };
+
+  const nested = record.data?.[0];
+  const accessToken = record.access_token ?? nested?.access_token;
+  const userId = record.user_id ?? nested?.user_id;
+
+  if (!accessToken) {
+    throw new Error(
+      record.error_message ??
+        record.error_type ??
+        record.error?.message ??
+        "Instagram authorization failed."
+    );
+  }
+
+  return {
+    access_token: accessToken,
+    user_id: String(userId ?? ""),
+  };
+}
+
 export async function exchangeInstagramCode(code: string): Promise<OAuthTokens> {
   const { clientId, clientSecret } = getInstagramCredentials();
   const redirectUri = await getOAuthRedirectUri("Instagram");
+  // Meta sometimes appends #_ to the redirect; strip it if it leaked into the code.
+  const authorizationCode = code.replace(/#_+$/, "");
 
   const shortLivedResponse = await fetch(
     "https://api.instagram.com/oauth/access_token",
@@ -47,30 +87,27 @@ export async function exchangeInstagramCode(code: string): Promise<OAuthTokens> 
         client_secret: clientSecret,
         grant_type: "authorization_code",
         redirect_uri: redirectUri,
-        code,
+        code: authorizationCode,
       }),
     }
   );
 
-  const shortLivedBody = (await shortLivedResponse.json()) as {
-    access_token?: string;
-    user_id?: string | number;
-    error_type?: string;
-    error_message?: string;
-  };
-
-  if (!shortLivedResponse.ok || !shortLivedBody.access_token) {
+  const shortLivedBody = await shortLivedResponse.json();
+  if (!shortLivedResponse.ok) {
     throw new Error(
-      shortLivedBody.error_message ??
-        shortLivedBody.error_type ??
+      (shortLivedBody as { error_message?: string; error_type?: string })
+        .error_message ??
+        (shortLivedBody as { error_type?: string }).error_type ??
         "Instagram authorization failed."
     );
   }
 
+  const shortLived = parseShortLivedTokenResponse(shortLivedBody);
+
   const longLivedUrl = new URL("https://graph.instagram.com/access_token");
   longLivedUrl.searchParams.set("grant_type", "ig_exchange_token");
   longLivedUrl.searchParams.set("client_secret", clientSecret);
-  longLivedUrl.searchParams.set("access_token", shortLivedBody.access_token);
+  longLivedUrl.searchParams.set("access_token", shortLived.access_token);
 
   const longLivedResponse = await fetch(longLivedUrl.toString());
   const longLivedBody = (await longLivedResponse.json()) as {
@@ -88,7 +125,7 @@ export async function exchangeInstagramCode(code: string): Promise<OAuthTokens> 
   return {
     access_token: longLivedBody.access_token,
     expires_at: getTokenExpiry(longLivedBody.expires_in),
-    provider_user_id: String(shortLivedBody.user_id ?? ""),
+    provider_user_id: shortLived.user_id,
   };
 }
 

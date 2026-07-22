@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PortalAccountClient } from "@/components/portal/PortalAccountClient";
@@ -13,17 +14,24 @@ import {
   requireSponsorPortalUser,
 } from "@/lib/portal/guard";
 import { roleLabels, isPortalRole, isSponsorPortalRole } from "@/lib/team";
+import { getMyAvatarUrl } from "@/app/account/actions";
 
 export default async function PortalAccountPage() {
   const membership = await getCurrentUserMembership();
   if (!membership || !isPortalRole(membership.role)) {
-    redirect("/");
+    redirect(STAFF_DASHBOARD_PATH);
   }
 
-  const [organization, email] = await Promise.all([
+  const [organization, email, avatarUrl, userId] = await Promise.all([
     getOrganizationForUser(),
     getUserEmail(),
+    getMyAvatarUrl(),
+    getUserId(),
   ]);
+
+  if (!userId) {
+    redirect("/login");
+  }
 
   if (isSponsorPortalRole(membership.role)) {
     const { linkedSponsorId } = await requireSponsorPortalUser();
@@ -41,6 +49,8 @@ export default async function PortalAccountPage() {
           email={email}
           profileLabel={sponsor.companyName}
           profileHref={`/sponsors/${sponsor.id}`}
+          userId={userId}
+          avatarUrl={avatarUrl}
         />
       </DashboardLayout>
     );
@@ -65,6 +75,8 @@ export default async function PortalAccountPage() {
           email={email}
           profileLabel={creator.name}
           profileHref={`/creators/${creator.id}`}
+          userId={userId}
+          avatarUrl={avatarUrl}
         />
         <CreatorPortalPayoutSection
           creatorId={linkedCreatorId}
@@ -84,4 +96,15 @@ async function getUserEmail(): Promise<string> {
   } = await supabase.auth.getUser();
 
   return user?.email ?? "";
+}
+
+async function getUserId(): Promise<string | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return user?.id ?? null;
 }

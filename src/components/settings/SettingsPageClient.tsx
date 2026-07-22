@@ -6,6 +6,7 @@ import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboarding
 import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
 import { OrganizationSettingsForm } from "./OrganizationSettingsForm";
 import { OrganizationLogoUpload } from "./OrganizationLogoUpload";
+import { ProfilePhotoUpload } from "@/components/account/ProfilePhotoUpload";
 
 interface SettingsPageClientProps {
   organizationId: string;
@@ -17,6 +18,9 @@ interface SettingsPageClientProps {
   canEdit: boolean;
   canView: boolean;
   showDevTools: boolean;
+  currentUserId?: string;
+  currentUserEmail?: string;
+  currentUserAvatarUrl?: string | null;
   devTools?: React.ReactNode;
   platformSync?: React.ReactNode;
   payoutSettings?: React.ReactNode;
@@ -32,6 +36,9 @@ export function SettingsPageClient({
   canEdit,
   canView,
   showDevTools,
+  currentUserId,
+  currentUserEmail,
+  currentUserAvatarUrl,
   devTools,
   platformSync,
   payoutSettings,
@@ -48,6 +55,23 @@ export function SettingsPageClient({
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
+      {currentUserId ? (
+        <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
+          <h2 className="text-base font-semibold text-white">Your profile</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Add a photo so teammates can recognize you across the workspace.
+          </p>
+          <div className="mt-6">
+            <ProfilePhotoUpload
+              userId={currentUserId}
+              displayName={currentUserEmail ?? organizationName}
+              email={currentUserEmail}
+              avatarUrl={currentUserAvatarUrl}
+            />
+          </div>
+        </section>
+      ) : null}
+
       <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
         <h2 className="text-base font-semibold text-white">Organization</h2>
         <p className="mt-1 text-sm text-gray-500">

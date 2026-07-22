@@ -5,6 +5,7 @@ import { ArrowLeft, Building2, Shield, User } from "lucide-react";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
 import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
+import { ProfilePhotoUpload } from "@/components/account/ProfilePhotoUpload";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 
 interface PortalAccountClientProps {
@@ -13,6 +14,8 @@ interface PortalAccountClientProps {
   email: string;
   profileLabel: string;
   profileHref: string;
+  userId: string;
+  avatarUrl?: string | null;
 }
 
 export function PortalAccountClient({
@@ -21,6 +24,8 @@ export function PortalAccountClient({
   email,
   profileLabel,
   profileHref,
+  userId,
+  avatarUrl,
 }: PortalAccountClientProps) {
   return (
     <div className="mx-auto max-w-2xl space-y-6 animate-fade-in">
@@ -31,6 +36,23 @@ export function PortalAccountClient({
         <ArrowLeft className="h-4 w-4" />
         Back to portal
       </Link>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Your profile</CardTitle>
+          <CardDescription>
+            Add a photo so your agency and teammates can recognize you.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <ProfilePhotoUpload
+            userId={userId}
+            displayName={email}
+            email={email}
+            avatarUrl={avatarUrl}
+          />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
