@@ -4,8 +4,12 @@ import { getOpenAiHealth } from "@/lib/ai/openai-health";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
   isPlatformOAuthFeatureEnabled,
+  isPlatformOAuthConfigured,
   launchOAuthPlatforms,
+  oauthPlatforms,
 } from "@/lib/platform-oauth/config";
+import { getOAuthRedirectUri } from "@/lib/platform-oauth/redirect-uri";
+import type { OAuthPlatform } from "@/lib/platform-oauth/types";
 import {
   isStripeConfigured,
   getStripeWebhookSecret,
@@ -23,10 +27,26 @@ export async function GET() {
     (openAiConfigured && openAiHealth === "available");
   const serviceRoleConfigured = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
+  const platformOAuthRedirects = Object.fromEntries(
+    await Promise.all(
+      oauthPlatforms.map(async (platform) => [
+        platform,
+        {
+          configured: isPlatformOAuthConfigured(platform),
+          redirectUri: await getOAuthRedirectUri(platform),
+        },
+      ] as const)
+    )
+  ) as Record<
+    OAuthPlatform,
+    { configured: boolean; redirectUri: string }
+  >;
+
   return NextResponse.json({
     ok: true,
     supabase: isSupabaseConfigured(),
     platformOAuth: isPlatformOAuthFeatureEnabled(),
+    platformOAuthRedirects,
     launchOAuthPlatforms,
     cronConfigured: Boolean(process.env.CRON_SECRET),
     serviceRoleConfigured,

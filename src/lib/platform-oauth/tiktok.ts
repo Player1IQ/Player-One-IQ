@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "crypto";
+import { getTikTokClientCredentials } from "./credentials";
 import { getOAuthRedirectUri } from "./redirect-uri";
 import type { OAuthTokens } from "./tokens";
 import { getTokenExpiry } from "./tokens";
@@ -10,12 +11,11 @@ export interface TikTokProfile {
 }
 
 function getTikTokCredentials() {
-  const clientKey = process.env.TIKTOK_CLIENT_KEY;
-  const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
-  if (!clientKey || !clientSecret) {
-    throw new Error("TikTok OAuth is not configured.");
+  const creds = getTikTokClientCredentials();
+  if (!creds) {
+    throw new Error("tiktok_not_configured");
   }
-  return { clientKey, clientSecret };
+  return creds;
 }
 
 export function createTikTokPkcePair() {
@@ -82,9 +82,11 @@ export async function exchangeTikTokCode(
 
   const tokenData = body.data ?? body;
   if (!response.ok || !tokenData.access_token) {
-    throw new Error(
-      body.error_description ?? body.error ?? "TikTok authorization failed."
-    );
+    const description = body.error_description ?? body.error ?? "";
+    if (description.toLowerCase().includes("client_key")) {
+      throw new Error("tiktok_invalid_client_key");
+    }
+    throw new Error(description || "TikTok authorization failed.");
   }
 
   return {

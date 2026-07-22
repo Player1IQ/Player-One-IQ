@@ -1,4 +1,10 @@
 import {
+  getInstagramClientCredentials,
+  getTikTokClientCredentials,
+  getTwitchClientCredentials,
+  getYouTubeClientCredentials,
+} from "./credentials";
+import {
   isOAuthPlatform,
   launchOAuthPlatforms,
   oauthPlatforms,
@@ -15,27 +21,19 @@ export function isPlatformOAuthFeatureEnabled(): boolean {
 }
 
 export function isYouTubeOAuthConfigured(): boolean {
-  return Boolean(
-    process.env.YOUTUBE_CLIENT_ID && process.env.YOUTUBE_CLIENT_SECRET
-  );
+  return Boolean(getYouTubeClientCredentials());
 }
 
 export function isTwitchOAuthConfigured(): boolean {
-  return Boolean(
-    process.env.TWITCH_CLIENT_ID && process.env.TWITCH_CLIENT_SECRET
-  );
+  return Boolean(getTwitchClientCredentials());
 }
 
 export function isInstagramOAuthConfigured(): boolean {
-  return Boolean(
-    process.env.INSTAGRAM_CLIENT_ID && process.env.INSTAGRAM_CLIENT_SECRET
-  );
+  return Boolean(getInstagramClientCredentials());
 }
 
 export function isTikTokOAuthConfigured(): boolean {
-  return Boolean(
-    process.env.TIKTOK_CLIENT_KEY && process.env.TIKTOK_CLIENT_SECRET
-  );
+  return Boolean(getTikTokClientCredentials());
 }
 
 export function isPlatformOAuthConfigured(platform: OAuthPlatform): boolean {

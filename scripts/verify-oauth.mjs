@@ -116,6 +116,23 @@ async function main() {
     console.log(`  Register redirect: ${platform.callback}`);
   }
 
+  console.log("\nGoogle / YouTube beta note:");
+  console.log(
+    "  OAuth consent screen must be in Testing until verified. Add each beta tester Gmail under"
+  );
+  console.log("  Google Cloud → APIs & Services → OAuth consent screen → Test users.");
+  console.log(
+    "  Use the same OAuth client as YOUTUBE_CLIENT_ID. Redirect URI must match exactly.\n"
+  );
+
+  console.log("\nTikTok beta note:");
+  console.log(
+    "  TikTok for Developers → Login Kit → add redirect URI exactly as shown above."
+  );
+  console.log(
+    "  Add beta TikTok accounts as test users if the app is still in sandbox.\n"
+  );
+
   console.log("\nManual E2E test:");
   console.log("  1. Creators → open a creator → Connect YouTube / Twitch / Instagram");
   console.log("  2. Complete OAuth → confirm account shows connected");

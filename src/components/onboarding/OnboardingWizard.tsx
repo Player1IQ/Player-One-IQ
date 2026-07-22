@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { completeOnboarding } from "@/app/onboarding/actions";
+import { formatPlatformOAuthError } from "@/lib/platform-oauth/oauth-errors";
 import { OnboardingConnectStep } from "@/components/onboarding/OnboardingConnectStep";
 import {
   clearOnboardingStepClient,
@@ -205,7 +206,15 @@ export function OnboardingWizard({
 
       {oauthErrorParam ? (
         <div className="mb-5 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-          {oauthErrorParam}
+          {(() => {
+            const formatted = formatPlatformOAuthError(oauthErrorParam);
+            return (
+              <>
+                <p className="font-medium text-red-300">{formatted.title}</p>
+                <p className="mt-1">{formatted.message}</p>
+              </>
+            );
+          })()}
         </div>
       ) : null}
 

@@ -18,6 +18,8 @@ import { exchangeTwitchCode, getTwitchAuthorizeUrl } from "./twitch";
 import { exchangeYouTubeCode, getYouTubeAuthorizeUrl } from "./youtube";
 import { syncCreatorPlatformAccountById } from "./sync-account";
 import { getAppOrigin } from "@/lib/email/app-url";
+import { assertPlatformCredentials } from "./credentials";
+import { toOAuthErrorQueryValue } from "./oauth-errors";
 
 function appendQueryParam(base: string, key: string, value: string): string {
   const separator = base.includes("?") ? "&" : "?";
@@ -130,6 +132,17 @@ export async function handlePlatformOAuthStart(
 
   const tiktokPkce =
     platform === "TikTok" ? createTikTokPkcePair() : null;
+
+  try {
+    assertPlatformCredentials(platform);
+  } catch (err) {
+    return NextResponse.redirect(
+      `${await getAppOrigin()}/creators/${creatorId}?oauth_error=${encodeURIComponent(
+        toOAuthErrorQueryValue(err)
+      )}`
+    );
+  }
+
   const state = createOAuthState({
     creatorId,
     organizationId,
@@ -183,7 +196,11 @@ export async function handlePlatformOAuthCallback(
 
   if (oauthError) {
     return NextResponse.redirect(
-      appendQueryParam(redirectBase, "oauth_error", oauthError)
+      appendQueryParam(
+        redirectBase,
+        "oauth_error",
+        toOAuthErrorQueryValue(oauthError)
+      )
     );
   }
 
@@ -257,7 +274,11 @@ export async function handlePlatformOAuthCallback(
       .eq("platform", platform);
 
     return NextResponse.redirect(
-      appendQueryParam(redirectBase, "oauth_error", message)
+      appendQueryParam(
+        redirectBase,
+        "oauth_error",
+        toOAuthErrorQueryValue(message)
+      )
     );
   }
 }

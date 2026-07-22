@@ -37,6 +37,12 @@ export function OnboardingConnectStep({
       </div>
 
       <p className="text-xs leading-relaxed text-gray-500">
+        During beta, YouTube uses Google sign-in. If Google blocks access, your
+        workspace admin must add your Gmail as a Google OAuth test user. TikTok
+        requires Login Kit to be configured for this app.
+      </p>
+
+      <p className="text-xs leading-relaxed text-gray-500">
         You can add more platforms or enter handles manually later from{" "}
         <a
           href={`/creators/${creatorId}?returnTo=${returnTo}`}

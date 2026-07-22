@@ -1,4 +1,5 @@
 import { getOAuthRedirectUri } from "./redirect-uri";
+import { getYouTubeClientCredentials } from "./credentials";
 import type { OAuthTokens } from "./tokens";
 import { getTokenExpiry } from "./tokens";
 
@@ -12,12 +13,12 @@ export interface YouTubeSyncResult {
 }
 
 export async function getYouTubeAuthorizeUrl(state: string): Promise<string> {
-  const clientId = process.env.YOUTUBE_CLIENT_ID;
-  if (!clientId) throw new Error("YouTube OAuth is not configured.");
+  const creds = getYouTubeClientCredentials();
+  if (!creds) throw new Error("youtube_not_configured");
 
   const redirectUri = await getOAuthRedirectUri("YouTube");
   const params = new URLSearchParams({
-    client_id: clientId,
+    client_id: creds.clientId,
     redirect_uri: redirectUri,
     response_type: "code",
     scope: [
@@ -34,10 +35,9 @@ export async function getYouTubeAuthorizeUrl(state: string): Promise<string> {
 }
 
 export async function exchangeYouTubeCode(code: string): Promise<OAuthTokens> {
-  const clientId = process.env.YOUTUBE_CLIENT_ID;
-  const clientSecret = process.env.YOUTUBE_CLIENT_SECRET;
-  if (!clientId || !clientSecret) {
-    throw new Error("YouTube OAuth is not configured.");
+  const creds = getYouTubeClientCredentials();
+  if (!creds) {
+    throw new Error("youtube_not_configured");
   }
 
   const redirectUri = await getOAuthRedirectUri("YouTube");
@@ -46,8 +46,8 @@ export async function exchangeYouTubeCode(code: string): Promise<OAuthTokens> {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code,
-      client_id: clientId,
-      client_secret: clientSecret,
+      client_id: creds.clientId,
+      client_secret: creds.clientSecret,
       redirect_uri: redirectUri,
       grant_type: "authorization_code",
     }),
