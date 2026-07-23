@@ -3,8 +3,11 @@ import { getOrganizationId } from "@/lib/organization/queries";
 import { oauthPlatforms, type OAuthPlatform } from "./types";
 import {
   ensureFreshTokensForPlatform,
-  type PlatformAccountRow,
 } from "./sync-account";
+import {
+  loadPlatformOAuthTokens,
+  savePlatformOAuthTokens,
+} from "./token-store";
 
 export async function getOAuthAccessTokenForCreator(
   creatorId: string,
@@ -18,29 +21,27 @@ export async function getOAuthAccessTokenForCreator(
 
   const { data: account } = await supabase
     .from("creator_platform_accounts")
-    .select("id, organization_id, creator_id, platform, oauth_metadata, connection_status")
+    .select("id, organization_id, creator_id, platform, connection_status")
     .eq("creator_id", creatorId)
     .eq("organization_id", organizationId)
     .eq("platform", platform)
     .eq("connection_status", "connected_oauth")
     .maybeSingle();
 
-  if (!account?.oauth_metadata) return null;
+  if (!account) return null;
 
-  const row = account as PlatformAccountRow;
-  const tokens = row.oauth_metadata;
+  const tokens = await loadPlatformOAuthTokens(account.id, organizationId);
   if (!tokens?.access_token) return null;
 
   const freshTokens = await ensureFreshTokensForPlatform(platform, tokens);
 
   if (freshTokens !== tokens) {
-    await supabase
-      .from("creator_platform_accounts")
-      .update({
-        oauth_metadata: freshTokens,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", account.id);
+    const saveResult = await savePlatformOAuthTokens(
+      account.id,
+      organizationId,
+      freshTokens
+    );
+    if (saveResult.error) return null;
   }
 
   return { accessToken: freshTokens.access_token, accountId: account.id };

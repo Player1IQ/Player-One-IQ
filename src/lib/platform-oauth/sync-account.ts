@@ -17,6 +17,7 @@ import { syncTwitchRevenue } from "./twitch";
 import { syncYouTubeRevenue } from "./youtube";
 import { refreshInstagramAccessToken } from "./instagram";
 import { refreshTikTokAccessToken } from "./tiktok";
+import { loadPlatformOAuthTokens, savePlatformOAuthTokens } from "./token-store";
 
 export interface PlatformAccountRow {
   id: string;
@@ -113,7 +114,7 @@ export async function syncCreatorPlatformAccountById(
 
   const { data: account, error: fetchError } = await supabase
     .from("creator_platform_accounts")
-    .select("id, organization_id, creator_id, platform, oauth_metadata")
+    .select("id, organization_id, creator_id, platform, connection_status")
     .eq("id", accountId)
     .eq("organization_id", organizationId)
     .maybeSingle();
@@ -122,11 +123,15 @@ export async function syncCreatorPlatformAccountById(
     return { error: "Platform account not found." };
   }
 
-  const row = account as PlatformAccountRow;
-  const tokens = row.oauth_metadata;
+  const tokens = await loadPlatformOAuthTokens(accountId, organizationId);
   if (!tokens?.access_token) {
     return { error: "This account is not connected via OAuth." };
   }
+
+  const row = {
+    ...account,
+    oauth_metadata: tokens,
+  } as PlatformAccountRow;
 
   const platform = row.platform as OAuthPlatform;
   const periodMonth = getCurrentPeriodMonth();
@@ -242,7 +247,6 @@ export async function syncCreatorPlatformAccountById(
         display_name: displayName,
         connection_method: "oauth",
         connection_status: "connected_oauth",
-        oauth_metadata: freshTokens,
         last_synced_at: new Date().toISOString(),
         sync_error: revenueWarning ?? null,
         updated_at: new Date().toISOString(),
@@ -251,6 +255,13 @@ export async function syncCreatorPlatformAccountById(
       .eq("organization_id", organizationId);
 
     if (updateError) return { error: updateError.message };
+
+    const tokenSave = await savePlatformOAuthTokens(
+      row.id,
+      organizationId,
+      freshTokens
+    );
+    if (tokenSave.error) return { error: tokenSave.error };
     return { success: true };
   } catch (err) {
     const message =

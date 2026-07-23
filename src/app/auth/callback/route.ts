@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeInternalRedirectPath } from "@/lib/auth/safe-redirect";
 import { getPendingInvitationForUser } from "@/lib/team/queries";
 import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { NextResponse } from "next/server";
@@ -6,7 +7,10 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? STAFF_DASHBOARD_PATH;
+  const next = sanitizeInternalRedirectPath(
+    searchParams.get("next"),
+    STAFF_DASHBOARD_PATH
+  );
 
   if (code) {
     const supabase = await createClient();

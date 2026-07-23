@@ -8,6 +8,7 @@ import {
   requireFeatureAccess,
   requireResourceWriteAccess,
 } from "@/lib/permissions";
+import { clearPlatformOAuthTokens } from "@/lib/platform-oauth/token-store";
 import { platforms, type Platform } from "@/lib/creators";
 import {
   getCurrentPeriodMonth,
@@ -205,7 +206,6 @@ export async function disconnectCreatorPlatformAccount(accountId: string) {
     .from("creator_platform_accounts")
     .update({
       connection_status: "disconnected",
-      oauth_metadata: {},
       sync_error: null,
       updated_at: new Date().toISOString(),
     })
@@ -213,6 +213,9 @@ export async function disconnectCreatorPlatformAccount(accountId: string) {
     .eq("organization_id", organizationId);
 
   if (error) return { error: error.message };
+
+  const tokenClear = await clearPlatformOAuthTokens(accountId, organizationId);
+  if (tokenClear.error) return { error: tokenClear.error };
 
   revalidatePath(`/creators/${account.creator_id}`);
   revalidatePath("/");
@@ -251,7 +254,6 @@ export async function cancelCreatorPlatformOAuthAttempt(accountId: string) {
     .from("creator_platform_accounts")
     .update({
       connection_status: "disconnected",
-      oauth_metadata: {},
       sync_error: null,
       updated_at: new Date().toISOString(),
     })
@@ -259,6 +261,9 @@ export async function cancelCreatorPlatformOAuthAttempt(accountId: string) {
     .eq("organization_id", organizationId);
 
   if (error) return { error: error.message };
+
+  const tokenClear = await clearPlatformOAuthTokens(accountId, organizationId);
+  if (tokenClear.error) return { error: tokenClear.error };
 
   revalidatePath(`/creators/${account.creator_id}`);
   revalidatePath("/portal");

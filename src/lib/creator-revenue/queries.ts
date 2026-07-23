@@ -33,7 +33,9 @@ export async function getCreatorPlatformAccounts(
 
   const { data, error } = await supabase
     .from("creator_platform_accounts")
-    .select("*")
+    .select(
+      "id, organization_id, creator_id, platform, account_handle, display_name, connection_method, connection_status, last_synced_at, sync_error, created_at, updated_at"
+    )
     .eq("organization_id", organizationId)
     .eq("creator_id", creatorId)
     .neq("connection_status", "disconnected")

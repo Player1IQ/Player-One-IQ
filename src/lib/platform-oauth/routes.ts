@@ -20,6 +20,7 @@ import { syncCreatorPlatformAccountById } from "./sync-account";
 import { getAppOrigin } from "@/lib/email/app-url";
 import { assertPlatformCredentials } from "./credentials";
 import { toOAuthErrorQueryValue } from "./oauth-errors";
+import { createServiceClient } from "@/lib/supabase/admin";
 
 function appendQueryParam(base: string, key: string, value: string): string {
   const separator = base.includes("?") ? "&" : "?";
@@ -210,17 +211,15 @@ export async function handlePlatformOAuthCallback(
     );
   }
 
-  const supabase = await createClient();
-  if (!supabase) {
-    return NextResponse.redirect(
-      appendQueryParam(redirectBase, "oauth_error", "supabase_not_configured")
-    );
-  }
-
   try {
     const tokens = await exchangeCode(platform, code, payload.pkceVerifier);
 
-    const { data: account, error: accountError } = await supabase
+    const serviceSupabase = createServiceClient();
+    if (!serviceSupabase) {
+      throw new Error("Service client is not configured.");
+    }
+
+    const { data: account, error: accountError } = await serviceSupabase
       .from("creator_platform_accounts")
       .upsert(
         {
@@ -262,16 +261,19 @@ export async function handlePlatformOAuthCallback(
     const message =
       err instanceof Error ? err.message : "Platform authorization failed.";
 
-    await supabase
-      .from("creator_platform_accounts")
-      .update({
-        connection_status: "sync_error",
-        sync_error: message,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("creator_id", payload.creatorId)
-      .eq("organization_id", payload.organizationId)
-      .eq("platform", platform);
+    const errorClient = await createClient();
+    if (errorClient) {
+      await errorClient
+        .from("creator_platform_accounts")
+        .update({
+          connection_status: "sync_error",
+          sync_error: message,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("creator_id", payload.creatorId)
+        .eq("organization_id", payload.organizationId)
+        .eq("platform", platform);
+    }
 
     return NextResponse.redirect(
       appendQueryParam(
