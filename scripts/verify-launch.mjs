@@ -9,6 +9,7 @@
 
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
+import { printPostBetaChecklist } from "./post-beta-checklist-items.mjs";
 
 const baseUrl = (
   process.argv[2] ??
@@ -62,12 +63,14 @@ function main() {
     console.log(
       "Manual steps (not automated): Resend domain, Stripe live keys, Supabase auth URLs, OAuth prod callbacks, Agency Pro API keys + webhooks in Settings, agency billing policy.\n"
     );
+    printPostBetaChecklist();
     process.exit(1);
   }
 
   console.log(
     "All automated checks passed. Complete manual ops (Resend domain, Stripe live, Supabase auth URLs, OAuth callbacks) before inviting users.\n"
   );
+  printPostBetaChecklist();
 }
 
 main();

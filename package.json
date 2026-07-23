@@ -16,6 +16,7 @@
     "verify:schedule": "node scripts/verify-schedule.mjs",
     "verify:capacity": "node scripts/load-smoke.mjs",
     "verify:launch": "node scripts/verify-launch.mjs",
+    "verify:post-beta": "node scripts/post-beta-checklist-items.mjs",
     "test:guards": "node --import tsx --test tests/guards/portal-paths.test.ts tests/guards/staff-paths.test.ts tests/api/keys.test.ts tests/creators/portal-benefits.test.ts tests/opportunities/recommendations.test.ts tests/onboarding/step-resolution.test.ts tests/onboarding/portal-tour-state.test.ts tests/schedule/helpers.test.ts tests/schedule/cancellation-email.test.ts tests/payments/helpers.test.ts",
     "test:e2e": "playwright test"
   },

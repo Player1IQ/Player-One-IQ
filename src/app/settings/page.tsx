@@ -3,6 +3,7 @@ import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SeedTestDataButton } from "@/components/dev/SeedTestDataButton";
 import { DeployChecklistCard } from "@/components/settings/DeployChecklistCard";
+import { PostBetaLaunchChecklist } from "@/components/settings/PostBetaLaunchChecklist";
 import { PlatformSyncCard } from "@/components/settings/PlatformSyncCard";
 import { SettingsPageClient } from "@/components/settings/SettingsPageClient";
 import { AiIntegrationCard } from "@/components/settings/AiIntegrationCard";
@@ -142,6 +143,7 @@ export default async function SettingsPage() {
                 aiIntegrationHasKey={aiIntegration?.hasApiKey ?? false}
                 aiIntegrationProbeError={aiIntegration?.lastProbeError ?? null}
               />
+              <PostBetaLaunchChecklist />
               <AiIntegrationCard
                 integration={aiIntegration}
                 encryptionConfigured={isAiCredentialsEncryptionConfigured()}

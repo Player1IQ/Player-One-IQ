@@ -1,0 +1,141 @@
+{
+  "title": "Post-beta launch",
+  "description": "Complete these when moving from beta testers to public launch. Track progress here and in npm run verify:launch.",
+  "sections": [
+    {
+      "id": "platform-oauth",
+      "title": "Platform integrations (production)",
+      "items": [
+        {
+          "id": "google-oauth-production",
+          "label": "Google / YouTube OAuth published to production",
+          "detail": "Submit Google OAuth app for verification; exit Testing mode so any Google user can connect YouTube (not just test users)."
+        },
+        {
+          "id": "tiktok-approved",
+          "label": "TikTok Login Kit approved and live",
+          "detail": "Use production Client Key/Secret on Vercel; register redirect on canonical domain."
+        },
+        {
+          "id": "meta-instagram-approved",
+          "label": "Meta / Instagram Login approved",
+          "detail": "Finish business verification and app review; set INSTAGRAM_CLIENT_ID/SECRET on Vercel."
+        },
+        {
+          "id": "oauth-redirects-canonical",
+          "label": "All OAuth redirect URIs use canonical domain",
+          "detail": "Update Google, Twitch, TikTok, Meta, and Supabase auth URLs to playeroneiq.com (or www) — remove vercel.app-only URLs when ready."
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Security & access",
+      "items": [
+        {
+          "id": "migration-064",
+          "label": "Migration 064 applied (OAuth token column lockdown)",
+          "detail": "Run supabase/migrations/064_protect_oauth_metadata_column.sql in production Supabase."
+        },
+        {
+          "id": "api-key-pepper",
+          "label": "API_KEY_PEPPER set in Vercel",
+          "detail": "Required if Agency Pro API keys are offered to customers."
+        },
+        {
+          "id": "leaked-password-protection",
+          "label": "Supabase leaked-password protection enabled",
+          "detail": "Authentication → Providers → enable HaveIBeenPwned check."
+        },
+        {
+          "id": "admin-2fa",
+          "label": "2FA enabled on admin accounts",
+          "detail": "Vercel, Supabase, Google Cloud, Stripe, TikTok, and Meta developer accounts."
+        },
+        {
+          "id": "secrets-rotated",
+          "label": "Beta secrets rotated if shared widely",
+          "detail": "CRON_SECRET, PLATFORM_OAUTH_STATE_SECRET, and any test API keys."
+        }
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "title": "Infrastructure & reliability",
+      "items": [
+        {
+          "id": "custom-domain-apex",
+          "label": "Custom domain fully live (apex + www)",
+          "detail": "playeroneiq.com A record points to Vercel; www CNAME configured; NEXT_PUBLIC_APP_URL matches canonical URL."
+        },
+        {
+          "id": "stripe-live",
+          "label": "Stripe live mode + production webhook",
+          "detail": "Live keys on Vercel; webhook at /api/billing/webhook on canonical domain."
+        },
+        {
+          "id": "resend-custom-domain",
+          "label": "Resend on custom sending domain",
+          "detail": "INVITE_EMAIL_FROM uses your domain, not onboarding@resend.dev."
+        },
+        {
+          "id": "error-monitoring",
+          "label": "Error monitoring and uptime alerts configured",
+          "detail": "e.g. Sentry or Vercel monitoring; alert on /api/health failures."
+        },
+        {
+          "id": "supabase-backups",
+          "label": "Supabase backup / PITR plan confirmed",
+          "detail": "Enable point-in-time recovery on Pro if customer data volume warrants it."
+        }
+      ]
+    },
+    {
+      "id": "legal-trust",
+      "title": "Legal & trust",
+      "items": [
+        {
+          "id": "privacy-terms-expanded",
+          "label": "Privacy Policy and Terms expanded for production",
+          "detail": "Cover OAuth data, retention, subprocessors, and contact for data requests."
+        },
+        {
+          "id": "beta-messaging-removed",
+          "label": "Beta messaging removed from marketing site",
+          "detail": "Update landing page copy and pricing CTAs for general availability."
+        },
+        {
+          "id": "data-deletion-process",
+          "label": "Data deletion / disconnect process documented",
+          "detail": "Users can disconnect platforms and request workspace deletion."
+        }
+      ]
+    },
+    {
+      "id": "product-ops",
+      "title": "Product & operations",
+      "items": [
+        {
+          "id": "self-serve-onboarding",
+          "label": "Self-serve signup and onboarding tested end-to-end",
+          "detail": "Agency, creator, and sponsor flows without manual invites."
+        },
+        {
+          "id": "support-channel",
+          "label": "Support channel and SLA defined for paid tiers",
+          "detail": "Public support email; response expectations documented."
+        },
+        {
+          "id": "billing-policy-communicated",
+          "label": "Billing tiers and trial policy communicated",
+          "detail": "Free vs paid plans clear on site and in-app."
+        },
+        {
+          "id": "verify-launch-passing",
+          "label": "npm run verify:launch passes on production URL",
+          "detail": "Run against https://www.playeroneiq.com (or canonical domain) before GA."
+        }
+      ]
+    }
+  ]
+}

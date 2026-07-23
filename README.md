@@ -34,6 +34,7 @@ Run these before or after deploy to confirm configuration:
 | Script | Purpose |
 |--------|---------|
 | `npm run verify:launch` | **Full pre-launch checklist** (runs all scripts below) |
+| `npm run verify:post-beta` | **Post-beta GA checklist** (manual items; also in Settings) |
 | `npm run verify:deploy` | Vercel / production env checklist |
 | `npm run verify:production` | Post-deploy smoke checks |
 | `npm run verify:billing` | Stripe billing setup |
@@ -67,7 +68,16 @@ You are ready to invite real users when:
 - [ ] Agency free-tier vs paid policy decided and communicated to the team
 - [ ] Platform trials configured (migration 028) — new orgs trialing, existing orgs grandfathered
 
-Settings → **Deploy checklist** mirrors the production health checks in the app UI.
+### Post-beta launch (general availability)
+
+When moving beyond beta testers, complete the **Post-beta launch** checklist:
+
+- **In app:** Settings → scroll to **Post-beta launch** (track progress with checkboxes; saved in your browser)
+- **CLI:** `npm run verify:post-beta` or `npm run verify:launch` (prints the same list after automated checks)
+
+Covers production OAuth approval (Google, TikTok, Meta), custom domain finalization, migration 064, security hardening, Stripe/Resend production, legal pages, and removing beta messaging.
+
+Settings → **Deploy checklist** mirrors automated production health checks; **Post-beta launch** tracks manual GA steps.
 
 ## Project structure
 
