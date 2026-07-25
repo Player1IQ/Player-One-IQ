@@ -29,25 +29,25 @@ const MOBILE_NAV_ITEMS = [
 ];
 
 const revenueData = [
-  { month: "Jan", revenue: 320, deals: 18 },
-  { month: "Feb", revenue: 410, deals: 22 },
-  { month: "Mar", revenue: 385, deals: 19 },
-  { month: "Apr", revenue: 522, deals: 28 },
-  { month: "May", revenue: 614, deals: 35 },
-  { month: "Jun", revenue: 591, deals: 31 },
-  { month: "Jul", revenue: 724, deals: 42 },
-  { month: "Aug", revenue: 847, deals: 47 },
+  { month: "Jan", revenue: 8, deals: 2 },
+  { month: "Feb", revenue: 11, deals: 3 },
+  { month: "Mar", revenue: 10, deals: 2 },
+  { month: "Apr", revenue: 14, deals: 4 },
+  { month: "May", revenue: 16, deals: 4 },
+  { month: "Jun", revenue: 15, deals: 3 },
+  { month: "Jul", revenue: 18, deals: 5 },
+  { month: "Aug", revenue: 22, deals: 5 },
 ];
 
 const creatorGrowthData = [
-  { month: "Jan", creators: 1240 },
-  { month: "Feb", creators: 1580 },
-  { month: "Mar", creators: 1820 },
-  { month: "Apr", creators: 2340 },
-  { month: "May", creators: 2980 },
-  { month: "Jun", creators: 3450 },
-  { month: "Jul", creators: 4120 },
-  { month: "Aug", creators: 4870 },
+  { month: "Jan", creators: 4 },
+  { month: "Feb", creators: 6 },
+  { month: "Mar", creators: 7 },
+  { month: "Apr", creators: 9 },
+  { month: "May", creators: 11 },
+  { month: "Jun", creators: 13 },
+  { month: "Jul", creators: 15 },
+  { month: "Aug", creators: 18 },
 ];
 
 const heroMiniData = [
@@ -55,10 +55,18 @@ const heroMiniData = [
   { v: 61 }, { v: 59 }, { v: 72 }, { v: 85 },
 ];
 
-const trustedOrgs = [
-  "NRG Esports", "100 Thieves", "FaZe Clan", "Cloud9", "G2 Esports",
-  "Loaded", "WME Sports", "Evolved Talent", "TSM", "Team Liquid",
-  "Sentinels", "Luminosity Gaming",
+const betaPartnerOrgs = [
+  "Meridian Talent", "Northline Collective", "Vertex Creator Co.", "Arcade Lane Media",
+  "Summit Roster", "Forge Entertainment", "Prism Talent Group", "Lumen Creator Studio",
+  "Pitchline Partners", "Baseline Sports Media", "Draft Day Management", "Halo Point Agency",
+];
+
+const sampleOpportunities = [
+  { brand: "Bolt Energy", creator: "JaydenStreams", value: "Campaign", category: "Sponsorship", match: 92, status: "Active" as const },
+  { brand: "Kova Apparel", creator: "MiaCreates", value: "Partnership", category: "Endorsement", match: 89, status: "Active" as const },
+  { brand: "Orbit Games", creator: "TylerPlays", value: "In pipeline", category: "Partnership", match: 91, status: "Pending" as const },
+  { brand: "Nimbus Tech", creator: "AlexReviews", value: "Campaign", category: "Sponsorship", match: 88, status: "Active" as const },
+  { brand: "Drift Beverage", creator: "SamNova", value: "In pipeline", category: "Brand deal", match: 90, status: "Pending" as const },
 ];
 
 const features = [
@@ -120,7 +128,7 @@ const aiAssistants = [
     role: "Strategic Advisor",
     color: "violet",
     prompt: "What should I focus on to grow revenue this quarter?",
-    response: "Your top 3 creator contracts are up for renewal in 45 days. Based on Q3 performance, I recommend renegotiating upward by 28%. I've drafted the pitch deck — want me to send it for review?",
+    response: "Your top 3 creator contracts are up for renewal in 45 days. Based on recent performance trends, I've drafted renegotiation briefs with recommended talking points — want me to send them for review?",
   },
   {
     name: "Content Strategist",
@@ -128,7 +136,7 @@ const aiAssistants = [
     role: "Content Intelligence",
     color: "sky",
     prompt: "What content formats are performing best right now?",
-    response: "MrBeast-style reaction content is trending +340% in gaming this month. 4 creators on your roster have the audience fit. I can draft a campaign brief for each — ready in 5 minutes.",
+    response: "Short-form reaction content is gaining traction in gaming this month. Jayden and Tyler on your roster have especially strong audience fit. I can draft a campaign brief for each — ready in a few minutes.",
   },
   {
     name: "Sponsorship Hunter",
@@ -136,7 +144,7 @@ const aiAssistants = [
     role: "Deal Prospector",
     color: "blue",
     prompt: "Find new brand opportunities for our gaming roster.",
-    response: "I found 12 brands with active creator budgets matching your roster. Nike has a $2M campaign brief aligned with 3 of your athletes. I drafted an intro email — want me to send it?",
+    response: "Bolt Energy and Kova Apparel have active briefs matching three creators on your roster — Jayden, Mia, and Tyler. I drafted intro emails for each pairing — want me to send them for review?",
   },
   {
     name: "Revenue Optimizer",
@@ -144,33 +152,33 @@ const aiAssistants = [
     role: "Financial Intelligence",
     color: "emerald",
     prompt: "Are we leaving money on the table with current pricing?",
-    response: "Your agency is leaving $340K on the table from underpriced sponsorships. I analyzed 847 comparable deals — here is the market rate card you should be using today.",
+    response: "A few sponsorships on your roster may be priced below comparable market rates. I pulled benchmarks from similar deals — here is a rate card you can use in your next negotiation.",
   },
 ];
 
 const testimonials = [
   {
-    quote: "Player One IQ completely transformed how we manage our creator roster. We closed $2.4M in sponsorships in our first quarter using the platform. The AI assistant alone paid for itself in week one.",
-    name: "Jordan Kim",
+    quote: "We're in the public beta and already replaced three spreadsheets. Roster, renewals, and sponsor outreach finally live in one place — our team actually uses it every day.",
+    name: "Jordan Reyes",
     role: "CEO",
-    company: "Evolved Talent Agency",
-    avatar: "JK",
+    company: "Meridian Talent",
+    avatar: "JR",
     stars: 5,
   },
   {
-    quote: "We tried five other platforms before Player One IQ. Nothing comes close. The contract management and sponsor CRM are built by people who actually understand how creator businesses work.",
-    name: "Marcus Chen",
+    quote: "The sponsor CRM and contract workflow feel purpose-built for creator deals. We onboarded our partnerships team in a week without a painful custom setup.",
+    name: "Marcus Okonkwo",
     role: "Head of Partnerships",
-    company: "NRG Esports",
-    avatar: "MC",
+    company: "Vertex Creator Co.",
+    avatar: "MO",
     stars: 5,
   },
   {
-    quote: "The Opportunity Marketplace is a game changer. Brands we never would have reached out to are coming to us. Player One IQ is the competitive edge every serious creator agency needs.",
-    name: "Aaliya Torres",
+    quote: "Marketplace matching surfaced two brand conversations we hadn't prioritized yet. For a lean agency, that kind of signal is exactly what we needed in beta.",
+    name: "Aaliya Sharma",
     role: "Founder",
-    company: "Loaded Management",
-    avatar: "AT",
+    company: "Northline Collective",
+    avatar: "AS",
     stars: 5,
   },
 ];
@@ -238,13 +246,7 @@ const plans = [
   },
 ];
 
-const marketplaceDeals = [
-  { brand: "Nike", creator: "MrBeast", value: "$450K", category: "Campaign", match: 98, status: "Active" },
-  { brand: "Red Bull", creator: "iShowSpeed", value: "$320K", category: "Endorsement", match: 95, status: "Active" },
-  { brand: "Riot Games", creator: "Pokimane", value: "$280K", category: "Partnership", match: 97, status: "Pending" },
-  { brand: "Samsung", creator: "MKBHD", value: "$200K", category: "Sponsorship", match: 94, status: "Active" },
-  { brand: "Monster Energy", creator: "Ninja", value: "$380K", category: "Brand Deal", match: 96, status: "Pending" },
-];
+const marketplaceDeals = sampleOpportunities;
 
 // ─── Animation helpers ─────────────────────────────────────────────────────────
 
@@ -499,10 +501,10 @@ function HeroDashboard() {
           {/* Stats row */}
           <div className="grid grid-cols-4 gap-2 mb-4">
             {[
-              { label: "MRR", value: "$847K", delta: "+23%" },
-              { label: "Deals", value: "234", delta: "+12" },
-              { label: "Brands", value: "47", delta: "+8" },
-              { label: "Creators", value: "4.8K", delta: "+340" },
+              { label: "Revenue", value: "Your data", delta: "Track MRR" },
+              { label: "Deals", value: "Pipeline", delta: "All stages" },
+              { label: "Brands", value: "CRM", delta: "Relationships" },
+              { label: "Creators", value: "Roster", delta: "One view" },
             ].map((s, i) => (
               <div
                 key={i}
@@ -535,7 +537,7 @@ function HeroDashboard() {
               <span className="text-[9px] font-semibold uppercase tracking-widest text-white/35">
                 Revenue Trend
               </span>
-              <span className="text-[9px] font-semibold text-violet-400">+163% YoY</span>
+              <span className="text-[9px] font-semibold text-violet-400">Sample view</span>
             </div>
             <div className="h-[72px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -564,11 +566,7 @@ function HeroDashboard() {
             <div className="text-[9px] font-semibold uppercase tracking-widest text-white/25 mb-2">
               Recent Opportunities
             </div>
-            {[
-              { brand: "Nike", creator: "MrBeast", value: "$450K", active: true },
-              { brand: "Red Bull", creator: "iShowSpeed", value: "$320K", active: false },
-              { brand: "Riot Games", creator: "Pokimane", value: "$280K", active: true },
-            ].map((deal, i) => (
+            {sampleOpportunities.slice(0, 3).map((deal, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between py-1.5"
@@ -577,7 +575,7 @@ function HeroDashboard() {
                 <div className="flex items-center gap-2">
                   <span
                     className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{ background: deal.active ? "#34d399" : "#fbbf24" }}
+                    style={{ background: deal.status === "Active" ? "#34d399" : "#fbbf24" }}
                   />
                   <span className="text-[10px] text-white/60">
                     {deal.brand}{" "}
@@ -649,7 +647,7 @@ function HeroSection() {
             >
               <span className="w-1.5 h-1.5 rounded-full bg-violet-400 inline-block" />
               <span className="text-violet-400 font-medium text-xs">
-                Now in public beta — join 2,400+ agencies
+                Now in public beta — built for creator agencies
               </span>
             </motion.div>
 
@@ -719,9 +717,9 @@ function HeroSection() {
               transition={{ duration: 0.6, delay: 0.62 }}
             >
               {[
-                { value: "4,800+", label: "Creators managed" },
-                { value: "$2.1B", label: "Deals processed" },
-                { value: "340+", label: "Agencies onboard" },
+                { value: "All-in-one", label: "Creator workspace" },
+                { value: "AI-powered", label: "Growth & deals" },
+                { value: "Public beta", label: "Now live" },
               ].map((stat, i) => (
                 <div key={i} className={i > 0 ? "border-l pl-10" : ""} style={i > 0 ? { borderColor: "rgba(255,255,255,0.08)" } : {}}>
                   <div className="font-display text-2xl font-bold text-white">{stat.value}</div>
@@ -761,8 +759,8 @@ function HeroSection() {
                 </div>
                 <span className="text-[10px] text-white/50 font-medium">Deal Closed</span>
               </div>
-              <div className="font-display text-sm font-bold text-white">Nike × MrBeast</div>
-              <div className="font-data text-xs text-emerald-400 font-semibold mt-0.5">$450,000</div>
+              <div className="font-display text-sm font-bold text-white">Bolt Energy × JaydenStreams</div>
+              <div className="font-data text-xs text-emerald-400 font-semibold mt-0.5">Campaign won</div>
             </motion.div>
 
             <motion.div
@@ -783,9 +781,7 @@ function HeroSection() {
                 </span>
               </div>
               <div className="text-[11px] text-white/65 leading-snug">
-                3 contracts up for renewal.{" "}
-                <span className="text-violet-400 font-semibold">+$280K</span>{" "}
-                estimated upside.
+                3 contracts up for renewal. Renegotiation briefs ready for review.
               </div>
             </motion.div>
 
@@ -803,8 +799,8 @@ function HeroSection() {
               <div className="text-[9px] text-white/30 mb-1.5 font-semibold uppercase tracking-wide">
                 Sponsor ROI
               </div>
-              <div className="font-display text-2xl font-bold text-white">4.8×</div>
-              <div className="text-[10px] text-sky-400 font-medium mt-0.5">Avg return</div>
+              <div className="font-display text-2xl font-bold text-white">Built-in</div>
+              <div className="text-[10px] text-sky-400 font-medium mt-0.5">Per campaign</div>
             </motion.div>
           </motion.div>
         </div>
@@ -822,7 +818,7 @@ function TrustedBySection() {
       style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
     >
       <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/20 mb-10 px-6">
-        Trusted by the world&#39;s leading creator businesses
+        Teams in our public beta
       </p>
       <div className="relative">
         <div
@@ -834,7 +830,7 @@ function TrustedBySection() {
           style={{ background: "linear-gradient(to left, #06060f, transparent)" }}
         />
         <div className="flex gap-14 animate-marquee" style={{ width: "max-content" }}>
-          {[...trustedOrgs, ...trustedOrgs].map((org, i) => (
+          {[...betaPartnerOrgs, ...betaPartnerOrgs].map((org, i) => (
             <div
               key={i}
               className="flex items-center gap-2.5 whitespace-nowrap select-none cursor-default"
@@ -1147,10 +1143,10 @@ function AnalyticsSection() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           {[
-            { label: "Revenue Tracked", value: "$2.1B+", icon: DollarSign, delta: "+34% MoM" },
-            { label: "Creator Profiles", value: "4,870", icon: Users, delta: "+340 this month" },
-            { label: "Active Campaigns", value: "1,247", icon: Activity, delta: "47 closing soon" },
-            { label: "Avg Sponsor ROI", value: "4.8×", icon: TrendingUp, delta: "vs 2.1× industry avg" },
+            { label: "Unified revenue", value: "One view", icon: DollarSign, delta: "All streams" },
+            { label: "Creator profiles", value: "Per creator", icon: Users, delta: "P&L & metrics" },
+            { label: "Campaign tracking", value: "End-to-end", icon: Activity, delta: "Pipeline to close" },
+            { label: "Sponsor ROI", value: "Measurable", icon: TrendingUp, delta: "Per campaign" },
           ].map((s, i) => {
             const Icon = s.icon;
             return (
@@ -1187,8 +1183,8 @@ function AnalyticsSection() {
                 <p className="text-white/30 text-xs mt-0.5">Monthly revenue across all creators</p>
               </div>
               <div className="text-right">
-                <div className="font-display text-xl font-bold text-white">$847K</div>
-                <div className="text-xs text-emerald-400 font-semibold">+23% MoM</div>
+                <div className="font-display text-xl font-bold text-white">Sample</div>
+                <div className="text-xs text-emerald-400 font-semibold">Illustrative preview</div>
               </div>
             </div>
             <div className="h-56">
@@ -1211,7 +1207,7 @@ function AnalyticsSection() {
                     tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
-                    tickFormatter={(v) => `$${v}K`}
+                    tickFormatter={(v) => `${v}`}
                   />
                   <Tooltip
                     contentStyle={{
@@ -1221,7 +1217,7 @@ function AnalyticsSection() {
                       color: "#fff",
                       fontSize: 12,
                     }}
-                    formatter={(v) => [`$${Number(v ?? 0)}K`, "Revenue"]}
+                    formatter={(v) => [`${Number(v ?? 0)}`, "Sample index"]}
                     cursor={{ stroke: "rgba(255,255,255,0.08)" }}
                   />
                   <Area
@@ -1249,8 +1245,8 @@ function AnalyticsSection() {
                 <p className="text-white/30 text-xs mt-0.5">Total managed creators over time</p>
               </div>
               <div className="text-right">
-                <div className="font-display text-xl font-bold text-white">4,870</div>
-                <div className="text-xs text-sky-400 font-semibold">+293% YoY</div>
+                <div className="font-display text-xl font-bold text-white">Sample</div>
+                <div className="text-xs text-sky-400 font-semibold">Illustrative preview</div>
               </div>
             </div>
             <div className="h-56">
@@ -1273,7 +1269,7 @@ function AnalyticsSection() {
                     tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
-                    tickFormatter={(v) => `${(v / 1000).toFixed(1)}K`}
+                    tickFormatter={(v) => `${v}`}
                   />
                   <Tooltip
                     contentStyle={{
@@ -1331,14 +1327,14 @@ function MarketplaceSection() {
             </h2>
             <p className="text-white/40 text-lg mb-10 leading-relaxed">
               Brands with active budgets are searching for creators right now.
-              Our AI matches them to your roster with a 94%+ fit score — and surfaces
+              Our AI matches them to your roster with intelligent fit scoring — and surfaces
               the opportunity before your competitors even know it exists.
             </p>
             <div className="flex gap-8">
               {[
-                { value: "1,200+", label: "Active brands" },
-                { value: "$140M", label: "Deal volume" },
-                { value: "48h", label: "Avg time to close" },
+                { value: "AI match", label: "Fit scoring" },
+                { value: "Pipeline", label: "Deal stages" },
+                { value: "Fast", label: "Less busywork" },
               ].map((s, i) => (
                 <div
                   key={i}
@@ -1401,7 +1397,7 @@ function MarketplaceSection() {
 
             <div className="text-center pt-3">
               <button className="text-sm text-violet-400 hover:text-violet-300 transition-colors font-semibold flex items-center gap-1.5 mx-auto">
-                View all 1,247 live opportunities
+                Explore the marketplace
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -1581,7 +1577,7 @@ function TestimonialsSection() {
       <div className="max-w-7xl mx-auto px-6">
         <motion.div className="text-center mb-16" {...fadeUp}>
           <h2 className="font-display text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
-            What the best agencies
+            What our beta
             <br />
             <span
               style={{
@@ -1591,7 +1587,7 @@ function TestimonialsSection() {
                 backgroundClip: "text",
               }}
             >
-              are saying.
+              testers are saying.
             </span>
           </h2>
         </motion.div>
@@ -1692,8 +1688,8 @@ function FinalCTASection() {
           </h2>
 
           <p className="text-white/40 text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-            Join 340+ agencies and 4,800+ creators who have made Player One IQ
-            the operating system for their business. No credit card required.
+            Start building your creator business on one platform.
+            No credit card required.
           </p>
 
           <div className="flex flex-wrap justify-center gap-5 mb-8">
