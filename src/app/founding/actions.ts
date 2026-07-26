@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/admin";
+import { sendFoundingApplicationNotification } from "@/lib/email/founding-application";
 import type { FoundingApplicationInput } from "@/lib/founding/types";
 import { REVENUE_SOURCE_OPTIONS } from "@/lib/founding/types";
 
@@ -34,6 +35,18 @@ function validateInput(input: FoundingApplicationInput): string | null {
     }
   }
   return null;
+}
+
+async function notifyFoundingApplication(
+  input: FoundingApplicationInput
+): Promise<void> {
+  const result = await sendFoundingApplicationNotification(input);
+  if (!result.sent) {
+    console.error(
+      "[founding-application] notification not sent:",
+      result.error ?? "unknown error"
+    );
+  }
 }
 
 export async function submitFoundingApplication(
@@ -92,6 +105,7 @@ export async function submitFoundingApplication(
       return { error: "Unable to submit your application. Please try again." };
     }
 
+    await notifyFoundingApplication(input);
     return { success: true };
   }
 
@@ -114,5 +128,6 @@ export async function submitFoundingApplication(
     return { error: "Unable to submit your application. Please try again." };
   }
 
+  await notifyFoundingApplication(input);
   return { success: true };
 }

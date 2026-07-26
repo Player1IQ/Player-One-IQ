@@ -57,6 +57,11 @@ export async function GET() {
     resendConfigured: Boolean(
       process.env.RESEND_API_KEY && process.env.INVITE_EMAIL_FROM
     ),
+    foundingApplicationNotifyConfigured: Boolean(
+      process.env.RESEND_API_KEY &&
+        process.env.INVITE_EMAIL_FROM &&
+        process.env.FOUNDING_APPLICATION_NOTIFY_EMAIL?.trim()
+    ),
     openAiConfigured,
     openAiHealth,
     aiCredentialsEncryptionConfigured,
