@@ -8,7 +8,6 @@ import {
   getOrganizationForUser,
   getUserOrganizations,
 } from "@/lib/organization/queries";
-import { getSearchIndex } from "@/lib/search/queries";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { getCurrentUserRole } from "@/lib/permissions";
 import { enforcePortalRouteAccess } from "@/lib/portal/guard";
@@ -53,9 +52,8 @@ export async function DashboardLayout({
   const currentUserRole = await getCurrentUserRole();
   const isPortalUser = !canAccessStaffDashboard(currentUserRole);
 
-  const [searchIndex, subscriptionContext, organizations, activeOrganization] =
+  const [subscriptionContext, organizations, activeOrganization] =
     await Promise.all([
-      isPortalUser ? Promise.resolve([]) : getSearchIndex(),
       getSubscriptionContext(),
       getUserOrganizations(),
       getOrganizationForUser(),
@@ -100,7 +98,7 @@ export async function DashboardLayout({
         </div>
         <div className="flex items-center gap-3">
           <MessageNotificationBell messagingEnabled={messagingEnabled} />
-          {!isPortalUser ? <GlobalSearch items={searchIndex} /> : null}
+          {!isPortalUser ? <GlobalSearch /> : null}
           {headerActions}
           {!isPortalUser ? (
             <div className="hidden items-center gap-2 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs text-gray-400 xl:flex">

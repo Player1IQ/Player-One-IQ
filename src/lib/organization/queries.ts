@@ -1,4 +1,6 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth/cached";
 import { getActiveOrganizationIdCookie } from "./context";
 
 export interface Organization {
@@ -52,12 +54,14 @@ function mapMembershipOrg(
 }
 
 export async function getUserOrganizations(): Promise<UserOrganization[]> {
+  return getUserOrganizationsCached();
+}
+
+const getUserOrganizationsCached = cache(async (): Promise<UserOrganization[]> => {
   const supabase = await createClient();
   if (!supabase) return [];
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return [];
 
   const { data: memberships } = await supabase
@@ -91,9 +95,13 @@ export async function getUserOrganizations(): Promise<UserOrganization[]> {
   return Array.from(byId.values()).sort((a, b) =>
     a.name.localeCompare(b.name)
   );
-}
+});
 
 export async function getOrganizationForUser(): Promise<Organization | null> {
+  return getOrganizationForUserCached();
+}
+
+const getOrganizationForUserCached = cache(async (): Promise<Organization | null> => {
   const organizations = await getUserOrganizations();
   if (organizations.length === 0) return null;
 
@@ -114,7 +122,7 @@ export async function getOrganizationForUser(): Promise<Organization | null> {
 
   if (error || !org) return null;
   return org;
-}
+});
 
 export async function getOrganizationId(): Promise<string | null> {
   const org = await getOrganizationForUser();

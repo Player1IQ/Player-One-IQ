@@ -1,4 +1,6 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth/cached";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
   getLimitForMetric,
@@ -39,12 +41,15 @@ export interface CurrentUserMembership {
 }
 
 export async function getCurrentUserMembership(): Promise<CurrentUserMembership | null> {
+  return getCurrentUserMembershipCached();
+}
+
+const getCurrentUserMembershipCached = cache(
+  async (): Promise<CurrentUserMembership | null> => {
   const supabase = await createClient();
   if (!supabase) return null;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return null;
 
   const organizationId = await getOrganizationId();
@@ -99,7 +104,7 @@ export async function getCurrentUserMembership(): Promise<CurrentUserMembership 
     linkedCreatorId: membership.linked_creator_id ?? null,
     linkedSponsorId: membership.linked_sponsor_id ?? null,
   };
-}
+});
 
 export async function getCurrentUserRole(): Promise<TeamRole | null> {
   const membership = await getCurrentUserMembership();

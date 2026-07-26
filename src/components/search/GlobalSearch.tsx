@@ -2,24 +2,56 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import type { SearchResult } from "@/lib/search/queries";
 import { filterSearchResults, searchTypeLabels } from "@/lib/search";
 
-interface GlobalSearchProps {
-  items: SearchResult[];
-}
-
-export function GlobalSearch({ items }: GlobalSearchProps) {
+export function GlobalSearch() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [items, setItems] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const results = useMemo(
     () => filterSearchResults(items, query),
     [items, query]
   );
+
+  useEffect(() => {
+    if (!open || items.length > 0 || loading) return;
+
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(null);
+
+    fetch("/api/search")
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load search index");
+        }
+        const data = (await response.json()) as { items: SearchResult[] };
+        if (!cancelled) {
+          setItems(data.items);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLoadError("Could not load search results. Try again.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, items.length, loading]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -108,9 +140,20 @@ export function GlobalSearch({ items }: GlobalSearchProps) {
             </div>
 
             <div className="max-h-80 overflow-y-auto p-2">
-              {results.length === 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center gap-2 px-3 py-8 text-sm text-gray-500">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Loading search index...
+                </div>
+              ) : loadError ? (
+                <p className="px-3 py-6 text-center text-sm text-red-400">
+                  {loadError}
+                </p>
+              ) : results.length === 0 ? (
                 <p className="px-3 py-6 text-center text-sm text-gray-500">
-                  No results found.
+                  {items.length === 0
+                    ? "No searchable records yet."
+                    : "No results found."}
                 </p>
               ) : (
                 results.map((result, index) => (

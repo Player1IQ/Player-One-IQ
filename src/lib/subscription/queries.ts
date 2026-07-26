@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -429,6 +430,10 @@ async function getFallbackSubscriptionContext(): Promise<SubscriptionContext> {
 }
 
 export async function getSubscriptionContext(): Promise<SubscriptionContext> {
+  return getSubscriptionContextCached();
+}
+
+const getSubscriptionContextCached = cache(async (): Promise<SubscriptionContext> => {
   let subscription = await getOrganizationSubscription();
   if (!subscription) {
     return getFallbackSubscriptionContext();
@@ -457,4 +462,4 @@ export async function getSubscriptionContext(): Promise<SubscriptionContext> {
     limits,
     usage,
   };
-}
+});
