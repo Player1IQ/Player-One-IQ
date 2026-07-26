@@ -40,25 +40,30 @@ function validateInput(input: FoundingApplicationInput): string | null {
 async function notifyFoundingApplication(
   input: FoundingApplicationInput
 ): Promise<void> {
-  const result = await sendFoundingApplicationNotification(input);
-  if (!result.sent) {
-    console.error(
-      "[founding-application] notification not sent:",
-      result.error ?? "unknown error"
-    );
+  try {
+    const result = await sendFoundingApplicationNotification(input);
+    if (!result.sent) {
+      console.error(
+        "[founding-application] notification not sent:",
+        result.error ?? "unknown error"
+      );
+    }
+  } catch (error) {
+    console.error("[founding-application] notification failed:", error);
   }
 }
 
 export async function submitFoundingApplication(
   input: FoundingApplicationInput
 ): Promise<{ success: true } | { error: string }> {
-  const validationError = validateInput(input);
-  if (validationError) {
-    return { error: validationError };
-  }
+  try {
+    const validationError = validateInput(input);
+    if (validationError) {
+      return { error: validationError };
+    }
 
-  const email = normalizeEmail(input.email);
-  const payload = {
+    const email = normalizeEmail(input.email);
+    const payload = {
     applicant_type: input.applicantType,
     name: input.name.trim(),
     creator_handle: input.creatorHandle?.trim() || null,
@@ -105,7 +110,7 @@ export async function submitFoundingApplication(
       return { error: "Unable to submit your application. Please try again." };
     }
 
-    await notifyFoundingApplication(input);
+    void notifyFoundingApplication(input);
     return { success: true };
   }
 
@@ -128,6 +133,10 @@ export async function submitFoundingApplication(
     return { error: "Unable to submit your application. Please try again." };
   }
 
-  await notifyFoundingApplication(input);
+  void notifyFoundingApplication(input);
   return { success: true };
+  } catch (error) {
+    console.error("[founding-application] submit failed:", error);
+    return { error: "Unable to submit your application. Please try again." };
+  }
 }

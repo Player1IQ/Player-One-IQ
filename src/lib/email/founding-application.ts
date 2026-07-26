@@ -138,21 +138,32 @@ export async function sendFoundingApplicationNotification(
     input.applicantType === "organization" ? "Organization" : "Creator";
   const subject = `New Founding Roster application: ${input.name} (${typeLabel})`;
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: recipients,
-      subject,
-      html: buildApplicationHtml(input),
-      text: buildApplicationSummary(input),
-      reply_to: input.email.trim(),
-    }),
-  });
+  let response: Response;
+  try {
+    response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: recipients,
+        subject,
+        html: buildApplicationHtml(input),
+        text: buildApplicationSummary(input),
+        reply_to: input.email.trim().toLowerCase(),
+      }),
+    });
+  } catch (error) {
+    return {
+      sent: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to reach the email service.",
+    };
+  }
 
   if (!response.ok) {
     let errorMessage = "Failed to send founding application notification.";

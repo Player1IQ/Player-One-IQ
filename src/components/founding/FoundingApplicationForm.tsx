@@ -60,35 +60,43 @@ export function FoundingApplicationForm({
     const form = new FormData(event.currentTarget);
 
     startTransition(async () => {
-      const result = await submitFoundingApplication({
-        applicantType,
-        name: String(form.get("name") ?? ""),
-        creatorHandle: String(form.get("creatorHandle") ?? ""),
-        email: String(form.get("email") ?? ""),
-        primaryPlatform: String(form.get("primaryPlatform") ?? ""),
-        otherPlatforms: String(form.get("otherPlatforms") ?? ""),
-        channelLinks: String(form.get("channelLinks") ?? ""),
-        contentType: String(form.get("contentType") ?? ""),
-        revenueSources,
-        biggestManagementProblem: String(form.get("biggestManagementProblem") ?? ""),
-        whyJoin: String(form.get("whyJoin") ?? ""),
-        nominatedBy: String(form.get("nominatedBy") ?? ""),
-      });
+      try {
+        const result = await submitFoundingApplication({
+          applicantType,
+          name: String(form.get("name") ?? ""),
+          creatorHandle: String(form.get("creatorHandle") ?? ""),
+          email: String(form.get("email") ?? ""),
+          primaryPlatform: String(form.get("primaryPlatform") ?? ""),
+          otherPlatforms: String(form.get("otherPlatforms") ?? ""),
+          channelLinks: String(form.get("channelLinks") ?? ""),
+          contentType: String(form.get("contentType") ?? ""),
+          revenueSources,
+          biggestManagementProblem: String(
+            form.get("biggestManagementProblem") ?? ""
+          ),
+          whyJoin: String(form.get("whyJoin") ?? ""),
+          nominatedBy: String(form.get("nominatedBy") ?? ""),
+        });
 
-      if ("error" in result) {
-        setError(result.error);
-        return;
+        if ("error" in result) {
+          setError(result.error);
+          return;
+        }
+
+        trackMarketingEvent("founding_application_submitted", {
+          applicant_type: applicantType,
+        });
+        trackMarketingEvent(
+          applicantType === "creator"
+            ? "founding_creator_application"
+            : "founding_organization_application"
+        );
+        onSuccess();
+      } catch {
+        setError(
+          "Something went wrong while submitting. Please try again in a moment."
+        );
       }
-
-      trackMarketingEvent("founding_application_submitted", {
-        applicant_type: applicantType,
-      });
-      trackMarketingEvent(
-        applicantType === "creator"
-          ? "founding_creator_application"
-          : "founding_organization_application"
-      );
-      onSuccess();
     });
   }
 
