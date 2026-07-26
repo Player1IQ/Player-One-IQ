@@ -682,7 +682,7 @@ function FoundingAccessStrip() {
       </p>
       <div className="text-center px-6">
         <p className="text-white/40 text-sm max-w-xl mx-auto mb-6 leading-relaxed">
-          Player One IQ is assembling its first cohort to shape the platform before
+          Player One IQ is assembling its Founding Roster to shape the platform before
           public launch. Gaming creators and organizations are our entry wedge —
           the vision is the full creator economy.
         </p>
@@ -1502,7 +1502,7 @@ function FinalCTASection() {
           <div className="flex flex-wrap justify-center gap-6">
             {[
               { icon: Shield, text: "Founding access open" },
-              { icon: Check, text: "Cohort 01 applications reviewed personally" },
+              { icon: Check, text: "Founding Roster applications reviewed personally" },
               { icon: Activity, text: "Pricing available when you're ready" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-1.5 text-xs text-white/25 font-medium">

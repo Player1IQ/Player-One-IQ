@@ -122,7 +122,7 @@ export function FoundingRosterClient() {
               You&apos;re on our radar.
             </h1>
             <p className="text-white/50 text-lg leading-relaxed mb-4">
-              We&apos;re keeping Cohort 01 intentionally small so we can work closely
+              We&apos;re keeping the Founding Roster intentionally small so we can work closely
               with every member.
             </p>
             <p className="text-white/50 text-lg leading-relaxed mb-4">
@@ -213,7 +213,7 @@ export function FoundingRosterClient() {
             {[
               { value: "25", label: "Creators" },
               { value: "5", label: "Organizations" },
-              { value: "01", label: "First cohort" },
+              { value: "30", label: "Total spots" },
             ].map((item) => (
               <div
                 key={item.label}
@@ -248,7 +248,7 @@ export function FoundingRosterClient() {
                 boxShadow: "0 8px 32px rgba(124,58,237,0.35)",
               }}
             >
-              Apply to Cohort 01
+              Apply to the Founding Roster
             </button>
             <a
               href="#founding-perks"
@@ -488,7 +488,7 @@ export function FoundingRosterClient() {
         <div className="max-w-3xl mx-auto">
           <motion.div className="mb-12" {...fadeUp}>
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-violet-400 mb-4">
-              Cohort 01 application
+              Founding Roster application
             </p>
             <h2 className="font-display text-4xl font-extrabold text-white">
               Apply to the Founding Roster
