@@ -9,6 +9,7 @@ const PUBLIC_PREFIX_ROUTES = [
   "/privacy",
   "/welcome",
   "/invite",
+  "/founding",
 ];
 
 const MIDDLEWARE_PUBLIC_PREFIX_ROUTES = [

@@ -10,23 +10,13 @@ import {
 } from "recharts";
 import {
   Users, TrendingUp, FileText, ShoppingBag, Brain, BarChart2,
-  MessageSquare, Bell, Zap, DollarSign, Sparkles, ArrowRight,
-  Check, Star, Globe, Activity, Twitter, Linkedin, Play,
-  ChevronRight, Target, Hash, Menu, X, Shield,
+  MessageSquare, Zap, DollarSign, Sparkles, ArrowRight,
+  Check, Activity, Play,
+  ChevronRight, Target, Shield,
 } from "lucide-react";
-
-const NAV_ITEMS = [
-  { label: "Product", href: "#product" },
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "AI", href: "#ai" },
-  { label: "Marketplace", href: "#marketplace" },
-];
-
-const MOBILE_NAV_ITEMS = [
-  ...NAV_ITEMS,
-  { label: "Sign in", href: "/login" },
-];
+import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { MarketingNav } from "@/components/marketing/MarketingNav";
+import { FOUNDING_ROSTER_PATH } from "@/lib/marketing/config";
 
 const revenueData = [
   { month: "Jan", revenue: 8, deals: 2 },
@@ -55,18 +45,10 @@ const heroMiniData = [
   { v: 61 }, { v: 59 }, { v: 72 }, { v: 85 },
 ];
 
-const betaPartnerOrgs = [
-  "Meridian Talent", "Northline Collective", "Vertex Creator Co.", "Arcade Lane Media",
-  "Summit Roster", "Forge Entertainment", "Prism Talent Group", "Lumen Creator Studio",
-  "Pitchline Partners", "Baseline Sports Media", "Draft Day Management", "Halo Point Agency",
-];
-
 const sampleOpportunities = [
-  { brand: "Bolt Energy", creator: "JaydenStreams", value: "Campaign", category: "Sponsorship", match: 92, status: "Active" as const },
-  { brand: "Kova Apparel", creator: "MiaCreates", value: "Partnership", category: "Endorsement", match: 89, status: "Active" as const },
-  { brand: "Orbit Games", creator: "TylerPlays", value: "In pipeline", category: "Partnership", match: 91, status: "Pending" as const },
-  { brand: "Nimbus Tech", creator: "AlexReviews", value: "Campaign", category: "Sponsorship", match: 88, status: "Active" as const },
-  { brand: "Drift Beverage", creator: "SamNova", value: "In pipeline", category: "Brand deal", match: 90, status: "Pending" as const },
+  { brand: "Brand partner", creator: "Creator A", value: "Pipeline", category: "Sponsorship", match: 92, status: "Active" as const },
+  { brand: "Brand partner", creator: "Creator B", value: "In review", category: "Partnership", match: 89, status: "Active" as const },
+  { brand: "Brand partner", creator: "Creator C", value: "In pipeline", category: "Partnership", match: 91, status: "Pending" as const },
 ];
 
 const features = [
@@ -94,7 +76,7 @@ const features = [
   {
     icon: ShoppingBag,
     title: "Opportunity Marketplace",
-    description: "Brands with active budgets are seeking creators right now. Our AI surfaces the right match automatically.",
+    description: "The opportunity marketplace we're building for creators — discover and manage brand opportunities from inside Player One IQ as the marketplace comes online.",
     large: false,
     color: "purple",
   },
@@ -136,7 +118,7 @@ const aiAssistants = [
     role: "Content Intelligence",
     color: "sky",
     prompt: "What content formats are performing best right now?",
-    response: "Short-form reaction content is gaining traction in gaming this month. Jayden and Tyler on your roster have especially strong audience fit. I can draft a campaign brief for each — ready in a few minutes.",
+    response: "Short-form reaction content is gaining traction in gaming this month. Several creators on your roster have strong audience fit. I can draft a campaign brief for each — ready in a few minutes.",
   },
   {
     name: "Sponsorship Hunter",
@@ -144,7 +126,7 @@ const aiAssistants = [
     role: "Deal Prospector",
     color: "blue",
     prompt: "Find new brand opportunities for our gaming roster.",
-    response: "Bolt Energy and Kova Apparel have active briefs matching three creators on your roster — Jayden, Mia, and Tyler. I drafted intro emails for each pairing — want me to send them for review?",
+    response: "I found brand opportunities that may match creators on your roster. I drafted intro emails for the strongest pairings — want me to send them for review?",
   },
   {
     name: "Revenue Optimizer",
@@ -156,32 +138,7 @@ const aiAssistants = [
   },
 ];
 
-const testimonials = [
-  {
-    quote: "We're in the public beta and already replaced three spreadsheets. Roster, renewals, and sponsor outreach finally live in one place — our team actually uses it every day.",
-    name: "Jordan Reyes",
-    role: "CEO",
-    company: "Meridian Talent",
-    avatar: "JR",
-    stars: 5,
-  },
-  {
-    quote: "The sponsor CRM and contract workflow feel purpose-built for creator deals. We onboarded our partnerships team in a week without a painful custom setup.",
-    name: "Marcus Okonkwo",
-    role: "Head of Partnerships",
-    company: "Vertex Creator Co.",
-    avatar: "MO",
-    stars: 5,
-  },
-  {
-    quote: "Marketplace matching surfaced two brand conversations we hadn't prioritized yet. For a lean agency, that kind of signal is exactly what we needed in beta.",
-    name: "Aaliya Sharma",
-    role: "Founder",
-    company: "Northline Collective",
-    avatar: "AS",
-    stars: 5,
-  },
-];
+const marketplaceDeals = sampleOpportunities;
 
 const plans = [
   {
@@ -245,8 +202,6 @@ const plans = [
     badge: "Custom",
   },
 ];
-
-const marketplaceDeals = sampleOpportunities;
 
 // ─── Animation helpers ─────────────────────────────────────────────────────────
 
@@ -331,102 +286,7 @@ function Tag({ children, color = "violet" }: { children: ReactNode; color?: stri
 // ─── Nav ───────────────────────────────────────────────────────────────────────
 
 function Nav() {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <nav
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
-      style={
-        scrolled
-          ? {
-              background: "rgba(6,6,15,0.85)",
-              backdropFilter: "blur(24px)",
-              borderBottom: "1px solid rgba(255,255,255,0.06)",
-              padding: "12px 0",
-            }
-          : { padding: "20px 0" }
-      }
-    >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
-          >
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-display font-bold text-white text-[15px] tracking-tight">
-            Player One IQ
-          </span>
-        </Link>
-
-        {/* Links */}
-        <div className="hidden md:flex items-center gap-8">
-          {NAV_ITEMS.map((item) => (
-            <a
-              key={item.label} href={item.href}
-              className="text-sm text-white/45 hover:text-white/85 transition-colors font-medium"
-            >
-              {item.label}
-            </a>
-          ))}
-        </div>
-
-        {/* CTAs */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="hidden md:block text-sm text-white/55 hover:text-white transition-colors font-medium"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/signup"
-            className="text-sm px-5 py-2.5 rounded-xl font-semibold text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
-            style={{
-              background: "linear-gradient(135deg, #7c3aed, #2563eb)",
-              boxShadow: "0 4px 20px rgba(124,58,237,0.3)",
-            }}
-          >
-            Start Free Trial
-          </Link>
-          <button
-            className="md:hidden text-white/50 hover:text-white transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div
-          className="md:hidden mt-4 mx-6 rounded-2xl p-5 space-y-3"
-          style={{ background: "rgba(13,13,31,0.98)", border: "1px solid rgba(255,255,255,0.08)" }}
-        >
-          {MOBILE_NAV_ITEMS.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="block text-sm text-white/60 hover:text-white py-2 border-b border-white/[0.05] last:border-0 transition-colors"
-              onClick={() => setMobileOpen(false)}
-            >
-              {item.label}
-            </a>
-          ))}
-        </div>
-      )}
-    </nav>
-  );
+  return <MarketingNav />;
 }
 
 // ─── Hero Dashboard Mockup ─────────────────────────────────────────────────────
@@ -647,7 +507,7 @@ function HeroSection() {
             >
               <span className="w-1.5 h-1.5 rounded-full bg-violet-400 inline-block" />
               <span className="text-violet-400 font-medium text-xs">
-                Now in public beta — built for creator agencies
+                Founding access now open
               </span>
             </motion.div>
 
@@ -679,8 +539,8 @@ function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.35 }}
             >
-              Manage creators, sponsorships, contracts, revenue, AI insights,
-              opportunities, and your entire business from one intelligent platform.
+              One place to manage your growth, revenue, partnerships, contracts,
+              team, and creator business.
             </motion.p>
 
             <motion.div
@@ -690,24 +550,24 @@ function HeroSection() {
               transition={{ duration: 0.6, delay: 0.48 }}
             >
               <Link
-                href="/signup"
+                href={FOUNDING_ROSTER_PATH}
                 className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:scale-[1.03] hover:shadow-2xl"
                 style={{
                   background: "linear-gradient(135deg, #7c3aed, #2563eb)",
                   boxShadow: "0 8px 32px rgba(124,58,237,0.4)",
                 }}
               >
-                Start Free Trial
+                Join the Founding Roster
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                href="/signup"
+              <a
+                href="#product"
                 className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white/75 hover:text-white transition-all duration-200 hover:border-white/20"
                 style={{ border: "1px solid rgba(255,255,255,0.12)" }}
               >
                 <Play className="w-4 h-4" />
-                See how it works
-              </Link>
+                Explore Player One IQ
+              </a>
             </motion.div>
 
             <motion.div
@@ -717,9 +577,9 @@ function HeroSection() {
               transition={{ duration: 0.6, delay: 0.62 }}
             >
               {[
-                { value: "All-in-one", label: "Creator workspace" },
-                { value: "AI-powered", label: "Growth & deals" },
-                { value: "Public beta", label: "Now live" },
+                { value: "Growth", label: "Analytics & insights" },
+                { value: "Revenue", label: "Contracts & deals" },
+                { value: "Founding", label: "Access now open" },
               ].map((stat, i) => (
                 <div key={i} className={i > 0 ? "border-l pl-10" : ""} style={i > 0 ? { borderColor: "rgba(255,255,255,0.08)" } : {}}>
                   <div className="font-display text-2xl font-bold text-white">{stat.value}</div>
@@ -759,8 +619,8 @@ function HeroSection() {
                 </div>
                 <span className="text-[10px] text-white/50 font-medium">Deal Closed</span>
               </div>
-              <div className="font-display text-sm font-bold text-white">Bolt Energy × JaydenStreams</div>
-              <div className="font-data text-xs text-emerald-400 font-semibold mt-0.5">Campaign won</div>
+              <div className="font-display text-sm font-bold text-white">Brand × Creator</div>
+              <div className="font-data text-xs text-emerald-400 font-semibold mt-0.5">Product preview</div>
             </motion.div>
 
             <motion.div
@@ -811,41 +671,28 @@ function HeroSection() {
 
 // ─── Trusted By ────────────────────────────────────────────────────────────────
 
-function TrustedBySection() {
+function FoundingAccessStrip() {
   return (
     <section
       className="py-16 overflow-hidden"
       style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
     >
-      <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/20 mb-10 px-6">
-        Teams in our public beta
+      <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/25 mb-6 px-6">
+        Now selecting founding creators &amp; organizations
       </p>
-      <div className="relative">
-        <div
-          className="absolute left-0 top-0 bottom-0 w-24 pointer-events-none z-10"
-          style={{ background: "linear-gradient(to right, #06060f, transparent)" }}
-        />
-        <div
-          className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none z-10"
-          style={{ background: "linear-gradient(to left, #06060f, transparent)" }}
-        />
-        <div className="flex gap-14 animate-marquee" style={{ width: "max-content" }}>
-          {[...betaPartnerOrgs, ...betaPartnerOrgs].map((org, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2.5 whitespace-nowrap select-none cursor-default"
-              style={{ color: "rgba(255,255,255,0.2)" }}
-            >
-              <div
-                className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(255,255,255,0.05)" }}
-              >
-                <Hash className="w-3 h-3" />
-              </div>
-              <span className="text-sm font-semibold">{org}</span>
-            </div>
-          ))}
-        </div>
+      <div className="text-center px-6">
+        <p className="text-white/40 text-sm max-w-xl mx-auto mb-6 leading-relaxed">
+          Player One IQ is assembling its first cohort to shape the platform before
+          public launch. Gaming creators and organizations are our entry wedge —
+          the vision is the full creator economy.
+        </p>
+        <Link
+          href={FOUNDING_ROSTER_PATH}
+          className="inline-flex items-center gap-2 text-sm font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+        >
+          Join the Founding Roster
+          <ChevronRight className="w-4 h-4" />
+        </Link>
       </div>
     </section>
   );
@@ -1308,7 +1155,7 @@ function MarketplaceSection() {
           <motion.div {...fadeUp}>
             <Tag color="sky">Marketplace</Tag>
             <h2 className="font-display text-5xl font-extrabold text-white tracking-tight mb-6 leading-tight">
-              The sponsorship
+              Built for the future of
               <br />
               <span
                 style={{
@@ -1318,17 +1165,15 @@ function MarketplaceSection() {
                   backgroundClip: "text",
                 }}
               >
-                marketplace your
-                <br />
-                competitors don&apos;t
-                <br />
-                know about.
+                creator opportunities.
               </span>
             </h2>
-            <p className="text-white/40 text-lg mb-10 leading-relaxed">
-              Brands with active budgets are searching for creators right now.
-              Our AI matches them to your roster with intelligent fit scoring — and surfaces
-              the opportunity before your competitors even know it exists.
+            <p className="text-white/40 text-lg mb-4 leading-relaxed">
+              Discover and manage brand opportunities from inside Player One IQ as
+              the marketplace comes online.
+            </p>
+            <p className="text-violet-400/80 text-sm font-medium mb-10">
+              Coming first to Founding Members.
             </p>
             <div className="flex gap-8">
               {[
@@ -1397,7 +1242,7 @@ function MarketplaceSection() {
 
             <div className="text-center pt-3">
               <button className="text-sm text-violet-400 hover:text-violet-300 transition-colors font-semibold flex items-center gap-1.5 mx-auto">
-                Explore the marketplace
+                Explore the opportunity marketplace
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -1436,6 +1281,14 @@ function PricingSection() {
               your ambition.
             </span>
           </h2>
+          <p className="text-white/40 text-base max-w-2xl mx-auto mt-5 leading-relaxed">
+            Founding members receive complimentary access during pre-launch. Plans below
+            are for reference —{" "}
+            <Link href={FOUNDING_ROSTER_PATH} className="text-violet-400 hover:text-violet-300">
+              apply to the Founding Roster
+            </Link>{" "}
+            to get started.
+          </p>
 
           {/* Toggle */}
           <div
@@ -1566,73 +1419,6 @@ function PricingSection() {
   );
 }
 
-// ─── Testimonials Section ──────────────────────────────────────────────────────
-
-function TestimonialsSection() {
-  return (
-    <section
-      className="py-32"
-      style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
-    >
-      <div className="max-w-7xl mx-auto px-6">
-        <motion.div className="text-center mb-16" {...fadeUp}>
-          <h2 className="font-display text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
-            What our beta
-            <br />
-            <span
-              style={{
-                background: "linear-gradient(135deg, #a78bfa, #38bdf8)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              testers are saying.
-            </span>
-          </h2>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={t.name}
-              className="rounded-2xl p-7 flex flex-col"
-              style={{
-                background: "rgba(255,255,255,0.022)",
-                border: "1px solid rgba(255,255,255,0.07)",
-              }}
-              {...stagger(i)}
-            >
-              <div className="flex gap-0.5 mb-5">
-                {Array.from({ length: t.stars }).map((_, j) => (
-                  <Star key={j} className="w-4 h-4 text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-              <blockquote className="text-white/60 text-sm leading-relaxed flex-1 mb-7">
-                &ldquo;{t.quote}&rdquo;
-              </blockquote>
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
-                  style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
-                >
-                  {t.avatar}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-white">{t.name}</div>
-                  <div className="text-xs text-white/30 mt-0.5">
-                    {t.role}, {t.company}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 // ─── Final CTA ─────────────────────────────────────────────────────────────────
 
 function FinalCTASection() {
@@ -1688,20 +1474,20 @@ function FinalCTASection() {
           </h2>
 
           <p className="text-white/40 text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-            Start building your creator business on one platform.
-            No credit card required.
+            Apply to the Founding Roster and help shape the operating system for
+            the creator economy before public launch.
           </p>
 
           <div className="flex flex-wrap justify-center gap-5 mb-8">
             <Link
-              href="/signup"
+              href={FOUNDING_ROSTER_PATH}
               className="flex items-center gap-2 px-8 py-4 rounded-xl text-base font-bold text-white transition-all duration-200 hover:scale-[1.03]"
               style={{
                 background: "linear-gradient(135deg, #7c3aed, #2563eb)",
                 boxShadow: "0 12px 48px rgba(124,58,237,0.45)",
               }}
             >
-              Start Free Trial
+              Join the Founding Roster
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
@@ -1715,9 +1501,9 @@ function FinalCTASection() {
 
           <div className="flex flex-wrap justify-center gap-6">
             {[
-              { icon: Shield, text: "14-day free trial" },
-              { icon: Check, text: "No credit card required" },
-              { icon: Activity, text: "Cancel anytime" },
+              { icon: Shield, text: "Founding access open" },
+              { icon: Check, text: "Cohort 01 applications reviewed personally" },
+              { icon: Activity, text: "Pricing available when you're ready" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-1.5 text-xs text-white/25 font-medium">
                 <Icon className="w-3.5 h-3.5" />
@@ -1734,112 +1520,7 @@ function FinalCTASection() {
 // ─── Footer ────────────────────────────────────────────────────────────────────
 
 function Footer() {
-  const footerLinks = [
-    {
-      title: "Product",
-      links: [
-        { label: "Creator CRM", href: "#features" },
-        { label: "Sponsor CRM", href: "#features" },
-        { label: "Contract Management", href: "#features" },
-        { label: "Opportunity Marketplace", href: "#marketplace" },
-        { label: "AI Assistant", href: "#ai" },
-        { label: "Analytics", href: "#features" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { label: "About", href: "#product" },
-        { label: "Blog", href: "#product" },
-        { label: "Careers", href: "#product" },
-        { label: "Press", href: "#product" },
-        { label: "Partners", href: "#product" },
-        { label: "Contact", href: "/login" },
-      ],
-    },
-    {
-      title: "Legal",
-      links: [
-        { label: "Privacy Policy", href: "/privacy" },
-        { label: "Terms of Service", href: "/terms" },
-        { label: "Security", href: "/privacy" },
-        { label: "Compliance", href: "/privacy" },
-        { label: "Cookie Settings", href: "/privacy" },
-      ],
-    },
-  ];
-
-  return (
-    <footer
-      className="py-16 px-6"
-      style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
-    >
-      <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-5 gap-10 mb-12">
-          {/* Brand */}
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
-              >
-                <Zap className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-display font-bold text-white text-[15px]">Player One IQ</span>
-            </div>
-            <p className="text-white/30 text-sm leading-relaxed max-w-xs mb-6">
-              The operating system for the creator economy. Manage creators, deals,
-              contracts, and revenue from one intelligent platform.
-            </p>
-            <div className="flex gap-2.5">
-              {[Twitter, Linkedin, Globe].map((Icon, i) => (
-                <button
-                  key={i}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white/25 hover:text-white/60 transition-colors"
-                  style={{ border: "1px solid rgba(255,255,255,0.07)" }}
-                >
-                  <Icon className="w-4 h-4" />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Links */}
-          {footerLinks.map((col) => (
-            <div key={col.title}>
-              <h4 className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/20 mb-5">
-                {col.title}
-              </h4>
-              <ul className="space-y-3">
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-white/35 hover:text-white/65 transition-colors"
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        <div
-          className="flex flex-col md:flex-row justify-between items-center gap-4 pt-8"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
-        >
-          <p className="text-xs text-white/18">
-            &copy; {new Date().getFullYear()} Player One IQ, Inc. All rights reserved.
-          </p>
-          <p className="text-xs text-white/18">
-            Built for serious creator businesses.
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
+  return <MarketingFooter />;
 }
 
 // ─── App ───────────────────────────────────────────────────────────────────────
@@ -1851,13 +1532,12 @@ export function MarketingLandingClient() {
     >
       <Nav />
       <HeroSection />
-      <TrustedBySection />
+      <FoundingAccessStrip />
       <FeaturesSection />
       <AISection />
       <AnalyticsSection />
       <MarketplaceSection />
       <PricingSection />
-      <TestimonialsSection />
       <FinalCTASection />
       <Footer />
     </div>

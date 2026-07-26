@@ -4,7 +4,7 @@ import { MarketingLanding } from "@/components/marketing/MarketingLanding";
 export const metadata: Metadata = {
   title: "Player One IQ — Creator economy management",
   description:
-    "Manage creators, sponsors, campaigns, and contracts in one platform built for gaming agencies and creator organizations.",
+    "The operating system for the creator economy. Apply to the Founding Roster and help shape professional infrastructure for creators, teams, and organizations.",
   openGraph: {
     title: "Player One IQ",
     description:
