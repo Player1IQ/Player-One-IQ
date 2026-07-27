@@ -47,7 +47,10 @@ async function notifyFoundingApplication(
         "[founding-application] notification not sent:",
         result.error ?? "unknown error"
       );
+      return;
     }
+
+    console.info("[founding-application] notification sent");
   } catch (error) {
     console.error("[founding-application] notification failed:", error);
   }
@@ -110,7 +113,7 @@ export async function submitFoundingApplication(
       return { error: "Unable to submit your application. Please try again." };
     }
 
-    void notifyFoundingApplication(input);
+    await notifyFoundingApplication(input);
     return { success: true };
   }
 
@@ -133,7 +136,7 @@ export async function submitFoundingApplication(
     return { error: "Unable to submit your application. Please try again." };
   }
 
-  void notifyFoundingApplication(input);
+  await notifyFoundingApplication(input);
   return { success: true };
   } catch (error) {
     console.error("[founding-application] submit failed:", error);
