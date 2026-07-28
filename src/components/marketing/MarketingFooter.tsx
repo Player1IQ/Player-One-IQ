@@ -111,7 +111,20 @@ export function MarketingFooter() {
           <p className="text-xs text-white/18">
             &copy; {new Date().getFullYear()} Player One IQ, Inc. All rights reserved.
           </p>
-          <p className="text-xs text-white/18">Founding access now open.</p>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/25 md:justify-end">
+            <Link href="/privacy" className="hover:text-white/55 transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="hover:text-white/55 transition-colors">
+              Terms of Service
+            </Link>
+            <a
+              href="mailto:Admin@playeroneIQ.com"
+              className="hover:text-white/55 transition-colors"
+            >
+              Admin@playeroneIQ.com
+            </a>
+          </div>
         </div>
       </div>
     </footer>
