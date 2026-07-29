@@ -32,6 +32,9 @@ import { TodayScheduleCard } from "@/components/schedule/TodayScheduleCard";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
 import type { CreatorPortalBenefits } from "@/lib/creators/portal-benefits";
 import type { ScheduleEvent } from "@/lib/schedule";
+import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
+import type { CoachProfile } from "@/lib/creator-coach/profile-types";
+import { CreatorCoachPanel } from "@/components/creator-coach";
 
 interface PortalHomeClientProps {
   creator: Creator;
@@ -50,6 +53,10 @@ interface PortalHomeClientProps {
   platformSummary?: CreatorPlatformSummary | null;
   portalBenefits?: CreatorPortalBenefits | null;
   todaySchedule?: ScheduleEvent[];
+  coachSnapshot?: CreatorCoachSnapshot | null;
+  coachContext?: CoachContext | null;
+  coachProfile?: CoachProfile | null;
+  creatorId?: string | null;
 }
 
 export function PortalHomeClient({
@@ -69,6 +76,10 @@ export function PortalHomeClient({
   platformSummary = null,
   portalBenefits = null,
   todaySchedule = [],
+  coachSnapshot = null,
+  coachContext = null,
+  coachProfile = null,
+  creatorId = null,
 }: PortalHomeClientProps) {
   const activeContracts = contracts.filter((contract) =>
     ["active", "negotiating", "draft"].includes(contract.status)
@@ -76,6 +87,15 @@ export function PortalHomeClient({
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {coachSnapshot && coachContext ? (
+        <CreatorCoachPanel
+          snapshot={coachSnapshot}
+          coachContext={coachContext}
+          coachProfile={coachProfile}
+          creatorId={creatorId}
+        />
+      ) : null}
+
       <PortalAlertsBanner
         overdueDeliverables={deliverableMetrics.overdueCount}
         unreadMessages={unreadMessages}

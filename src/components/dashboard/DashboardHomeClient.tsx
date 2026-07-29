@@ -42,6 +42,8 @@ import { CreatorAvatar } from "@/components/creators/CreatorAvatar";
 import { PresenceBadge } from "@/components/presence/PresenceBadge";
 import { TodayScheduleCard } from "@/components/schedule/TodayScheduleCard";
 import type { ScheduleEvent } from "@/lib/schedule";
+import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
+import { CreatorCoachPanel } from "@/components/creator-coach";
 
 interface ActivityItem {
   id: string;
@@ -85,6 +87,8 @@ interface DashboardHomeClientProps {
   revenueTrend: RevenueTrendPoint[];
   creatorGrowth: CreatorGrowthPoint[];
   todaySchedule?: ScheduleEvent[];
+  coachSnapshot?: CreatorCoachSnapshot | null;
+  coachContext?: CoachContext | null;
 }
 
 function activityLabel(
@@ -216,6 +220,8 @@ export function DashboardHomeClient({
   revenueTrend,
   creatorGrowth,
   todaySchedule = [],
+  coachSnapshot = null,
+  coachContext = null,
 }: DashboardHomeClientProps) {
   const hasRevenueTrend = revenueTrend.some(
     (point) => point.contract > 0 || point.platform > 0
@@ -271,6 +277,13 @@ export function DashboardHomeClient({
 
   return (
     <div className="command-center-bg space-y-8 animate-fade-in pb-2" data-tour-spot="dashboard-home">
+      {coachSnapshot && coachContext ? (
+        <CreatorCoachPanel
+          snapshot={coachSnapshot}
+          coachContext={coachContext}
+        />
+      ) : null}
+
       <CommandCenterHeader
         organizationName={organizationName}
         attentionCount={opsQueueItems.length}
@@ -417,8 +430,8 @@ export function DashboardHomeClient({
       <section className="space-y-4">
         <SectorHeader
           sector="AI"
-          title="Recommendations"
-          description="Tools to support growth, partnerships, and revenue planning"
+          title="AI workspace"
+          description="Deep-dive assistants for growth, partnerships, and revenue planning"
           action={
             <Link
               href="/ai"

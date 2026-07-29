@@ -33,6 +33,12 @@ import {
   groupRevenueEntriesByMonth,
 } from "@/lib/dashboard/charts";
 import { getTodayScheduleEvents } from "@/lib/schedule/queries";
+import {
+  buildOrganizationCoachContext,
+  buildCreatorCoachSnapshot,
+  getCurrentUserDisplayName,
+  getCurrentUserId,
+} from "@/lib/creator-coach";
 
 export default async function DashboardPage() {
   const role = await getCurrentUserRole();
@@ -54,6 +60,8 @@ export default async function DashboardPage() {
     connectedAccountCount,
     applications,
     todaySchedule,
+    userId,
+    userDisplayName,
   ] = await Promise.all([
     getCreators(),
     getSponsors(),
@@ -66,6 +74,8 @@ export default async function DashboardPage() {
     getConnectedPlatformAccountCount(),
     getAllApplications(),
     getTodayScheduleEvents(),
+    getCurrentUserId(),
+    getCurrentUserDisplayName(),
   ]);
 
   const opportunityStats = getOpportunityStats(opportunities);
@@ -91,6 +101,26 @@ export default async function DashboardPage() {
   const overdueContracts = getOverdueContracts(contracts);
   const organization = await getOrganizationForUser();
 
+  const coachContext = buildOrganizationCoachContext({
+    userDisplayName,
+    creators,
+    contracts,
+    connectedAccountCount,
+    monthlyRevenue,
+    openOpportunityCount: opportunityStats.openCount,
+    pendingApplications,
+    todaySchedule,
+    unreadMessages,
+    expiringContractsCount: contractStats.expiringSoonCount,
+  });
+
+  const coachSnapshot = userId
+    ? await buildCreatorCoachSnapshot({
+        userId,
+        creatorCoachContext: coachContext,
+      })
+    : null;
+
   return (
     <DashboardLayout
       title="Dashboard"
@@ -114,6 +144,8 @@ export default async function DashboardPage() {
         revenueTrend={revenueTrend}
         creatorGrowth={creatorGrowth}
         todaySchedule={todaySchedule}
+        coachSnapshot={coachSnapshot}
+        coachContext={coachContext}
       />
     </DashboardLayout>
   );

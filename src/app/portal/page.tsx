@@ -38,6 +38,14 @@ import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 import { getTodayScheduleEvents, creatorHasScheduleBlocks } from "@/lib/schedule/queries";
+import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
+import { fetchCreatorContentSnapshots } from "@/lib/platform-oauth/content-aggregate";
+import {
+  buildCreatorCoachContext,
+  buildCreatorCoachSnapshot,
+  getCurrentUserId,
+} from "@/lib/creator-coach";
+import { getCoachProfile } from "@/lib/creator-coach/profile-queries";
 
 export default async function PortalHomePage() {
   const membership = await getCurrentUserMembership();
@@ -133,6 +141,9 @@ export default async function PortalHomePage() {
     marketplaceOpportunities,
     todaySchedule,
     hasScheduleBlock,
+    audienceAnalytics,
+    contentSnapshots,
+    userId,
   ] = await Promise.all([
     getCreatorById(membership.linkedCreatorId),
     getContracts(),
@@ -151,6 +162,9 @@ export default async function PortalHomePage() {
     showOpportunities ? getMarketplaceOpportunities() : Promise.resolve([]),
     getTodayScheduleEvents(),
     creatorHasScheduleBlocks(membership.linkedCreatorId),
+    getCreatorAudienceAnalytics(membership.linkedCreatorId).catch(() => null),
+    fetchCreatorContentSnapshots(membership.linkedCreatorId).catch(() => []),
+    getCurrentUserId(),
   ]);
 
   if (!creator) {
@@ -179,6 +193,34 @@ export default async function PortalHomePage() {
     hasScheduleBlock
   );
 
+  const coachProfile = userId
+    ? await getCoachProfile(userId, membership.linkedCreatorId)
+    : null;
+
+  const coachContext = buildCreatorCoachContext({
+    creator,
+    contracts,
+    platformSummary,
+    deliverableMetrics,
+    profileReadiness: portalBenefits.profileReadiness,
+    hasScheduleBlock,
+    todayScheduleCount: todaySchedule.length,
+    unreadMessages,
+    openOpportunityCount: openOpportunities.length,
+    pendingApplicationCount: opportunityApplicationStats.needsAction,
+    revenueEntryCount: revenueEntries.length,
+    analytics: audienceAnalytics,
+    contentSnapshots,
+    coachProfile,
+  });
+
+  const coachSnapshot = userId
+    ? await buildCreatorCoachSnapshot({
+        userId,
+        creatorCoachContext: coachContext,
+      })
+    : null;
+
   return (
     <DashboardLayout
       title="Portal"
@@ -201,6 +243,10 @@ export default async function PortalHomePage() {
         platformSummary={platformSummary}
         portalBenefits={portalBenefits}
         todaySchedule={todaySchedule}
+        coachSnapshot={coachSnapshot}
+        coachContext={coachContext}
+        coachProfile={coachProfile}
+        creatorId={membership.linkedCreatorId}
       />
     </DashboardLayout>
   );
