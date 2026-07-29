@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { awardCreatorSeasonXp } from "@/lib/creator-seasons/service";
 import type { CoachProfileInput } from "./profile-types";
 
 export async function saveCoachProfileAction(
@@ -73,7 +74,17 @@ export async function saveCoachProfileAction(
     return { error: "Unable to save your Creator Coach preferences." };
   }
 
+  if (creatorId) {
+    await awardCreatorSeasonXp({
+      userId: user.id,
+      creatorId,
+      eventType: "coach_onboarding",
+      sourceKey: `coach-onboarding:${creatorId}`,
+    });
+  }
+
   revalidatePath("/portal");
+  revalidatePath("/portal/seasons");
   revalidatePath("/dashboard");
   return { success: true };
 }

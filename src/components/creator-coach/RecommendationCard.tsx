@@ -17,6 +17,7 @@ import {
   completeCoachRecommendationAction,
   dismissCoachRecommendationAction,
 } from "@/lib/creator-coach/actions";
+import { recordCoachRecommendationXpAction } from "@/lib/creator-seasons/season-coach-actions";
 import {
   addLocalCompletedRecommendation,
   addLocalDismissedRecommendation,
@@ -70,6 +71,10 @@ export function RecommendationCard({
         recommendation.id
       );
       onLocalComplete?.(recommendation.id);
+      void recordCoachRecommendationXpAction(
+        recommendation.id,
+        coachContext
+      ).then(() => onSnapshotUpdate?.());
       return;
     }
 

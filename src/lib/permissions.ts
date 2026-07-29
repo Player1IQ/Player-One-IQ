@@ -1,6 +1,12 @@
 import { cache } from "react";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth/cached";
+import {
+  isRolePreviewAllowed,
+  parseRolePreviewCookie,
+  ROLE_PREVIEW_COOKIE,
+} from "@/lib/dev/role-preview";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
   getLimitForMetric,
@@ -72,11 +78,14 @@ const getCurrentUserMembershipCached = cache(
       : null;
 
   if (portalRole) {
-    return {
-      role: portalRole,
-      linkedCreatorId: membership?.linked_creator_id ?? null,
-      linkedSponsorId: membership?.linked_sponsor_id ?? null,
-    };
+    return applyRolePreviewIfAllowed(
+      {
+        role: portalRole,
+        linkedCreatorId: membership?.linked_creator_id ?? null,
+        linkedSponsorId: membership?.linked_sponsor_id ?? null,
+      },
+      user.email
+    );
   }
 
   const { data: ownedOrg } = await supabase
@@ -88,23 +97,57 @@ const getCurrentUserMembershipCached = cache(
 
   if (ownedOrg) {
     if (membership?.linked_creator_id || membership?.linked_sponsor_id) {
-      return {
-        role: (membership.role as TeamRole) ?? "owner",
-        linkedCreatorId: membership.linked_creator_id ?? null,
-        linkedSponsorId: membership.linked_sponsor_id ?? null,
-      };
+      return applyRolePreviewIfAllowed(
+        {
+          role: (membership.role as TeamRole) ?? "owner",
+          linkedCreatorId: membership.linked_creator_id ?? null,
+          linkedSponsorId: membership.linked_sponsor_id ?? null,
+        },
+        user.email
+      );
     }
-    return { role: "owner", linkedCreatorId: null, linkedSponsorId: null };
+    return applyRolePreviewIfAllowed(
+      { role: "owner", linkedCreatorId: null, linkedSponsorId: null },
+      user.email
+    );
   }
 
   if (!membership?.role) return null;
 
-  return {
+  const baseMembership = {
     role: membership.role as TeamRole,
     linkedCreatorId: membership.linked_creator_id ?? null,
     linkedSponsorId: membership.linked_sponsor_id ?? null,
   };
+
+  return applyRolePreviewIfAllowed(baseMembership, user.email);
 });
+
+async function applyRolePreviewIfAllowed(
+  membership: CurrentUserMembership,
+  email: string | undefined
+): Promise<CurrentUserMembership> {
+  if (!email || !isRolePreviewAllowed(email)) return membership;
+
+  const cookieStore = await cookies();
+  const preview = parseRolePreviewCookie(
+    cookieStore.get(ROLE_PREVIEW_COOKIE)?.value
+  );
+  if (!preview) return membership;
+
+  return {
+    role: preview.role,
+    linkedCreatorId: preview.linkedCreatorId,
+    linkedSponsorId: preview.linkedSponsorId,
+  };
+}
+
+export async function isRolePreviewActiveForCurrentUser(): Promise<boolean> {
+  const user = await getAuthUser();
+  if (!user?.email || !isRolePreviewAllowed(user.email)) return false;
+  const cookieStore = await cookies();
+  return Boolean(cookieStore.get(ROLE_PREVIEW_COOKIE)?.value);
+}
 
 export async function getCurrentUserRole(): Promise<TeamRole | null> {
   const membership = await getCurrentUserMembership();

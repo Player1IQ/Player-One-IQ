@@ -1,15 +1,16 @@
 "use client";
 
 import {
-  BarChart,
+  Area,
+  AreaChart,
   Bar,
-  LineChart,
-  Line,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
 import { BarChart3, Eye, Users, TrendingUp } from "lucide-react";
 import type { CreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
@@ -19,18 +20,74 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { UpgradePrompt } from "@/components/subscription/UpgradePrompt";
 import { PlatformBadge } from "./PlatformBadge";
 import type { Platform } from "@/lib/creators";
+import {
+  chartAxisTick,
+  chartGridStroke,
+  chartTooltipStyle,
+  formatChartCount,
+  getChartAxisMax,
+  getChartYAxisTicks,
+} from "@/lib/charts/format";
 
-const chartTooltipStyle = {
-  backgroundColor: "#111520",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: "12px",
-  fontSize: "12px",
+const PLATFORM_BAR_COLORS: Record<string, string> = {
+  YouTube: "#7C3AED",
+  Twitch: "#9146FF",
+  Instagram: "#E1306C",
+  TikTok: "#00F2EA",
 };
 
-function formatCount(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return value.toLocaleString();
+function PlatformViewsTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ value?: number; dataKey?: string }>;
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+
+  const views = payload.find((entry) => entry.dataKey === "views")?.value ?? 0;
+
+  return (
+    <div style={chartTooltipStyle} className="px-3 py-2 shadow-lg">
+      <p className="text-xs font-medium text-white">{label}</p>
+      <p className="mt-1 text-xs text-gray-400">
+        Views:{" "}
+        <span className="font-semibold text-accent-light">
+          {formatChartCount(views)}
+        </span>
+      </p>
+    </div>
+  );
+}
+
+function ContentTrendTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ value?: number; dataKey?: string }>;
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+
+  const views = payload.find((entry) => entry.dataKey === "views")?.value ?? 0;
+
+  return (
+    <div style={chartTooltipStyle} className="px-3 py-2 shadow-lg">
+      <p className="max-w-[12rem] truncate text-xs font-medium text-white">
+        {label}
+      </p>
+      <p className="mt-1 text-xs text-gray-400">
+        Views:{" "}
+        <span className="font-semibold text-accent-light">
+          {formatChartCount(views)}
+        </span>
+      </p>
+    </div>
+  );
 }
 
 interface CreatorAudienceGrowthProps {
@@ -76,13 +133,32 @@ export function CreatorAudienceGrowth({
     (row) => row.audienceSize !== null && row.audienceSize > 0
   );
 
-  const platformChartData = analytics.platformBreakdown
-    .filter((row) => row.connectedViaOAuth && row.totalViews > 0)
-    .map((row) => ({
-      platform: row.platform,
-      views: row.totalViews,
-      engagement: row.totalEngagement,
-    }));
+  const platformChartData = connectedPlatforms.map((row) => ({
+    platform: row.platform,
+    views: row.totalViews,
+    engagement: row.totalEngagement,
+    fill: PLATFORM_BAR_COLORS[row.platform] ?? "#7C3AED",
+  }));
+
+  const maxPlatformViews = Math.max(
+    ...platformChartData.map((row) => row.views),
+    0
+  );
+  const platformAxisMax = getChartAxisMax(maxPlatformViews);
+  const platformAxisTicks = getChartYAxisTicks(maxPlatformViews);
+
+  const contentTrendData = analytics.contentTrend.map((point) => ({
+    ...point,
+    shortLabel:
+      point.label.length > 14 ? `${point.label.slice(0, 13)}…` : point.label,
+  }));
+  const maxContentViews = Math.max(
+    ...contentTrendData.map((point) => point.views),
+    0
+  );
+  const contentAxisMax = getChartAxisMax(maxContentViews);
+  const contentAxisTicks = getChartYAxisTicks(maxContentViews);
+  const useContentBarChart = contentTrendData.length < 3;
 
   return (
     <Card>
@@ -113,7 +189,7 @@ export function CreatorAudienceGrowth({
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard
                 title="Total Views"
-                value={formatCount(analytics.totalViews)}
+                value={formatChartCount(analytics.totalViews)}
                 subtitle="Recent content snapshots"
                 icon={Eye}
                 iconColor="text-accent-light"
@@ -134,7 +210,7 @@ export function CreatorAudienceGrowth({
               />
               <MetricCard
                 title="Audience Reach"
-                value={hasAudienceData ? formatCount(totalAudience) : "—"}
+                value={hasAudienceData ? formatChartCount(totalAudience) : "—"}
                 subtitle={
                   hasAudienceData
                     ? "Followers & subscribers"
@@ -145,7 +221,7 @@ export function CreatorAudienceGrowth({
               />
             </div>
 
-            {canViewAdvancedAnalytics && platformChartData.length > 0 && (
+            {canViewAdvancedAnalytics && connectedPlatforms.length > 0 && (
               <div className="grid gap-6 lg:grid-cols-2">
                 <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                   <h4 className="text-sm font-medium text-gray-300">
@@ -154,76 +230,183 @@ export function CreatorAudienceGrowth({
                   <p className="mt-1 text-xs text-gray-500">
                     Total views from recent content per platform
                   </p>
-                  <div className="mt-4 h-56 min-h-[14rem] min-w-0">
+                  <div className="mt-4 h-64 min-h-[16rem] min-w-0">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={platformChartData}>
+                      <BarChart
+                        data={platformChartData}
+                        margin={{ top: 8, right: 8, bottom: 0, left: -12 }}
+                        barCategoryGap="28%"
+                      >
                         <CartesianGrid
                           strokeDasharray="3 3"
-                          stroke="rgba(255,255,255,0.04)"
+                          stroke={chartGridStroke}
+                          vertical={false}
                         />
                         <XAxis
                           dataKey="platform"
-                          tick={{ fill: "#6B7280", fontSize: 11 }}
+                          tick={chartAxisTick}
                           axisLine={false}
                           tickLine={false}
                         />
                         <YAxis
-                          tick={{ fill: "#6B7280", fontSize: 11 }}
+                          domain={[0, platformAxisMax]}
+                          allowDecimals={false}
+                          ticks={platformAxisTicks}
+                          tickFormatter={formatChartCount}
+                          tick={chartAxisTick}
                           axisLine={false}
                           tickLine={false}
+                          width={48}
                         />
-                        <Tooltip contentStyle={chartTooltipStyle} />
+                        <Tooltip
+                          cursor={{ fill: "rgba(124,58,237,0.08)" }}
+                          content={<PlatformViewsTooltip />}
+                        />
                         <Bar
                           dataKey="views"
-                          fill="#7C3AED"
-                          radius={[6, 6, 0, 0]}
+                          radius={[8, 8, 0, 0]}
+                          maxBarSize={72}
                           name="Views"
-                        />
+                        >
+                          {platformChartData.map((entry) => (
+                            <Cell key={entry.platform} fill={entry.fill} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
 
-                {analytics.contentTrend.length > 0 && (
+                {contentTrendData.length > 0 && (
                   <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
                     <h4 className="text-sm font-medium text-gray-300">
                       Content performance trend
                     </h4>
                     <p className="mt-1 text-xs text-gray-500">
-                      Views per recent post or video
+                      {useContentBarChart
+                        ? `Views per recent post or video (${contentTrendData.length} synced)`
+                        : "Views per recent post or video"}
                     </p>
-                    <div className="mt-4 h-56 min-h-[14rem] min-w-0">
+                    {contentTrendData.length === 1 ? (
+                      <p className="mt-1 text-xs text-gray-600">
+                        One video synced so far. Publish or sync more content to
+                        see a trend line.
+                      </p>
+                    ) : null}
+                    <div className="mt-4 h-64 min-h-[16rem] min-w-0">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={analytics.contentTrend}>
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="rgba(255,255,255,0.04)"
-                          />
-                          <XAxis
-                            dataKey="label"
-                            tick={{ fill: "#6B7280", fontSize: 10 }}
-                            axisLine={false}
-                            tickLine={false}
-                            interval={0}
-                            angle={-25}
-                            textAnchor="end"
-                            height={60}
-                          />
-                          <YAxis
-                            tick={{ fill: "#6B7280", fontSize: 11 }}
-                            axisLine={false}
-                            tickLine={false}
-                          />
-                          <Tooltip contentStyle={chartTooltipStyle} />
-                          <Line
-                            type="monotone"
-                            dataKey="views"
-                            stroke="#A78BFA"
-                            strokeWidth={2}
-                            dot={{ fill: "#7C3AED", r: 3 }}
-                            name="Views"
-                          />
-                        </LineChart>
+                        {useContentBarChart ? (
+                          <BarChart
+                            data={contentTrendData}
+                            margin={{
+                              top: 8,
+                              right: 8,
+                              bottom: contentTrendData.length === 1 ? 0 : 0,
+                              left: -12,
+                            }}
+                            barCategoryGap="28%"
+                          >
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke={chartGridStroke}
+                              vertical={false}
+                            />
+                            {contentTrendData.length > 1 ? (
+                              <XAxis
+                                dataKey="shortLabel"
+                                tick={chartAxisTick}
+                                axisLine={false}
+                                tickLine={false}
+                                interval={0}
+                                angle={-20}
+                                textAnchor="end"
+                                height={56}
+                              />
+                            ) : (
+                              <XAxis dataKey="shortLabel" hide />
+                            )}
+                            <YAxis
+                              domain={[0, contentAxisMax]}
+                              allowDecimals={false}
+                              ticks={contentAxisTicks}
+                              tickFormatter={formatChartCount}
+                              tick={chartAxisTick}
+                              axisLine={false}
+                              tickLine={false}
+                              width={48}
+                            />
+                            <Tooltip content={<ContentTrendTooltip />} />
+                            <Bar
+                              dataKey="views"
+                              fill="#7C3AED"
+                              radius={[8, 8, 0, 0]}
+                              maxBarSize={72}
+                              name="Views"
+                            />
+                          </BarChart>
+                        ) : (
+                          <AreaChart
+                            data={contentTrendData}
+                            margin={{ top: 8, right: 8, bottom: 0, left: -12 }}
+                          >
+                            <defs>
+                              <linearGradient
+                                id="contentViewsGrad"
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
+                                <stop
+                                  offset="5%"
+                                  stopColor="#7C3AED"
+                                  stopOpacity={0.35}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor="#7C3AED"
+                                  stopOpacity={0}
+                                />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke={chartGridStroke}
+                              vertical={false}
+                            />
+                            <XAxis
+                              dataKey="shortLabel"
+                              tick={{ fill: "#6B7280", fontSize: 10 }}
+                              axisLine={false}
+                              tickLine={false}
+                              interval={0}
+                              angle={-20}
+                              textAnchor="end"
+                              height={56}
+                            />
+                            <YAxis
+                              domain={[0, contentAxisMax]}
+                              allowDecimals={false}
+                              ticks={contentAxisTicks}
+                              tickFormatter={formatChartCount}
+                              tick={chartAxisTick}
+                              axisLine={false}
+                              tickLine={false}
+                              width={48}
+                            />
+                            <Tooltip content={<ContentTrendTooltip />} />
+                            <Area
+                              type="monotone"
+                              dataKey="views"
+                              stroke="#7C3AED"
+                              fill="url(#contentViewsGrad)"
+                              strokeWidth={2}
+                              dot={{ fill: "#A78BFA", r: 3, strokeWidth: 0 }}
+                              activeDot={{ r: 5, fill: "#C4B5FD" }}
+                              name="Views"
+                            />
+                          </AreaChart>
+                        )}
                       </ResponsiveContainer>
                     </div>
                   </div>
@@ -239,51 +422,49 @@ export function CreatorAudienceGrowth({
                 Posts, videos, and average views per connected platform
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {analytics.platformBreakdown
-                  .filter((row) => row.connectedViaOAuth)
-                  .map((row) => (
-                    <div
-                      key={row.platform}
-                      className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <PlatformBadge platform={row.platform as Platform} />
-                        {row.audienceSize !== null && row.audienceSize > 0 && (
-                          <span className="text-xs text-gray-500">
-                            {formatCount(row.audienceSize)} audience
-                          </span>
-                        )}
-                      </div>
-                      <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
-                        <div>
-                          <dt className="text-[10px] uppercase tracking-wide text-gray-500">
-                            Content
-                          </dt>
-                          <dd className="mt-0.5 text-sm font-semibold text-white">
-                            {row.contentCount}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-[10px] uppercase tracking-wide text-gray-500">
-                            Views
-                          </dt>
-                          <dd className="mt-0.5 text-sm font-semibold text-white">
-                            {formatCount(row.totalViews)}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-[10px] uppercase tracking-wide text-gray-500">
-                            Avg views
-                          </dt>
-                          <dd className="mt-0.5 text-sm font-semibold text-white">
-                            {row.contentCount > 0
-                              ? formatCount(row.avgViews)
-                              : "—"}
-                          </dd>
-                        </div>
-                      </dl>
+                {connectedPlatforms.map((row) => (
+                  <div
+                    key={row.platform}
+                    className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <PlatformBadge platform={row.platform as Platform} />
+                      {row.audienceSize !== null && row.audienceSize > 0 && (
+                        <span className="text-xs text-gray-500">
+                          {formatChartCount(row.audienceSize)} audience
+                        </span>
+                      )}
                     </div>
-                  ))}
+                    <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-gray-500">
+                          Content
+                        </dt>
+                        <dd className="mt-0.5 text-sm font-semibold text-white">
+                          {row.contentCount}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-gray-500">
+                          Views
+                        </dt>
+                        <dd className="mt-0.5 text-sm font-semibold text-white">
+                          {formatChartCount(row.totalViews)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-[10px] uppercase tracking-wide text-gray-500">
+                          Avg views
+                        </dt>
+                        <dd className="mt-0.5 text-sm font-semibold text-white">
+                          {row.contentCount > 0
+                            ? formatChartCount(row.avgViews)
+                            : "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                ))}
               </div>
             </div>
           </>

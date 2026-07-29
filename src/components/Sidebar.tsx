@@ -14,6 +14,7 @@ import {
   Settings,
   Sparkles,
   Target,
+  Trophy,
   UserCog,
   Users,
   Zap,
@@ -44,6 +45,7 @@ const navIcons: Record<NavIconName, LucideIcon> = {
   "credit-card": CreditCard,
   settings: Settings,
   calendar: Calendar,
+  trophy: Trophy,
 };
 
 interface SidebarProps {

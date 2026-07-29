@@ -17,6 +17,10 @@ import {
   insertNewMissionState,
   updateCreatorCoachMission,
 } from "./queries";
+import {
+  awardMissionTaskSeasonXp,
+  awardRecommendationSeasonXp,
+} from "@/lib/creator-seasons/sync-coach-xp";
 import type { CoachContext, CreatorCoachSnapshot } from "./types";
 
 async function requireUserId(): Promise<string | null> {
@@ -38,11 +42,30 @@ export async function completeCoachMissionTaskAction(
     return { error: "Mission state not found." };
   }
 
+  const existingTask = persisted.mission.tasks.find((task) => task.id === taskId);
+  if (!existingTask) {
+    return { error: "Task not found." };
+  }
+  if (existingTask.completed) {
+    return { snapshot: await buildCreatorCoachSnapshot({ userId, creatorCoachContext: context }) };
+  }
+
   const updatedMission = completeMissionTask(persisted.mission, taskId);
   const dismissedIds = persisted.dismissedRecommendationIds;
   const completedIds = persisted.completedRecommendationIds;
+  const missionWasComplete = isMissionComplete(updatedMission);
 
-  if (isMissionComplete(updatedMission)) {
+  if (context.scope === "creator" && context.scopeId) {
+    await awardMissionTaskSeasonXp({
+      userId,
+      creatorId: context.scopeId,
+      mission: updatedMission,
+      taskId,
+      stateId,
+    });
+  }
+
+  if (missionWasComplete) {
     const recommendations = runRecommendationEngine(context, {
       dismissedIds,
       completedIds,
@@ -65,6 +88,7 @@ export async function completeCoachMissionTaskAction(
   for (const path of revalidatePaths) {
     revalidatePath(path);
   }
+  revalidatePath("/portal/seasons");
 
   const snapshot = await buildCreatorCoachSnapshot({
     userId,
@@ -118,6 +142,15 @@ export async function completeCoachRecommendationAction(
   const persisted = await getLatestCoachStateForToday(userId, creatorId);
   if (!persisted) return { error: "Coach state not found." };
 
+  if (persisted.completedRecommendationIds.includes(recommendationId)) {
+    return {
+      snapshot: await buildCreatorCoachSnapshot({
+        userId,
+        creatorCoachContext: context,
+      }),
+    };
+  }
+
   const completedIds = Array.from(
     new Set([...persisted.completedRecommendationIds, recommendationId])
   );
@@ -126,9 +159,18 @@ export async function completeCoachRecommendationAction(
     completedRecommendationIds: completedIds,
   });
 
+  if (context.scope === "creator" && context.scopeId) {
+    await awardRecommendationSeasonXp({
+      userId,
+      creatorId: context.scopeId,
+      recommendationId,
+    });
+  }
+
   for (const path of revalidatePaths) {
     revalidatePath(path);
   }
+  revalidatePath("/portal/seasons");
 
   const snapshot = await buildCreatorCoachSnapshot({
     userId,

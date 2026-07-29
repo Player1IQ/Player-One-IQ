@@ -5,6 +5,7 @@ import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DailyMission } from "@/lib/creator-coach/types";
 import { completeCoachMissionTaskAction } from "@/lib/creator-coach/actions";
+import { recordCoachMissionTaskXpAction } from "@/lib/creator-seasons/season-coach-actions";
 import {
   completeMissionTask,
   getMissionProgress,
@@ -62,7 +63,9 @@ export function TodaysMissionCard({
       const updated = completeMissionTask(missionState, taskId);
       setLocalMissionState(coachContext.scope, coachContext.scopeId, updated);
       setMissionState(updated);
-      onSnapshotUpdate?.();
+      void recordCoachMissionTaskXpAction(taskId, coachContext, {
+        mission: missionState,
+      }).then(() => onSnapshotUpdate?.());
       return;
     }
 

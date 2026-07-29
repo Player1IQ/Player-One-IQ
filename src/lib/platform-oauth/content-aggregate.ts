@@ -13,33 +13,37 @@ async function fetchOAuthPlatformContent(
   creatorId: string,
   platform: OAuthPlatform
 ): Promise<PlatformContentSnapshot> {
-  const tokenResult = await getOAuthAccessTokenForCreator(creatorId, platform);
-  if (!tokenResult) {
+  try {
+    const tokenResult = await getOAuthAccessTokenForCreator(creatorId, platform);
+    if (!tokenResult) {
+      return { platform, items: [], connectedViaOAuth: false };
+    }
+
+    let items;
+    if (platform === "YouTube") {
+      items = (await fetchYouTubeRecentVideos(tokenResult.accessToken)).map(
+        (video) => ({
+          id: video.videoId,
+          title: video.title,
+          publishedAt: video.publishedAt,
+          contentType: "video" as const,
+          viewCount: video.viewCount,
+          likeCount: video.likeCount,
+          commentCount: video.commentCount,
+        })
+      );
+    } else if (platform === "Twitch") {
+      items = await fetchTwitchRecentContent(tokenResult.accessToken);
+    } else if (platform === "Instagram") {
+      items = await fetchInstagramRecentContent(tokenResult.accessToken);
+    } else {
+      items = await fetchTikTokRecentContent(tokenResult.accessToken);
+    }
+
+    return { platform, items, connectedViaOAuth: true };
+  } catch {
     return { platform, items: [], connectedViaOAuth: false };
   }
-
-  let items;
-  if (platform === "YouTube") {
-    items = (await fetchYouTubeRecentVideos(tokenResult.accessToken)).map(
-      (video) => ({
-        id: video.videoId,
-        title: video.title,
-        publishedAt: video.publishedAt,
-        contentType: "video" as const,
-        viewCount: video.viewCount,
-        likeCount: video.likeCount,
-        commentCount: video.commentCount,
-      })
-    );
-  } else if (platform === "Twitch") {
-    items = await fetchTwitchRecentContent(tokenResult.accessToken);
-  } else if (platform === "Instagram") {
-    items = await fetchInstagramRecentContent(tokenResult.accessToken);
-  } else {
-    items = await fetchTikTokRecentContent(tokenResult.accessToken);
-  }
-
-  return { platform, items, connectedViaOAuth: true };
 }
 
 export async function fetchCreatorContentSnapshots(

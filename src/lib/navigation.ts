@@ -27,7 +27,8 @@ export type NavIconName =
   | "user-cog"
   | "credit-card"
   | "settings"
-  | "calendar";
+  | "calendar"
+  | "trophy";
 
 export interface NavItem {
   label: string;
@@ -234,6 +235,21 @@ export function getAccessibleNavItems(
           ...items.slice(homeIndex + 1),
         ];
       }
+    }
+
+    const seasonsItem: NavItem = {
+      label: "Seasons",
+      href: "/portal/seasons",
+      icon: "trophy",
+    };
+    if (!items.some((item) => item.href === "/portal/seasons")) {
+      const growthIndex = items.findIndex((item) => item.href === "/portal/growth");
+      const insertIndex = growthIndex >= 0 ? growthIndex + 1 : 1;
+      items = [
+        ...items.slice(0, insertIndex),
+        seasonsItem,
+        ...items.slice(insertIndex),
+      ];
     }
   }
 

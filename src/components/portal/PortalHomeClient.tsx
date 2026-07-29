@@ -34,7 +34,9 @@ import type { CreatorPortalBenefits } from "@/lib/creators/portal-benefits";
 import type { ScheduleEvent } from "@/lib/schedule";
 import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
 import type { CoachProfile } from "@/lib/creator-coach/profile-types";
+import type { CreatorSeasonView } from "@/lib/creator-seasons/types";
 import { CreatorCoachPanel } from "@/components/creator-coach";
+import { CreatorSeasonCard } from "@/components/creator-seasons";
 
 interface PortalHomeClientProps {
   creator: Creator;
@@ -57,6 +59,7 @@ interface PortalHomeClientProps {
   coachContext?: CoachContext | null;
   coachProfile?: CoachProfile | null;
   creatorId?: string | null;
+  seasonView?: CreatorSeasonView | null;
 }
 
 export function PortalHomeClient({
@@ -80,6 +83,7 @@ export function PortalHomeClient({
   coachContext = null,
   coachProfile = null,
   creatorId = null,
+  seasonView = null,
 }: PortalHomeClientProps) {
   const activeContracts = contracts.filter((contract) =>
     ["active", "negotiating", "draft"].includes(contract.status)
@@ -94,6 +98,10 @@ export function PortalHomeClient({
           coachProfile={coachProfile}
           creatorId={creatorId}
         />
+      ) : null}
+
+      {seasonView && creatorId ? (
+        <CreatorSeasonCard seasonView={seasonView} creatorId={creatorId} />
       ) : null}
 
       <PortalAlertsBanner

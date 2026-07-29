@@ -1,10 +1,10 @@
-import { getOAuthAccessTokenForCreator } from "./account-access";
+import { getOAuthAccessTokenForCreator, getConnectedOAuthPlatformsForCreator } from "./account-access";
 import {
   fetchCreatorContentSnapshots,
   getAnalyzablePlatforms,
 } from "./content-aggregate";
 import type { PlatformContentSnapshot } from "./content-performance";
-import { oauthPlatforms, type OAuthPlatform } from "./types";
+import type { OAuthPlatform } from "./types";
 
 export interface PlatformBreakdownMetric {
   platform: string;
@@ -22,6 +22,7 @@ export interface ContentTrendPoint {
   views: number;
   engagement: number;
   platform: string;
+  publishedAt: string;
 }
 
 export interface CreatorAudienceAnalytics {
@@ -84,13 +85,17 @@ function buildContentTrend(snapshots: PlatformContentSnapshot[]): ContentTrendPo
         views: item.viewCount,
         engagement: engagementForItem(item),
         platform: snapshot.platform,
+        publishedAt: item.publishedAt,
       });
     }
   }
 
   return points
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 12);
+    .sort(
+      (left, right) =>
+        new Date(left.publishedAt).getTime() - new Date(right.publishedAt).getTime()
+    )
+    .slice(-12);
 }
 
 async function fetchPlatformAudienceSize(
@@ -148,19 +153,24 @@ async function fetchAudienceSizesForCreator(
   creatorId: string
 ): Promise<Map<string, number | null>> {
   const sizes = new Map<string, number | null>();
+  const connectedPlatforms = await getConnectedOAuthPlatformsForCreator(creatorId);
 
   await Promise.all(
-    oauthPlatforms.map(async (platform) => {
-      const tokenResult = await getOAuthAccessTokenForCreator(creatorId, platform);
-      if (!tokenResult) {
+    connectedPlatforms.map(async (platform) => {
+      try {
+        const tokenResult = await getOAuthAccessTokenForCreator(creatorId, platform);
+        if (!tokenResult) {
+          sizes.set(platform, null);
+          return;
+        }
+        const size = await fetchPlatformAudienceSize(
+          platform,
+          tokenResult.accessToken
+        );
+        sizes.set(platform, size);
+      } catch {
         sizes.set(platform, null);
-        return;
       }
-      const size = await fetchPlatformAudienceSize(
-        platform,
-        tokenResult.accessToken
-      );
-      sizes.set(platform, size);
     })
   );
 

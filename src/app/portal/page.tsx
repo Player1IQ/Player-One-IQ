@@ -45,7 +45,9 @@ import {
   buildCreatorCoachSnapshot,
   getCurrentUserId,
 } from "@/lib/creator-coach";
+import { getAllCoachStatesForToday } from "@/lib/creator-coach/queries";
 import { getCoachProfile } from "@/lib/creator-coach/profile-queries";
+import { buildCreatorSeasonView, syncCreatorSeasonXpFromCoach } from "@/lib/creator-seasons";
 
 export default async function PortalHomePage() {
   const membership = await getCurrentUserMembership();
@@ -221,6 +223,30 @@ export default async function PortalHomePage() {
       })
     : null;
 
+  if (userId && isCreatorPortalRole(membership.role) && membership.linkedCreatorId) {
+    const states = await getAllCoachStatesForToday(
+      userId,
+      membership.linkedCreatorId
+    );
+    await syncCreatorSeasonXpFromCoach({
+      userId,
+      creatorId: membership.linkedCreatorId,
+      missions: states.map((state) => ({
+        mission: state.mission,
+        stateId: state.id,
+      })),
+      completedRecommendationIds: [
+        ...new Set(states.flatMap((state) => state.completedRecommendationIds)),
+      ],
+      coachOnboardingCompleted: coachProfile?.onboardingCompleted ?? false,
+    });
+  }
+
+  const seasonView =
+    userId && isCreatorPortalRole(membership.role)
+      ? await buildCreatorSeasonView(userId, membership.linkedCreatorId!)
+      : null;
+
   return (
     <DashboardLayout
       title="Portal"
@@ -247,6 +273,7 @@ export default async function PortalHomePage() {
         coachContext={coachContext}
         coachProfile={coachProfile}
         creatorId={membership.linkedCreatorId}
+        seasonView={seasonView}
       />
     </DashboardLayout>
   );

@@ -7,7 +7,9 @@ import type { CoachProfile } from "@/lib/creator-coach/profile-types";
 import {
   getLocalCompletedRecommendations,
   getLocalDismissedRecommendations,
+  getLocalMissionState,
 } from "@/lib/creator-coach/client-state";
+import { syncCreatorSeasonFromCoachAction } from "@/lib/creator-seasons/season-coach-actions";
 import { TodaysMissionCard } from "./TodaysMissionCard";
 import { RecommendationCard } from "./RecommendationCard";
 import { CoachActivationCard } from "./CoachActivationCard";
@@ -44,6 +46,36 @@ export function CreatorCoachPanel({
       getLocalCompletedRecommendations(coachContext.scope, coachContext.scopeId)
     );
   }, [snapshot.stateId, coachContext.scope, coachContext.scopeId]);
+
+  useEffect(() => {
+    if (!creatorId || coachContext.scope !== "creator" || snapshot.stateId) return;
+
+    const localMission = getLocalMissionState(
+      coachContext.scope,
+      coachContext.scopeId,
+      snapshot.mission.id
+    );
+    const localCompleted = getLocalCompletedRecommendations(
+      coachContext.scope,
+      coachContext.scopeId
+    );
+
+    if (!localMission && localCompleted.length === 0) return;
+
+    void syncCreatorSeasonFromCoachAction(creatorId, {
+      mission: localMission,
+      completedRecommendationIds: localCompleted,
+    }).then((result) => {
+      if (result.xpAwarded > 0) router.refresh();
+    });
+  }, [
+    creatorId,
+    coachContext.scope,
+    coachContext.scopeId,
+    snapshot.stateId,
+    snapshot.mission.id,
+    router,
+  ]);
 
   const visibleRecommendations = useMemo(() => {
     if (snapshot.stateId) return snapshot.recommendations;

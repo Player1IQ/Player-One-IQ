@@ -8,6 +8,7 @@ import {
   loadPlatformOAuthTokens,
   savePlatformOAuthTokens,
 } from "./token-store";
+import type { OAuthTokens } from "./tokens";
 
 export async function getOAuthAccessTokenForCreator(
   creatorId: string,
@@ -33,7 +34,12 @@ export async function getOAuthAccessTokenForCreator(
   const tokens = await loadPlatformOAuthTokens(account.id, organizationId);
   if (!tokens?.access_token) return null;
 
-  const freshTokens = await ensureFreshTokensForPlatform(platform, tokens);
+  let freshTokens: OAuthTokens;
+  try {
+    freshTokens = await ensureFreshTokensForPlatform(platform, tokens);
+  } catch {
+    return null;
+  }
 
   if (freshTokens !== tokens) {
     const saveResult = await savePlatformOAuthTokens(

@@ -141,3 +141,31 @@ export async function getLatestCoachStateForToday(
 
   return mapStateRow(data as CreatorCoachStateRow);
 }
+
+export async function getAllCoachStatesForToday(
+  userId: string,
+  creatorId: string | null
+): Promise<CreatorCoachPersistedState[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  let query = supabase
+    .from("creator_coach_state")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .eq("user_id", userId)
+    .eq("mission_date", todayKey())
+    .order("mission_sequence", { ascending: true });
+
+  query = creatorId
+    ? query.eq("creator_id", creatorId)
+    : query.is("creator_id", null);
+
+  const { data, error } = await query;
+  if (error || !data) return [];
+
+  return (data as CreatorCoachStateRow[]).map(mapStateRow);
+}

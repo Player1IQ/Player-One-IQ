@@ -9,7 +9,10 @@ import {
   getUserOrganizations,
 } from "@/lib/organization/queries";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
-import { getCurrentUserRole } from "@/lib/permissions";
+import { getCurrentUserRole, isRolePreviewActiveForCurrentUser } from "@/lib/permissions";
+import { getAuthUser } from "@/lib/auth/cached";
+import { isRolePreviewAllowed } from "@/lib/dev/role-preview";
+import { RolePreviewSwitcher } from "@/components/dev/RolePreviewSwitcher";
 import { enforcePortalRouteAccess } from "@/lib/portal/guard";
 import { canAccessStaffDashboard } from "@/lib/team";
 import { getPortalTourSteps } from "@/lib/onboarding/tour";
@@ -49,7 +52,12 @@ export async function DashboardLayout({
 }: DashboardLayoutProps) {
   await enforcePortalRouteAccess();
 
-  const currentUserRole = await getCurrentUserRole();
+  const [authUser, currentUserRole, rolePreviewActive] = await Promise.all([
+    getAuthUser(),
+    getCurrentUserRole(),
+    isRolePreviewActiveForCurrentUser(),
+  ]);
+  const showRolePreviewSwitcher = isRolePreviewAllowed(authUser?.email);
   const isPortalUser = !canAccessStaffDashboard(currentUserRole);
 
   const [subscriptionContext, organizations, activeOrganization] =
@@ -149,6 +157,12 @@ export async function DashboardLayout({
         {children}
         {showPortalPoweredBy ? <PortalPoweredByFooter /> : null}
       </DashboardShell>
+      {showRolePreviewSwitcher && currentUserRole ? (
+        <RolePreviewSwitcher
+          currentRole={currentUserRole}
+          previewActive={rolePreviewActive}
+        />
+      ) : null}
       <MessageNotifications />
     </>
   );
