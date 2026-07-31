@@ -1,7 +1,8 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isPublicAppPath } from "@/lib/auth/public-routes";
-import { getAuthBootstrap, getActiveOrgAccess } from "@/lib/auth/route-context";
+import { getAuthBootstrap } from "@/lib/auth/route-context";
+import { getCurrentUserMembership } from "@/lib/permissions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
   getPortalRedirectPath,
@@ -91,8 +92,8 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
     redirect("/onboarding");
   }
 
-  const activeOrgAccess = await getActiveOrgAccess();
-  const role = activeOrgAccess?.role ?? null;
+  const membership = await getCurrentUserMembership();
+  const role = membership?.role ?? null;
 
   if (
     hasOrganization &&
@@ -110,7 +111,7 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
   }
 
   if (
-    activeOrgAccess &&
+    membership &&
     !isPublicRoute &&
     !isOrgSetup &&
     !isOnboarding &&
@@ -119,8 +120,8 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
   ) {
     if (isPortalRole(role)) {
       const portalContext = {
-        linkedCreatorId: activeOrgAccess.linkedCreatorId,
-        linkedSponsorId: activeOrgAccess.linkedSponsorId,
+        linkedCreatorId: membership.linkedCreatorId,
+        linkedSponsorId: membership.linkedSponsorId,
       };
       if (!isPathAllowedForPortalUser(pathname, role, portalContext)) {
         redirect(getPortalRedirectPath(pathname, portalContext));
@@ -143,7 +144,7 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
     !isInviteRoute &&
     !isOrgSetup &&
     !isOnboarding &&
-    activeOrgAccess
+    membership
   ) {
     if (isPortalRole(role)) {
       redirect(PORTAL_HOME);

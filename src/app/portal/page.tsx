@@ -88,7 +88,14 @@ export default async function PortalHomePage() {
     ]);
 
     if (!sponsor) {
-      redirect(STAFF_DASHBOARD_PATH);
+      return (
+        <DashboardLayout title="Portal" description="Your agency portal">
+          <PortalNoProfileClient
+            roleLabel={getPortalRoleLabel(membership.role)}
+            variant="sponsor"
+          />
+        </DashboardLayout>
+      );
     }
 
     const whiteLabelEnabled = hasFeature(subscription.features, "white_label");
