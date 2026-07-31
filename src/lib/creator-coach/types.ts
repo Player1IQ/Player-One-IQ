@@ -54,7 +54,7 @@ export interface DailyMission {
 
 export interface CreatorCoachSnapshot {
   stateId: string | null;
-  firstName: string;
+  displayName: string;
   greeting: string;
   mission: DailyMission;
   recommendations: Recommendation[];
@@ -66,7 +66,7 @@ export interface CreatorCoachSnapshot {
 export interface CoachContext {
   scope: "creator" | "organization";
   scopeId: string | null;
-  firstName: string;
+  displayName: string;
   creatorName?: string;
   primaryPlatform?: string;
   connectedPlatformCount: number;

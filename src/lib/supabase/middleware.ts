@@ -9,11 +9,19 @@ import { isSupabaseConfigured } from "./config";
  * enforceAuthenticatedRouteAccess() to avoid Vercel middleware timeouts.
  */
 export async function updateSession(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
+
   if (!isSupabaseConfigured()) {
-    return NextResponse.next({ request });
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   }
 
-  let supabaseResponse = NextResponse.next({ request });
+  let supabaseResponse = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,7 +35,9 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = NextResponse.next({
+            request: { headers: requestHeaders },
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -40,7 +50,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
   const isPublicRoute = isPublicMiddlewarePath(pathname);
 
   if (!user && !isPublicRoute) {

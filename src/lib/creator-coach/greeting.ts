@@ -11,6 +11,7 @@ export function getFirstName(name: string): string {
   return trimmed.split(/\s+/)[0] ?? trimmed;
 }
 
-export function buildGreeting(firstName: string, date = new Date()): string {
-  return `${getTimeBasedGreeting(date)}, ${firstName}`;
+export function buildGreeting(name: string, date = new Date()): string {
+  const displayName = name.trim();
+  return `${getTimeBasedGreeting(date)}, ${displayName || "Creator"}`;
 }

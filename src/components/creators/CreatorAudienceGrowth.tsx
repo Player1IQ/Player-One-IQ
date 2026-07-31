@@ -429,13 +429,8 @@ export function CreatorAudienceGrowth({
                   >
                     <div className="flex items-center justify-between gap-2">
                       <PlatformBadge platform={row.platform as Platform} />
-                      {row.audienceSize !== null && row.audienceSize > 0 && (
-                        <span className="text-xs text-gray-500">
-                          {formatChartCount(row.audienceSize)} audience
-                        </span>
-                      )}
                     </div>
-                    <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
+                    <dl className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
                       <div>
                         <dt className="text-[10px] uppercase tracking-wide text-gray-500">
                           Content
@@ -459,6 +454,22 @@ export function CreatorAudienceGrowth({
                         <dd className="mt-0.5 text-sm font-semibold text-white">
                           {row.contentCount > 0
                             ? formatChartCount(row.avgViews)
+                            : "—"}
+                        </dd>
+                      </div>
+                      <div
+                        title={
+                          row.audienceSize === null || row.audienceSize <= 0
+                            ? "Audience size is not available for this platform yet"
+                            : undefined
+                        }
+                      >
+                        <dt className="text-[10px] uppercase tracking-wide text-gray-500">
+                          Audience
+                        </dt>
+                        <dd className="mt-0.5 text-sm font-semibold text-white">
+                          {row.audienceSize !== null && row.audienceSize > 0
+                            ? formatChartCount(row.audienceSize)
                             : "—"}
                         </dd>
                       </div>

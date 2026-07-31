@@ -352,10 +352,10 @@ export function OpportunitiesPageClient({
             sourceOpportunities.length === 0
               ? isPortalUser
                 ? portalTab === "marketplace"
-                  ? "No open marketplace opportunities right now. Check back as brands publish public listings."
+                  ? "Sponsor opportunities are coming soon. We're onboarding our first brand partners. Once live, you'll see sponsorship and partnership opportunities matched to your profile right here — no scrolling through cold DMs required."
                   : portalTab === "recommended"
                     ? "No recommended opportunities right now. Connect more platforms or update your profile to improve matches."
-                    : "No open opportunities from your agency right now."
+                    : "Sponsor opportunities are coming soon. We're onboarding our first brand partners. Once live, you'll see sponsorship and partnership opportunities matched to your profile right here — no scrolling through cold DMs required."
                 : canManage
                   ? "Create your first sponsorship opportunity for creators to discover and apply."
                   : "Check back when opportunities are published."

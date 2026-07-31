@@ -68,8 +68,8 @@ export async function buildCreatorCoachSnapshot(
 
   return {
     stateId: persisted?.id ?? null,
-    firstName: context.firstName,
-    greeting: buildGreeting(context.firstName),
+    displayName: context.displayName,
+    greeting: buildGreeting(context.displayName),
     mission: mission!,
     recommendations,
     progressPercent: getMissionProgress(mission!),
@@ -94,6 +94,19 @@ export async function getCurrentUserDisplayName(): Promise<string> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user?.email) return "there";
+
+  const metadataName =
+    (typeof user.user_metadata?.full_name === "string"
+      ? user.user_metadata.full_name
+      : null) ??
+    (typeof user.user_metadata?.name === "string"
+      ? user.user_metadata.name
+      : null);
+
+  if (metadataName?.trim()) {
+    return metadataName.trim();
+  }
+
   return displayNameFromEmail(user.email);
 }
 

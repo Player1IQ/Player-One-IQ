@@ -54,6 +54,7 @@ export function MessagesInboxClient({
   const [modalOpen, setModalOpen] = useState(false);
 
   const quickFilters = getQuickFilters(isPortalUser);
+  const agencyContacts = users.filter((user) => user.userId !== currentUserId);
 
   const totalUnread = conversations.reduce(
     (sum, conversation) => sum + conversation.unreadCount,
@@ -97,11 +98,18 @@ export function MessagesInboxClient({
         />
         <MetricCard
           title={isPortalUser ? "Agency Contacts" : "Team Members"}
-          value={String(users.length)}
+          value={String(isPortalUser ? agencyContacts.length : users.length)}
           icon={Users}
           iconColor="text-violet-400"
         />
       </div>
+
+      {isPortalUser && agencyContacts.length === 0 ? (
+        <div className="rounded-xl border border-white/[0.06] bg-surface-raised/50 px-4 py-4 text-sm text-gray-400">
+          No contacts yet. Once you&apos;re connected with an agency or sponsor,
+          you&apos;ll be able to message them directly here.
+        </div>
+      ) : null}
 
       {totalUnread > 0 ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/25 bg-accent/10 px-4 py-3">
@@ -193,13 +201,25 @@ export function MessagesInboxClient({
           description={
             conversations.length === 0
               ? isPortalUser
-                ? "Message your agency team or open a contract deal room from your contract details."
+                ? agencyContacts.length === 0
+                  ? "No contacts yet. Once you're connected with an agency or sponsor, you'll be able to message them directly here."
+                  : "Message your agency team or open a contract deal room from your contract details."
                 : "Start a direct message or open a deal room from an opportunity or contract."
               : "Try a different search or filter."
           }
           action={
             conversations.length === 0 ? (
-              <Button type="button" size="sm" onClick={() => setModalOpen(true)}>
+              <Button
+                type="button"
+                size="sm"
+                disabled={isPortalUser && agencyContacts.length === 0}
+                title={
+                  isPortalUser && agencyContacts.length === 0
+                    ? "Add a contact first"
+                    : undefined
+                }
+                onClick={() => setModalOpen(true)}
+              >
                 New Message
               </Button>
             ) : hasActiveFilters ? (

@@ -7,13 +7,20 @@ import type { CreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-anal
 import type { PlatformContentSnapshot } from "@/lib/platform-oauth/content-performance";
 import type { DashboardRevenueSummary } from "@/lib/revenue/summary";
 import type { ScheduleEvent } from "@/lib/schedule";
+import { displayNameFromEmail } from "@/lib/team";
 import { analyzePostingCadence } from "./posting-cadence";
-import { getFirstName } from "./greeting";
 import type { CoachProfile } from "./profile-types";
 import type { CoachContext } from "./types";
 
 const UPLOAD_GOAL_WEEKLY = 4;
 const STREAM_HOURS_ESTIMATE = 2.5;
+
+function resolveCoachDisplayName(name: string, email: string | null): string {
+  const trimmed = name.trim();
+  if (trimmed) return trimmed;
+  if (email) return displayNameFromEmail(email);
+  return "Creator";
+}
 
 function deriveContentMetrics(
   analytics: CreatorAudienceAnalytics | null | undefined,
@@ -85,7 +92,7 @@ export function buildCreatorCoachContext(input: {
   return {
     scope: "creator",
     scopeId: input.creator.id,
-    firstName: getFirstName(input.creator.name),
+    displayName: resolveCoachDisplayName(input.creator.name, input.creator.email),
     creatorName: input.creator.name,
     primaryPlatform: input.creator.primaryPlatform,
     connectedPlatformCount: connectedCount,
@@ -139,7 +146,7 @@ export function buildOrganizationCoachContext(input: {
   return {
     scope: "organization",
     scopeId: null,
-    firstName: getFirstName(input.userDisplayName),
+    displayName: input.userDisplayName,
     connectedPlatformCount: input.connectedAccountCount,
     hasOAuthContent: input.connectedAccountCount > 0,
     totalRecentViews: null,

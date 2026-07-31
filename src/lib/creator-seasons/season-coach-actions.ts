@@ -33,10 +33,11 @@ export async function syncCreatorSeasonFromCoachAction(
     getCoachProfile(userId, creatorId),
   ]);
 
-  const missions = states.map((state) => ({
-    mission: state.mission,
-    stateId: state.id,
-  }));
+  const missions: Array<{ mission: DailyMission; stateId: string | null }> =
+    states.map((state) => ({
+      mission: state.mission,
+      stateId: state.id,
+    }));
 
   if (local?.mission) {
     missions.push({ mission: local.mission, stateId: null });

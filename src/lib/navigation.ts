@@ -237,6 +237,21 @@ export function getAccessibleNavItems(
       }
     }
 
+    const coachItem: NavItem = {
+      label: "Coach",
+      href: "/portal/coach",
+      icon: "sparkles",
+    };
+    if (!items.some((item) => item.href === "/portal/coach")) {
+      const growthIndex = items.findIndex((item) => item.href === "/portal/growth");
+      const insertIndex = growthIndex >= 0 ? growthIndex : 1;
+      items = [
+        ...items.slice(0, insertIndex),
+        coachItem,
+        ...items.slice(insertIndex),
+      ];
+    }
+
     const seasonsItem: NavItem = {
       label: "Seasons",
       href: "/portal/seasons",

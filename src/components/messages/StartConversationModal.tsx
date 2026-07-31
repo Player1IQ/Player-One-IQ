@@ -36,6 +36,7 @@ export function StartConversationModal({
   const [loading, setLoading] = useState(false);
 
   const recipients = users.filter((user) => user.userId !== currentUserId);
+  const hasContacts = recipients.length > 0;
 
   if (!open) return null;
 
@@ -54,8 +55,12 @@ export function StartConversationModal({
 
     const result =
       mode === "direct"
-        ? await getOrCreateDirectConversation(selectedUserId)
-        : await createGroupConversation(groupTitle, selectedMemberIds);
+        ? selectedUserId
+          ? await getOrCreateDirectConversation(selectedUserId)
+          : { error: "Select an agency contact to start a conversation." }
+        : selectedMemberIds.length === 0
+          ? { error: "Select at least one member for the group." }
+          : await createGroupConversation(groupTitle, selectedMemberIds);
 
     if ("error" in result) {
       setError(result.error);
@@ -107,14 +112,14 @@ export function StartConversationModal({
           </div>
 
           {recipients.length === 0 ? (
-            <div className="space-y-2 text-sm text-gray-400">
+            <div className="space-y-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-100/90">
               <p>
                 {isPortalUser
-                  ? "No agency contacts are available yet."
+                  ? "No contacts yet. Once you're connected with an agency or sponsor, you'll be able to message them directly here."
                   : "No other team members available yet."}
               </p>
               {!isPortalUser ? (
-                <p>
+                <p className="text-gray-400">
                   Invite colleagues from the{" "}
                   <Link href="/team" className="text-accent-light hover:underline">
                     Team page
@@ -195,8 +200,9 @@ export function StartConversationModal({
             </button>
             <button
               type="submit"
-              disabled={loading || recipients.length === 0}
-              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              disabled={loading || !hasContacts}
+              title={!hasContacts ? "Add a contact first" : undefined}
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               {mode === "direct" ? "Start Conversation" : "Create Group"}

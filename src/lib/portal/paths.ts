@@ -8,6 +8,8 @@ import {
 
 export const PORTAL_HOME = "/portal";
 
+const PORTAL_SHORTCUT_PATHS = ["/coach", "/deliverables"];
+
 export interface PortalPathContext {
   linkedCreatorId?: string | null;
   linkedSponsorId?: string | null;
@@ -89,6 +91,10 @@ export function isPathAllowedForPortalUser(
 
   if (STAFF_ONLY_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
     return false;
+  }
+
+  if (PORTAL_SHORTCUT_PATHS.includes(pathname)) {
+    return true;
   }
 
   if (pathname.startsWith("/creators/")) {

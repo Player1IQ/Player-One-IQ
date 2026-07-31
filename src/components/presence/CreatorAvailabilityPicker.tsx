@@ -38,7 +38,6 @@ export function CreatorAvailabilityPicker({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <PresenceBadge status={status} size="md" pulse={false} />
       <select
         value={status}
         disabled={isPending}
