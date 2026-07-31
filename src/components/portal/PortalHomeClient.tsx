@@ -16,9 +16,9 @@ import type { Creator } from "@/lib/creators";
 import type { Contract } from "@/lib/contracts";
 import { presenceLabels } from "@/lib/presence/types";
 import { CreatorAvatar } from "@/components/creators/CreatorAvatar";
-import { PlatformBadge } from "@/components/creators/PlatformBadge";
-import { StatusBadge } from "@/components/creators/StatusBadge";
+import { ConnectedPlatformBadges } from "@/components/creators/ConnectedPlatformBadges";
 import { ContractStatusBadge } from "@/components/contracts/ContractStatusBadge";
+import { PresenceBadge } from "@/components/presence/PresenceBadge";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { PortalAlertsBanner } from "@/components/portal/PortalAlertsBanner";
@@ -139,8 +139,14 @@ export function PortalHomeClient({
             </p>
             <h2 className="mt-1 text-3xl font-bold text-white">{creator.name}</h2>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <StatusBadge status={creator.status} />
-              <PlatformBadge platform={creator.primaryPlatform} />
+              <PresenceBadge status={creator.availabilityStatus} size="md" />
+              <ConnectedPlatformBadges
+                platforms={
+                  platformSummary?.platforms.map((account) => account.platform) ??
+                  []
+                }
+                fallbackPlatform={creator.primaryPlatform}
+              />
             </div>
           </div>
           <Link
@@ -160,15 +166,7 @@ export function PortalHomeClient({
         ) : null}
       </div>
 
-      <div
-        className={`grid gap-4 ${
-          showCampaigns && showOpportunities
-            ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7"
-            : showCampaigns || showOpportunities
-              ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
-              : "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
-        }`}
-      >
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <MetricCard
           title="Open deliverables"
           value={String(deliverableMetrics.openCount)}
@@ -225,7 +223,7 @@ export function PortalHomeClient({
           title="Messages"
           value={String(unreadMessages)}
           subtitle={unreadMessages === 1 ? "Unread conversation" : "Unread conversations"}
-          href="/messages"
+          href="/portal/messages"
           icon={MessageSquare}
           iconColor="text-violet-400"
         />
@@ -385,7 +383,7 @@ export function PortalHomeClient({
               My profile
             </Link>
             <Link
-              href="/messages"
+              href="/portal/messages"
               className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
             >
               <MessageSquare className="h-4 w-4 text-accent-light" />

@@ -108,6 +108,12 @@ export function OpportunitiesPageClient({
   }, [sourceOpportunities, search, statusFilter]);
 
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
+  const portalAllEmpty =
+    isPortalUser &&
+    agencyOpportunities.length === 0 &&
+    marketplaceOpportunities.length === 0 &&
+    myApplicationCount === 0;
+  const showPortalStatCards = !portalAllEmpty || hasActiveFilters;
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -133,7 +139,7 @@ export function OpportunitiesPageClient({
             iconColor="text-violet-400"
           />
         </div>
-      ) : (
+      ) : showPortalStatCards ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <MetricCard
             title="Your agency"
@@ -161,7 +167,7 @@ export function OpportunitiesPageClient({
             iconColor="text-sky-400"
           />
         </div>
-      )}
+      ) : null}
 
       {canManage && pendingReviewCount > 0 ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">

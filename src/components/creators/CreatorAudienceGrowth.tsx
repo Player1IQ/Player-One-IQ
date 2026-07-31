@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { MetricCard } from "@/components/ui/MetricCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { UpgradePrompt } from "@/components/subscription/UpgradePrompt";
+import { ChartFrame } from "@/components/charts/ChartFrame";
 import { PlatformBadge } from "./PlatformBadge";
 import type { Platform } from "@/lib/creators";
 import {
@@ -230,13 +231,14 @@ export function CreatorAudienceGrowth({
                   <p className="mt-1 text-xs text-gray-500">
                     Total views from recent content per platform
                   </p>
-                  <div className="mt-4 h-64 min-h-[16rem] min-w-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={platformChartData}
-                        margin={{ top: 8, right: 8, bottom: 0, left: -12 }}
-                        barCategoryGap="28%"
-                      >
+                  <div className="mt-4">
+                    <ChartFrame minHeight={280}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={platformChartData}
+                          margin={{ top: 8, right: 8, bottom: 8, left: -12 }}
+                          barCategoryGap="28%"
+                        >
                         <CartesianGrid
                           strokeDasharray="3 3"
                           stroke={chartGridStroke}
@@ -274,7 +276,8 @@ export function CreatorAudienceGrowth({
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
-                  </div>
+                  </ChartFrame>
+                </div>
                 </div>
 
                 {contentTrendData.length > 0 && (
@@ -293,35 +296,36 @@ export function CreatorAudienceGrowth({
                         see a trend line.
                       </p>
                     ) : null}
-                    <div className="mt-4 h-64 min-h-[16rem] min-w-0">
-                      <ResponsiveContainer width="100%" height="100%">
-                        {useContentBarChart ? (
-                          <BarChart
-                            data={contentTrendData}
-                            margin={{
-                              top: 8,
-                              right: 8,
-                              bottom: contentTrendData.length === 1 ? 0 : 0,
-                              left: -12,
-                            }}
-                            barCategoryGap="28%"
-                          >
+                    <div className="mt-4">
+                      <ChartFrame minHeight={280}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          {useContentBarChart ? (
+                            <BarChart
+                              data={contentTrendData}
+                              margin={{
+                                top: 8,
+                                right: 8,
+                                bottom: 24,
+                                left: -12,
+                              }}
+                              barCategoryGap="28%"
+                            >
                             <CartesianGrid
                               strokeDasharray="3 3"
                               stroke={chartGridStroke}
                               vertical={false}
                             />
-                            {contentTrendData.length > 1 ? (
-                              <XAxis
-                                dataKey="shortLabel"
-                                tick={chartAxisTick}
-                                axisLine={false}
-                                tickLine={false}
-                                interval={0}
-                                angle={-20}
-                                textAnchor="end"
-                                height={56}
-                              />
+                              {contentTrendData.length > 1 ? (
+                                <XAxis
+                                  dataKey="shortLabel"
+                                  tick={chartAxisTick}
+                                  axisLine={false}
+                                  tickLine={false}
+                                  interval={0}
+                                  angle={-20}
+                                  textAnchor="end"
+                                  height={72}
+                                />
                             ) : (
                               <XAxis dataKey="shortLabel" hide />
                             )}
@@ -344,11 +348,11 @@ export function CreatorAudienceGrowth({
                               name="Views"
                             />
                           </BarChart>
-                        ) : (
-                          <AreaChart
-                            data={contentTrendData}
-                            margin={{ top: 8, right: 8, bottom: 0, left: -12 }}
-                          >
+                          ) : (
+                            <AreaChart
+                              data={contentTrendData}
+                              margin={{ top: 8, right: 8, bottom: 24, left: -12 }}
+                            >
                             <defs>
                               <linearGradient
                                 id="contentViewsGrad"
@@ -374,16 +378,16 @@ export function CreatorAudienceGrowth({
                               stroke={chartGridStroke}
                               vertical={false}
                             />
-                            <XAxis
-                              dataKey="shortLabel"
-                              tick={{ fill: "#6B7280", fontSize: 10 }}
-                              axisLine={false}
-                              tickLine={false}
-                              interval={0}
-                              angle={-20}
-                              textAnchor="end"
-                              height={56}
-                            />
+                              <XAxis
+                                dataKey="shortLabel"
+                                tick={{ fill: "#6B7280", fontSize: 10 }}
+                                axisLine={false}
+                                tickLine={false}
+                                interval={0}
+                                angle={-20}
+                                textAnchor="end"
+                                height={72}
+                              />
                             <YAxis
                               domain={[0, contentAxisMax]}
                               allowDecimals={false}
@@ -408,7 +412,8 @@ export function CreatorAudienceGrowth({
                           </AreaChart>
                         )}
                       </ResponsiveContainer>
-                    </div>
+                    </ChartFrame>
+                  </div>
                   </div>
                 )}
               </div>
@@ -448,7 +453,7 @@ export function CreatorAudienceGrowth({
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-[10px] uppercase tracking-wide text-gray-500">
+                        <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
                           Avg views
                         </dt>
                         <dd className="mt-0.5 text-sm font-semibold text-white">

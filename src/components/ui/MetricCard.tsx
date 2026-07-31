@@ -42,7 +42,7 @@ export function MetricCard({
           <p className="text-sm font-medium text-gray-400">{title}</p>
           <p className="text-3xl font-bold tracking-tight text-white">{value}</p>
           {subtitle && (
-            <p className="truncate text-sm text-gray-500">{subtitle}</p>
+            <p className="line-clamp-2 text-sm text-gray-500">{subtitle}</p>
           )}
           {trend && (
             <p

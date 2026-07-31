@@ -2,29 +2,47 @@
 
 import { useState, useTransition } from "react";
 import { ChevronDown, Loader2 } from "lucide-react";
-import { updateMyPresence } from "@/lib/presence/actions";
-import type { PresenceStatus } from "@/lib/presence/types";
+import {
+  updateCreatorAvailability,
+  updateMyPresence,
+} from "@/lib/presence/actions";
+import {
+  presenceStatuses,
+  type PresenceStatus,
+} from "@/lib/presence/types";
 import { PresenceBadge } from "./PresenceBadge";
 
 interface PresencePickerProps {
   initialStatus: PresenceStatus;
+  mode?: "user" | "creator";
+  creatorId?: string;
 }
 
-const selectableStatuses: PresenceStatus[] = [
+const userSelectableStatuses: PresenceStatus[] = [
   "online",
   "away",
   "in_meeting",
 ];
 
-export function PresencePicker({ initialStatus }: PresencePickerProps) {
+export function PresencePicker({
+  initialStatus,
+  mode = "user",
+  creatorId,
+}: PresencePickerProps) {
   const [status, setStatus] = useState(initialStatus);
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  const selectableStatuses =
+    mode === "creator" ? presenceStatuses : userSelectableStatuses;
+
   function handleSelect(next: PresenceStatus) {
     setOpen(false);
     startTransition(async () => {
-      const result = await updateMyPresence(next);
+      const result =
+        mode === "creator" && creatorId
+          ? await updateCreatorAvailability(creatorId, next)
+          : await updateMyPresence(next);
       if ("success" in result && result.success) {
         setStatus(next);
       }

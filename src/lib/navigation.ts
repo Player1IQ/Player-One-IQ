@@ -112,7 +112,7 @@ export const portalNavItems: NavItem[] = [
   },
   {
     label: "Messages",
-    href: "/messages",
+    href: "/portal/messages",
     icon: "message-square",
     showUnreadBadge: true,
     requiredFeature: navFeatureRequirements["/messages"],
@@ -138,7 +138,7 @@ export const sponsorPortalNavItems: NavItem[] = [
   },
   {
     label: "Messages",
-    href: "/messages",
+    href: "/portal/messages",
     icon: "message-square",
     showUnreadBadge: true,
     requiredFeature: navFeatureRequirements["/messages"],
@@ -160,7 +160,9 @@ export function getAccessibleNavItems(
   if (role && isCreatorPortalRole(role) && !canAccessStaffDashboard(role)) {
     const campaignsItem = navItems.find((item) => item.href === "/campaigns");
     if (campaignsItem && !items.some((item) => item.href === "/campaigns")) {
-      const messagesIndex = items.findIndex((item) => item.href === "/messages");
+      const messagesIndex = items.findIndex(
+        (item) => item.href === "/portal/messages"
+      );
       if (messagesIndex >= 0) {
         items = [
           ...items.slice(0, messagesIndex),
@@ -177,7 +179,9 @@ export function getAccessibleNavItems(
       opportunitiesItem &&
       !items.some((item) => item.href === "/opportunities")
     ) {
-      const messagesIndex = items.findIndex((item) => item.href === "/messages");
+      const messagesIndex = items.findIndex(
+        (item) => item.href === "/portal/messages"
+      );
       if (messagesIndex >= 0) {
         items = [
           ...items.slice(0, messagesIndex),
@@ -276,4 +280,30 @@ export function getAccessibleNavItems(
       if (!permissionKey) return true;
       return hasReadAccess(role, permissionKey);
     });
+}
+
+export function getActiveNavHref(
+  pathname: string,
+  items: NavItem[]
+): string | null {
+  const matching = items
+    .filter((item) => {
+      if (item.href === STAFF_DASHBOARD_PATH) {
+        return pathname === STAFF_DASHBOARD_PATH;
+      }
+      if (item.href === "/portal") {
+        return pathname === "/portal";
+      }
+      if (item.href === "/portal/profile") {
+        return (
+          pathname.startsWith("/creators/") || pathname === "/portal/profile"
+        );
+      }
+      return (
+        pathname === item.href || pathname.startsWith(`${item.href}/`)
+      );
+    })
+    .sort((a, b) => b.href.length - a.href.length);
+
+  return matching[0]?.href ?? null;
 }

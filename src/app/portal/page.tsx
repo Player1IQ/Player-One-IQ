@@ -124,8 +124,8 @@ export default async function PortalHomePage() {
     );
   }
 
-  const showCampaigns = isCreatorPortalRole(membership.role);
-  const showOpportunities = isCreatorPortalRole(membership.role);
+  const isCreatorPortal = isCreatorPortalRole(membership.role);
+  const showOpportunities = isCreatorPortal;
 
   const [
     creator,
@@ -151,7 +151,7 @@ export default async function PortalHomePage() {
     getContracts(),
     getUnreadMessageCount(),
     getOrganizationForUser(),
-    showCampaigns ? getCampaigns() : Promise.resolve([]),
+    isCreatorPortal ? getCampaigns() : Promise.resolve([]),
     getPortalDeliverableMetrics(membership.linkedCreatorId),
     getSubscriptionContext(),
     showOpportunities ? getOpenOpportunitiesForPortal() : Promise.resolve([]),
@@ -168,6 +168,9 @@ export default async function PortalHomePage() {
     fetchCreatorContentSnapshots(membership.linkedCreatorId).catch(() => []),
     getCurrentUserId(),
   ]);
+
+  const showCampaigns =
+    isCreatorPortal && hasFeature(subscription.features, "campaign_tracking");
 
   if (!creator) {
     return (

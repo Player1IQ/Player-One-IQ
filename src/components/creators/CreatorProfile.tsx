@@ -22,12 +22,17 @@ import { deleteCreator } from "@/app/creators/actions";
 import { CreatorAvatar } from "./CreatorAvatar";
 import { StatusBadge } from "./StatusBadge";
 import { PlatformBadge } from "./PlatformBadge";
+import { ConnectedPlatformBadges } from "./ConnectedPlatformBadges";
 import { CreatorFormModal } from "./CreatorFormModal";
 import { CreatorPortalProfileModal } from "./CreatorPortalProfileModal";
 import { CreatorAvailabilityPicker } from "@/components/presence/CreatorAvailabilityPicker";
 import { CreatorPlatformAccounts } from "./CreatorPlatformAccounts";
 import { CreatorIncomeOverview } from "./CreatorIncomeOverview";
-import type { CreatorPlatformAccount, CreatorRevenueEntry } from "@/lib/creator-revenue";
+import {
+  isConnectedPlatformAccount,
+  type CreatorPlatformAccount,
+  type CreatorRevenueEntry,
+} from "@/lib/creator-revenue";
 import {
   platformOAuthDescription,
   type OAuthPlatformUi,
@@ -200,12 +205,12 @@ export function CreatorProfile({
                 />
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <PlatformBadge platform={creator.primaryPlatform} />
-                {creator.socialHandles
-                  .filter((h) => h.platform !== creator.primaryPlatform)
-                  .map((h, i) => (
-                    <PlatformBadge key={`${h.platform}-${i}`} platform={h.platform} />
-                  ))}
+                <ConnectedPlatformBadges
+                  platforms={platformAccounts
+                    .filter(isConnectedPlatformAccount)
+                    .map((account) => account.platform)}
+                  fallbackPlatform={creator.primaryPlatform}
+                />
               </div>
             </div>
           </div>

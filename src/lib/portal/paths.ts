@@ -1,5 +1,9 @@
 import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import {
+  PORTAL_SHORTCUT_PATHS,
+  resolvePortalShortcut,
+} from "@/lib/portal/shortcuts";
+import {
   isCreatorPortalRole,
   isPortalRole,
   isSponsorPortalRole,
@@ -7,8 +11,6 @@ import {
 } from "@/lib/team";
 
 export const PORTAL_HOME = "/portal";
-
-const PORTAL_SHORTCUT_PATHS = ["/coach", "/deliverables"];
 
 export interface PortalPathContext {
   linkedCreatorId?: string | null;
@@ -93,7 +95,7 @@ export function isPathAllowedForPortalUser(
     return false;
   }
 
-  if (PORTAL_SHORTCUT_PATHS.includes(pathname)) {
+  if ((PORTAL_SHORTCUT_PATHS as string[]).includes(pathname)) {
     return true;
   }
 
@@ -141,5 +143,5 @@ export function getPortalRedirectPath(
     return `/sponsors/${linkedSponsorId}`;
   }
 
-  return PORTAL_HOME;
+  return resolvePortalShortcut(pathname) ?? PORTAL_HOME;
 }

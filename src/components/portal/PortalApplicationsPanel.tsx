@@ -40,7 +40,9 @@ function StatChip({
       )}
     >
       <p className="text-lg font-semibold">{value}</p>
-      <p className="text-[11px] uppercase tracking-wider opacity-80">{label}</p>
+      <p className="whitespace-nowrap text-[11px] uppercase tracking-wider opacity-80">
+        {label}
+      </p>
     </div>
   );
 }

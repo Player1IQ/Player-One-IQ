@@ -24,11 +24,10 @@ import { OrganizationSwitcher } from "@/components/organization/OrganizationSwit
 import type { UserOrganization } from "@/lib/organization/queries";
 import { useMemo } from "react";
 import type { FeatureKey } from "@/lib/subscription/types";
-import { getAccessibleNavItems, type NavIconName } from "@/lib/navigation";
+import { getAccessibleNavItems, getActiveNavHref, type NavIconName } from "@/lib/navigation";
 import type { TeamRole } from "@/lib/team";
 import { SidebarUser } from "@/components/SidebarUser";
 import { UnreadBadge } from "@/components/messages/UnreadBadge";
-import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 const navIcons: Record<NavIconName, LucideIcon> = {
@@ -72,6 +71,10 @@ export function Sidebar({
     const features = new Set(enabledFeatures ?? []);
     return getAccessibleNavItems(features, teamRole);
   }, [enabledFeatures, teamRole]);
+  const activeHref = useMemo(
+    () => getActiveNavHref(pathname, items),
+    [pathname, items]
+  );
   const showBillingCta =
     teamRole !== "player" &&
     teamRole !== "content_creator" &&
@@ -124,15 +127,7 @@ export function Sidebar({
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto p-3" data-tour-sidebar>
         {items.map((item) => {
-          const isActive =
-            item.href === STAFF_DASHBOARD_PATH
-              ? pathname === STAFF_DASHBOARD_PATH
-              : item.href === "/portal"
-                ? pathname === "/portal"
-                : item.href === "/portal/profile"
-                  ? pathname.startsWith("/creators/") ||
-                    pathname === "/portal/profile"
-                  : pathname.startsWith(item.href);
+          const isActive = item.href === activeHref;
           const Icon = navIcons[item.icon];
 
           return (

@@ -103,7 +103,7 @@ export function MessageNotificationBell({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-white/[0.06] bg-surface-raised/95 shadow-2xl backdrop-blur-xl">
+        <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-white/[0.06] bg-surface-raised shadow-2xl">
           <div className="border-b border-white/[0.06] px-4 py-3">
             <p className="text-sm font-semibold text-white">Notifications</p>
             <p className="mt-0.5 text-xs text-gray-500">

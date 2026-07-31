@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { fetchMyPresence } from "@/lib/presence/actions";
+import { getSidebarAvailabilityContext } from "@/lib/presence/availability-context";
 import { PresencePicker } from "@/components/presence/PresencePicker";
 import type { PresenceStatus } from "@/lib/presence/types";
 import { Avatar } from "@/components/ui/Avatar";
@@ -15,6 +15,8 @@ export function SidebarUser() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [presenceStatus, setPresenceStatus] =
     useState<PresenceStatus>("inactive");
+  const [presenceMode, setPresenceMode] = useState<"user" | "creator">("user");
+  const [creatorId, setCreatorId] = useState<string | undefined>();
   const [presenceReady, setPresenceReady] = useState(false);
   const configured = isSupabaseConfigured();
 
@@ -66,8 +68,12 @@ export function SidebarUser() {
           .maybeSingle();
         setAvatarUrl(profile?.avatar_url ?? null);
 
-        const status = await fetchMyPresence();
-        setPresenceStatus(status);
+        const availability = await getSidebarAvailabilityContext();
+        setPresenceStatus(availability.status);
+        setPresenceMode(availability.mode);
+        if (availability.mode === "creator") {
+          setCreatorId(availability.creatorId);
+        }
         setPresenceReady(true);
       }
     }
@@ -94,7 +100,11 @@ export function SidebarUser() {
           </p>
           {presenceReady && configured ? (
             <div className="mt-1.5">
-              <PresencePicker initialStatus={presenceStatus} />
+              <PresencePicker
+                initialStatus={presenceStatus}
+                mode={presenceMode}
+                creatorId={creatorId}
+              />
             </div>
           ) : null}
         </div>

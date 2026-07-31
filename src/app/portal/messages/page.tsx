@@ -3,18 +3,14 @@ import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPage
 import { MessagesInboxClient } from "@/components/messages/MessagesInboxClient";
 import { loadMessagesPage } from "@/lib/messages/page-data";
 
-export default async function MessagesPage() {
+export default async function PortalMessagesPage() {
   const { conversations, messageUsers, currentUserId, isPortalUser } =
     await loadMessagesPage();
 
   return (
     <DashboardLayout
       title="Messages"
-      description={
-        isPortalUser
-          ? "Messages with your agency team and contract deal rooms"
-          : "Inbox, deal rooms, and team conversations"
-      }
+      description="Messages with your agency team and contract deal rooms"
     >
       <SubscriptionPageGate required="messaging" featureLabel="Messaging">
         {currentUserId ? (

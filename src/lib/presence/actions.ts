@@ -147,6 +147,26 @@ export async function updateCreatorAvailability(
 
   if (error) return { error: error.message };
 
+  if (isOwnPortalProfile) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const manual = isManualPresenceStatus(status);
+      const timestamp = nowIso();
+      await supabase.from("user_presence").upsert(
+        {
+          user_id: user.id,
+          status,
+          is_manual: manual,
+          updated_at: timestamp,
+          ...(status !== "inactive" ? { last_seen_at: timestamp } : {}),
+        },
+        { onConflict: "user_id" }
+      );
+    }
+  }
+
   const { revalidatePath } = await import("next/cache");
   revalidatePath("/creators");
   revalidatePath(`/creators/${creatorId}`);
