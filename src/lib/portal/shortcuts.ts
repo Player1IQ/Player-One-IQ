@@ -5,6 +5,7 @@ export const PORTAL_ROUTE_SHORTCUTS: Record<string, string> = {
   "/growth": "/portal/growth",
   "/seasons": "/portal/seasons",
   "/messages": "/portal/messages",
+  "/account": "/portal/account",
 };
 
 export const PORTAL_SHORTCUT_PATHS = Object.keys(PORTAL_ROUTE_SHORTCUTS);

@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       },
       { source: "/growth", destination: "/portal/growth", permanent: false },
       { source: "/seasons", destination: "/portal/seasons", permanent: false },
+      { source: "/account", destination: "/portal/account", permanent: false },
     ];
   },
   async headers() {

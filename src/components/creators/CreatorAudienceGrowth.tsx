@@ -18,7 +18,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { MetricCard } from "@/components/ui/MetricCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { UpgradePrompt } from "@/components/subscription/UpgradePrompt";
-import { ChartFrame } from "@/components/charts/ChartFrame";
+import {
+  CHART_FRAME_DEFAULT_HEIGHT,
+  ChartFrame,
+} from "@/components/charts/ChartFrame";
 import { PlatformBadge } from "./PlatformBadge";
 import type { Platform } from "@/lib/creators";
 import {
@@ -232,8 +235,11 @@ export function CreatorAudienceGrowth({
                     Total views from recent content per platform
                   </p>
                   <div className="mt-4">
-                    <ChartFrame minHeight={280}>
-                      <ResponsiveContainer width="100%" height="100%">
+                    <ChartFrame height={CHART_FRAME_DEFAULT_HEIGHT}>
+                      <ResponsiveContainer
+                        width="100%"
+                        height={CHART_FRAME_DEFAULT_HEIGHT}
+                      >
                         <BarChart
                           data={platformChartData}
                           margin={{ top: 8, right: 8, bottom: 8, left: -12 }}
@@ -297,8 +303,11 @@ export function CreatorAudienceGrowth({
                       </p>
                     ) : null}
                     <div className="mt-4">
-                      <ChartFrame minHeight={280}>
-                        <ResponsiveContainer width="100%" height="100%">
+                      <ChartFrame height={CHART_FRAME_DEFAULT_HEIGHT}>
+                        <ResponsiveContainer
+                          width="100%"
+                          height={CHART_FRAME_DEFAULT_HEIGHT}
+                        >
                           {useContentBarChart ? (
                             <BarChart
                               data={contentTrendData}
@@ -435,8 +444,8 @@ export function CreatorAudienceGrowth({
                     <div className="flex items-center justify-between gap-2">
                       <PlatformBadge platform={row.platform as Platform} />
                     </div>
-                    <dl className="mt-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
-                      <div>
+                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-center sm:grid-cols-4 sm:gap-x-3">
+                      <div className="min-w-0 px-1">
                         <dt className="text-[10px] uppercase tracking-wide text-gray-500">
                           Content
                         </dt>
@@ -444,7 +453,7 @@ export function CreatorAudienceGrowth({
                           {row.contentCount}
                         </dd>
                       </div>
-                      <div>
+                      <div className="min-w-0 px-1">
                         <dt className="text-[10px] uppercase tracking-wide text-gray-500">
                           Views
                         </dt>
@@ -452,7 +461,7 @@ export function CreatorAudienceGrowth({
                           {formatChartCount(row.totalViews)}
                         </dd>
                       </div>
-                      <div>
+                      <div className="min-w-0 px-1">
                         <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
                           Avg views
                         </dt>
@@ -463,13 +472,14 @@ export function CreatorAudienceGrowth({
                         </dd>
                       </div>
                       <div
+                        className="min-w-0 px-1"
                         title={
                           row.audienceSize === null || row.audienceSize <= 0
                             ? "Audience size is not available for this platform yet"
                             : undefined
                         }
                       >
-                        <dt className="text-[10px] uppercase tracking-wide text-gray-500">
+                        <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
                           Audience
                         </dt>
                         <dd className="mt-0.5 text-sm font-semibold text-white">
