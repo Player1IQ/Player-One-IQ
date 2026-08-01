@@ -3,11 +3,17 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth/cached";
 import { getCreators } from "@/lib/creators/queries";
+import { getOrganizationId } from "@/lib/organization/queries";
+import { PORTAL_HOME } from "@/lib/portal/paths";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { getSponsors } from "@/lib/sponsors/queries";
 import {
+  canAccessStaffDashboard,
   isCreatorPortalRole,
+  isPortalRole,
   isSponsorPortalRole,
   type TeamRole,
 } from "@/lib/team";
@@ -51,6 +57,47 @@ async function resolveLinkedIdsForRole(role: TeamRole): Promise<{
   }
 
   return { linkedCreatorId, linkedSponsorId };
+}
+
+async function resolveRedirectAfterPreviewClear(): Promise<string> {
+  const user = await getAuthUser();
+  if (!user) return "/login";
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return STAFF_DASHBOARD_PATH;
+
+  const supabase = await createClient();
+  if (!supabase) return STAFF_DASHBOARD_PATH;
+
+  const { data: membership } = await supabase
+    .from("team_members")
+    .select("role")
+    .eq("organization_id", organizationId)
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .maybeSingle();
+
+  const role = membership?.role as TeamRole | undefined;
+  if (role && isPortalRole(role)) {
+    return PORTAL_HOME;
+  }
+
+  if (role && canAccessStaffDashboard(role)) {
+    return STAFF_DASHBOARD_PATH;
+  }
+
+  const { data: ownedOrg } = await supabase
+    .from("organizations")
+    .select("id")
+    .eq("id", organizationId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (ownedOrg) {
+    return STAFF_DASHBOARD_PATH;
+  }
+
+  return PORTAL_HOME;
 }
 
 export async function setRolePreviewAction(
@@ -97,5 +144,5 @@ export async function clearRolePreviewAction(): Promise<
   cookieStore.delete(ROLE_PREVIEW_COOKIE);
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(await resolveRedirectAfterPreviewClear());
 }

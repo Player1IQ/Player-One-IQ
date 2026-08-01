@@ -3,12 +3,11 @@
 import { useState, useTransition } from "react";
 import { ChevronDown, Eye, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { roleLabels, type TeamRole } from "@/lib/team";
+import { roleLabels, teamRoles, type TeamRole } from "@/lib/team";
 import {
   clearRolePreviewAction,
   setRolePreviewAction,
 } from "@/lib/dev/role-preview-actions";
-import { ROLE_PREVIEW_OPTIONS } from "@/lib/dev/role-preview";
 
 interface RolePreviewSwitcherProps {
   currentRole: TeamRole;
@@ -72,7 +71,7 @@ export function RolePreviewSwitcher({
             </button>
           </div>
           <ul className="max-h-80 overflow-y-auto p-2">
-            {ROLE_PREVIEW_OPTIONS.map((role) => (
+            {teamRoles.map((role) => (
               <li key={role}>
                 <button
                   type="button"
