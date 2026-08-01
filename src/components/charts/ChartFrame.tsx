@@ -17,7 +17,7 @@ export function ChartFrame({
 }: ChartFrameProps) {
   return (
     <div
-      className={cn("w-full min-w-0", className)}
+      className={cn("chart-frame w-full min-w-0", className)}
       style={{ height }}
     >
       {children}
@@ -26,3 +26,4 @@ export function ChartFrame({
 }
 
 export const CHART_FRAME_DEFAULT_HEIGHT = 280;
+export const CONTENT_TREND_CHART_HEIGHT = 300;

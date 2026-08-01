@@ -4,20 +4,26 @@ export async function fetchTikTokRecentContent(
   accessToken: string,
   limit = 12
 ): Promise<ContentPerformanceItem[]> {
-  const response = await fetch("https://open.tiktokapis.com/v2/video/list/", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ max_count: limit }),
-  });
+  const fields =
+    "id,title,video_description,create_time,view_count,like_count,comment_count";
+  const response = await fetch(
+    `https://open.tiktokapis.com/v2/video/list/?fields=${fields}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ max_count: limit }),
+    }
+  );
 
   const body = (await response.json()) as {
     data?: {
       videos?: Array<{
         id: string;
         title?: string;
+        video_description?: string;
         create_time?: number;
         view_count?: number;
         like_count?: number;
@@ -33,7 +39,10 @@ export async function fetchTikTokRecentContent(
 
   return (body.data?.videos ?? []).map((video) => ({
     id: video.id,
-    title: video.title || "TikTok video",
+    title:
+      video.video_description?.trim() ||
+      video.title?.trim() ||
+      "TikTok video",
     publishedAt: video.create_time
       ? new Date(video.create_time * 1000).toISOString()
       : "",

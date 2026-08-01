@@ -25,9 +25,17 @@ export interface ContentTrendPoint {
   publishedAt: string;
 }
 
+export interface WeeklyViewsPoint {
+  weekStart: string;
+  label: string;
+  views: number;
+  contentCount: number;
+}
+
 export interface CreatorAudienceAnalytics {
   platformBreakdown: PlatformBreakdownMetric[];
   contentTrend: ContentTrendPoint[];
+  weeklyViewsTrend: WeeklyViewsPoint[];
   totalViews: number;
   totalContent: number;
   hasOAuthContent: boolean;
@@ -39,12 +47,6 @@ function engagementForItem(item: {
   commentCount?: number;
 }): number {
   return (item.likeCount ?? 0) + (item.commentCount ?? 0);
-}
-
-function truncateLabel(title: string, max = 22): string {
-  const trimmed = title.trim();
-  if (trimmed.length <= max) return trimmed;
-  return `${trimmed.slice(0, max - 1)}…`;
 }
 
 function buildBreakdownFromSnapshots(
@@ -74,6 +76,53 @@ function buildBreakdownFromSnapshots(
   });
 }
 
+function getWeekStartUtc(isoDate: string): string | null {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const day = date.getUTCDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(date);
+  monday.setUTCDate(date.getUTCDate() + diff);
+  monday.setUTCHours(0, 0, 0, 0);
+  return monday.toISOString().slice(0, 10);
+}
+
+function formatWeekLabel(weekStart: string): string {
+  const date = new Date(`${weekStart}T00:00:00.000Z`);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+export function buildWeeklyViewsTrend(
+  points: ContentTrendPoint[]
+): WeeklyViewsPoint[] {
+  const buckets = new Map<string, { views: number; contentCount: number }>();
+
+  for (const point of points) {
+    const weekStart = getWeekStartUtc(point.publishedAt);
+    if (!weekStart) continue;
+
+    const existing = buckets.get(weekStart) ?? { views: 0, contentCount: 0 };
+    buckets.set(weekStart, {
+      views: existing.views + point.views,
+      contentCount: existing.contentCount + 1,
+    });
+  }
+
+  return [...buckets.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([weekStart, bucket]) => ({
+      weekStart,
+      label: formatWeekLabel(weekStart),
+      views: bucket.views,
+      contentCount: bucket.contentCount,
+    }));
+}
+
 function buildContentTrend(snapshots: PlatformContentSnapshot[]): ContentTrendPoint[] {
   const points: ContentTrendPoint[] = [];
 
@@ -81,7 +130,7 @@ function buildContentTrend(snapshots: PlatformContentSnapshot[]): ContentTrendPo
     for (const item of snapshot.items) {
       points.push({
         id: `${snapshot.platform}-${item.id}`,
-        label: truncateLabel(item.title || "Untitled"),
+        label: (item.title || "Untitled").trim(),
         views: item.viewCount,
         engagement: engagementForItem(item),
         platform: snapshot.platform,
@@ -182,9 +231,11 @@ export function buildCreatorAudienceAnalytics(
   audienceSizes: Map<string, number | null>
 ): CreatorAudienceAnalytics {
   const platformBreakdown = buildBreakdownFromSnapshots(snapshots, audienceSizes);
-  const contentTrend = buildContentTrend(
-    snapshots.filter((s) => s.connectedViaOAuth && s.items.length > 0)
+  const oauthSnapshots = snapshots.filter(
+    (s) => s.connectedViaOAuth && s.items.length > 0
   );
+  const contentTrend = buildContentTrend(oauthSnapshots);
+  const weeklyViewsTrend = buildWeeklyViewsTrend(contentTrend);
   const analyzable = getAnalyzablePlatforms(snapshots);
 
   const totalViews = platformBreakdown.reduce((sum, row) => sum + row.totalViews, 0);
@@ -196,6 +247,7 @@ export function buildCreatorAudienceAnalytics(
   return {
     platformBreakdown,
     contentTrend,
+    weeklyViewsTrend,
     totalViews,
     totalContent,
     hasOAuthContent: analyzable.length > 0,

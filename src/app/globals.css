@@ -115,4 +115,15 @@
     position: relative;
     z-index: 1;
   }
+
+  /* Recharts defaults use light tooltip cursor / wrapper on dark charts */
+  .chart-frame .recharts-tooltip-cursor {
+    fill: rgba(124, 58, 237, 0.08) !important;
+  }
+
+  .chart-frame .recharts-default-tooltip {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
 }

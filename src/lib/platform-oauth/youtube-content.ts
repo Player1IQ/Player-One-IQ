@@ -54,7 +54,8 @@ export async function fetchYouTubeRecentVideos(
     );
   }
 
-  const videoIds = (playlistBody.items ?? [])
+  const playlistItems = playlistBody.items ?? [];
+  const videoIds = playlistItems
     .map((item) => item.contentDetails?.videoId)
     .filter((id): id is string => Boolean(id));
 
@@ -84,12 +85,30 @@ export async function fetchYouTubeRecentVideos(
     );
   }
 
-  return (statsBody.items ?? []).map((item) => ({
-    videoId: item.id,
-    title: item.snippet?.title ?? "Untitled",
-    publishedAt: item.snippet?.publishedAt ?? "",
-    viewCount: Number(item.statistics?.viewCount ?? 0),
-    likeCount: Number(item.statistics?.likeCount ?? 0),
-    commentCount: Number(item.statistics?.commentCount ?? 0),
-  }));
+  const statsById = new Map(
+    (statsBody.items ?? []).map((item) => [item.id, item])
+  );
+
+  return playlistItems
+    .map((playlistItem) => {
+      const videoId = playlistItem.contentDetails?.videoId;
+      if (!videoId) return null;
+
+      const stats = statsById.get(videoId);
+      if (!stats) return null;
+
+      return {
+        videoId,
+        title:
+          stats.snippet?.title?.trim() ||
+          playlistItem.snippet?.title?.trim() ||
+          "Untitled",
+        publishedAt:
+          stats.snippet?.publishedAt ?? playlistItem.snippet?.publishedAt ?? "",
+        viewCount: Number(stats.statistics?.viewCount ?? 0),
+        likeCount: Number(stats.statistics?.likeCount ?? 0),
+        commentCount: Number(stats.statistics?.commentCount ?? 0),
+      };
+    })
+    .filter((item): item is YouTubeVideoPerformance => item !== null);
 }

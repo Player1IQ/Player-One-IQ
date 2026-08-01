@@ -264,6 +264,7 @@ export function CreatorProfile({
           audienceAnalytics ?? {
             platformBreakdown: [],
             contentTrend: [],
+            weeklyViewsTrend: [],
             totalViews: 0,
             totalContent: 0,
             hasOAuthContent: false,
