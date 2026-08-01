@@ -91,27 +91,6 @@ export function PortalHomeClient({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {coachSnapshot && coachContext ? (
-        <CreatorCoachPanel
-          snapshot={coachSnapshot}
-          coachContext={coachContext}
-          coachProfile={coachProfile}
-          creatorId={creatorId}
-        />
-      ) : null}
-
-      {seasonView && creatorId ? (
-        <CreatorSeasonCard seasonView={seasonView} creatorId={creatorId} />
-      ) : null}
-
-      <PortalAlertsBanner
-        overdueDeliverables={deliverableMetrics.overdueCount}
-        unreadMessages={unreadMessages}
-        acceptedApplications={portalBenefits?.applicationStats.accepted ?? 0}
-        underReviewApplications={portalBenefits?.applicationStats.underReview ?? 0}
-        rejectedApplications={portalBenefits?.applicationStats.rejected ?? 0}
-      />
-
       <div
         className="relative overflow-hidden rounded-2xl border border-white/[0.06]"
         data-tour-spot="portal-home-hero"
@@ -236,6 +215,27 @@ export function PortalHomeClient({
           iconColor="text-sky-400"
         />
       </div>
+
+      <PortalAlertsBanner
+        overdueDeliverables={deliverableMetrics.overdueCount}
+        unreadMessages={unreadMessages}
+        acceptedApplications={portalBenefits?.applicationStats.accepted ?? 0}
+        underReviewApplications={portalBenefits?.applicationStats.underReview ?? 0}
+        rejectedApplications={portalBenefits?.applicationStats.rejected ?? 0}
+      />
+
+      {coachSnapshot && coachContext ? (
+        <CreatorCoachPanel
+          snapshot={coachSnapshot}
+          coachContext={coachContext}
+          coachProfile={coachProfile}
+          creatorId={creatorId}
+        />
+      ) : null}
+
+      {seasonView && creatorId ? (
+        <CreatorSeasonCard seasonView={seasonView} creatorId={creatorId} />
+      ) : null}
 
       {portalBenefits && portalBenefits.profileReadiness.score < 100 ? (
         <PortalProfileReadiness readiness={portalBenefits.profileReadiness} />

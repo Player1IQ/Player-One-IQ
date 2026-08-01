@@ -10,7 +10,6 @@ import {
   getLocalMissionState,
 } from "@/lib/creator-coach/client-state";
 import { syncCreatorSeasonFromCoachAction } from "@/lib/creator-seasons/season-coach-actions";
-import { TodaysMissionCard } from "./TodaysMissionCard";
 import { RecommendationCard } from "./RecommendationCard";
 import { CoachActivationCard } from "./CoachActivationCard";
 import { CoachOnboardingModal } from "./CoachOnboardingModal";
@@ -108,23 +107,14 @@ export function CreatorCoachPanel({
         <CoachActivationCard onActivate={() => setOnboardingOpen(true)} />
       ) : null}
 
-      <TodaysMissionCard
-        greeting={snapshot.greeting}
-        mission={snapshot.mission}
-        progressPercent={snapshot.progressPercent}
-        stateId={snapshot.stateId}
-        coachContext={coachContext}
-        onSnapshotUpdate={handleSnapshotUpdate}
-      />
-
       <div className="space-y-4">
         <SectorHeader
           sector="Coach"
           title="Creator Coach"
           description={
             coachProfile?.onboardingCompleted
-              ? "Personalized recommendations based on your goals and real workspace data."
-              : "Recommendations to grow your creator business — powered by your real workspace data."
+              ? `${snapshot.greeting} — Personalized recommendations based on your goals and real workspace data.`
+              : `${snapshot.greeting} — Recommendations to grow your creator business, powered by your real workspace data.`
           }
         />
         {visibleRecommendations.length === 0 ? (
