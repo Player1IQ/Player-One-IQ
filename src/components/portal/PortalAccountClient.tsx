@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ArrowLeft, Building2, Shield, User } from "lucide-react";
-import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
 import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
 import { ProfilePhotoUpload } from "@/components/account/ProfilePhotoUpload";
@@ -99,10 +98,6 @@ export function PortalAccountClient({
 
       <ReplayOnboardingButton />
       <ReplayPortalTourButton />
-
-      <div className="flex justify-end">
-        <SignOutButton />
-      </div>
     </div>
   );
 }

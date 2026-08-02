@@ -24,7 +24,7 @@ export function DealRoomButton({
   const [loading, setLoading] = useState(false);
 
   const buttonLabel =
-    label ?? (conversationId ? "Go to Deal Room" : "Open Deal Room");
+    label ?? (conversationId ? "Go to deal chat" : "Open deal chat");
 
   if (conversationId) {
     return (

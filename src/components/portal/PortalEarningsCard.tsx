@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { DollarSign, ExternalLink } from "lucide-react";
+import { DollarSign } from "lucide-react";
 import type { DashboardRevenueSummary } from "@/lib/revenue/summary";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 
@@ -63,8 +63,7 @@ export function PortalEarningsCard({
           href={incomeHref}
           className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-light hover:text-white"
         >
-          View full income overview
-          <ExternalLink className="h-3.5 w-3.5" />
+          View full income overview →
         </Link>
       </CardContent>
     </Card>

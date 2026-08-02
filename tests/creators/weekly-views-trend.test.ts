@@ -19,21 +19,21 @@ function point(
 
 test("buildWeeklyViewsTrend groups views by week start (Monday UTC)", () => {
   const trend = buildWeeklyViewsTrend([
-    point({ id: "a", publishedAt: "2026-06-03T12:00:00.000Z", views: 3 }),
-    point({ id: "b", publishedAt: "2026-06-05T12:00:00.000Z", views: 5 }),
-    point({ id: "c", publishedAt: "2026-06-10T12:00:00.000Z", views: 2 }),
-  ]);
+    point({ id: "a", publishedAt: "2026-05-20T12:00:00.000Z", views: 3 }),
+    point({ id: "b", publishedAt: "2026-05-22T12:00:00.000Z", views: 5 }),
+    point({ id: "c", publishedAt: "2026-05-28T12:00:00.000Z", views: 2 }),
+  ], new Date("2026-06-01T12:00:00.000Z"));
 
   assert.equal(trend.length, 2);
   assert.deepEqual(trend[0], {
-    weekStart: "2026-06-01",
-    label: "Jun 1",
+    weekStart: "2026-05-18",
+    label: "May 18",
     views: 8,
     contentCount: 2,
   });
   assert.deepEqual(trend[1], {
-    weekStart: "2026-06-08",
-    label: "Jun 8",
+    weekStart: "2026-05-25",
+    label: "May 25",
     views: 2,
     contentCount: 1,
   });

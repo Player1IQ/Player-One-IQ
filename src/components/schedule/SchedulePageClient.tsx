@@ -970,9 +970,19 @@ export function SchedulePageClient({
       ) : null}
 
       <p className="text-xs text-gray-600">
-        Showing events from{" "}
-        {new Date(rangeStartIso).toLocaleDateString()} to{" "}
-        {new Date(rangeEndIso).toLocaleDateString()}.
+        Showing events for the week of{" "}
+        {weekDays[0]?.toLocaleDateString("en-US", {
+          month: "numeric",
+          day: "numeric",
+          year: "numeric",
+        })}{" "}
+        –{" "}
+        {weekDays[6]?.toLocaleDateString("en-US", {
+          month: "numeric",
+          day: "numeric",
+          year: "numeric",
+        })}
+        .
       </p>
     </div>
   );

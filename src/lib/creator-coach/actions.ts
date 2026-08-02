@@ -134,7 +134,7 @@ export async function completeCoachRecommendationAction(
   recommendationId: string,
   context: CoachContext,
   revalidatePaths: string[] = ["/portal", "/dashboard"]
-): Promise<{ snapshot?: CreatorCoachSnapshot; error?: string }> {
+): Promise<{ snapshot?: CreatorCoachSnapshot; error?: string; xpAwarded?: number }> {
   const userId = await requireUserId();
   if (!userId) return { error: "Not authenticated." };
 
@@ -155,12 +155,17 @@ export async function completeCoachRecommendationAction(
     new Set([...persisted.completedRecommendationIds, recommendationId])
   );
 
-  await updateCreatorCoachMission(persisted.id, persisted.mission, {
+  const saved = await updateCreatorCoachMission(persisted.id, persisted.mission, {
     completedRecommendationIds: completedIds,
   });
 
+  if (!saved) {
+    return { error: "Could not save recommendation completion." };
+  }
+
+  let xpAwarded = 0;
   if (context.scope === "creator" && context.scopeId) {
-    await awardRecommendationSeasonXp({
+    xpAwarded = await awardRecommendationSeasonXp({
       userId,
       creatorId: context.scopeId,
       recommendationId,
@@ -176,5 +181,5 @@ export async function completeCoachRecommendationAction(
     userId,
     creatorCoachContext: context,
   });
-  return { snapshot };
+  return { snapshot, xpAwarded };
 }

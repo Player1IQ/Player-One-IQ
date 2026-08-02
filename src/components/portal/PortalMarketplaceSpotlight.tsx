@@ -1,7 +1,6 @@
-"use client";
-
 import Link from "next/link";
-import { Briefcase, ExternalLink, Store } from "lucide-react";
+import { MARKETPLACE_COMING_SOON_COPY } from "@/lib/opportunities/marketplace-copy";
+import { Briefcase, Store } from "lucide-react";
 import type { Opportunity } from "@/lib/opportunities";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 
@@ -31,7 +30,7 @@ export function PortalMarketplaceSpotlight({
             <Briefcase className="mx-auto h-8 w-8 text-gray-600" />
             <p className="mt-3 text-sm text-gray-400">
               {marketplaceCount === 0
-                ? "No marketplace listings right now. Check back soon or browse your agency opportunities."
+                ? MARKETPLACE_COMING_SOON_COPY
                 : "Browse the open marketplace to discover new sponsorship deals."}
             </p>
             <Link
@@ -69,8 +68,7 @@ export function PortalMarketplaceSpotlight({
               href="/opportunities?tab=marketplace"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-light hover:text-white"
             >
-              Browse all {marketplaceCount} marketplace listings
-              <ExternalLink className="h-3.5 w-3.5" />
+              Browse all {marketplaceCount} marketplace listings →
             </Link>
           </>
         )}

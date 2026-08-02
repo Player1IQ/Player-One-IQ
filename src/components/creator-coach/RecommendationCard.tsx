@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Check,
   ChevronDown,
-  ExternalLink,
   Loader2,
   X,
 } from "lucide-react";
@@ -78,9 +77,18 @@ export function RecommendationCard({
       return;
     }
 
-    runAction(() =>
-      completeCoachRecommendationAction(stateId, recommendation.id, coachContext)
-    );
+    startTransition(async () => {
+      const result = await completeCoachRecommendationAction(
+        stateId,
+        recommendation.id,
+        coachContext
+      );
+      if (result.error) return;
+      if ((result.xpAwarded ?? 0) === 0) {
+        await recordCoachRecommendationXpAction(recommendation.id, coachContext);
+      }
+      onSnapshotUpdate?.();
+    });
   }
 
   function handleDismiss() {
@@ -131,7 +139,12 @@ export function RecommendationCard({
             <h3 className="mt-1 text-base font-semibold text-white">
               {recommendation.title}
             </h3>
-            <p className="mt-1 text-sm text-gray-400 line-clamp-2">
+            <p
+              className={cn(
+                "mt-1 text-sm text-gray-400",
+                !expanded && "line-clamp-2"
+              )}
+            >
               {recommendation.description}
             </p>
           </div>
@@ -184,7 +197,6 @@ export function RecommendationCard({
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-dark"
           >
             {recommendation.actionLabel}
-            <ExternalLink className="h-3.5 w-3.5" />
           </Link>
           {recommendation.learnMoreRoute ? (
             <Link

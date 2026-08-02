@@ -70,11 +70,19 @@ export function evaluateMissedPostingCadenceRule(
 
   const missedLabel = formatDayList(cadence.missedPostingDaysThisWeek);
   const rhythmLabel = formatDayList(cadence.typicalPostingDays);
+  const missedSet = new Set(cadence.missedPostingDaysThisWeek);
+  const rhythmOnly = cadence.typicalPostingDays.filter((day) => !missedSet.has(day));
+  const rhythmOnlyLabel = formatDayList(rhythmOnly);
+
+  const description =
+    rhythmOnly.length === 0 || rhythmOnlyLabel === missedLabel
+      ? `You missed your usual upload days this week (${missedLabel}).`
+      : `You missed ${cadence.missedPostingDaysThisWeek.length} expected upload${cadence.missedPostingDaysThisWeek.length === 1 ? "" : "s"} this week (${missedLabel}). Your connected platforms show you usually publish on ${rhythmOnlyLabel}.`;
 
   return baseRecommendation({
     id: "goals-missed-posting-cadence",
     title: "Catch up on missed uploads",
-    description: `You missed ${cadence.missedPostingDaysThisWeek.length} expected upload${cadence.missedPostingDaysThisWeek.length === 1 ? "" : "s"} this week (${missedLabel}). Your connected platforms show you usually publish on ${rhythmLabel}.`,
+    description,
     whyItMatters:
       "Consistent publishing on your strongest days compounds algorithmic reach and trains your audience when to show up.",
     category: "Goals",
@@ -309,7 +317,7 @@ export function evaluateProfileReadinessRule(
     estimatedImpact: "Better sponsor discovery",
     confidenceScore: 86,
     actionLabel: "Update profile",
-    actionRoute: incomplete.href,
+    actionRoute: context.scopeId ? "/portal/profile" : "/portal",
   });
 }
 

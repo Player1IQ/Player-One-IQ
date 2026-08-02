@@ -20,6 +20,10 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
+import {
+  AGENCY_OPPORTUNITIES_EMPTY_COPY,
+  MARKETPLACE_COMING_SOON_COPY,
+} from "@/lib/opportunities/marketplace-copy";
 import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
 import { OpportunityFitBadge } from "./OpportunityFitBadge";
@@ -358,10 +362,10 @@ export function OpportunitiesPageClient({
             sourceOpportunities.length === 0
               ? isPortalUser
                 ? portalTab === "marketplace"
-                  ? "Sponsor opportunities are coming soon. We're onboarding our first brand partners. Once live, you'll see sponsorship and partnership opportunities matched to your profile right here — no scrolling through cold DMs required."
+                  ? MARKETPLACE_COMING_SOON_COPY
                   : portalTab === "recommended"
                     ? "No recommended opportunities right now. Connect more platforms or update your profile to improve matches."
-                    : "Sponsor opportunities are coming soon. We're onboarding our first brand partners. Once live, you'll see sponsorship and partnership opportunities matched to your profile right here — no scrolling through cold DMs required."
+                    : AGENCY_OPPORTUNITIES_EMPTY_COPY
                 : canManage
                   ? "Create your first sponsorship opportunity for creators to discover and apply."
                   : "Check back when opportunities are published."

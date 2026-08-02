@@ -307,7 +307,9 @@ export function ContractsPageClient({
               ? isPortalUser
                 ? "No deals yet"
                 : "No contracts yet"
-              : "No matching contracts"
+              : isPortalUser
+                ? "No matching deals"
+                : "No matching contracts"
           }
           description={
             contracts.length === 0
@@ -342,7 +344,7 @@ export function ContractsPageClient({
           <p className="text-sm text-gray-500">
             Showing{" "}
             <span className="font-medium text-gray-300">{filtered.length}</span>{" "}
-            of {contracts.length} contracts
+            of {contracts.length} {isPortalUser ? "deals" : "contracts"}
           </p>
 
           <div className="flex gap-0 lg:gap-6">

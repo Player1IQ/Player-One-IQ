@@ -20,6 +20,7 @@ interface CreatorCoachPanelProps {
   coachContext: CoachContext;
   coachProfile?: CoachProfile | null;
   creatorId?: string | null;
+  showSectionHeader?: boolean;
 }
 
 export function CreatorCoachPanel({
@@ -27,6 +28,7 @@ export function CreatorCoachPanel({
   coachContext,
   coachProfile = null,
   creatorId = null,
+  showSectionHeader = true,
 }: CreatorCoachPanelProps) {
   const router = useRouter();
   const [onboardingOpen, setOnboardingOpen] = useState(false);
@@ -107,7 +109,7 @@ export function CreatorCoachPanel({
         <CoachActivationCard onActivate={() => setOnboardingOpen(true)} />
       ) : null}
 
-      <div className="space-y-4">
+      {showSectionHeader ? (
         <SectorHeader
           sector="Coach"
           title="Creator Coach"
@@ -117,6 +119,9 @@ export function CreatorCoachPanel({
               : `${snapshot.greeting} — Recommendations to grow your creator business, powered by your real workspace data.`
           }
         />
+      ) : null}
+
+      <div className="space-y-4">
         {visibleRecommendations.length === 0 ? (
           <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/50 px-6 py-10 text-center">
             <p className="text-sm font-medium text-gray-300">

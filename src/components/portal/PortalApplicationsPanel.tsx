@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Briefcase, ExternalLink } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import {
   getApplicationStats,
   type OpportunityApplication,
@@ -104,8 +104,7 @@ export function PortalApplicationsPanel({
           href="/opportunities/applications"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-light hover:text-white"
         >
-          View all applications
-          <ExternalLink className="h-3.5 w-3.5" />
+          View all applications →
         </Link>
       </CardContent>
     </Card>

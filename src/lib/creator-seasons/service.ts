@@ -141,13 +141,17 @@ export async function awardCreatorSeasonXp(input: {
   }
 
   const newTotal = progress.totalXp + xpAmount;
-  await supabase
+  const { error: updateError } = await supabase
     .from("creator_season_progress")
     .update({
       total_xp: newTotal,
       updated_at: new Date().toISOString(),
     })
     .eq("id", progress.id);
+
+  if (updateError) {
+    return { awarded: false };
+  }
 
   return { awarded: true, xp: xpAmount };
 }

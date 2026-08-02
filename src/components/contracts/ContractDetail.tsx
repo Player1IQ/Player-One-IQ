@@ -127,7 +127,7 @@ export function ContractDetail({
             className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
           >
             <ArrowLeft className="h-4 w-4" />
-            {isPortalUser ? "Back to Portal" : "Back to Contracts"}
+            {isPortalUser ? "Back to Portal" : "Back to Deals"}
           </Link>
           <div className="flex flex-wrap gap-2">
             {showDealRoom ? (

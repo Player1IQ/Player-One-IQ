@@ -88,21 +88,38 @@ function getWeekStartUtc(isoDate: string): string | null {
   return monday.toISOString().slice(0, 10);
 }
 
-function formatWeekLabel(weekStart: string): string {
+function formatWeekLabel(weekStart: string, includeYear = false): string {
   const date = new Date(`${weekStart}T00:00:00.000Z`);
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
+    ...(includeYear ? { year: "numeric" } : {}),
     timeZone: "UTC",
   });
 }
 
+const WEEKLY_TREND_LOOKBACK_WEEKS = 12;
+
 export function buildWeeklyViewsTrend(
-  points: ContentTrendPoint[]
+  points: ContentTrendPoint[],
+  now = new Date()
 ): WeeklyViewsPoint[] {
+  const validPoints = points.filter((point) => {
+    const published = new Date(point.publishedAt);
+    return !Number.isNaN(published.getTime());
+  });
+
+  const windowStart = new Date(now);
+  windowStart.setUTCDate(windowStart.getUTCDate() - WEEKLY_TREND_LOOKBACK_WEEKS * 7);
+
+  const recentPoints = validPoints.filter(
+    (point) => new Date(point.publishedAt) >= windowStart
+  );
+  const sourcePoints = recentPoints.length > 0 ? recentPoints : validPoints;
+
   const buckets = new Map<string, { views: number; contentCount: number }>();
 
-  for (const point of points) {
+  for (const point of sourcePoints) {
     const weekStart = getWeekStartUtc(point.publishedAt);
     if (!weekStart) continue;
 
@@ -113,14 +130,18 @@ export function buildWeeklyViewsTrend(
     });
   }
 
-  return [...buckets.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([weekStart, bucket]) => ({
-      weekStart,
-      label: formatWeekLabel(weekStart),
-      views: bucket.views,
-      contentCount: bucket.contentCount,
-    }));
+  const weeks = [...buckets.entries()].sort(([left], [right]) =>
+    left.localeCompare(right)
+  );
+  const years = new Set(weeks.map(([weekStart]) => weekStart.slice(0, 4)));
+  const includeYear = years.size > 1;
+
+  return weeks.map(([weekStart, bucket]) => ({
+    weekStart,
+    label: formatWeekLabel(weekStart, includeYear),
+    views: bucket.views,
+    contentCount: bucket.contentCount,
+  }));
 }
 
 function buildContentTrend(snapshots: PlatformContentSnapshot[]): ContentTrendPoint[] {

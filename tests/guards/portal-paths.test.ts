@@ -52,6 +52,7 @@ const playerCases: PortalCase[] = [
   { role: "player", pathname: "/growth", expected: true },
   { role: "player", pathname: "/seasons", expected: true },
   { role: "player", pathname: "/portal/growth", expected: true },
+  { role: "player", pathname: "/portal/opportunities", expected: true },
   { role: "player", pathname: "/portal/seasons", expected: true },
   { role: "player", pathname: "/account", expected: true },
   { role: "player", pathname: "/portal/account", expected: true },

@@ -39,14 +39,14 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
 
   return (
     <DashboardLayout
-      title={isPortalUser ? "Your deals" : "Contracts"}
+      title={isPortalUser ? "Your Deals" : "Contracts"}
       description={
         isPortalUser
           ? "Sponsorship agreements linked to your profile"
           : "Manage sponsorship agreements and deliverables"
       }
     >
-      <SubscriptionPageGate required="contracts" featureLabel="Contracts">
+      <SubscriptionPageGate required="contracts" featureLabel="Deals">
         <ContractsPageClient
           contracts={contracts}
           creators={creators}

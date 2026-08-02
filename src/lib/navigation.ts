@@ -59,7 +59,7 @@ export const navItems: NavItem[] = [
     requiredFeature: navFeatureRequirements["/campaigns"],
   },
   {
-    label: "Contracts",
+    label: "Deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],
@@ -105,7 +105,7 @@ export const portalNavItems: NavItem[] = [
   { label: "Schedule", href: "/schedule", icon: "calendar" },
   { label: "My Profile", href: "/portal/profile", icon: "users" },
   {
-    label: "Contracts",
+    label: "Deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],
@@ -125,7 +125,7 @@ export const sponsorPortalNavItems: NavItem[] = [
   { label: "Schedule", href: "/schedule", icon: "calendar" },
   { label: "Company", href: "/portal/profile", icon: "building" },
   {
-    label: "Contracts",
+    label: "Deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],

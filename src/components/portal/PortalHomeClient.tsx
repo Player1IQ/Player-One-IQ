@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Contract } from "@/lib/contracts";
-import { presenceLabels } from "@/lib/presence/types";
+import { countActiveDeals } from "@/lib/contracts/deal-metrics";
+import { PresencePicker } from "@/components/presence/PresencePicker";
 import { CreatorAvatar } from "@/components/creators/CreatorAvatar";
 import { ConnectedPlatformBadges } from "@/components/creators/ConnectedPlatformBadges";
 import { ContractStatusBadge } from "@/components/contracts/ContractStatusBadge";
@@ -85,9 +86,7 @@ export function PortalHomeClient({
   creatorId = null,
   seasonView = null,
 }: PortalHomeClientProps) {
-  const activeContracts = contracts.filter((contract) =>
-    ["active", "negotiating", "draft"].includes(contract.status)
-  );
+  const activeDealCount = countActiveDeals(contracts);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -164,8 +163,8 @@ export function PortalHomeClient({
         />
         <MetricCard
           title="Active deals"
-          value={String(activeContracts.length)}
-          subtitle={`${contracts.length} total contracts`}
+          value={String(activeDealCount)}
+          subtitle={`${contracts.length} total deals`}
           href="/contracts"
           icon={FileText}
           iconColor="text-emerald-400"
@@ -206,14 +205,18 @@ export function PortalHomeClient({
           icon={MessageSquare}
           iconColor="text-violet-400"
         />
-        <MetricCard
-          title="Availability"
-          value={presenceLabels[creator.availabilityStatus]}
-          subtitle="Tap to update your status"
-          href={`/creators/${creator.id}`}
-          icon={Calendar}
-          iconColor="text-sky-400"
-        />
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            Availability
+          </p>
+          <div className="mt-3">
+            <PresencePicker
+              mode="creator"
+              creatorId={creator.id}
+              initialStatus={creator.availabilityStatus}
+            />
+          </div>
+        </div>
       </div>
 
       <PortalAlertsBanner
@@ -324,7 +327,7 @@ export function PortalHomeClient({
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <Card>
           <CardHeader>
-            <CardTitle>Your contracts</CardTitle>
+            <CardTitle>Your deals</CardTitle>
             <CardDescription>
               Sponsorship agreements linked to your roster profile
             </CardDescription>

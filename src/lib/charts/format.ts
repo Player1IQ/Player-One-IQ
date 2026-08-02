@@ -24,6 +24,15 @@ export function getChartYAxisTicks(max: number): number[] {
     return Array.from({ length: ceiling + 1 }, (_, index) => index);
   }
 
+  if (ceiling <= 20) {
+    const ticks = [0, 5, 10, 15, 20].filter((tick) => tick <= ceiling);
+    if (max > 0 && !ticks.includes(max) && max < ceiling) {
+      ticks.push(max);
+      ticks.sort((a, b) => a - b);
+    }
+    return ticks;
+  }
+
   const step =
     ceiling <= 50 ? 10 : ceiling <= 200 ? 50 : ceiling <= 1000 ? 200 : 500;
   const ticks: number[] = [];
@@ -32,6 +41,10 @@ export function getChartYAxisTicks(max: number): number[] {
   }
   if (ticks[ticks.length - 1] !== ceiling) {
     ticks.push(ceiling);
+  }
+  if (max > 0 && max < ceiling && !ticks.includes(max)) {
+    ticks.push(max);
+    ticks.sort((a, b) => a - b);
   }
   return ticks;
 }
@@ -124,7 +137,7 @@ export function getContentTrendBarAxisConfig(itemCount: number): {
     return { maxCharsPerLine: 22, maxLines: 2, bottomMargin: 64, axisHeight: 56 };
   }
   if (itemCount === 3) {
-    return { maxCharsPerLine: 18, maxLines: 2, bottomMargin: 72, axisHeight: 64 };
+    return { maxCharsPerLine: 18, maxLines: 2, bottomMargin: 56, axisHeight: 52 };
   }
   return { maxCharsPerLine: 14, maxLines: 2, bottomMargin: 80, axisHeight: 72 };
 }

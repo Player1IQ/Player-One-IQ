@@ -26,4 +26,4 @@ export function ChartFrame({
 }
 
 export const CHART_FRAME_DEFAULT_HEIGHT = 280;
-export const CONTENT_TREND_CHART_HEIGHT = 300;
+export const CONTENT_TREND_CHART_HEIGHT = 240;

@@ -15,7 +15,7 @@ export default async function PortalCoachPage() {
   return (
     <DashboardLayout
       title="Creator Coach"
-      description="Personalized missions and recommendations for your creator business"
+      description="Personalized recommendations for your creator business"
     >
       {data.coachSnapshot ? (
         <CreatorCoachPanel
@@ -23,6 +23,7 @@ export default async function PortalCoachPage() {
           coachContext={data.coachContext}
           coachProfile={data.coachProfile}
           creatorId={data.creatorId}
+          showSectionHeader={false}
         />
       ) : (
         <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/50 px-6 py-12 text-center">

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Contract } from "@/lib/contracts";
+import { countActiveDeals } from "@/lib/contracts/deal-metrics";
 import { RelatedContractsSection } from "@/components/contracts/RelatedContractsSection";
 import { formatCreatorDate } from "@/lib/creators";
 import { deleteCreator } from "@/app/creators/actions";
@@ -133,7 +134,9 @@ export function CreatorProfile({
     (h) => h.platform === creator.primaryPlatform
   );
 
-  const activeContracts = contracts.filter((c) => c.status === "active");
+  const activeDealCount = isPortalUser
+    ? countActiveDeals(contracts)
+    : contracts.filter((c) => c.status === "active").length;
   const totalContractValue = contracts.reduce(
     (sum, c) => sum + c.contractValue,
     0
@@ -221,7 +224,7 @@ export function CreatorProfile({
       <div className={`grid gap-4 sm:grid-cols-2 ${isPortalUser ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
         <MetricCard
           title={isPortalUser ? "Active deals" : "Active Contracts"}
-          value={String(activeContracts.length)}
+          value={String(activeDealCount)}
           subtitle={
             isPortalUser
               ? `${contracts.length} sponsorship agreement${contracts.length === 1 ? "" : "s"}`
@@ -395,7 +398,7 @@ export function CreatorProfile({
       </Section>
 
       <Section
-        title={isPortalUser ? "Your sponsorship deals" : "Contracts"}
+        title={isPortalUser ? "Your deals" : "Contracts"}
         description={
           isPortalUser
             ? "Active and past sponsorship agreements on your profile"

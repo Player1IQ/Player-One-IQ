@@ -44,7 +44,7 @@ export function CreatorSeasonCard({
             <p className="mt-1 text-sm text-gray-400">
               {optedIn
                 ? `Tier ${currentTier.tier} · ${currentTier.title} · ${daysRemaining} days left`
-                : "Complete Coach missions to earn XP and unlock tier rewards."}
+                : "Complete Coach recommendations to earn XP and unlock tier rewards."}
             </p>
           </div>
         </div>
@@ -164,8 +164,6 @@ export function CreatorSeasonPanel({
         <h2 className="text-lg font-semibold text-white">How to earn XP</h2>
         <ul className="mt-4 grid gap-3 sm:grid-cols-2">
           {[
-            { label: "Complete a mission task", xp: 25 },
-            { label: "Finish today’s full mission", xp: 50 },
             { label: "Mark a Coach recommendation done", xp: 30 },
             { label: "Personalize your Creator Coach", xp: 100 },
           ].map((item) => (
