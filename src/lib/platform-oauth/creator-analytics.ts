@@ -88,63 +88,79 @@ function getWeekStartUtc(isoDate: string): string | null {
   return monday.toISOString().slice(0, 10);
 }
 
-function formatWeekLabel(weekStart: string, includeYear = false): string {
+function formatWeekLabel(weekStart: string): string {
   const date = new Date(`${weekStart}T00:00:00.000Z`);
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    ...(includeYear ? { year: "numeric" } : {}),
     timeZone: "UTC",
   });
 }
 
 const WEEKLY_TREND_LOOKBACK_WEEKS = 12;
 
+function getWeekStartsForLookback(now = new Date()): string[] {
+  const currentWeekStart = getWeekStartUtc(now.toISOString());
+  if (!currentWeekStart) return [];
+
+  const weekStarts: string[] = [];
+  const anchor = new Date(`${currentWeekStart}T00:00:00.000Z`);
+
+  for (let index = WEEKLY_TREND_LOOKBACK_WEEKS - 1; index >= 0; index -= 1) {
+    const weekDate = new Date(anchor);
+    weekDate.setUTCDate(anchor.getUTCDate() - index * 7);
+    weekStarts.push(weekDate.toISOString().slice(0, 10));
+  }
+
+  return weekStarts;
+}
+
 export function buildWeeklyViewsTrend(
   points: ContentTrendPoint[],
   now = new Date()
 ): WeeklyViewsPoint[] {
-  const validPoints = points.filter((point) => {
-    const published = new Date(point.publishedAt);
-    return !Number.isNaN(published.getTime());
-  });
-
   const windowStart = new Date(now);
   windowStart.setUTCDate(windowStart.getUTCDate() - WEEKLY_TREND_LOOKBACK_WEEKS * 7);
+  windowStart.setUTCHours(0, 0, 0, 0);
 
-  const recentPoints = validPoints.filter(
-    (point) => new Date(point.publishedAt) >= windowStart
+  const weekStarts = getWeekStartsForLookback(now);
+  const buckets = new Map(
+    weekStarts.map((weekStart) => [
+      weekStart,
+      { views: 0, contentCount: 0 },
+    ])
   );
-  const sourcePoints = recentPoints.length > 0 ? recentPoints : validPoints;
 
-  const buckets = new Map<string, { views: number; contentCount: number }>();
+  for (const point of points) {
+    const published = new Date(point.publishedAt);
+    if (Number.isNaN(published.getTime()) || published < windowStart) {
+      continue;
+    }
 
-  for (const point of sourcePoints) {
     const weekStart = getWeekStartUtc(point.publishedAt);
-    if (!weekStart) continue;
+    if (!weekStart || !buckets.has(weekStart)) continue;
 
-    const existing = buckets.get(weekStart) ?? { views: 0, contentCount: 0 };
+    const existing = buckets.get(weekStart)!;
     buckets.set(weekStart, {
       views: existing.views + point.views,
       contentCount: existing.contentCount + 1,
     });
   }
 
-  const weeks = [...buckets.entries()].sort(([left], [right]) =>
-    left.localeCompare(right)
-  );
-  const years = new Set(weeks.map(([weekStart]) => weekStart.slice(0, 4)));
-  const includeYear = years.size > 1;
-
-  return weeks.map(([weekStart, bucket]) => ({
-    weekStart,
-    label: formatWeekLabel(weekStart, includeYear),
-    views: bucket.views,
-    contentCount: bucket.contentCount,
-  }));
+  return weekStarts.map((weekStart) => {
+    const bucket = buckets.get(weekStart)!;
+    return {
+      weekStart,
+      label: formatWeekLabel(weekStart),
+      views: bucket.views,
+      contentCount: bucket.contentCount,
+    };
+  });
 }
 
-function buildContentTrend(snapshots: PlatformContentSnapshot[]): ContentTrendPoint[] {
+function buildContentTrendPoints(
+  snapshots: PlatformContentSnapshot[]
+): ContentTrendPoint[] {
   const points: ContentTrendPoint[] = [];
 
   for (const snapshot of snapshots) {
@@ -160,12 +176,10 @@ function buildContentTrend(snapshots: PlatformContentSnapshot[]): ContentTrendPo
     }
   }
 
-  return points
-    .sort(
-      (left, right) =>
-        new Date(left.publishedAt).getTime() - new Date(right.publishedAt).getTime()
-    )
-    .slice(-12);
+  return points.sort(
+    (left, right) =>
+      new Date(left.publishedAt).getTime() - new Date(right.publishedAt).getTime()
+  );
 }
 
 async function fetchPlatformAudienceSize(
@@ -255,8 +269,9 @@ export function buildCreatorAudienceAnalytics(
   const oauthSnapshots = snapshots.filter(
     (s) => s.connectedViaOAuth && s.items.length > 0
   );
-  const contentTrend = buildContentTrend(oauthSnapshots);
-  const weeklyViewsTrend = buildWeeklyViewsTrend(contentTrend);
+  const allContentPoints = buildContentTrendPoints(oauthSnapshots);
+  const contentTrend = allContentPoints.slice(-12);
+  const weeklyViewsTrend = buildWeeklyViewsTrend(allContentPoints);
   const analyzable = getAnalyzablePlatforms(snapshots);
 
   const totalViews = platformBreakdown.reduce((sum, row) => sum + row.totalViews, 0);

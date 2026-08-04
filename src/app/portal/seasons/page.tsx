@@ -56,7 +56,7 @@ export default async function PortalSeasonsPage() {
   return (
     <DashboardLayout
       title="Seasons"
-      description="Earn XP from Coach missions and unlock tier rewards"
+      description="Earn XP from Coach recommendations and unlock tier rewards"
     >
       <CreatorSeasonPanel
         seasonView={seasonView}

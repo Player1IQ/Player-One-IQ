@@ -637,7 +637,7 @@ export function CreatorAudienceGrowth({
                         </dd>
                       </div>
                       <div className="min-w-0 px-1">
-                        <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
+                        <dt className="text-[9px] uppercase leading-tight tracking-wide text-gray-500 min-[1150px]:text-[10px]">
                           Avg views
                         </dt>
                         <dd className="mt-0.5 text-sm font-semibold text-white">
@@ -654,7 +654,7 @@ export function CreatorAudienceGrowth({
                             : undefined
                         }
                       >
-                        <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
+                        <dt className="text-[9px] uppercase leading-tight tracking-wide text-gray-500 min-[1150px]:text-[10px]">
                           Audience
                         </dt>
                         <dd className="mt-0.5 text-sm font-semibold text-white">

@@ -135,7 +135,16 @@ export async function awardCreatorSeasonXp(input: {
 
   if (insertError) {
     if (insertError.code === "23505") {
-      return { awarded: false };
+      const { data: existing } = await supabase
+        .from("creator_season_xp_events")
+        .select("xp_amount")
+        .eq("progress_id", progress.id)
+        .eq("source_key", input.sourceKey)
+        .maybeSingle();
+
+      if (existing) {
+        return { awarded: true, xp: existing.xp_amount };
+      }
     }
     return { awarded: false };
   }
@@ -150,7 +159,8 @@ export async function awardCreatorSeasonXp(input: {
     .eq("id", progress.id);
 
   if (updateError) {
-    return { awarded: false };
+    // Event was recorded; still credit the user if total_xp update lost a race.
+    return { awarded: true, xp: xpAmount };
   }
 
   return { awarded: true, xp: xpAmount };

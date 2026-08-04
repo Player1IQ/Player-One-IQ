@@ -10,7 +10,7 @@ export const SEASON_XP_AMOUNTS: Record<SeasonXpEventType, number> = {
 export const SEASON_TIERS: SeasonTier[] = [
   { tier: 1, xpRequired: 0, title: "Rookie", reward: "Season 1 badge on your portal" },
   { tier: 2, xpRequired: 100, title: "Hustler", reward: "Custom portal flair color" },
-  { tier: 3, xpRequired: 250, title: "Grinder", reward: "Extra daily mission insight" },
+  { tier: 3, xpRequired: 250, title: "Grinder", reward: "Extra daily recommendation insight" },
   { tier: 4, xpRequired: 450, title: "Streak Starter", reward: "Streak counter on your home" },
   { tier: 5, xpRequired: 700, title: "Rising Creator", reward: "Priority applicant tag" },
   { tier: 6, xpRequired: 1000, title: "Momentum", reward: "Season stats recap card" },

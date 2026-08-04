@@ -6,7 +6,6 @@ import {
   Briefcase,
   Calendar,
   CheckSquare,
-  ExternalLink,
   FileText,
   MessageSquare,
   Target,
@@ -151,7 +150,7 @@ export function PortalHomeClient({
           subtitle={
             deliverableMetrics.overdueCount > 0
               ? `${deliverableMetrics.overdueCount} overdue`
-              : "Across your contracts"
+              : "Across your deals"
           }
           href="/portal/deliverables"
           icon={CheckSquare}
@@ -282,7 +281,7 @@ export function PortalHomeClient({
               href={`/contracts/${deliverableMetrics.nextDue.contractId}`}
               className="text-sm font-medium text-accent-light hover:text-white"
             >
-              View contract
+              View deal
             </Link>
             <Link
               href="/portal/deliverables"
@@ -363,10 +362,9 @@ export function PortalHomeClient({
             {contracts.length > 0 ? (
               <Link
                 href="/contracts"
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent-light hover:text-white"
+                className="mt-4 inline-flex text-sm font-medium text-accent-light hover:text-white"
               >
-                View all contracts
-                <ExternalLink className="h-3.5 w-3.5" />
+                View all deals
               </Link>
             ) : null}
           </CardContent>

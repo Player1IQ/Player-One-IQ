@@ -143,11 +143,21 @@ export async function completeCoachRecommendationAction(
   if (!persisted) return { error: "Coach state not found." };
 
   if (persisted.completedRecommendationIds.includes(recommendationId)) {
+    let xpAwarded = 0;
+    if (context.scope === "creator" && context.scopeId) {
+      xpAwarded = await awardRecommendationSeasonXp({
+        userId,
+        creatorId: context.scopeId,
+        recommendationId,
+      });
+    }
+
     return {
       snapshot: await buildCreatorCoachSnapshot({
         userId,
         creatorCoachContext: context,
       }),
+      xpAwarded,
     };
   }
 

@@ -166,7 +166,7 @@ export function ContractTable({
             <thead>
               <tr className="border-b border-border bg-surface-overlay/60">
                 <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Contract Name
+                  {isPortalUser ? "Deal name" : "Contract Name"}
                 </th>
                 {!isPortalUser ? (
                   <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
