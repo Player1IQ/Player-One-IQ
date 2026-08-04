@@ -115,15 +115,66 @@ function getWeekStartsForLookback(now = new Date()): string[] {
   return weekStarts;
 }
 
+function getWeekStartsBetween(startDate: Date, endWeekStart: string): string[] {
+  const startWeek = getWeekStartUtc(startDate.toISOString());
+  if (!startWeek) return [];
+
+  const weekStarts: string[] = [];
+  const anchor = new Date(`${startWeek}T00:00:00.000Z`);
+  const end = new Date(`${endWeekStart}T00:00:00.000Z`);
+
+  while (anchor <= end) {
+    weekStarts.push(anchor.toISOString().slice(0, 10));
+    anchor.setUTCDate(anchor.getUTCDate() + 7);
+  }
+
+  return weekStarts;
+}
+
 export function buildWeeklyViewsTrend(
   points: ContentTrendPoint[],
   now = new Date()
 ): WeeklyViewsPoint[] {
-  const windowStart = new Date(now);
-  windowStart.setUTCDate(windowStart.getUTCDate() - WEEKLY_TREND_LOOKBACK_WEEKS * 7);
-  windowStart.setUTCHours(0, 0, 0, 0);
+  const defaultWindowStart = new Date(now);
+  defaultWindowStart.setUTCDate(
+    defaultWindowStart.getUTCDate() - WEEKLY_TREND_LOOKBACK_WEEKS * 7
+  );
+  defaultWindowStart.setUTCHours(0, 0, 0, 0);
 
-  const weekStarts = getWeekStartsForLookback(now);
+  const validPoints = points.filter((point) => {
+    const published = new Date(point.publishedAt);
+    return !Number.isNaN(published.getTime());
+  });
+
+  const hasRecentContent = validPoints.some(
+    (point) => new Date(point.publishedAt) >= defaultWindowStart
+  );
+
+  let weekStarts: string[];
+  let windowStart: Date;
+
+  if (hasRecentContent || validPoints.length === 0) {
+    weekStarts = getWeekStartsForLookback(now);
+    windowStart = defaultWindowStart;
+  } else {
+    const earliest = validPoints.reduce((min, point) => {
+      const published = new Date(point.publishedAt);
+      return published < min ? published : min;
+    }, new Date(validPoints[0].publishedAt));
+
+    const currentWeekStart = getWeekStartUtc(now.toISOString());
+    if (!currentWeekStart) {
+      weekStarts = getWeekStartsForLookback(now);
+      windowStart = defaultWindowStart;
+    } else {
+      const earliestWeekStart = getWeekStartUtc(earliest.toISOString());
+      windowStart = earliestWeekStart
+        ? new Date(`${earliestWeekStart}T00:00:00.000Z`)
+        : earliest;
+      weekStarts = getWeekStartsBetween(windowStart, currentWeekStart);
+    }
+  }
+
   const buckets = new Map(
     weekStarts.map((weekStart) => [
       weekStart,
@@ -131,9 +182,9 @@ export function buildWeeklyViewsTrend(
     ])
   );
 
-  for (const point of points) {
+  for (const point of validPoints) {
     const published = new Date(point.publishedAt);
-    if (Number.isNaN(published.getTime()) || published < windowStart) {
+    if (published < windowStart) {
       continue;
     }
 

@@ -72,7 +72,8 @@ export function RecommendationCard({
       onLocalComplete?.(recommendation.id);
       void recordCoachRecommendationXpAction(
         recommendation.id,
-        coachContext
+        coachContext,
+        { missionDate: new Date().toISOString().slice(0, 10) }
       ).then(() => onSnapshotUpdate?.());
       return;
     }
@@ -85,7 +86,9 @@ export function RecommendationCard({
       );
       if (result.error) return;
       if ((result.xpAwarded ?? 0) === 0) {
-        await recordCoachRecommendationXpAction(recommendation.id, coachContext);
+        await recordCoachRecommendationXpAction(recommendation.id, coachContext, {
+          stateId,
+        });
       }
       onSnapshotUpdate?.();
     });

@@ -245,9 +245,13 @@ export default async function PortalHomePage() {
         mission: state.mission,
         stateId: state.id,
       })),
-      completedRecommendationIds: [
-        ...new Set(states.flatMap((state) => state.completedRecommendationIds)),
-      ],
+      completedRecommendations: states.flatMap((state) =>
+        state.completedRecommendationIds.map((recommendationId) => ({
+          recommendationId,
+          stateId: state.id,
+          missionDate: state.missionDate,
+        }))
+      ),
       coachOnboardingCompleted: coachProfile?.onboardingCompleted ?? false,
     });
   }

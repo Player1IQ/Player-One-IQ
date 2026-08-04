@@ -149,6 +149,8 @@ export async function completeCoachRecommendationAction(
         userId,
         creatorId: context.scopeId,
         recommendationId,
+        stateId: persisted.id,
+        missionDate: persisted.missionDate,
       });
     }
 
@@ -179,6 +181,8 @@ export async function completeCoachRecommendationAction(
       userId,
       creatorId: context.scopeId,
       recommendationId,
+      stateId: persisted.id,
+      missionDate: persisted.missionDate,
     });
   }
 

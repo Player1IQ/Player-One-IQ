@@ -13,6 +13,16 @@ function taskSourceKey(
     : `task:mission:${missionId}:${taskId}`;
 }
 
+export function recommendationSourceKey(
+  recommendationId: string,
+  stateId?: string | null,
+  missionDate?: string
+): string {
+  if (stateId) return `recommendation:${recommendationId}:${stateId}`;
+  if (missionDate) return `recommendation:${recommendationId}:${missionDate}`;
+  return `recommendation:${recommendationId}`;
+}
+
 export async function awardMissionTaskSeasonXp(input: {
   userId: string;
   creatorId: string;
@@ -54,12 +64,18 @@ export async function awardRecommendationSeasonXp(input: {
   userId: string;
   creatorId: string;
   recommendationId: string;
+  stateId?: string | null;
+  missionDate?: string;
 }): Promise<number> {
   const result = await awardCreatorSeasonXp({
     userId: input.userId,
     creatorId: input.creatorId,
     eventType: "recommendation_complete",
-    sourceKey: `recommendation:${input.recommendationId}`,
+    sourceKey: recommendationSourceKey(
+      input.recommendationId,
+      input.stateId,
+      input.missionDate
+    ),
   });
   return result.awarded && result.xp ? result.xp : 0;
 }
@@ -81,7 +97,11 @@ export async function syncCreatorSeasonXpFromCoach(input: {
   userId: string;
   creatorId: string;
   missions: Array<{ mission: DailyMission; stateId?: string | null }>;
-  completedRecommendationIds?: string[];
+  completedRecommendations?: Array<{
+    recommendationId: string;
+    stateId?: string | null;
+    missionDate?: string;
+  }>;
   coachOnboardingCompleted?: boolean;
 }): Promise<number> {
   let totalAwarded = 0;
@@ -99,11 +119,13 @@ export async function syncCreatorSeasonXpFromCoach(input: {
     }
   }
 
-  for (const recommendationId of input.completedRecommendationIds ?? []) {
+  for (const completion of input.completedRecommendations ?? []) {
     totalAwarded += await awardRecommendationSeasonXp({
       userId: input.userId,
       creatorId: input.creatorId,
-      recommendationId,
+      recommendationId: completion.recommendationId,
+      stateId: completion.stateId,
+      missionDate: completion.missionDate,
     });
   }
 

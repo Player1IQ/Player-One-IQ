@@ -52,7 +52,7 @@ test("buildWeeklyViewsTrend skips items with invalid publish dates", () => {
   assert.equal(activeWeek?.views, 1);
 });
 
-test("buildWeeklyViewsTrend ignores content outside the recent lookback window", () => {
+test("buildWeeklyViewsTrend keeps 12-week window when recent content exists", () => {
   const trend = buildWeeklyViewsTrend([
     point({ publishedAt: "2020-01-08T12:00:00.000Z", views: 99 }),
     point({ publishedAt: "2026-05-28T12:00:00.000Z", views: 4 }),
@@ -60,5 +60,19 @@ test("buildWeeklyViewsTrend ignores content outside the recent lookback window",
 
   assert.equal(trend.length, 12);
   assert.equal(trend.reduce((sum, entry) => sum + entry.views, 0), 4);
-  assert.ok(!trend.some((entry) => entry.label.includes("2020")));
+  assert.ok(!trend.some((entry) => entry.views === 99));
+});
+
+test("buildWeeklyViewsTrend extends window for sparse old-only content", () => {
+  const trend = buildWeeklyViewsTrend([
+    point({ publishedAt: "2020-01-08T12:00:00.000Z", views: 99 }),
+    point({ publishedAt: "2020-01-15T12:00:00.000Z", views: 12 }),
+  ], new Date("2026-06-01T12:00:00.000Z"));
+
+  assert.ok(trend.length > 12);
+  assert.equal(trend.reduce((sum, entry) => sum + entry.views, 0), 111);
+  const jan6 = trend.find((entry) => entry.weekStart === "2020-01-06");
+  const jan13 = trend.find((entry) => entry.weekStart === "2020-01-13");
+  assert.equal(jan6?.views, 99);
+  assert.equal(jan13?.views, 12);
 });

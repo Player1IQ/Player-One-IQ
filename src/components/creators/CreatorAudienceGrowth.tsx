@@ -619,26 +619,26 @@ export function CreatorAudienceGrowth({
                     <div className="flex items-center justify-between gap-2">
                       <PlatformBadge platform={row.platform as Platform} />
                     </div>
-                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-center sm:grid-cols-4 sm:gap-x-3">
-                      <div className="min-w-0 px-1">
-                        <dt className="text-[10px] uppercase tracking-wide text-gray-500">
+                    <dl className="mt-3 grid grid-flow-col auto-cols-fr gap-x-2 text-center">
+                      <div className="min-w-0">
+                        <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
                           Content
                         </dt>
                         <dd className="mt-0.5 text-sm font-semibold text-white">
                           {row.contentCount}
                         </dd>
                       </div>
-                      <div className="min-w-0 px-1">
-                        <dt className="text-[10px] uppercase tracking-wide text-gray-500">
+                      <div className="min-w-0">
+                        <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
                           Views
                         </dt>
                         <dd className="mt-0.5 text-sm font-semibold text-white">
                           {formatChartCount(row.totalViews)}
                         </dd>
                       </div>
-                      <div className="min-w-0 px-1">
-                        <dt className="text-[9px] uppercase leading-tight tracking-wide text-gray-500 min-[1150px]:text-[10px]">
-                          Avg views
+                      <div className="min-w-0">
+                        <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
+                          Avg Views
                         </dt>
                         <dd className="mt-0.5 text-sm font-semibold text-white">
                           {row.contentCount > 0
@@ -647,14 +647,14 @@ export function CreatorAudienceGrowth({
                         </dd>
                       </div>
                       <div
-                        className="min-w-0 px-1"
+                        className="min-w-0"
                         title={
                           row.audienceSize === null || row.audienceSize <= 0
                             ? "Audience size is not available for this platform yet"
                             : undefined
                         }
                       >
-                        <dt className="text-[9px] uppercase leading-tight tracking-wide text-gray-500 min-[1150px]:text-[10px]">
+                        <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
                           Audience
                         </dt>
                         <dd className="mt-0.5 text-sm font-semibold text-white">

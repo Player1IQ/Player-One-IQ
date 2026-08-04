@@ -43,18 +43,26 @@ export async function syncCreatorSeasonFromCoachAction(
     missions.push({ mission: local.mission, stateId: null });
   }
 
-  const completedRecommendationIds = [
-    ...new Set([
-      ...states.flatMap((state) => state.completedRecommendationIds),
-      ...(local?.completedRecommendationIds ?? []),
-    ]),
+  const completedRecommendations = [
+    ...states.flatMap((state) =>
+      state.completedRecommendationIds.map((recommendationId) => ({
+        recommendationId,
+        stateId: state.id,
+        missionDate: state.missionDate,
+      }))
+    ),
+    ...(local?.completedRecommendationIds ?? []).map((recommendationId) => ({
+      recommendationId,
+      stateId: null as string | null,
+      missionDate: new Date().toISOString().slice(0, 10),
+    })),
   ];
 
   const xpAwarded = await syncCreatorSeasonXpFromCoach({
     userId,
     creatorId,
     missions,
-    completedRecommendationIds,
+    completedRecommendations,
     coachOnboardingCompleted: coachProfile?.onboardingCompleted ?? false,
   });
 
@@ -106,7 +114,8 @@ export async function recordCoachMissionTaskXpAction(
 
 export async function recordCoachRecommendationXpAction(
   recommendationId: string,
-  context: CoachContext
+  context: CoachContext,
+  options?: { stateId?: string | null; missionDate?: string }
 ): Promise<{ xpAwarded: number }> {
   if (context.scope !== "creator" || !context.scopeId) {
     return { xpAwarded: 0 };
@@ -119,6 +128,9 @@ export async function recordCoachRecommendationXpAction(
     userId,
     creatorId: context.scopeId,
     recommendationId,
+    stateId: options?.stateId,
+    missionDate:
+      options?.missionDate ?? new Date().toISOString().slice(0, 10),
   });
 
   if (xpAwarded > 0) {

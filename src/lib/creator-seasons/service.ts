@@ -104,7 +104,7 @@ export async function awardCreatorSeasonXp(input: {
   eventType: SeasonXpEventType;
   sourceKey: string;
   metadata?: Record<string, unknown>;
-}): Promise<{ awarded: boolean; xp?: number }> {
+}): Promise<{ awarded: boolean; xp?: number; totalXpAfter?: number }> {
   const season = await getActiveCreatorSeason();
   if (!season) return { awarded: false };
 
@@ -135,16 +135,7 @@ export async function awardCreatorSeasonXp(input: {
 
   if (insertError) {
     if (insertError.code === "23505") {
-      const { data: existing } = await supabase
-        .from("creator_season_xp_events")
-        .select("xp_amount")
-        .eq("progress_id", progress.id)
-        .eq("source_key", input.sourceKey)
-        .maybeSingle();
-
-      if (existing) {
-        return { awarded: true, xp: existing.xp_amount };
-      }
+      return { awarded: false, totalXpAfter: progress.totalXp };
     }
     return { awarded: false };
   }
@@ -160,8 +151,8 @@ export async function awardCreatorSeasonXp(input: {
 
   if (updateError) {
     // Event was recorded; still credit the user if total_xp update lost a race.
-    return { awarded: true, xp: xpAmount };
+    return { awarded: true, xp: xpAmount, totalXpAfter: newTotal };
   }
 
-  return { awarded: true, xp: xpAmount };
+  return { awarded: true, xp: xpAmount, totalXpAfter: newTotal };
 }
