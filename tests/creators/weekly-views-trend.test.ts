@@ -63,6 +63,23 @@ test("buildWeeklyViewsTrend keeps 12-week window when recent content exists", ()
   assert.ok(!trend.some((entry) => entry.views === 99));
 });
 
+test("buildWeeklyViewsTrend is ordered oldest-to-newest", () => {
+  const trend = buildWeeklyViewsTrend([
+    point({ publishedAt: "2020-01-08T12:00:00.000Z", views: 99 }),
+    point({ publishedAt: "2020-01-15T12:00:00.000Z", views: 12 }),
+  ], new Date("2026-06-01T12:00:00.000Z"));
+
+  assert.ok(trend.length > 1);
+  for (let index = 1; index < trend.length; index += 1) {
+    assert.ok(
+      trend[index].weekStart >= trend[index - 1].weekStart,
+      `week ${index} should not precede week ${index - 1}`
+    );
+  }
+  assert.equal(trend[0].weekStart, "2020-01-06");
+  assert.ok(trend[trend.length - 1].weekStart >= "2026-05-26");
+});
+
 test("buildWeeklyViewsTrend extends window for sparse old-only content", () => {
   const trend = buildWeeklyViewsTrend([
     point({ publishedAt: "2020-01-08T12:00:00.000Z", views: 99 }),

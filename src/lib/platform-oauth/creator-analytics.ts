@@ -88,11 +88,12 @@ function getWeekStartUtc(isoDate: string): string | null {
   return monday.toISOString().slice(0, 10);
 }
 
-function formatWeekLabel(weekStart: string): string {
+function formatWeekLabel(weekStart: string, includeYear = false): string {
   const date = new Date(`${weekStart}T00:00:00.000Z`);
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
+    ...(includeYear ? { year: "numeric" } : {}),
     timeZone: "UTC",
   });
 }
@@ -198,15 +199,21 @@ export function buildWeeklyViewsTrend(
     });
   }
 
-  return weekStarts.map((weekStart) => {
-    const bucket = buckets.get(weekStart)!;
-    return {
-      weekStart,
-      label: formatWeekLabel(weekStart),
-      views: bucket.views,
-      contentCount: bucket.contentCount,
-    };
-  });
+  const firstYear = weekStarts[0]?.slice(0, 4);
+  const lastYear = weekStarts[weekStarts.length - 1]?.slice(0, 4);
+  const includeYear = Boolean(firstYear && lastYear && firstYear !== lastYear);
+
+  return weekStarts
+    .map((weekStart) => {
+      const bucket = buckets.get(weekStart)!;
+      return {
+        weekStart,
+        label: formatWeekLabel(weekStart, includeYear),
+        views: bucket.views,
+        contentCount: bucket.contentCount,
+      };
+    })
+    .sort((left, right) => left.weekStart.localeCompare(right.weekStart));
 }
 
 function buildContentTrendPoints(

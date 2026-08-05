@@ -229,7 +229,9 @@ export function CreatorAudienceGrowth({
   const platformAxisTicks = getChartYAxisTicks(maxPlatformViews);
 
   const contentTrendData = analytics.contentTrend;
-  const weeklyViewsData = analytics.weeklyViewsTrend;
+  const weeklyViewsData = [...analytics.weeklyViewsTrend].sort((left, right) =>
+    left.weekStart.localeCompare(right.weekStart)
+  );
   const maxContentViews = Math.max(
     ...contentTrendData.map((point) => point.views),
     0
@@ -434,11 +436,18 @@ export function CreatorAudienceGrowth({
                                 vertical={false}
                               />
                               <XAxis
-                                dataKey="label"
+                                dataKey="weekStart"
+                                tickFormatter={(weekStart) => {
+                                  const point = weeklyViewsData.find(
+                                    (entry) => entry.weekStart === weekStart
+                                  );
+                                  return point?.label ?? weekStart;
+                                }}
                                 tick={chartAxisTick}
                                 axisLine={false}
                                 tickLine={false}
                                 tickMargin={8}
+                                interval="preserveStartEnd"
                               />
                               <YAxis
                                 domain={[0, weeklyAxisMax]}
@@ -610,7 +619,7 @@ export function CreatorAudienceGrowth({
               <p className="mt-1 text-xs text-gray-500">
                 Posts, videos, and average views per connected platform
               </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {connectedPlatforms.map((row) => (
                   <div
                     key={row.platform}
@@ -619,7 +628,7 @@ export function CreatorAudienceGrowth({
                     <div className="flex items-center justify-between gap-2">
                       <PlatformBadge platform={row.platform as Platform} />
                     </div>
-                    <dl className="mt-3 grid grid-flow-col auto-cols-fr gap-x-2 text-center">
+                    <dl className="mt-3 grid grid-cols-[minmax(0,0.82fr)_minmax(0,0.82fr)_minmax(0,1.18fr)_minmax(0,1.18fr)] gap-x-3 text-center">
                       <div className="min-w-0">
                         <dt className="whitespace-nowrap text-[10px] uppercase tracking-wide text-gray-500">
                           Content
