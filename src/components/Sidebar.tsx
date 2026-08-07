@@ -21,6 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import type { UserOrganization } from "@/lib/organization/queries";
 import { useMemo } from "react";
 import type { FeatureKey } from "@/lib/subscription/types";
@@ -101,20 +102,12 @@ export function Sidebar({
             </div>
           </>
         ) : (
-          <>
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-muted shadow-glow-active">
-              <span className="text-sm font-black text-white">P1</span>
-              <div className="absolute inset-0 rounded-xl bg-accent/20 blur-md" />
-            </div>
-            <div>
-              <p className="text-sm font-bold tracking-tight text-white">
-                Player One IQ
-              </p>
-              <p className="text-[10px] font-medium uppercase tracking-widest text-gray-500">
-                Creator Platform
-              </p>
-            </div>
-          </>
+          <div className="min-w-0">
+            <BrandLogo size="sm" className="shrink-0" />
+            <p className="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-500">
+              Creator Platform
+            </p>
+          </div>
         )}
       </div>
 

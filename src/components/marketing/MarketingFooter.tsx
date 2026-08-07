@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Globe, Linkedin, Twitter, Zap } from "lucide-react";
+import { Globe, Linkedin, Twitter } from "lucide-react";
+import { BrandLogoLink } from "@/components/brand/BrandLogo";
 import { FOUNDING_ROSTER_PATH, SOCIAL_X_URL } from "@/lib/marketing/config";
 
 export function MarketingFooter() {
@@ -36,16 +37,8 @@ export function MarketingFooter() {
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-5 gap-10 mb-12">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
-              >
-                <Zap className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-display font-bold text-white text-[15px]">
-                Player One IQ
-              </span>
+            <div className="mb-4">
+              <BrandLogoLink href="/" size="md" />
             </div>
             <p className="text-white/30 text-sm leading-relaxed max-w-xs mb-6">
               The operating system for the creator economy — professional

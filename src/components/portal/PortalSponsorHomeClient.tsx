@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import type { PortalDeliverableMetrics } from "@/lib/contract-deliverables/queries";
 import {
   Building2,
@@ -91,8 +92,9 @@ export function PortalSponsorHomeClient({
         </div>
         {!whiteLabelEnabled && organizationLogoUrl ? (
           <div className="relative border-t border-white/[0.04] px-6 py-2 sm:px-8">
-            <p className="text-[10px] text-gray-600">
-              Portal powered by Player One IQ
+            <p className="flex items-center gap-2 text-[10px] text-gray-600">
+              <span>Portal powered by</span>
+              <BrandLogo size="xs" className="opacity-70" />
             </p>
           </div>
         ) : null}

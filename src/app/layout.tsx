@@ -31,6 +31,10 @@ export const metadata: Metadata = {
     title: "Player One IQ",
     description: siteDescription,
   },
+  icons: {
+    icon: "/branding/player-one-iq-logo.png",
+    apple: "/branding/player-one-iq-logo.png",
+  },
 };
 
 export default async function RootLayout({

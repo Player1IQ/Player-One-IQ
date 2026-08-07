@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { FOUNDING_ROSTER_PATH } from "@/lib/marketing/config";
 
 const revenueData = [
@@ -310,13 +311,7 @@ function HeroDashboard() {
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div className="flex items-center gap-2">
-          <div
-            className="w-5 h-5 rounded-lg flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
-          >
-            <Zap className="w-2.5 h-2.5 text-white" />
-          </div>
-          <span className="font-display text-xs font-semibold text-white/80">Player One IQ</span>
+          <BrandLogo size="xs" />
         </div>
         <div className="flex items-center gap-2">
           <div

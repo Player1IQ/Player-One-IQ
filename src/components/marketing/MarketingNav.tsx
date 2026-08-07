@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Menu, X, Zap } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { BrandLogoLink } from "@/components/brand/BrandLogo";
 import { FOUNDING_ROSTER_PATH } from "@/lib/marketing/config";
 
 const NAV_ITEMS = [
@@ -46,17 +47,7 @@ export function MarketingNav({ activePath }: MarketingNavProps) {
       }
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)" }}
-          >
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-display font-bold text-white text-[15px] tracking-tight">
-            Player One IQ
-          </span>
-        </Link>
+        <BrandLogoLink href="/" size="lg" priority />
 
         <div className="hidden md:flex items-center gap-8">
           {NAV_ITEMS.map((item) => (

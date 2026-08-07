@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SupabaseConfigBanner } from "./SupabaseConfigBanner";
+import { BrandLogoLink } from "@/components/brand/BrandLogo";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -17,12 +18,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         <div className="absolute inset-0 bg-mesh-gradient opacity-60" />
 
         <div className="relative z-10 p-10">
-          <Link href="/login" className="flex items-center gap-3">
-            <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-muted shadow-glow-active">
-              <span className="text-sm font-black text-white">P1</span>
-            </div>
-            <span className="text-xl font-bold text-white">Player One IQ</span>
-          </Link>
+          <BrandLogoLink href="/login" size="xl" priority />
         </div>
 
         <div className="relative z-10 px-10 pb-16">
@@ -57,12 +53,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
       <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2 lg:px-16">
         <div className="mx-auto w-full max-w-md">
           <div className="mb-8 lg:hidden">
-            <Link href="/login" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-muted">
-                <span className="text-xs font-black text-white">P1</span>
-              </div>
-              <span className="font-bold text-white">Player One IQ</span>
-            </Link>
+            <BrandLogoLink href="/login" size="md" />
           </div>
 
           <div className="mb-8">

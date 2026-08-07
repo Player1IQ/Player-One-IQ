@@ -11,6 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import { completeOnboarding } from "@/app/onboarding/actions";
 import { formatPlatformOAuthError } from "@/lib/platform-oauth/oauth-errors";
 import { OnboardingConnectStep } from "@/components/onboarding/OnboardingConnectStep";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import {
   clearOnboardingStepClient,
   readOnboardingStepClient,
@@ -170,11 +171,9 @@ export function OnboardingWizard({
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 py-10">
       <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-muted">
-          <span className="text-sm font-black text-white">P1</span>
-        </div>
+        <BrandLogo size="md" />
         <div>
-          <p className="text-sm font-semibold text-white">Player One IQ setup</p>
+          <p className="text-sm font-semibold text-white">Account setup</p>
           <p className="text-xs text-gray-500">
             Step {stepIndex + 1} of {flow.steps.length} · {stepLabel(currentStep)}
           </p>

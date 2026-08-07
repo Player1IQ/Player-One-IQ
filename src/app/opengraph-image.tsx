@@ -1,10 +1,17 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 export const alt = "Player One IQ";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
+export default async function OpenGraphImage() {
+  const logoBuffer = await readFile(
+    join(process.cwd(), "public/branding/player-one-iq-logo.png")
+  );
+  const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -15,33 +22,21 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #0f0f12 0%, #1a1a24 50%, #0f0f12 100%)",
+          background: "#000000",
           color: "white",
           fontFamily: "system-ui, sans-serif",
         }}
       >
+        <img
+          src={logoSrc}
+          alt="Player One IQ"
+          width={560}
+          height={200}
+          style={{ objectFit: "contain" }}
+        />
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 96,
-            height: 96,
-            borderRadius: 24,
-            background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-            fontSize: 36,
-            fontWeight: 800,
-            marginBottom: 32,
-          }}
-        >
-          P1
-        </div>
-        <div style={{ fontSize: 64, fontWeight: 700, letterSpacing: -1 }}>
-          Player One IQ
-        </div>
-        <div
-          style={{
-            marginTop: 16,
+            marginTop: 40,
             fontSize: 28,
             color: "#a1a1aa",
             maxWidth: 720,
