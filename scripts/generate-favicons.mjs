@@ -4,7 +4,7 @@ import sharp from "sharp";
 import pngToIco from "png-to-ico";
 
 const root = process.cwd();
-const source = join(root, "public/branding/player-one-iq-logo.png");
+const source = join(root, "public/branding/favicon-wordmark.png");
 const publicDir = join(root, "public");
 
 async function loadTrimmedWordmark() {
@@ -15,44 +15,11 @@ async function loadTrimmedWordmark() {
 }
 
 /**
- * Fit the full horizontal P1IQ wordmark inside a square with even padding.
+ * Boost IQ contrast on black so purple stays visible at tiny sizes.
  */
-async function renderContainedSquare(trimmed, size, paddingRatio = 0.08) {
-  const padding = Math.max(1, Math.round(size * paddingRatio));
-  const inner = Math.max(1, size - padding * 2);
-
-  const mark = await sharp(trimmed.data)
-    .resize(inner, inner, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-    .png()
-    .toBuffer({ resolveWithObject: true });
-
-  const { width, height } = mark.info;
-  const left = Math.floor((size - width) / 2);
-  const top = Math.floor((size - height) / 2);
-
-  return sharp({
-    create: {
-      width: size,
-      height: size,
-      channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 1 },
-    },
-  })
-    .composite([{ input: mark.data, left, top }])
-    .png()
-    .toBuffer();
-}
-
-/**
- * Tiny tab icons cannot fit a wide wordmark legibly on one line.
- * Stack P1 over IQ so both marks stay visible at 16–32px.
- */
-async function renderStackedFavicon(trimmed, size) {
+async function enhanceWordmarkForFavicon(trimmed) {
   const { width, height } = trimmed.info;
-  const splitX = Math.round(width * 0.5);
+  const splitX = Math.round(width * 0.52);
 
   const p1Part = await sharp(trimmed.data)
     .extract({ left: 0, top: 0, width: splitX, height })
@@ -61,39 +28,59 @@ async function renderStackedFavicon(trimmed, size) {
 
   const iqPart = await sharp(trimmed.data)
     .extract({ left: splitX, top: 0, width: width - splitX, height })
-    .modulate({ brightness: 1.35, saturation: 1.15 })
+    .modulate({ brightness: 1.22, saturation: 1.12 })
     .png()
     .toBuffer();
 
-  const padding = Math.max(1, Math.round(size * 0.08));
-  const gap = Math.max(1, Math.round(size * 0.04));
-  const rowHeight = Math.floor((size - padding * 2 - gap) / 2);
-  const rowWidth = size - padding * 2;
+  const p1Meta = await sharp(p1Part).metadata();
+  const iqMeta = await sharp(iqPart).metadata();
+  const combinedWidth = (p1Meta.width ?? 0) + (iqMeta.width ?? 0);
 
-  const p1Row = await sharp(p1Part)
-    .resize(rowWidth, rowHeight, {
-      fit: "contain",
+  return sharp({
+    create: {
+      width: combinedWidth,
+      height,
+      channels: 4,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
+    },
+  })
+    .composite([
+      { input: p1Part, left: 0, top: 0 },
+      { input: iqPart, left: p1Meta.width ?? 0, top: 0 },
+    ])
     .png()
     .toBuffer({ resolveWithObject: true });
+}
 
-  const iqRow = await sharp(iqPart)
-    .resize(rowWidth, rowHeight, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
+/**
+ * Render the horizontal P1IQ wordmark centered in a square favicon.
+ */
+async function renderHorizontalFavicon(wordmark, size) {
+  const { width, height } = wordmark.info;
+  const aspect = width / height;
+
+  const maxWidth = Math.max(1, Math.round(size * 0.96));
+  const maxHeight = Math.max(1, Math.round(size * 0.78));
+
+  let targetWidth = maxWidth;
+  let targetHeight = Math.max(1, Math.round(targetWidth / aspect));
+
+  if (targetHeight > maxHeight) {
+    targetHeight = maxHeight;
+    targetWidth = Math.max(1, Math.round(targetHeight * aspect));
+  }
+
+  const mark = await sharp(wordmark.data)
+    .resize(targetWidth, targetHeight, {
+      fit: "fill",
+      kernel: sharp.kernel.lanczos3,
     })
+    .sharpen(size <= 16 ? { sigma: 0.8 } : { sigma: 0.5 })
     .png()
-    .toBuffer({ resolveWithObject: true });
+    .toBuffer();
 
-  const centerRow = (row, top) => ({
-    input: row.data,
-    left: padding + Math.floor((rowWidth - row.info.width) / 2),
-    top: top + Math.floor((rowHeight - row.info.height) / 2),
-  });
-
-  const p1Top = padding;
-  const iqTop = padding + rowHeight + gap;
+  const left = Math.floor((size - targetWidth) / 2);
+  const top = Math.floor((size - targetHeight) / 2);
 
   return sharp({
     create: {
@@ -103,10 +90,7 @@ async function renderStackedFavicon(trimmed, size) {
       background: { r: 0, g: 0, b: 0, alpha: 1 },
     },
   })
-    .composite([
-      centerRow(p1Row, p1Top),
-      centerRow(iqRow, iqTop),
-    ])
+    .composite([{ input: mark, left, top }])
     .png()
     .toBuffer();
 }
@@ -123,19 +107,20 @@ async function main() {
     `Trimmed wordmark: ${trimmed.info.width}x${trimmed.info.height}`
   );
 
-  // Re-save branding asset as true PNG (source may be JPEG with .png extension).
-  await sharp(trimmed.data).png().toFile(source);
+  const wordmark = await enhanceWordmarkForFavicon(trimmed);
 
-  const smallSizes = [16, 32];
+  const smallSizes = [16, 32, 48];
   const largeSizes = [180, 192, 512];
 
   for (const size of smallSizes) {
-    const buffer = await renderStackedFavicon(trimmed, size);
-    await writePngBuffer(buffer, `favicon-${size}x${size}.png`);
+    const buffer = await renderHorizontalFavicon(wordmark, size);
+    const filename =
+      size === 48 ? "favicon-48x48.png" : `favicon-${size}x${size}.png`;
+    await writePngBuffer(buffer, filename);
   }
 
   for (const size of largeSizes) {
-    const buffer = await renderContainedSquare(trimmed, size);
+    const buffer = await renderHorizontalFavicon(wordmark, size);
     const filename =
       size === 180
         ? "apple-touch-icon.png"
@@ -146,7 +131,11 @@ async function main() {
   }
 
   const ico = await pngToIco(
-    smallSizes.map((size) => join(publicDir, `favicon-${size}x${size}.png`))
+    smallSizes.map((size) => {
+      const filename =
+        size === 48 ? "favicon-48x48.png" : `favicon-${size}x${size}.png`;
+      return join(publicDir, filename);
+    })
   );
   await writeFile(join(publicDir, "favicon.ico"), ico);
 
