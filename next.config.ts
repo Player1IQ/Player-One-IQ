@@ -17,6 +17,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/(favicon.*|apple-touch-icon.*|android-chrome-.*|site\\.webmanifest)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, must-revalidate",
+          },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },

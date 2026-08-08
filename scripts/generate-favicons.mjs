@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
-import toIco from "to-ico";
+import pngToIco from "png-to-ico";
 
 const root = process.cwd();
 const source = join(root, "public/branding/player-one-iq-logo.png");
@@ -80,11 +80,9 @@ async function main() {
     await writePngBuffer(buffer, filename);
   }
 
-  const icoBuffers = await Promise.all(
-    smallSizes.map((size) => renderSquareFavicon(trimmed, size))
+  const ico = await pngToIco(
+    smallSizes.map((size) => join(publicDir, `favicon-${size}x${size}.png`))
   );
-
-  const ico = await toIco(icoBuffers);
   await writeFile(join(publicDir, "favicon.ico"), ico);
 
   const manifest = {
