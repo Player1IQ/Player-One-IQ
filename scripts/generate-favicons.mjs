@@ -16,24 +16,35 @@ async function loadTrimmedWordmark() {
 
 /**
  * Wide wordmarks become unreadable stripes when fit inside a tiny square.
- * Crop the left "P1" portion of the wordmark, then scale into a square.
+ * Crop the left "P1" portion, scale with padding so the mark isn't cramped.
  */
 async function renderSquareFavicon(trimmed, size) {
   const { width, height } = trimmed.info;
-  // P1 occupies roughly the left 48% of the trimmed wordmark.
   const cropWidth = Math.min(Math.round(width * 0.48), width);
-  const cropHeight = height;
+  const innerSize = Math.max(1, Math.round(size * 0.68));
 
-  const cropped = await sharp(trimmed.data)
-    .extract({ left: 0, top: 0, width: cropWidth, height: cropHeight })
-    .resize(size, size, {
+  const mark = await sharp(trimmed.data)
+    .extract({ left: 0, top: 0, width: cropWidth, height })
+    .resize(innerSize, innerSize, {
       fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 1 },
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
     })
     .png()
     .toBuffer();
 
-  return cropped;
+  const offset = Math.floor((size - innerSize) / 2);
+
+  return sharp({
+    create: {
+      width: size,
+      height: size,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 1 },
+    },
+  })
+    .composite([{ input: mark, left: offset, top: offset }])
+    .png()
+    .toBuffer();
 }
 
 async function renderContainedSquare(trimmed, size) {
