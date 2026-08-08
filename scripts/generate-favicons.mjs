@@ -15,24 +15,23 @@ async function loadTrimmedWordmark() {
 }
 
 /**
- * Wide wordmarks become unreadable stripes when fit inside a tiny square.
- * Crop the left "P1" portion, scale with padding so the mark isn't cramped.
+ * Fit the full P1IQ wordmark inside a square with even padding.
  */
-async function renderSquareFavicon(trimmed, size) {
-  const { width, height } = trimmed.info;
-  const cropWidth = Math.min(Math.round(width * 0.48), width);
-  const innerSize = Math.max(1, Math.round(size * 0.68));
+async function renderContainedSquare(trimmed, size, paddingRatio = 0.08) {
+  const padding = Math.max(1, Math.round(size * paddingRatio));
+  const inner = Math.max(1, size - padding * 2);
 
   const mark = await sharp(trimmed.data)
-    .extract({ left: 0, top: 0, width: cropWidth, height })
-    .resize(innerSize, innerSize, {
+    .resize(inner, inner, {
       fit: "contain",
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     })
     .png()
-    .toBuffer();
+    .toBuffer({ resolveWithObject: true });
 
-  const offset = Math.floor((size - innerSize) / 2);
+  const { width, height } = mark.info;
+  const left = Math.floor((size - width) / 2);
+  const top = Math.floor((size - height) / 2);
 
   return sharp({
     create: {
@@ -42,17 +41,7 @@ async function renderSquareFavicon(trimmed, size) {
       background: { r: 0, g: 0, b: 0, alpha: 1 },
     },
   })
-    .composite([{ input: mark, left: offset, top: offset }])
-    .png()
-    .toBuffer();
-}
-
-async function renderContainedSquare(trimmed, size) {
-  return sharp(trimmed.data)
-    .resize(size, size, {
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 1 },
-    })
+    .composite([{ input: mark.data, left, top }])
     .png()
     .toBuffer();
 }
@@ -76,7 +65,7 @@ async function main() {
   const largeSizes = [180, 192, 512];
 
   for (const size of smallSizes) {
-    const buffer = await renderSquareFavicon(trimmed, size);
+    const buffer = await renderContainedSquare(trimmed, size);
     await writePngBuffer(buffer, `favicon-${size}x${size}.png`);
   }
 
