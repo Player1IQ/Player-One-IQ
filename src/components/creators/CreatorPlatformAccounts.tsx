@@ -32,6 +32,7 @@ interface CreatorPlatformAccountsProps {
   oauthPlatformUi?: OAuthPlatformUi[];
   canWrite?: boolean;
   allowPlatformOAuth?: boolean;
+  periodMonth?: string;
 }
 
 function getAccountRevenue(
@@ -51,6 +52,9 @@ function getAccountRevenue(
       accountEntries.find((e) => e.revenueType === "donations")?.amount ?? 0,
     other:
       accountEntries.find((e) => e.revenueType === "other")?.amount ?? 0,
+    syncedTypes: new Set(
+      accountEntries.filter((e) => e.source === "api_sync").map((e) => e.revenueType)
+    ),
   };
 }
 
@@ -61,12 +65,18 @@ export function CreatorPlatformAccounts({
   oauthPlatformUi = [],
   canWrite = true,
   allowPlatformOAuth = false,
+  periodMonth,
 }: CreatorPlatformAccountsProps) {
   const canManagePlatforms = canWrite || allowPlatformOAuth;
   const router = useRouter();
   const [connectOpen, setConnectOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({ advertisement: "", subscription: "", donations: "" });
+  const [form, setForm] = useState({
+    advertisement: "",
+    subscription: "",
+    donations: "",
+    other: "",
+  });
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
@@ -77,6 +87,7 @@ export function CreatorPlatformAccounts({
       advertisement: revenue.advertisement ? String(revenue.advertisement) : "",
       subscription: revenue.subscription ? String(revenue.subscription) : "",
       donations: revenue.donations ? String(revenue.donations) : "",
+      other: revenue.other ? String(revenue.other) : "",
     });
     setError("");
   }
@@ -85,11 +96,16 @@ export function CreatorPlatformAccounts({
     setLoadingId(accountId);
     setError("");
 
-    const result = await upsertCreatorPlatformRevenue(accountId, {
-      advertisement: parseFloat(form.advertisement) || 0,
-      subscription: parseFloat(form.subscription) || 0,
-      donations: parseFloat(form.donations) || 0,
-    });
+    const result = await upsertCreatorPlatformRevenue(
+      accountId,
+      {
+        advertisement: parseFloat(form.advertisement) || 0,
+        subscription: parseFloat(form.subscription) || 0,
+        donations: parseFloat(form.donations) || 0,
+        other: parseFloat(form.other) || 0,
+      },
+      periodMonth
+    );
 
     setLoadingId(null);
 
@@ -354,12 +370,17 @@ export function CreatorPlatformAccounts({
                     </div>
 
                     {isEditing ? (
-                      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                        {(["advertisement", "subscription", "donations"] as const).map(
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        {(["advertisement", "subscription", "donations", "other"] as const).map(
                           (key) => (
                             <div key={key}>
                               <label className="mb-1 block text-xs capitalize text-gray-500">
-                                {key}
+                                {key === "other" ? "Other" : key}
+                                {revenue.syncedTypes.has(key) ? (
+                                  <span className="ml-1 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-emerald-400">
+                                    Synced
+                                  </span>
+                                ) : null}
                               </label>
                               <input
                                 type="number"
@@ -368,12 +389,13 @@ export function CreatorPlatformAccounts({
                                 onChange={(e) =>
                                   setForm({ ...form, [key]: e.target.value })
                                 }
-                                className="w-full rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm text-gray-200"
+                                disabled={revenue.syncedTypes.has(key)}
+                                className="w-full rounded-lg border border-border bg-surface-raised px-3 py-2 text-sm text-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
                               />
                             </div>
                           )
                         )}
-                        <div className="sm:col-span-3 flex justify-end">
+                        <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
                           <button
                             onClick={() => saveRevenue(account.id)}
                             disabled={loadingId === account.id}
@@ -382,38 +404,37 @@ export function CreatorPlatformAccounts({
                             {loadingId === account.id && (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             )}
-                            Save this month
+                            Save for month
                           </button>
                         </div>
                       </div>
                     ) : (
                       <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                        <span className="text-gray-400">
-                          Ads:{" "}
-                          <span className="text-gray-200">
-                            ${revenue.advertisement.toLocaleString()}
-                          </span>
-                        </span>
-                        <span className="text-gray-400">
-                          Subs:{" "}
-                          <span className="text-gray-200">
-                            ${revenue.subscription.toLocaleString()}
-                          </span>
-                        </span>
-                        <span className="text-gray-400">
-                          Tips:{" "}
-                          <span className="text-gray-200">
-                            ${revenue.donations.toLocaleString()}
-                          </span>
-                        </span>
-                        {revenue.other > 0 ? (
-                          <span className="text-gray-400">
-                            Other:{" "}
-                            <span className="text-gray-200">
-                              ${revenue.other.toLocaleString()}
-                            </span>
-                          </span>
-                        ) : null}
+                        {(["advertisement", "subscription", "donations", "other"] as const).map(
+                          (key) => {
+                            const value = revenue[key];
+                            if (value <= 0 && !revenue.syncedTypes.has(key)) return null;
+                            const labels = {
+                              advertisement: "Ads",
+                              subscription: "Subs",
+                              donations: "Tips",
+                              other: "Other",
+                            };
+                            return (
+                              <span key={key} className="text-gray-400">
+                                {labels[key]}:{" "}
+                                <span className="text-gray-200">
+                                  ${value.toLocaleString()}
+                                </span>
+                                {revenue.syncedTypes.has(key) ? (
+                                  <span className="ml-1 rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-emerald-400">
+                                    Synced
+                                  </span>
+                                ) : null}
+                              </span>
+                            );
+                          }
+                        )}
                       </div>
                     )}
                   </li>

@@ -7,18 +7,29 @@ import {
   getCreatorPlatformAccounts,
   getCreatorRevenueEntries,
 } from "@/lib/creator-revenue/queries";
+import { getCreatorPaidContractPaymentsForMonth } from "@/lib/payments/queries";
 import { canRunLiveAi } from "@/lib/ai/credentials";
 import { getOrganizationId } from "@/lib/organization/queries";
-import { canAccessCreator, hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
+import {
+  canAccessCreator,
+  getCurrentUserMembership,
+  hasFullAccess,
+  getCurrentUserRole,
+} from "@/lib/permissions";
 import { isCreatorPortalRole, isPortalRole } from "@/lib/team";
 import { getOAuthPlatformUi } from "@/lib/platform-oauth/config";
 import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasAnyFeature, hasFeature } from "@/lib/subscription/features";
+import { getPeriodMonthFromSearchParams } from "@/lib/revenue/monthly";
 
 interface CreatorDetailPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ oauth_success?: string; oauth_error?: string }>;
+  searchParams: Promise<{
+    oauth_success?: string;
+    oauth_error?: string;
+    month?: string;
+  }>;
 }
 
 export default async function CreatorDetailPage({
@@ -26,24 +37,31 @@ export default async function CreatorDetailPage({
   searchParams,
 }: CreatorDetailPageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
   const { oauth_success: oauthSuccess, oauth_error: oauthError } =
-    await searchParams;
+    resolvedSearchParams;
+  const periodMonth = getPeriodMonthFromSearchParams(resolvedSearchParams);
+
   const [
     creator,
     role,
+    membership,
     contracts,
     platformAccounts,
     revenueEntries,
     subscription,
     audienceAnalytics,
+    payments,
   ] = await Promise.all([
     getCreatorById(id),
     getCurrentUserRole(),
+    getCurrentUserMembership(),
     getContracts(),
     getCreatorPlatformAccounts(id),
-    getCreatorRevenueEntries(id),
+    getCreatorRevenueEntries(id, periodMonth),
     getSubscriptionContext(),
     getCreatorAudienceAnalytics(id),
+    getCreatorPaidContractPaymentsForMonth(id, periodMonth),
   ]);
 
   if (!creator) {
@@ -62,6 +80,9 @@ export default async function CreatorDetailPage({
     creator.socialHandles[0]?.handle ?? creator.email ?? undefined;
 
   const isPortalUser = isPortalRole(role);
+  const canWriteRevenue =
+    hasFullAccess(role, "creators") ||
+    (isCreatorPortalRole(role) && membership?.linkedCreatorId === id);
 
   return (
     <DashboardLayout title={creator.name} description={subtitle}>
@@ -74,6 +95,7 @@ export default async function CreatorDetailPage({
         oauthSuccess={oauthSuccess ?? null}
         oauthError={oauthError ?? null}
         canWrite={hasFullAccess(role, "creators")}
+        canWriteRevenue={canWriteRevenue}
         isPortalUser={isPortalUser}
         isContentCreator={isCreatorPortalRole(role)}
         canUseContentAi={hasFeature(subscription.features, "ai_growth")}
@@ -87,6 +109,8 @@ export default async function CreatorDetailPage({
           subscription.features,
           "advanced_analytics"
         )}
+        periodMonth={periodMonth}
+        payments={payments}
       />
     </DashboardLayout>
   );

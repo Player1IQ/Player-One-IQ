@@ -32,7 +32,13 @@ import {
   getCreatorPlatformAccounts,
   getCreatorRevenueEntries,
 } from "@/lib/creator-revenue/queries";
-import { isConnectedPlatformAccount } from "@/lib/creator-revenue";
+import {
+  getCreatorPaidContractPaymentsForMonth,
+} from "@/lib/payments/queries";
+import {
+  getCurrentPeriodMonth,
+  isConnectedPlatformAccount,
+} from "@/lib/creator-revenue";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
@@ -153,6 +159,7 @@ export default async function PortalHomePage() {
     audienceAnalytics,
     contentSnapshots,
     userId,
+    creatorPayments,
   ] = await Promise.all([
     getCreatorById(membership.linkedCreatorId),
     getContracts(),
@@ -174,6 +181,10 @@ export default async function PortalHomePage() {
     getCreatorAudienceAnalytics(membership.linkedCreatorId).catch(() => null),
     fetchCreatorContentSnapshots(membership.linkedCreatorId).catch(() => []),
     getCurrentUserId(),
+    getCreatorPaidContractPaymentsForMonth(
+      membership.linkedCreatorId,
+      getCurrentPeriodMonth()
+    ),
   ]);
 
   const showCampaigns =
@@ -202,7 +213,8 @@ export default async function PortalHomePage() {
     deliverableMetrics,
     marketplaceOpportunities,
     openOpportunities,
-    hasScheduleBlock
+    hasScheduleBlock,
+    creatorPayments
   );
 
   const coachProfile = userId

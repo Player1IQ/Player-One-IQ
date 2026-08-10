@@ -28,7 +28,8 @@ export type NavIconName =
   | "credit-card"
   | "settings"
   | "calendar"
-  | "trophy";
+  | "trophy"
+  | "dollar-sign";
 
 export interface NavItem {
   label: string;
@@ -102,6 +103,7 @@ export const navItems: NavItem[] = [
 
 export const portalNavItems: NavItem[] = [
   { label: "Home", href: "/portal", icon: "dashboard" },
+  { label: "Revenue", href: "/portal/revenue", icon: "dollar-sign" },
   { label: "Schedule", href: "/schedule", icon: "calendar" },
   { label: "My Profile", href: "/portal/profile", icon: "users" },
   {

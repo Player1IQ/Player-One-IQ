@@ -24,8 +24,9 @@ import {
   getConnectedPlatformAccountCount,
   getOrganizationRevenueEntriesForMonths,
 } from "@/lib/creator-revenue/queries";
-import { getCurrentPeriodMonth } from "@/lib/creator-revenue";
 import { getDashboardRevenueSummary } from "@/lib/revenue/summary";
+import { getPaidContractPaymentsForMonth } from "@/lib/payments/queries";
+import { getPeriodMonthFromSearchParams } from "@/lib/revenue/monthly";
 import {
   buildCreatorGrowthData,
   buildRevenueTrendData,
@@ -40,12 +41,18 @@ import {
   getCurrentUserId,
 } from "@/lib/creator-coach";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
   const role = await getCurrentUserRole();
   if (role && !canAccessStaffDashboard(role)) {
     redirect("/portal");
   }
 
+  const resolvedSearchParams = await searchParams;
+  const periodMonth = getPeriodMonthFromSearchParams(resolvedSearchParams);
   const monthKeys = getLastNMonthKeys(6).map((month) => month.key);
 
   const [
@@ -62,6 +69,7 @@ export default async function DashboardPage() {
     todaySchedule,
     userId,
     userDisplayName,
+    paidPayments,
   ] = await Promise.all([
     getCreators(),
     getSponsors(),
@@ -76,6 +84,7 @@ export default async function DashboardPage() {
     getTodayScheduleEvents(),
     getCurrentUserId(),
     getCurrentUserDisplayName(),
+    getPaidContractPaymentsForMonth(periodMonth),
   ]);
 
   const opportunityStats = getOpportunityStats(opportunities);
@@ -83,14 +92,14 @@ export default async function DashboardPage() {
   const activeCreators = creators.filter((c) => c.status === "active");
   const activeSponsors = sponsors.filter((s) => s.status === "active");
   const contractStats = getContractStats(contracts);
-  const currentMonth = getCurrentPeriodMonth();
   const currentMonthEntries = platformRevenueEntries.filter(
-    (entry) => entry.periodMonth === currentMonth
+    (entry) => entry.periodMonth === periodMonth
   );
   const monthlyRevenue = getDashboardRevenueSummary(
     contracts,
     currentMonthEntries,
-    connectedAccountCount
+    connectedAccountCount,
+    { periodMonth, payments: paidPayments }
   );
   const entriesByMonth = groupRevenueEntriesByMonth(platformRevenueEntries);
   const revenueTrend = buildRevenueTrendData(contracts, entriesByMonth).map(
@@ -146,6 +155,7 @@ export default async function DashboardPage() {
         todaySchedule={todaySchedule}
         coachSnapshot={coachSnapshot}
         coachContext={coachContext}
+        periodMonth={periodMonth}
       />
     </DashboardLayout>
   );

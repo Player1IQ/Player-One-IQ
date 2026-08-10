@@ -1,14 +1,29 @@
 import { formatCurrency, type Contract } from "@/lib/contracts";
 import {
+  getCurrentPeriodMonth,
   summarizeOrganizationPlatformRevenue,
   type CreatorRevenueEntry,
 } from "@/lib/creator-revenue";
 import { getMonthlyRevenueSummary } from "@/lib/contracts";
+import {
+  buildMonthlyRevenueBreakdown,
+  buildMonthlyRevenueSubtitle,
+  normalizePeriodMonth,
+  sumCashReceivedDollars,
+  type MonthlyRevenueBreakdown,
+} from "@/lib/revenue/monthly";
+import type { ContractPayment } from "@/lib/payments/types";
 
 export interface DashboardRevenueSummary {
   total: number;
   totalDisplay: string;
+  cashReceived: number;
+  cashReceivedDisplay: string;
+  expectedDeals: number;
+  expectedDealsDisplay: string;
+  /** @deprecated Use expectedDeals — kept for backward compatibility */
   contractRevenue: number;
+  /** @deprecated Use expectedDealsDisplay */
   contractRevenueDisplay: string;
   platformRevenue: number;
   platformRevenueDisplay: string;
@@ -16,46 +31,73 @@ export interface DashboardRevenueSummary {
   advertisementRevenueDisplay: string;
   activeContractCount: number;
   connectedAccountCount: number;
+  periodMonth: string;
   subtitle: string;
+}
+
+export interface DashboardRevenueSummaryOptions {
+  periodMonth?: string;
+  payments?: ContractPayment[];
 }
 
 export function getDashboardRevenueSummary(
   contracts: Contract[],
   platformEntries: CreatorRevenueEntry[],
-  connectedAccountCount: number
+  connectedAccountCount: number,
+  options: DashboardRevenueSummaryOptions = {}
 ): DashboardRevenueSummary {
-  const contractSummary = getMonthlyRevenueSummary(contracts);
+  const periodMonth = normalizePeriodMonth(options.periodMonth);
+  const payments = options.payments ?? [];
+  const contractSummary = getMonthlyRevenueSummary(
+    contracts,
+    new Date(`${periodMonth}T00:00:00`)
+  );
+  const breakdown = buildMonthlyRevenueBreakdown({
+    periodMonth,
+    contracts,
+    platformEntries,
+    payments,
+    connectedAccountCount,
+  });
   const platformSummary = summarizeOrganizationPlatformRevenue(
     platformEntries,
     connectedAccountCount
   );
 
-  const total = contractSummary.amount + platformSummary.platformRevenue;
-
-  let subtitle = "";
-  if (contractSummary.activeContractCount > 0 && connectedAccountCount > 0) {
-    subtitle = `${formatCurrency(contractSummary.amount)} contracts · ${platformSummary.platformRevenueDisplay} platform income`;
-  } else if (contractSummary.activeContractCount > 0) {
-    subtitle = `${formatCurrency(contractSummary.amount)} from active contracts`;
-  } else if (connectedAccountCount > 0) {
-    subtitle = `${platformSummary.platformRevenueDisplay} from connected platform accounts`;
-  } else {
-    subtitle = "Connect creator platforms or activate contracts to track revenue";
-  }
-
   return {
-    total,
-    totalDisplay: formatCurrency(total),
-    contractRevenue: contractSummary.amount,
-    contractRevenueDisplay: formatCurrency(contractSummary.amount),
-    platformRevenue: platformSummary.platformRevenue,
-    platformRevenueDisplay: platformSummary.platformRevenueDisplay,
+    total: breakdown.total,
+    totalDisplay: breakdown.totalDisplay,
+    cashReceived: breakdown.cashReceived,
+    cashReceivedDisplay: breakdown.cashReceivedDisplay,
+    expectedDeals: breakdown.expectedDeals,
+    expectedDealsDisplay: breakdown.expectedDealsDisplay,
+    contractRevenue: breakdown.expectedDeals,
+    contractRevenueDisplay: breakdown.expectedDealsDisplay,
+    platformRevenue: breakdown.platformRevenue,
+    platformRevenueDisplay: breakdown.platformRevenueDisplay,
     advertisementRevenue: platformSummary.advertisementRevenue,
     advertisementRevenueDisplay: formatCurrency(
       platformSummary.advertisementRevenue
     ),
     activeContractCount: contractSummary.activeContractCount,
     connectedAccountCount,
-    subtitle,
+    periodMonth,
+    subtitle: buildMonthlyRevenueSubtitle(breakdown),
   };
 }
+
+export function getCreatorDashboardRevenueSummary(
+  contracts: Contract[],
+  platformEntries: CreatorRevenueEntry[],
+  payments: ContractPayment[],
+  periodMonth = getCurrentPeriodMonth()
+): MonthlyRevenueBreakdown {
+  return buildMonthlyRevenueBreakdown({
+    periodMonth: normalizePeriodMonth(periodMonth),
+    contracts,
+    platformEntries,
+    payments,
+  });
+}
+
+export { sumCashReceivedDollars };

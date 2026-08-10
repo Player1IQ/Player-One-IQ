@@ -1,6 +1,7 @@
 import type { Creator } from "./types";
 import type { Contract } from "@/lib/contracts";
 import type { CreatorRevenueEntry } from "@/lib/creator-revenue";
+import type { ContractPayment } from "@/lib/payments/types";
 import type { PortalDeliverableMetrics } from "@/lib/contract-deliverables/queries";
 import {
   getApplicationStats,
@@ -112,7 +113,8 @@ export async function getCreatorPortalBenefits(
   deliverableMetrics: PortalDeliverableMetrics,
   marketplaceOpportunities?: Opportunity[],
   openOpportunities?: Opportunity[],
-  hasScheduleBlock = false
+  hasScheduleBlock = false,
+  payments: ContractPayment[] = []
 ): Promise<CreatorPortalBenefits> {
   const creatorContracts = contracts.filter(
     (contract) => contract.creatorId === creatorId
@@ -133,7 +135,8 @@ export async function getCreatorPortalBenefits(
     revenueSummary: getDashboardRevenueSummary(
       creatorContracts,
       revenueEntries,
-      connectedAccountCount
+      connectedAccountCount,
+      { payments }
     ),
     applicationStats,
     recentApplications,

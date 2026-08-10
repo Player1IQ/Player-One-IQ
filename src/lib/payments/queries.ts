@@ -96,3 +96,87 @@ export async function getContractPayment(
   if (error || !data) return null;
   return mapContractPaymentRow(data as ContractPaymentRow);
 }
+
+function monthBoundsIso(periodMonth: string): { start: string; end: string } {
+  const start = new Date(`${periodMonth}T00:00:00`);
+  const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999);
+  return { start: start.toISOString(), end: end.toISOString() };
+}
+
+export async function getPaidContractPaymentsForMonth(
+  periodMonth: string
+): Promise<ContractPayment[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const { start, end } = monthBoundsIso(periodMonth);
+
+  const { data, error } = await supabase
+    .from("contract_payments")
+    .select(contractPaymentSelect)
+    .eq("organization_id", organizationId)
+    .in("status", ["paid_external", "paid_platform"])
+    .gte("paid_at", start)
+    .lte("paid_at", end)
+    .order("paid_at", { ascending: false });
+
+  if (error || !data) return [];
+  return (data as ContractPaymentRow[]).map(mapContractPaymentRow);
+}
+
+export async function getCreatorPaidContractPaymentsForMonth(
+  creatorId: string,
+  periodMonth: string
+): Promise<ContractPayment[]> {
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const { start, end } = monthBoundsIso(periodMonth);
+
+  const { data, error } = await supabase
+    .from("contract_payments")
+    .select(contractPaymentSelect)
+    .eq("organization_id", organizationId)
+    .eq("payee_creator_id", creatorId)
+    .in("status", ["paid_external", "paid_platform"])
+    .gte("paid_at", start)
+    .lte("paid_at", end)
+    .order("paid_at", { ascending: false });
+
+  if (error || !data) return [];
+  return (data as ContractPaymentRow[]).map(mapContractPaymentRow);
+}
+
+export async function getPaidContractPaymentsForMonths(
+  monthKeys: string[]
+): Promise<ContractPayment[]> {
+  if (monthKeys.length === 0) return [];
+
+  const supabase = await createClient();
+  if (!supabase) return [];
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return [];
+
+  const sortedKeys = [...monthKeys].sort();
+  const { start } = monthBoundsIso(sortedKeys[0]!);
+  const { end } = monthBoundsIso(sortedKeys[sortedKeys.length - 1]!);
+
+  const { data, error } = await supabase
+    .from("contract_payments")
+    .select(contractPaymentSelect)
+    .eq("organization_id", organizationId)
+    .in("status", ["paid_external", "paid_platform"])
+    .gte("paid_at", start)
+    .lte("paid_at", end)
+    .order("paid_at", { ascending: false });
+
+  if (error || !data) return [];
+  return (data as ContractPaymentRow[]).map(mapContractPaymentRow);
+}

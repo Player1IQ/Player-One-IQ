@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import {
   requireCreatorPlatformConnectAccess,
+  requireCreatorRevenueWriteAccess,
   requireFeatureAccess,
   requireResourceWriteAccess,
 } from "@/lib/permissions";
@@ -16,6 +17,7 @@ import {
   revenueTypes,
   type RevenueType,
 } from "@/lib/creator-revenue";
+import { normalizePeriodMonth } from "@/lib/revenue/monthly";
 
 interface RevenueInput {
   advertisement?: number;
@@ -272,13 +274,11 @@ export async function cancelCreatorPlatformOAuthAttempt(accountId: string) {
 
 export async function upsertCreatorPlatformRevenue(
   accountId: string,
-  revenue: RevenueInput
+  revenue: RevenueInput,
+  periodMonthInput?: string
 ) {
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
-
-  const permError = await requireResourceWriteAccess("creators");
-  if (permError) return permError;
 
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
@@ -297,7 +297,10 @@ export async function upsertCreatorPlatformRevenue(
     return { error: "Platform account not found." };
   }
 
-  const periodMonth = getCurrentPeriodMonth();
+  const permError = await requireCreatorRevenueWriteAccess(account.creator_id);
+  if (permError) return permError;
+
+  const periodMonth = normalizePeriodMonth(periodMonthInput);
 
   for (const revenueType of revenueTypes) {
     const amount = revenue[revenueType];
@@ -316,6 +319,7 @@ export async function upsertCreatorPlatformRevenue(
   }
 
   revalidatePath(`/creators/${account.creator_id}`);
+  revalidatePath("/portal/revenue");
   revalidatePath("/");
   return { success: true };
 }

@@ -30,6 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CommandCenterHeader } from "@/components/dashboard/CommandCenterHeader";
+import { MonthSelector } from "@/components/revenue/MonthSelector";
 import { OpsQueue, type OpsQueueItem } from "@/components/dashboard/OpsQueue";
 import { CommandHeroMetric } from "@/components/dashboard/CommandHeroMetric";
 import { TelemetryPanel } from "@/components/dashboard/TelemetryPanel";
@@ -89,6 +90,7 @@ interface DashboardHomeClientProps {
   todaySchedule?: ScheduleEvent[];
   coachSnapshot?: CreatorCoachSnapshot | null;
   coachContext?: CoachContext | null;
+  periodMonth?: string;
 }
 
 function activityLabel(
@@ -222,6 +224,7 @@ export function DashboardHomeClient({
   todaySchedule = [],
   coachSnapshot = null,
   coachContext = null,
+  periodMonth,
 }: DashboardHomeClientProps) {
   const hasRevenueTrend = revenueTrend.some(
     (point) => point.contract > 0 || point.platform > 0
@@ -289,6 +292,12 @@ export function DashboardHomeClient({
         attentionCount={opsQueueItems.length}
       />
 
+      {periodMonth ? (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <MonthSelector periodMonth={periodMonth} />
+        </div>
+      ) : null}
+
       <OpsQueue items={opsQueueItems} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -301,12 +310,12 @@ export function DashboardHomeClient({
           iconColor="text-accent-light"
         />
         <CommandHeroMetric
-          telemetry="Sponsorship pipeline"
-          value={contractStats.totalValueDisplay}
-          subtitle={`${contractStats.activeCount} active contracts`}
+          telemetry="Cash received"
+          value={monthlyRevenue.cashReceivedDisplay}
+          subtitle={`${monthlyRevenue.expectedDealsDisplay} expected from deals`}
           href="/contracts"
           icon={FileText}
-          iconColor="text-fuchsia-400"
+          iconColor="text-emerald-400"
         />
         <CommandHeroMetric
           telemetry="Open opportunities"

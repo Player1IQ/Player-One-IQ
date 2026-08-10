@@ -243,6 +243,22 @@ export async function requireCreatorPlatformConnectAccess(
   return requireResourceWriteAccess("creators");
 }
 
+export async function requireCreatorRevenueWriteAccess(
+  creatorId: string
+): Promise<{ error: string } | null> {
+  const membership = await getCurrentUserMembership();
+  if (membership && isCreatorPortalRole(membership.role)) {
+    if (membership.linkedCreatorId !== creatorId) {
+      return {
+        error: "You can only update revenue on your own creator profile.",
+      };
+    }
+    return null;
+  }
+
+  return requireResourceWriteAccess("creators");
+}
+
 export function canPostDealRoomEvents(role: TeamRole | null): boolean {
   if (!role || isPortalRole(role)) return false;
   return (

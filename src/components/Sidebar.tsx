@@ -8,6 +8,7 @@ import {
   Building2,
   Calendar,
   CreditCard,
+  DollarSign,
   FileText,
   LayoutDashboard,
   MessageSquare,
@@ -46,6 +47,7 @@ const navIcons: Record<NavIconName, LucideIcon> = {
   settings: Settings,
   calendar: Calendar,
   trophy: Trophy,
+  "dollar-sign": DollarSign,
 };
 
 interface SidebarProps {

@@ -6,16 +6,12 @@ import type { DashboardRevenueSummary } from "@/lib/revenue/summary";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 
 interface PortalEarningsCardProps {
-  creatorId: string;
   summary: DashboardRevenueSummary;
 }
 
 export function PortalEarningsCard({
-  creatorId,
   summary,
 }: PortalEarningsCardProps) {
-  const incomeHref = `/creators/${creatorId}#income-overview`;
-
   return (
     <Card>
       <CardHeader>
@@ -24,7 +20,7 @@ export function PortalEarningsCard({
           Your earnings this month
         </CardTitle>
         <CardDescription>
-          Combined sponsorship deals and connected platform income
+          Cash received from deals plus connected platform income
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
@@ -40,13 +36,13 @@ export function PortalEarningsCard({
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-              Sponsorship deals
+              Cash received
             </p>
             <p className="mt-1 text-lg font-semibold text-gray-100">
-              {summary.contractRevenueDisplay}
+              {summary.cashReceivedDisplay}
             </p>
           </div>
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
@@ -57,13 +53,21 @@ export function PortalEarningsCard({
               {summary.platformRevenueDisplay}
             </p>
           </div>
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+              Expected deals
+            </p>
+            <p className="mt-1 text-lg font-semibold text-gray-100">
+              {summary.expectedDealsDisplay}
+            </p>
+          </div>
         </div>
 
         <Link
-          href={incomeHref}
+          href="/portal/revenue"
           className="inline-flex items-center gap-1.5 text-sm font-medium text-accent-light hover:text-white"
         >
-          View full income overview →
+          View full revenue →
         </Link>
       </CardContent>
     </Card>

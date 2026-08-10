@@ -29,8 +29,10 @@ import { CreatorPortalProfileModal } from "./CreatorPortalProfileModal";
 import { CreatorAvailabilityPicker } from "@/components/presence/CreatorAvailabilityPicker";
 import { CreatorPlatformAccounts } from "./CreatorPlatformAccounts";
 import { CreatorIncomeOverview } from "./CreatorIncomeOverview";
+import { MonthSelector } from "@/components/revenue/MonthSelector";
 import {
   isConnectedPlatformAccount,
+  getCurrentPeriodMonth,
   type CreatorPlatformAccount,
   type CreatorRevenueEntry,
 } from "@/lib/creator-revenue";
@@ -42,6 +44,7 @@ import { CreatorOAuthBanner } from "./CreatorOAuthBanner";
 import { CreatorContentCoach } from "./CreatorContentCoach";
 import { CreatorAudienceGrowth } from "./CreatorAudienceGrowth";
 import type { CreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
+import type { ContractPayment } from "@/lib/payments/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
@@ -62,6 +65,9 @@ interface CreatorProfileProps {
   audienceAnalytics?: CreatorAudienceAnalytics;
   canViewAnalytics?: boolean;
   canViewAdvancedAnalytics?: boolean;
+  periodMonth?: string;
+  payments?: ContractPayment[];
+  canWriteRevenue?: boolean;
 }
 
 function Section({
@@ -103,6 +109,9 @@ export function CreatorProfile({
   audienceAnalytics,
   canViewAnalytics = false,
   canViewAdvancedAnalytics = false,
+  periodMonth,
+  payments = [],
+  canWriteRevenue = false,
 }: CreatorProfileProps) {
   const connectedOAuthPlatforms = platformAccounts
     .filter((account) => account.connectionStatus === "connected_oauth")
@@ -355,13 +364,26 @@ export function CreatorProfile({
         title={isPortalUser ? "Your earnings this month" : "Income Overview"}
         description={
           isPortalUser
-            ? "Your sponsorship deals and connected platform income"
-            : "Combined platform and sponsorship revenue for this month"
+            ? "Cash received from deals plus connected platform income"
+            : "Cash received, platform income, and expected deal value"
         }
       >
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          {periodMonth ? <MonthSelector periodMonth={periodMonth} /> : null}
+          {isPortalUser ? (
+            <Link
+              href="/portal/revenue"
+              className="text-sm font-medium text-accent-light hover:text-white"
+            >
+              Open full revenue view →
+            </Link>
+          ) : null}
+        </div>
         <CreatorIncomeOverview
           contracts={contracts}
           revenueEntries={revenueEntries}
+          payments={payments}
+          periodMonth={periodMonth ?? getCurrentPeriodMonth()}
         />
       </Section>
 
@@ -392,8 +414,9 @@ export function CreatorProfile({
           accounts={platformAccounts}
           revenueEntries={revenueEntries}
           oauthPlatformUi={oauthPlatformUi}
-          canWrite={canWrite}
+          canWrite={canWrite || canWriteRevenue}
           allowPlatformOAuth={isPortalUser}
+          periodMonth={periodMonth}
         />
       </Section>
 

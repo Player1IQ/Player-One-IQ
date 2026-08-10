@@ -301,7 +301,6 @@ export function PortalHomeClient({
 
       {portalBenefits ? (
         <PortalEarningsCard
-          creatorId={creator.id}
           summary={portalBenefits.revenueSummary}
         />
       ) : null}
