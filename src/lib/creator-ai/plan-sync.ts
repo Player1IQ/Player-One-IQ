@@ -36,6 +36,7 @@ export interface PlanSyncSummary {
   eventsUpdated: number;
   eventsSkipped: number;
   eventsDeleted: number;
+  errors: string[];
 }
 
 function allPlanItems(plan: CreatorContentPlan): ContentPlanItem[] {
@@ -247,6 +248,7 @@ export async function syncContentPlanToSchedule(input: {
     eventsUpdated: 0,
     eventsSkipped: 0,
     eventsDeleted: 0,
+    errors: [],
   };
 
   if (!supabase) return summary;
@@ -285,7 +287,11 @@ export async function syncContentPlanToSchedule(input: {
         }
       );
 
-      if (!deleteError && typeof deletedCount === "number") {
+      if (deleteError) {
+        summary.errors.push(
+          `Could not clear ${date}: ${deleteError.message}`
+        );
+      } else if (typeof deletedCount === "number") {
         summary.eventsDeleted += deletedCount;
       }
     }
@@ -307,7 +313,10 @@ export async function syncContentPlanToSchedule(input: {
       p_all_day: mapping.allDay,
     });
 
-    if (error) continue;
+    if (error) {
+      summary.errors.push(`${item.id}: ${error.message}`);
+      continue;
+    }
 
     if (hadExisting) {
       summary.eventsUpdated += 1;
@@ -342,7 +351,9 @@ export async function syncContentPlanToSchedule(input: {
           p_ends_at: mapping.endsAt,
           p_all_day: mapping.allDay,
         });
-        if (!error) {
+        if (error) {
+          summary.errors.push(`${item.id}: ${error.message}`);
+        } else {
           summary.eventsUpdated += 1;
         }
         continue;

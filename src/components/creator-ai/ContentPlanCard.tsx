@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { CalendarDays, CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { activateCreatorContentPlanAction } from "@/lib/creator-ai/plan-actions";
+import {
+  activateCreatorContentPlanAction,
+  resyncCreatorContentPlanAction,
+} from "@/lib/creator-ai/plan-actions";
 import type { PlanSyncSummary } from "@/lib/creator-ai/plan-sync";
 import type { ContentPlanStatus, CreatorContentPlan } from "@/lib/creator-ai/plan-types";
 import { ContentPlanPreview } from "./ContentPlanPreview";
@@ -48,11 +51,19 @@ function formatSyncMessage(sync: PlanSyncSummary): string {
     parts.push(`${sync.eventsSkipped} existing event${sync.eventsSkipped === 1 ? "" : "s"} kept`);
   }
 
+  if (sync.errors.length > 0) {
+    return `Schedule sync failed: ${sync.errors[0]}`;
+  }
+
   if (parts.length === 0) {
     return "Your schedule is up to date.";
   }
 
   return `${parts.join(", ")} on your schedule.`;
+}
+
+function syncMessageTone(sync: PlanSyncSummary): "success" | "error" {
+  return sync.errors.length > 0 ? "error" : "success";
 }
 
 export function ContentPlanCard({
@@ -61,15 +72,16 @@ export function ContentPlanCard({
   onActivated,
 }: ContentPlanCardProps) {
   const [plan, setPlan] = useState(initialPlan);
-  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [syncSummary, setSyncSummary] = useState<PlanSyncSummary | null>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const statusStyle = STATUS_STYLES[plan.status];
+  const syncMessage = syncSummary ? formatSyncMessage(syncSummary) : null;
 
   function handleActivate() {
     setError("");
-    setSyncMessage(null);
+    setSyncSummary(null);
     startTransition(async () => {
       const result = await activateCreatorContentPlanAction(plan.id);
       if ("error" in result) {
@@ -77,8 +89,21 @@ export function ContentPlanCard({
         return;
       }
       setPlan(result.plan);
-      setSyncMessage(formatSyncMessage(result.sync));
+      setSyncSummary(result.sync);
       onActivated?.(result.plan);
+    });
+  }
+
+  function handleResync() {
+    setError("");
+    setSyncSummary(null);
+    startTransition(async () => {
+      const result = await resyncCreatorContentPlanAction(plan.id);
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+      setSyncSummary(result.sync);
     });
   }
 
@@ -135,15 +160,46 @@ export function ContentPlanCard({
         </div>
       ) : null}
 
-      {syncMessage ? (
-        <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100">
-          <p>{syncMessage}</p>
-          <Link
-            href="/schedule"
-            className="mt-1 inline-block font-medium text-emerald-200 underline-offset-2 hover:underline"
+      {plan.status === "active" ? (
+        <div className="space-y-2 border-t border-white/[0.06] pt-3">
+          <button
+            type="button"
+            onClick={handleResync}
+            disabled={isPending}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-3 py-1.5 text-xs font-medium text-gray-200 hover:border-accent/30 hover:text-white disabled:opacity-50"
           >
-            View schedule
-          </Link>
+            {isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <CalendarDays className="h-3.5 w-3.5" />
+            )}
+            Sync to schedule
+          </button>
+          <p className="text-[11px] text-gray-500">
+            Adds any missing plan items to your calendar without replacing
+            events that are already synced.
+          </p>
+        </div>
+      ) : null}
+
+      {syncMessage && syncSummary ? (
+        <div
+          className={cn(
+            "rounded-lg border px-3 py-2 text-xs",
+            syncMessageTone(syncSummary) === "error"
+              ? "border-red-500/20 bg-red-500/10 text-red-100"
+              : "border-emerald-500/20 bg-emerald-500/10 text-emerald-100"
+          )}
+        >
+          <p>{syncMessage}</p>
+          {syncMessageTone(syncSummary) === "success" ? (
+            <Link
+              href="/schedule"
+              className="mt-1 inline-block font-medium text-emerald-200 underline-offset-2 hover:underline"
+            >
+              View schedule
+            </Link>
+          ) : null}
         </div>
       ) : null}
 

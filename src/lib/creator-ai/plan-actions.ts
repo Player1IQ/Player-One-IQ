@@ -249,6 +249,35 @@ export async function activateCreatorContentPlanAction(planId: string): Promise<
   return { success: true, plan: activation.plan, sync };
 }
 
+export async function resyncCreatorContentPlanAction(planId: string): Promise<
+  | { success: true; plan: CreatorContentPlan; sync: PlanSyncSummary }
+  | { error: string; upgradeRequired?: boolean }
+> {
+  const access = await requireCreatorAiCoachAccess();
+  if ("error" in access) return access;
+
+  const plan = await getCreatorContentPlan(planId, access.userId);
+  if (!plan || plan.creatorId !== access.creatorId) {
+    return { error: "Plan not found." };
+  }
+  if (plan.status !== "active") {
+    return { error: "Only active plans can be synced to your schedule." };
+  }
+
+  const sync = await syncContentPlanToSchedule({
+    planId: plan.id,
+    userId: access.userId,
+    creatorId: access.creatorId,
+    organizationId: access.organizationId,
+    newPlan: plan,
+    previousActivePlan: plan,
+  });
+
+  revalidatePath("/portal/coach");
+  revalidatePath("/schedule");
+  return { success: true, plan, sync };
+}
+
 export async function archiveCreatorContentPlanAction(planId: string): Promise<
   | { success: true }
   | { error: string; upgradeRequired?: boolean }
