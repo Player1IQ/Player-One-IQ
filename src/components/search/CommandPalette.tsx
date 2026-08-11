@@ -137,7 +137,7 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
   }, []);
 
   useEffect(() => {
-    if (!open || index || loading) return;
+    if (!open || index) return;
 
     let cancelled = false;
     setLoading(true);
@@ -167,7 +167,7 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
     return () => {
       cancelled = true;
     };
-  }, [open, index, loading]);
+  }, [open, index]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
