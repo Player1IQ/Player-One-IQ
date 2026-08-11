@@ -95,11 +95,39 @@ export async function listCreatorContentPlans(
   return (data as CreatorContentPlanRow[]).map(mapContentPlanRow);
 }
 
+export async function getActiveCreatorContentPlan(
+  userId: string,
+  creatorId: string
+): Promise<CreatorContentPlan | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return null;
+
+  const { data, error } = await supabase
+    .from("creator_content_plans")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .eq("user_id", userId)
+    .eq("creator_id", creatorId)
+    .eq("status", "active")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return mapContentPlanRow(data as CreatorContentPlanRow);
+}
+
 export async function activateCreatorContentPlan(
   planId: string,
   userId: string,
   creatorId: string
-): Promise<CreatorContentPlan | null> {
+): Promise<{
+  plan: CreatorContentPlan;
+  previousActivePlan: CreatorContentPlan | null;
+} | null> {
   const supabase = await createClient();
   if (!supabase) return null;
 
@@ -110,24 +138,15 @@ export async function activateCreatorContentPlan(
   if (!target || target.creatorId !== creatorId) return null;
   if (target.status !== "draft") return null;
 
-  const { data: activePlans, error: activeError } = await supabase
-    .from("creator_content_plans")
-    .select("id")
-    .eq("organization_id", organizationId)
-    .eq("user_id", userId)
-    .eq("creator_id", creatorId)
-    .eq("status", "active");
-
-  if (activeError) return null;
+  const previousActivePlan = await getActiveCreatorContentPlan(userId, creatorId);
 
   const now = new Date().toISOString();
 
-  if (activePlans && activePlans.length > 0) {
-    const activeIds = activePlans.map((row) => row.id as string);
+  if (previousActivePlan) {
     const { error: archiveError } = await supabase
       .from("creator_content_plans")
       .update({ status: "archived", updated_at: now })
-      .in("id", activeIds)
+      .eq("id", previousActivePlan.id)
       .eq("user_id", userId)
       .eq("organization_id", organizationId);
 
@@ -144,7 +163,10 @@ export async function activateCreatorContentPlan(
     .single();
 
   if (error || !data) return null;
-  return mapContentPlanRow(data as CreatorContentPlanRow);
+  return {
+    plan: mapContentPlanRow(data as CreatorContentPlanRow),
+    previousActivePlan,
+  };
 }
 
 export async function archiveCreatorContentPlan(

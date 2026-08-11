@@ -58,6 +58,8 @@ export interface ScheduleEventRow {
   created_by: string | null;
   location: string | null;
   color: string | null;
+  content_plan_id: string | null;
+  content_plan_item_id: string | null;
   created_at: string;
   updated_at: string;
   schedule_event_participants?: ScheduleParticipantRow[] | null;
@@ -85,6 +87,8 @@ export interface ScheduleEvent {
   createdBy: string | null;
   location: string;
   color: string;
+  contentPlanId: string | null;
+  contentPlanItemId: string | null;
   createdAt: string;
   updatedAt: string;
   participants: ScheduleParticipant[];
@@ -192,6 +196,8 @@ export function mapScheduleEventRow(row: ScheduleEventRow): ScheduleEvent {
     createdBy: row.created_by,
     location: row.location ?? "",
     color: row.color ?? scheduleEventTypeColors[eventType],
+    contentPlanId: row.content_plan_id ?? null,
+    contentPlanItemId: row.content_plan_item_id ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     participants,

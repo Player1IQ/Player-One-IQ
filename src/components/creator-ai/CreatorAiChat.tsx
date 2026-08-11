@@ -36,6 +36,8 @@ export function CreatorAiChat({
 }: CreatorAiChatProps) {
   const router = useRouter();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const loadGenerationRef = useRef(0);
   const [conversations, setConversations] = useState(initialConversations);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(
     initialConversationId
@@ -51,9 +53,15 @@ export function CreatorAiChat({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const loadConversation = useCallback(async (conversationId: string) => {
+    const generation = ++loadGenerationRef.current;
     setLoadingConversation(true);
     setError("");
     const result = await getCreatorAiConversationAction(conversationId);
+
+    if (generation !== loadGenerationRef.current) {
+      return;
+    }
+
     setLoadingConversation(false);
 
     if ("error" in result) {
@@ -88,6 +96,7 @@ export function CreatorAiChat({
   }, [messages, isPending, isGeneratingPlan]);
 
   function handleNewConversation() {
+    loadGenerationRef.current += 1;
     setActiveConversationId(null);
     setMessages([]);
     setInput("");
@@ -95,6 +104,8 @@ export function CreatorAiChat({
     setMode(null);
     setFallbackNotice(null);
     setPickerOpen(false);
+    setLoadingConversation(false);
+    requestAnimationFrame(() => inputRef.current?.focus());
   }
 
   function handleGeneratePlan(weeksAhead = 2) {
@@ -413,6 +424,7 @@ export function CreatorAiChat({
       >
         <div className="flex gap-2">
           <textarea
+            ref={inputRef}
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={(event) => {

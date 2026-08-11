@@ -638,6 +638,11 @@ export function SchedulePageClient({
                           <p className="truncate text-sm font-semibold text-white">
                             {event.title}
                           </p>
+                          {event.contentPlanId ? (
+                            <span className="shrink-0 rounded-full border border-accent/30 bg-accent/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-accent-light">
+                              AI Plan
+                            </span>
+                          ) : null}
                         </div>
                         <p className="mt-1 text-xs text-gray-500">
                           {event.timeRangeDisplay}

@@ -21,6 +21,10 @@ import {
   getCreatorContentPlan,
   listCreatorContentPlans,
 } from "./plan-queries";
+import {
+  syncContentPlanToSchedule,
+  type PlanSyncSummary,
+} from "./plan-sync";
 import { requireCreatorAiCoachAccess } from "./permissions";
 import type { CreatorContentPlan } from "./plan-types";
 import type { CreatorAiMessage } from "./types";
@@ -43,7 +47,7 @@ function buildPlanAssistantMessage(plan: CreatorContentPlan): string {
     (total, week) => total + week.items.length,
     0
   );
-  return `Here's your ${plan.plan.weeks.length}-week posting plan (${itemCount} items, ${plan.periodStart} – ${plan.periodEnd}). Review the schedule below and activate when you're ready. Schedule sync is coming soon.`;
+  return `Here's your ${plan.plan.weeks.length}-week posting plan (${itemCount} items, ${plan.periodStart} – ${plan.periodEnd}). Review the schedule below and activate when you're ready — activating will add matching events to your calendar.`;
 }
 
 export async function generateCreatorContentPlanAction(input: {
@@ -215,24 +219,34 @@ export async function listCreatorContentPlansAction(
 }
 
 export async function activateCreatorContentPlanAction(planId: string): Promise<
-  | { success: true; plan: CreatorContentPlan }
+  | { success: true; plan: CreatorContentPlan; sync: PlanSyncSummary }
   | { error: string; upgradeRequired?: boolean }
 > {
   const access = await requireCreatorAiCoachAccess();
   if ("error" in access) return access;
 
-  const plan = await activateCreatorContentPlan(
+  const activation = await activateCreatorContentPlan(
     planId,
     access.userId,
     access.creatorId
   );
 
-  if (!plan) {
+  if (!activation) {
     return { error: "Could not activate plan. It may not exist or is not a draft." };
   }
 
+  const sync = await syncContentPlanToSchedule({
+    planId: activation.plan.id,
+    userId: access.userId,
+    creatorId: access.creatorId,
+    organizationId: access.organizationId,
+    newPlan: activation.plan,
+    previousActivePlan: activation.previousActivePlan,
+  });
+
   revalidatePath("/portal/coach");
-  return { success: true, plan };
+  revalidatePath("/schedule");
+  return { success: true, plan: activation.plan, sync };
 }
 
 export async function archiveCreatorContentPlanAction(planId: string): Promise<

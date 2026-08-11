@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { CalendarDays, CheckCircle2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { activateCreatorContentPlanAction } from "@/lib/creator-ai/plan-actions";
+import type { PlanSyncSummary } from "@/lib/creator-ai/plan-sync";
 import type { ContentPlanStatus, CreatorContentPlan } from "@/lib/creator-ai/plan-types";
 import { ContentPlanPreview } from "./ContentPlanPreview";
 
@@ -31,12 +33,35 @@ const STATUS_STYLES: Record<
   },
 };
 
+function formatSyncMessage(sync: PlanSyncSummary): string {
+  const added = sync.eventsCreated;
+  const updated = sync.eventsUpdated;
+  const parts: string[] = [];
+
+  if (added > 0) {
+    parts.push(`${added} event${added === 1 ? "" : "s"} added`);
+  }
+  if (updated > 0) {
+    parts.push(`${updated} updated`);
+  }
+  if (sync.eventsSkipped > 0 && parts.length === 0) {
+    parts.push(`${sync.eventsSkipped} existing event${sync.eventsSkipped === 1 ? "" : "s"} kept`);
+  }
+
+  if (parts.length === 0) {
+    return "Your schedule is up to date.";
+  }
+
+  return `${parts.join(", ")} on your schedule.`;
+}
+
 export function ContentPlanCard({
   plan: initialPlan,
   mode,
   onActivated,
 }: ContentPlanCardProps) {
   const [plan, setPlan] = useState(initialPlan);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -44,6 +69,7 @@ export function ContentPlanCard({
 
   function handleActivate() {
     setError("");
+    setSyncMessage(null);
     startTransition(async () => {
       const result = await activateCreatorContentPlanAction(plan.id);
       if ("error" in result) {
@@ -51,6 +77,7 @@ export function ContentPlanCard({
         return;
       }
       setPlan(result.plan);
+      setSyncMessage(formatSyncMessage(result.sync));
       onActivated?.(result.plan);
     });
   }
@@ -102,9 +129,21 @@ export function ContentPlanCard({
             Activate plan
           </button>
           <p className="text-[11px] text-gray-500">
-            Schedule sync coming soon — activating marks this as your current plan
-            without adding events to your calendar yet.
+            Activating adds plan items to your schedule. Unchanged days from a
+            previous plan are kept; only changed days are replaced.
           </p>
+        </div>
+      ) : null}
+
+      {syncMessage ? (
+        <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100">
+          <p>{syncMessage}</p>
+          <Link
+            href="/schedule"
+            className="mt-1 inline-block font-medium text-emerald-200 underline-offset-2 hover:underline"
+          >
+            View schedule
+          </Link>
         </div>
       ) : null}
 
