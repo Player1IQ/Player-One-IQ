@@ -36,6 +36,7 @@ export const featureKeys = [
   "limited_analytics",
   "advanced_analytics",
   "ai_growth",
+  "ai_creator_coach",
   "ai_sponsorship",
   "revenue_forecasting",
   "monthly_reports",

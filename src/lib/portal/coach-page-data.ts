@@ -26,6 +26,8 @@ import { creatorHasScheduleBlocks, getTodayScheduleEvents } from "@/lib/schedule
 import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
 import type { CoachProfile } from "@/lib/creator-coach/profile-types";
 import type { Creator } from "@/lib/creators";
+import type { CreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
+import type { PlatformContentSnapshot } from "@/lib/platform-oauth/content-performance";
 
 export interface PortalCoachPageData {
   creator: Creator;
@@ -33,6 +35,8 @@ export interface PortalCoachPageData {
   coachContext: CoachContext;
   coachProfile: CoachProfile | null;
   creatorId: string;
+  audienceAnalytics: CreatorAudienceAnalytics | null;
+  contentSnapshots: PlatformContentSnapshot[];
 }
 
 export async function loadPortalCoachPageData(
@@ -127,5 +131,7 @@ export async function loadPortalCoachPageData(
     coachContext,
     coachProfile,
     creatorId: linkedCreatorId,
+    audienceAnalytics: audienceAnalytics ?? null,
+    contentSnapshots,
   };
 }

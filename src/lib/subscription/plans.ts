@@ -22,6 +22,7 @@ export const planCatalog: Record<
       "apply_opportunities",
       "advanced_analytics",
       "ai_growth",
+      "ai_creator_coach",
       "ai_sponsorship",
       "revenue_forecasting",
       "monthly_reports",

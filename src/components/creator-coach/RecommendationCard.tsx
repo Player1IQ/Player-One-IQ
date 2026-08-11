@@ -27,6 +27,7 @@ interface RecommendationCardProps {
   recommendation: Recommendation;
   stateId: string | null;
   coachContext: CoachContext;
+  compact?: boolean;
   onSnapshotUpdate?: () => void;
   onLocalDismiss?: (recommendationId: string) => void;
   onLocalComplete?: (recommendationId: string) => void;
@@ -36,6 +37,7 @@ export function RecommendationCard({
   recommendation,
   stateId,
   coachContext,
+  compact = false,
   onSnapshotUpdate,
   onLocalDismiss,
   onLocalComplete,
@@ -116,13 +118,16 @@ export function RecommendationCard({
     <article
       className={cn(
         "rounded-2xl border border-white/[0.06] bg-surface-raised/80 backdrop-blur-sm transition-all duration-300",
-        expanded && "border-accent/20 shadow-card-hover"
+        !compact && expanded && "border-accent/20 shadow-card-hover"
       )}
     >
-      <div className="p-5">
+      <div className={cn(compact ? "p-4" : "p-5")}>
         <div className="flex items-start gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 ring-1 ring-accent/20">
-            <Icon className="h-5 w-5 text-accent-light" />
+          <div className={cn(
+            "flex shrink-0 items-center justify-center rounded-xl bg-accent/10 ring-1 ring-accent/20",
+            compact ? "h-9 w-9" : "h-11 w-11"
+          )}>
+            <Icon className={cn("text-accent-light", compact ? "h-4 w-4" : "h-5 w-5")} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -139,18 +144,19 @@ export function RecommendationCard({
                 {recommendation.priority}
               </span>
             </div>
-            <h3 className="mt-1 text-base font-semibold text-white">
+            <h3 className={cn("mt-1 font-semibold text-white", compact ? "text-sm" : "text-base")}>
               {recommendation.title}
             </h3>
             <p
               className={cn(
                 "mt-1 text-sm text-gray-400",
-                !expanded && "line-clamp-2"
+                compact ? "line-clamp-2" : !expanded && "line-clamp-2"
               )}
             >
               {recommendation.description}
             </p>
           </div>
+          {!compact ? (
           <button
             type="button"
             onClick={() => setExpanded((value) => !value)}
@@ -165,9 +171,10 @@ export function RecommendationCard({
               )}
             />
           </button>
+          ) : null}
         </div>
 
-        {expanded ? (
+        {!compact && expanded ? (
           <div className="mt-4 space-y-4 border-t border-white/[0.04] pt-4 animate-fade-in">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -194,14 +201,14 @@ export function RecommendationCard({
           </div>
         ) : null}
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className={cn("flex flex-wrap items-center gap-2", compact ? "mt-3" : "mt-4")}>
           <Link
             href={recommendation.actionRoute}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-dark"
           >
             {recommendation.actionLabel}
           </Link>
-          {recommendation.learnMoreRoute ? (
+          {!compact && recommendation.learnMoreRoute ? (
             <Link
               href={recommendation.learnMoreRoute}
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-gray-300 transition-all hover:border-accent/40 hover:text-accent-light"
@@ -209,6 +216,7 @@ export function RecommendationCard({
               Learn more
             </Link>
           ) : null}
+          {!compact ? (
           <Button
             size="sm"
             variant="secondary"
@@ -222,7 +230,8 @@ export function RecommendationCard({
             )}
             Mark complete
           </Button>
-          {recommendation.dismissible ? (
+          ) : null}
+          {!compact && recommendation.dismissible ? (
             <Button
               size="sm"
               variant="ghost"

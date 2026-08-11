@@ -7,6 +7,7 @@ export const featureLabels: Record<FeatureKey, string> = {
   limited_analytics: "Limited analytics",
   advanced_analytics: "Advanced analytics",
   ai_growth: "AI growth recommendations",
+  ai_creator_coach: "AI Creator Coach chat",
   ai_sponsorship: "AI sponsorship suggestions",
   revenue_forecasting: "Revenue forecasting",
   monthly_reports: "Monthly reports",
@@ -30,8 +31,11 @@ export const featureLabels: Record<FeatureKey, string> = {
   advanced_reporting: "Advanced reporting",
 };
 
+export const creatorCoachFeatureKeys: FeatureKey[] = ["ai_creator_coach"];
+
 export const aiFeatureKeys: FeatureKey[] = [
   "ai_growth",
+  "ai_creator_coach",
   "ai_sponsorship",
   "revenue_forecasting",
   "ai_creator_performance",
@@ -120,6 +124,7 @@ export function getUpgradePlanForFeature(
     creator: {
       advanced_analytics: "Creator Pro",
       ai_growth: "Creator Pro",
+      ai_creator_coach: "Creator Pro",
       ai_sponsorship: "Creator Pro",
       revenue_forecasting: "Creator Pro",
       monthly_reports: "Creator Pro",

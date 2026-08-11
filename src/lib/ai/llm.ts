@@ -214,6 +214,132 @@ export async function runLlmAssistant(
   return runOpenAiAssistantWithConfig(config, params);
 }
 
+export interface LlmTextCompletionParams {
+  system: string;
+  user: string;
+  history?: Array<{ role: "user" | "assistant"; content: string }>;
+}
+
+export interface LlmTextCompletionResult {
+  content: string;
+  tokensUsed: number;
+  model: string;
+}
+
+async function runOpenAiTextCompletionWithConfig(
+  config: ResolvedLlmConfig,
+  params: LlmTextCompletionParams
+): Promise<LlmTextCompletionResult> {
+  const historyMessages = (params.history ?? []).map((msg) => ({
+    role: msg.role,
+    content: msg.content,
+  }));
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: config.model,
+      temperature: 0.5,
+      messages: [
+        { role: "system", content: params.system },
+        ...historyMessages,
+        { role: "user", content: params.user },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`OpenAI request failed (${response.status}): ${body}`);
+  }
+
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+    usage?: { total_tokens?: number };
+  };
+
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) {
+    throw new Error("OpenAI returned an empty response.");
+  }
+
+  return {
+    content,
+    tokensUsed: data.usage?.total_tokens ?? 0,
+    model: config.model,
+  };
+}
+
+async function runAnthropicTextCompletionWithConfig(
+  config: ResolvedLlmConfig,
+  params: LlmTextCompletionParams
+): Promise<LlmTextCompletionResult> {
+  const historyMessages = (params.history ?? []).map((msg) => ({
+    role: msg.role,
+    content: msg.content,
+  }));
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": config.apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: config.model,
+      max_tokens: 2048,
+      temperature: 0.5,
+      system: params.system,
+      messages: [...historyMessages, { role: "user", content: params.user }],
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Anthropic request failed (${response.status}): ${body}`);
+  }
+
+  const data = (await response.json()) as {
+    content?: Array<{ type?: string; text?: string }>;
+    usage?: { input_tokens?: number; output_tokens?: number };
+    model?: string;
+  };
+
+  const content = data.content
+    ?.filter((block) => block.type === "text")
+    .map((block) => block.text ?? "")
+    .join("\n")
+    .trim();
+
+  if (!content) {
+    throw new Error("Anthropic returned an empty response.");
+  }
+
+  const inputTokens = data.usage?.input_tokens ?? 0;
+  const outputTokens = data.usage?.output_tokens ?? 0;
+
+  return {
+    content,
+    tokensUsed: inputTokens + outputTokens,
+    model: data.model ?? config.model,
+  };
+}
+
+export async function runLlmTextCompletion(
+  params: LlmTextCompletionParams,
+  config: ResolvedLlmConfig
+): Promise<LlmTextCompletionResult> {
+  if (config.provider === "anthropic") {
+    return runAnthropicTextCompletionWithConfig(config, params);
+  }
+  return runOpenAiTextCompletionWithConfig(config, params);
+}
+
 export async function probeLlmConfig(
   config: ResolvedLlmConfig
 ): Promise<{ ok: true } | { ok: false; error: string }> {
