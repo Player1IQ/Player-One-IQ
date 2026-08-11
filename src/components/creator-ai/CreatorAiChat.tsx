@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bot,
+  CalendarPlus,
   ChevronDown,
   Loader2,
   MessageSquarePlus,
@@ -17,6 +18,8 @@ import {
   listCreatorAiConversationsAction,
   sendCreatorAiMessageAction,
 } from "@/lib/creator-ai/actions";
+import { generateCreatorContentPlanAction } from "@/lib/creator-ai/plan-actions";
+import { ContentPlanMessage } from "./ContentPlanMessage";
 import { CREATOR_AI_SUGGESTED_PROMPTS } from "@/lib/creator-ai/prompts";
 import type { CreatorAiConversation, CreatorAiMessage } from "@/lib/creator-ai/types";
 
@@ -44,6 +47,7 @@ export function CreatorAiChat({
   const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
   const [loadingConversation, setLoadingConversation] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [isGeneratingPlan, startPlanTransition] = useTransition();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const loadConversation = useCallback(async (conversationId: string) => {
@@ -81,7 +85,7 @@ export function CreatorAiChat({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isPending]);
+  }, [messages, isPending, isGeneratingPlan]);
 
   function handleNewConversation() {
     setActiveConversationId(null);
@@ -91,6 +95,45 @@ export function CreatorAiChat({
     setMode(null);
     setFallbackNotice(null);
     setPickerOpen(false);
+  }
+
+  function handleGeneratePlan(weeksAhead = 2) {
+    if (isPending || isGeneratingPlan || !enabled) return;
+
+    setError("");
+    setFallbackNotice(null);
+
+    startPlanTransition(async () => {
+      const result = await generateCreatorContentPlanAction({
+        conversationId: activeConversationId,
+        weeksAhead,
+      });
+
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+
+      setActiveConversationId(result.conversationId);
+      setMode(result.mode);
+      setFallbackNotice(result.fallbackNotice ?? null);
+
+      const conversationResult = await getCreatorAiConversationAction(
+        result.conversationId
+      );
+      if ("success" in conversationResult) {
+        setMessages(conversationResult.messages);
+      } else {
+        setMessages((current) => [...current, result.assistantMessage]);
+      }
+
+      const listResult = await listCreatorAiConversationsAction();
+      if ("success" in listResult) {
+        setConversations(listResult.conversations);
+      }
+
+      router.refresh();
+    });
   }
 
   function handleSend(messageOverride?: string) {
@@ -218,6 +261,21 @@ export function CreatorAiChat({
 
           <button
             type="button"
+            onClick={() => handleGeneratePlan(2)}
+            disabled={!enabled || isPending || isGeneratingPlan}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 py-1.5 text-xs text-gray-300 hover:border-accent/30 hover:text-white disabled:opacity-50"
+            title="Generate posting plan"
+          >
+            {isGeneratingPlan ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <CalendarPlus className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">Generate plan</span>
+          </button>
+
+          <button
+            type="button"
             onClick={handleNewConversation}
             className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/20 px-2.5 py-1.5 text-xs text-gray-300 hover:border-accent/30 hover:text-white"
             title="New conversation"
@@ -260,8 +318,12 @@ export function CreatorAiChat({
                 <button
                   key={prompt}
                   type="button"
-                  disabled={!enabled || isPending}
-                  onClick={() => handleSend(prompt)}
+                  disabled={!enabled || isPending || isGeneratingPlan}
+                  onClick={() =>
+                    prompt === "Generate a 2-week posting plan"
+                      ? handleGeneratePlan(2)
+                      : handleSend(prompt)
+                  }
                   className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1.5 text-xs text-gray-300 transition-colors hover:border-accent/30 hover:text-white disabled:opacity-50"
                 >
                   {prompt}
@@ -273,6 +335,18 @@ export function CreatorAiChat({
           <ul className="space-y-4">
             {messages.map((message) => {
               const isUser = message.role === "user";
+              const isContentPlan =
+                !isUser && message.metadata?.type === "content_plan";
+              const planId =
+                typeof message.metadata?.planId === "string"
+                  ? message.metadata.planId
+                  : null;
+              const messageMode =
+                message.metadata?.mode === "live" ||
+                message.metadata?.mode === "demo"
+                  ? (message.metadata.mode as "live" | "demo")
+                  : null;
+
               return (
                 <li
                   key={message.id}
@@ -301,17 +375,23 @@ export function CreatorAiChat({
                     )}
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
+                    {isContentPlan && planId ? (
+                      <ContentPlanMessage
+                        planId={planId}
+                        mode={messageMode}
+                      />
+                    ) : null}
                   </div>
                 </li>
               );
             })}
-            {isPending ? (
+            {isPending || isGeneratingPlan ? (
               <li className="flex gap-3">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent-light">
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 </div>
                 <div className="rounded-2xl border border-white/[0.06] bg-black/20 px-4 py-2.5 text-sm text-gray-400">
-                  Thinking…
+                  {isGeneratingPlan ? "Generating plan…" : "Thinking…"}
                 </div>
               </li>
             ) : null}
@@ -342,7 +422,7 @@ export function CreatorAiChat({
               }
             }}
             rows={2}
-            disabled={!enabled || isPending}
+            disabled={!enabled || isPending || isGeneratingPlan}
             placeholder={
               enabled
                 ? "Ask your Creator Coach…"
@@ -352,7 +432,7 @@ export function CreatorAiChat({
           />
           <button
             type="submit"
-            disabled={!enabled || isPending || !input.trim()}
+            disabled={!enabled || isPending || isGeneratingPlan || !input.trim()}
             className="inline-flex h-[2.75rem] w-[2.75rem] shrink-0 items-center justify-center rounded-xl bg-accent text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
             aria-label="Send message"
           >

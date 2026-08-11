@@ -23,6 +23,7 @@ ${input.userMessage}`;
 }
 
 export const CREATOR_AI_SUGGESTED_PROMPTS = [
+  "Generate a 2-week posting plan",
   "What should I focus on this week based on my recent content?",
   "How can I improve my posting consistency?",
   "Which of my current recommendations should I prioritize?",
