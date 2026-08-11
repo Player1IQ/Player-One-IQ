@@ -39,8 +39,8 @@ async function saveApiRevenueEntry(
     amount: number;
     periodMonth: string;
   }
-) {
-  const { data: existing } = await supabase
+): Promise<void> {
+  const { data: existing, error: fetchError } = await supabase
     .from("creator_revenue_entries")
     .select("id, source")
     .eq("platform_account_id", params.platformAccountId)
@@ -48,11 +48,21 @@ async function saveApiRevenueEntry(
     .eq("period_month", params.periodMonth)
     .maybeSingle();
 
+  if (fetchError) {
+    throw new Error(`Failed to load revenue entry: ${fetchError.message}`);
+  }
+
   if (params.amount <= 0) {
     if (existing?.source === "api_sync") {
-      await supabase.from("creator_revenue_entries").delete().eq("id", existing.id);
+      const { error: deleteError } = await supabase
+        .from("creator_revenue_entries")
+        .delete()
+        .eq("id", existing.id);
+      if (deleteError) {
+        throw new Error(`Failed to delete api_sync entry: ${deleteError.message}`);
+      }
     }
-    return null;
+    return;
   }
 
   const payload = {
@@ -68,13 +78,20 @@ async function saveApiRevenueEntry(
   };
 
   if (existing) {
-    return supabase
+    const { error: updateError } = await supabase
       .from("creator_revenue_entries")
       .update(payload)
       .eq("id", existing.id);
+    if (updateError) {
+      throw new Error(`Failed to update revenue entry: ${updateError.message}`);
+    }
+    return;
   }
 
-  return supabase.from("creator_revenue_entries").insert(payload);
+  const { error: insertError } = await supabase.from("creator_revenue_entries").insert(payload);
+  if (insertError) {
+    throw new Error(`Failed to insert revenue entry: ${insertError.message}`);
+  }
 }
 
 export async function ensureFreshTokensForPlatform(

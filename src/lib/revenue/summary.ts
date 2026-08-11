@@ -1,4 +1,5 @@
-import { formatCurrency, type Contract } from "@/lib/contracts";
+import { type Contract } from "@/lib/contracts";
+import { formatCurrencyAmount } from "@/lib/currency";
 import {
   getCurrentPeriodMonth,
   summarizeOrganizationPlatformRevenue,
@@ -76,7 +77,7 @@ export function getDashboardRevenueSummary(
     platformRevenue: breakdown.platformRevenue,
     platformRevenueDisplay: breakdown.platformRevenueDisplay,
     advertisementRevenue: platformSummary.advertisementRevenue,
-    advertisementRevenueDisplay: formatCurrency(
+    advertisementRevenueDisplay: formatCurrencyAmount(
       platformSummary.advertisementRevenue
     ),
     activeContractCount: contractSummary.activeContractCount,

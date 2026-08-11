@@ -1,4 +1,5 @@
 import { formatCurrency, getContractMonthlyValue, type Contract } from "@/lib/contracts";
+import { formatCurrencyAmount } from "@/lib/currency";
 import {
   getCurrentPeriodMonth,
   summarizeCreatorIncome,
@@ -160,13 +161,13 @@ export function buildMonthlyRevenueBreakdown(params: {
   return {
     periodMonth: params.periodMonth,
     cashReceived,
-    cashReceivedDisplay: formatCurrency(cashReceived),
+    cashReceivedDisplay: formatCurrencyAmount(cashReceived),
     expectedDeals,
-    expectedDealsDisplay: formatCurrency(expectedDeals),
+    expectedDealsDisplay: formatCurrencyAmount(expectedDeals),
     platformRevenue: platformSummary.platformRevenue,
-    platformRevenueDisplay: formatCurrency(platformSummary.platformRevenue),
+    platformRevenueDisplay: formatCurrencyAmount(platformSummary.platformRevenue),
     total,
-    totalDisplay: formatCurrency(total),
+    totalDisplay: formatCurrencyAmount(total),
   };
 }
 

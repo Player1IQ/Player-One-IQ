@@ -105,19 +105,21 @@ export function PortalRevenueClient({
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className="border-accent/20 bg-accent/5">
+        <Card className="border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_32px_rgba(16,185,129,0.08)]">
           <CardHeader className="pb-2">
-            <CardDescription>Cash received</CardDescription>
-            <CardTitle className="text-3xl">{formatCurrency(summary.cashReceived)}</CardTitle>
+            <CardDescription className="text-emerald-300/80">Cash received</CardDescription>
+            <p className="mt-2 text-4xl font-bold tracking-tight text-emerald-300">
+              {formatCurrency(summary.cashReceived)}
+            </p>
           </CardHeader>
-          <CardContent className="pt-0 text-xs text-gray-500">{periodLabel}</CardContent>
+          <CardContent className="pt-0 text-xs text-emerald-300/60">{periodLabel}</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Platform income</CardDescription>
-            <CardTitle className="text-3xl">
+            <p className="mt-2 text-2xl font-semibold text-gray-300">
               {formatCurrency(summary.platformIncome.total)}
-            </CardTitle>
+            </p>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-gray-500">
             Self-reported and synced platform revenue
@@ -126,7 +128,9 @@ export function PortalRevenueClient({
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Expected from deals</CardDescription>
-            <CardTitle className="text-3xl">{formatCurrency(summary.expectedDeals)}</CardTitle>
+            <p className="mt-2 text-2xl font-semibold text-gray-300">
+              {formatCurrency(summary.expectedDeals)}
+            </p>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-gray-500">
             Amortized sponsorship value this month
@@ -158,7 +162,12 @@ export function PortalRevenueClient({
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                   <XAxis dataKey="month" tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fill: "#6B7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={chartTooltipStyle} />
+                  <Tooltip
+                    contentStyle={chartTooltipStyle}
+                    formatter={(value) =>
+                      typeof value === "number" ? formatCurrency(value) : String(value ?? "")
+                    }
+                  />
                   <Area
                     type="monotone"
                     dataKey="cashReceived"

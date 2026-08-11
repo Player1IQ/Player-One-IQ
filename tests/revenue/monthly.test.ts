@@ -229,7 +229,7 @@ test("getContractExpectedLabel explains non-active deals", () => {
   );
 });
 
-test("buildMonthlyRevenueBreakdown display fields use a single currency prefix", () => {
+test("buildMonthlyRevenueBreakdown display fields omit currency prefix for RSC safety", () => {
   const breakdown = buildMonthlyRevenueBreakdown({
     periodMonth: "2026-08-01",
     contracts: [baseContract()],
@@ -238,14 +238,18 @@ test("buildMonthlyRevenueBreakdown display fields use a single currency prefix",
     connectedAccountCount: 1,
   });
 
+  assert.equal(breakdown.cashReceivedDisplay, "2,500");
+  assert.equal(breakdown.expectedDealsDisplay, "1,000");
+  assert.equal(breakdown.platformRevenueDisplay, "500");
+  assert.equal(breakdown.totalDisplay, "3,000");
+
   for (const display of [
     breakdown.cashReceivedDisplay,
     breakdown.expectedDealsDisplay,
     breakdown.platformRevenueDisplay,
     breakdown.totalDisplay,
   ]) {
-    assert.match(display, /^\$/);
-    assert.doesNotMatch(display, /^\$\$/);
+    assert.doesNotMatch(display, /^\$/);
   }
 });
 
