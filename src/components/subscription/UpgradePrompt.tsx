@@ -6,6 +6,8 @@ interface UpgradePromptProps {
   message: string;
   featureLabel?: string;
   compact?: boolean;
+  upgradeHref?: string;
+  upgradeLabel?: string;
 }
 
 export function UpgradePrompt({
@@ -13,17 +15,19 @@ export function UpgradePrompt({
   message,
   featureLabel,
   compact = false,
+  upgradeHref = "/billing",
+  upgradeLabel = "View plans & upgrade",
 }: UpgradePromptProps) {
   if (compact) {
     return (
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-accent/20 bg-accent/5 px-4 py-3">
         <p className="text-sm text-gray-300">{message}</p>
         <Link
-          href="/billing"
+          href={upgradeHref}
           className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-dark"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          Upgrade
+          {upgradeLabel ?? "Upgrade"}
         </Link>
       </div>
     );
@@ -42,10 +46,10 @@ export function UpgradePrompt({
       ) : null}
       <p className="mx-auto mt-2 max-w-md text-sm text-gray-400">{message}</p>
       <Link
-        href="/billing"
+        href={upgradeHref}
         className="mt-6 inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 hover:bg-accent-dark"
       >
-        View plans & upgrade
+        {upgradeLabel}
       </Link>
     </div>
   );

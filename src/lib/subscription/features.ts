@@ -133,6 +133,7 @@ export function getUpgradePlanForFeature(
     agency: {
       ai_forecasting: "Agency Pro",
       ai_deal_recommendations: "Agency Pro",
+      ai_creator_coach: "Agency Pro",
       white_label: "Agency Pro",
       api_access: "Agency Pro",
     },

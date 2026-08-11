@@ -95,7 +95,9 @@ export function PortalCoachLayout({
             <div className="space-y-4">
               <UpgradePrompt
                 featureLabel="AI Creator Coach chat"
-                message="Chat with your personalized Creator Coach is available on Creator Pro. Upgrade to ask questions about your content, goals, and recommendations."
+                message="AI Creator Coach chat is not enabled for your organization yet. Ask your agency administrator to enable it, or upgrade your workspace plan."
+                upgradeHref="/portal/account"
+                upgradeLabel="Go to account"
               />
               <div className="rounded-2xl border border-dashed border-white/[0.08] bg-surface-raised/40 px-6 py-16 text-center">
                 <p className="text-sm text-gray-400">
