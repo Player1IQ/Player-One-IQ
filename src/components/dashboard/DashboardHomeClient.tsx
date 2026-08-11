@@ -38,6 +38,7 @@ import { SectorHeader } from "@/components/dashboard/SectorHeader";
 import type { Creator } from "@/lib/creators";
 import type { Contract } from "@/lib/contracts";
 import type { DashboardRevenueSummary } from "@/lib/revenue/summary";
+import { formatCurrency } from "@/lib/contracts";
 import { StatusBadge } from "@/components/creators/StatusBadge";
 import { CreatorAvatar } from "@/components/creators/CreatorAvatar";
 import { PresenceBadge } from "@/components/presence/PresenceBadge";
@@ -270,7 +271,7 @@ export function DashboardHomeClient({
     },
     {
       title: "Platform Revenue",
-      value: monthlyRevenue.platformRevenueDisplay,
+      value: formatCurrency(monthlyRevenue.platformRevenue),
       subtitle: `${monthlyRevenue.connectedAccountCount} connected accounts`,
       href: "/creators",
       icon: TrendingUp,
@@ -303,7 +304,7 @@ export function DashboardHomeClient({
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <CommandHeroMetric
           telemetry="Monthly revenue"
-          value={monthlyRevenue.totalDisplay}
+          value={formatCurrency(monthlyRevenue.total)}
           subtitle={monthlyRevenue.subtitle}
           href="/creators"
           icon={DollarSign}
@@ -311,8 +312,8 @@ export function DashboardHomeClient({
         />
         <CommandHeroMetric
           telemetry="Cash received"
-          value={monthlyRevenue.cashReceivedDisplay}
-          subtitle={`${monthlyRevenue.expectedDealsDisplay} expected from deals`}
+          value={formatCurrency(monthlyRevenue.cashReceived)}
+          subtitle={`${formatCurrency(monthlyRevenue.expectedDeals)} expected from deals`}
           href="/contracts"
           icon={FileText}
           iconColor="text-emerald-400"

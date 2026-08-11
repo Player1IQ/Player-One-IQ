@@ -1,4 +1,9 @@
-import { formatCurrency, getContractMonthlyValue, type Contract } from "@/lib/contracts";
+import {
+  contractOverlapsPeriodMonth,
+  formatCurrency,
+  getContractExpectedLabel,
+  type Contract,
+} from "@/lib/contracts";
 import {
   formatPeriodMonth,
   revenueTypeLabels,
@@ -9,6 +14,7 @@ import {
   buildCreatorMonthlyRevenue,
   filterPaymentsForPeriodMonth,
   formatPaymentAmountDisplay,
+  hasRecordedRevenueForMonth,
 } from "@/lib/revenue/monthly";
 import { contractPaymentStatusLabels } from "@/lib/payments/types";
 
@@ -33,16 +39,29 @@ export function CreatorIncomeOverview({
   });
   const periodPayments = filterPaymentsForPeriodMonth(payments, periodMonth);
   const periodLabel = formatPeriodMonth(periodMonth);
+  const showNoDataRecorded =
+    !hasRecordedRevenueForMonth({
+      platformEntries: revenueEntries,
+      payments: periodPayments,
+    }) &&
+    summary.cashReceived === 0 &&
+    summary.platformIncome.total === 0;
 
   return (
     <div className="space-y-6">
+      {showNoDataRecorded ? (
+        <div className="rounded-lg border border-border-subtle bg-surface px-4 py-3 text-sm text-gray-500">
+          No revenue recorded for {periodLabel}.
+        </div>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-lg border border-accent/20 bg-accent/5 p-4">
           <p className="text-xs uppercase tracking-wide text-gray-500">
             Cash received
           </p>
           <p className="mt-2 text-2xl font-bold text-white">
-            {summary.cashReceivedDisplay}
+            {formatCurrency(summary.cashReceived)}
           </p>
           <p className="mt-1 text-xs text-gray-500">{periodLabel}</p>
         </div>
@@ -51,7 +70,7 @@ export function CreatorIncomeOverview({
             Platform income
           </p>
           <p className="mt-2 text-2xl font-bold text-white">
-            {summary.platformIncome.totalDisplay}
+            {formatCurrency(summary.platformIncome.total)}
           </p>
           <p className="mt-1 text-xs text-gray-500">Ads, subs, donations, other</p>
         </div>
@@ -60,7 +79,7 @@ export function CreatorIncomeOverview({
             Expected from deals
           </p>
           <p className="mt-2 text-2xl font-bold text-white">
-            {summary.expectedDealsDisplay}
+            {formatCurrency(summary.expectedDeals)}
           </p>
           <p className="mt-1 text-xs text-gray-500">Amortized deal value</p>
         </div>
@@ -70,7 +89,9 @@ export function CreatorIncomeOverview({
         <p className="text-xs uppercase tracking-wide text-gray-500">
           Total income (cash + platform)
         </p>
-        <p className="mt-1 text-xl font-semibold text-white">{summary.totalDisplay}</p>
+        <p className="mt-1 text-xl font-semibold text-white">
+          {formatCurrency(summary.total)}
+        </p>
       </div>
 
       {periodPayments.length > 0 && (
@@ -154,20 +175,14 @@ export function CreatorIncomeOverview({
         </div>
       )}
 
-      {contracts.some(
-        (contract) => getContractMonthlyValue(contract, new Date(`${periodMonth}T00:00:00`)) > 0
+      {contracts.some((contract) =>
+        contractOverlapsPeriodMonth(contract, periodMonth)
       ) && (
         <div>
           <h3 className="text-sm font-medium text-gray-300">Expected deal value</h3>
           <ul className="mt-3 space-y-2">
             {contracts
-              .filter(
-                (contract) =>
-                  getContractMonthlyValue(
-                    contract,
-                    new Date(`${periodMonth}T00:00:00`)
-                  ) > 0
-              )
+              .filter((contract) => contractOverlapsPeriodMonth(contract, periodMonth))
               .map((contract) => (
                 <li
                   key={contract.id}
@@ -175,12 +190,7 @@ export function CreatorIncomeOverview({
                 >
                   <span className="text-gray-300">{contract.contractName}</span>
                   <span className="font-medium text-gray-100">
-                    {formatCurrency(
-                      getContractMonthlyValue(
-                        contract,
-                        new Date(`${periodMonth}T00:00:00`)
-                      )
-                    )}
+                    {getContractExpectedLabel(contract, periodMonth)}
                   </span>
                 </li>
               ))}
@@ -188,7 +198,7 @@ export function CreatorIncomeOverview({
         </div>
       )}
 
-      {summary.total === 0 && summary.expectedDeals === 0 && (
+      {summary.total === 0 && summary.expectedDeals === 0 && !showNoDataRecorded && (
         <p className="text-sm text-gray-500">
           Connect platform accounts and add contract deals to see a full income
           overview for this month.

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { DollarSign } from "lucide-react";
+import { formatCurrency } from "@/lib/contracts";
 import type { DashboardRevenueSummary } from "@/lib/revenue/summary";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 
@@ -30,7 +31,7 @@ export function PortalEarningsCard({
               Total this month
             </p>
             <p className="mt-1 text-2xl font-bold text-white">
-              {summary.totalDisplay}
+              {formatCurrency(summary.total)}
             </p>
             <p className="mt-1 text-xs text-gray-500">{summary.subtitle}</p>
           </div>
@@ -42,7 +43,7 @@ export function PortalEarningsCard({
               Cash received
             </p>
             <p className="mt-1 text-lg font-semibold text-gray-100">
-              {summary.cashReceivedDisplay}
+              {formatCurrency(summary.cashReceived)}
             </p>
           </div>
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
@@ -50,7 +51,7 @@ export function PortalEarningsCard({
               Platform income
             </p>
             <p className="mt-1 text-lg font-semibold text-gray-100">
-              {summary.platformRevenueDisplay}
+              {formatCurrency(summary.platformRevenue)}
             </p>
           </div>
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
@@ -58,7 +59,7 @@ export function PortalEarningsCard({
               Expected deals
             </p>
             <p className="mt-1 text-lg font-semibold text-gray-100">
-              {summary.expectedDealsDisplay}
+              {formatCurrency(summary.expectedDeals)}
             </p>
           </div>
         </div>

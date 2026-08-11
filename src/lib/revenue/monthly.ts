@@ -164,7 +164,7 @@ export function buildMonthlyRevenueBreakdown(params: {
     expectedDeals,
     expectedDealsDisplay: formatCurrency(expectedDeals),
     platformRevenue: platformSummary.platformRevenue,
-    platformRevenueDisplay: platformSummary.platformRevenueDisplay,
+    platformRevenueDisplay: formatCurrency(platformSummary.platformRevenue),
     total,
     totalDisplay: formatCurrency(total),
   };
@@ -181,6 +181,13 @@ export function buildCreatorMonthlyRevenue(params: {
     ...breakdown,
     platformIncome: summarizeCreatorIncome(params.platformEntries),
   };
+}
+
+export function hasRecordedRevenueForMonth(params: {
+  platformEntries: CreatorRevenueEntry[];
+  payments: ContractPayment[];
+}): boolean {
+  return params.platformEntries.length > 0 || params.payments.length > 0;
 }
 
 export function buildMonthlyRevenueSubtitle(

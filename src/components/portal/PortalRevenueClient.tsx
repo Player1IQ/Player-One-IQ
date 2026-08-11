@@ -14,21 +14,27 @@ import { DollarSign, FileText } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Contract } from "@/lib/contracts";
 import {
+  contractOverlapsPeriodMonth,
+  formatCurrency,
+  getContractExpectedLabel,
+} from "@/lib/contracts";
+import {
   formatPeriodMonth,
   type CreatorPlatformAccount,
   type CreatorRevenueEntry,
 } from "@/lib/creator-revenue";
 import type { ContractPayment } from "@/lib/payments/types";
 import type { CreatorMonthlyRevenue, MonthlyRevenueTrendPoint } from "@/lib/revenue/monthly";
+import {
+  formatPaymentAmountDisplay,
+  hasRecordedRevenueForMonth,
+} from "@/lib/revenue/monthly";
 import { CreatorPlatformAccounts } from "@/components/creators/CreatorPlatformAccounts";
 import { MonthSelector } from "@/components/revenue/MonthSelector";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { contractPaymentStatusLabels } from "@/lib/payments/types";
-import { formatPaymentAmountDisplay } from "@/lib/revenue/monthly";
 import type { OAuthPlatformUi } from "@/lib/platform-oauth/config";
-import { getContractMonthlyValue } from "@/lib/contracts";
-import { formatCurrency } from "@/lib/contracts";
 
 const chartTooltipStyle = {
   backgroundColor: "#111520",
@@ -64,7 +70,20 @@ export function PortalRevenueClient({
     (point) => point.cashReceived > 0 || point.platform > 0 || point.expectedDeals > 0
   );
   const periodLabel = formatPeriodMonth(periodMonth);
-  const monthDate = new Date(`${periodMonth}T00:00:00`);
+  const hasRecordedData = hasRecordedRevenueForMonth({
+    platformEntries: revenueEntries,
+    payments,
+  });
+  const showNoDataRecorded =
+    !hasRecordedData &&
+    summary.cashReceived === 0 &&
+    summary.platformIncome.total === 0;
+
+  const monthContracts = contracts.filter(
+    (contract) =>
+      contractOverlapsPeriodMonth(contract, periodMonth) ||
+      payments.some((payment) => payment.contractId === contract.id)
+  );
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -78,18 +97,27 @@ export function PortalRevenueClient({
         </Link>
       </div>
 
+      {showNoDataRecorded ? (
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-sm text-gray-400">
+          No revenue recorded for {periodLabel}. Enter platform income below or receive deal
+          payments to track earnings for this month.
+        </div>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="border-accent/20 bg-accent/5">
           <CardHeader className="pb-2">
             <CardDescription>Cash received</CardDescription>
-            <CardTitle className="text-3xl">{summary.cashReceivedDisplay}</CardTitle>
+            <CardTitle className="text-3xl">{formatCurrency(summary.cashReceived)}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-gray-500">{periodLabel}</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Platform income</CardDescription>
-            <CardTitle className="text-3xl">{summary.platformIncome.totalDisplay}</CardTitle>
+            <CardTitle className="text-3xl">
+              {formatCurrency(summary.platformIncome.total)}
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-gray-500">
             Self-reported and synced platform revenue
@@ -98,7 +126,7 @@ export function PortalRevenueClient({
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Expected from deals</CardDescription>
-            <CardTitle className="text-3xl">{summary.expectedDealsDisplay}</CardTitle>
+            <CardTitle className="text-3xl">{formatCurrency(summary.expectedDeals)}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-gray-500">
             Amortized sponsorship value this month
@@ -106,18 +134,10 @@ export function PortalRevenueClient({
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-emerald-400" />
-            Total income
-          </CardTitle>
-          <CardDescription>Cash received plus platform income for {periodLabel}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-4xl font-bold text-white">{summary.totalDisplay}</p>
-        </CardContent>
-      </Card>
+      <p className="text-sm text-gray-500">
+        Total income (cash + platform):{" "}
+        <span className="font-medium text-gray-300">{formatCurrency(summary.total)}</span>
+      </p>
 
       <Card>
         <CardHeader>
@@ -176,18 +196,22 @@ export function PortalRevenueClient({
             <FileText className="h-5 w-5 text-accent-light" />
             Your deals
           </CardTitle>
-          <CardDescription>Read-only view of sponsorship agreements and payments</CardDescription>
+          <CardDescription>
+            Sponsorship agreements active or paying out in {periodLabel}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
-          {contracts.length === 0 ? (
-            <p className="text-sm text-gray-500">No sponsorship deals linked to your profile yet.</p>
+          {monthContracts.length === 0 ? (
+            <p className="text-sm text-gray-500">
+              No deals overlap {periodLabel}. Switch months to see other agreements or payments.
+            </p>
           ) : (
             <ul className="space-y-3">
-              {contracts.map((contract) => {
+              {monthContracts.map((contract) => {
                 const contractPayments = payments.filter(
                   (payment) => payment.contractId === contract.id
                 );
-                const expected = getContractMonthlyValue(contract, monthDate);
+                const expectedLabel = getContractExpectedLabel(contract, periodMonth);
                 return (
                   <li
                     key={contract.id}
@@ -206,9 +230,7 @@ export function PortalRevenueClient({
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-200">
-                          {formatCurrency(expected)} expected
-                        </p>
+                        <p className="text-sm font-medium text-gray-200">{expectedLabel}</p>
                         {contractPayments.length > 0 ? (
                           <p className="text-xs text-emerald-400">
                             {contractPayments.length} payment

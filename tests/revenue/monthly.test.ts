@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Contract } from "@/lib/contracts";
+import {
+  contractOverlapsPeriodMonth,
+  getContractExpectedLabel,
+} from "@/lib/contracts";
 import type { ContractPayment } from "@/lib/payments/types";
 import type { CreatorRevenueEntry } from "@/lib/creator-revenue";
 import {
@@ -10,6 +14,7 @@ import {
   buildMonthlyRevenueTrend,
   filterPaymentsForPeriodMonth,
   getExpectedDealsValue,
+  hasRecordedRevenueForMonth,
   normalizePeriodMonth,
   paymentPaidInPeriodMonth,
   sumCashReceivedCents,
@@ -198,4 +203,72 @@ test("filterPaymentsForPeriodMonth returns only in-month paid payments", () => {
   const filtered = filterPaymentsForPeriodMonth(payments, "2026-08-01");
   assert.equal(filtered.length, 1);
   assert.equal(filtered[0]?.id, "payment-1");
+});
+
+test("contractOverlapsPeriodMonth respects deal date windows", () => {
+  const contract = baseContract({
+    startDate: "2026-08-01",
+    endDate: "2026-09-30",
+  });
+
+  assert.equal(contractOverlapsPeriodMonth(contract, "2026-08-01"), true);
+  assert.equal(contractOverlapsPeriodMonth(contract, "2026-12-01"), false);
+  assert.equal(contractOverlapsPeriodMonth(contract, "2026-03-01"), false);
+});
+
+test("getContractExpectedLabel explains non-active deals", () => {
+  const draft = baseContract({
+    status: "draft",
+    startDate: "2026-08-01",
+    endDate: "2026-09-30",
+  });
+
+  assert.equal(
+    getContractExpectedLabel(draft, "2026-08-01"),
+    "Draft — not counted"
+  );
+});
+
+test("buildMonthlyRevenueBreakdown display fields use a single currency prefix", () => {
+  const breakdown = buildMonthlyRevenueBreakdown({
+    periodMonth: "2026-08-01",
+    contracts: [baseContract()],
+    platformEntries: [baseEntry()],
+    payments: [basePayment()],
+    connectedAccountCount: 1,
+  });
+
+  for (const display of [
+    breakdown.cashReceivedDisplay,
+    breakdown.expectedDealsDisplay,
+    breakdown.platformRevenueDisplay,
+    breakdown.totalDisplay,
+  ]) {
+    assert.match(display, /^\$/);
+    assert.doesNotMatch(display, /^\$\$/);
+  }
+});
+
+test("hasRecordedRevenueForMonth detects platform entries and payments", () => {
+  assert.equal(
+    hasRecordedRevenueForMonth({
+      platformEntries: [],
+      payments: [],
+    }),
+    false
+  );
+  assert.equal(
+    hasRecordedRevenueForMonth({
+      platformEntries: [baseEntry()],
+      payments: [],
+    }),
+    true
+  );
+  assert.equal(
+    hasRecordedRevenueForMonth({
+      platformEntries: [],
+      payments: [basePayment()],
+    }),
+    true
+  );
 });

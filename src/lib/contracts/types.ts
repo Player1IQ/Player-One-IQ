@@ -226,6 +226,63 @@ function monthsBetween(start: Date, end: Date): number {
   return Math.max(1, months);
 }
 
+export function contractOverlapsPeriodMonth(
+  contract: Contract,
+  periodMonth: string
+): boolean {
+  const monthDate = new Date(`${periodMonth}T00:00:00`);
+  const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+  const monthEnd = new Date(
+    monthDate.getFullYear(),
+    monthDate.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999
+  );
+
+  if (contract.startDate && contract.endDate) {
+    const start = new Date(contract.startDate + "T00:00:00");
+    const end = new Date(contract.endDate + "T00:00:00");
+    return end >= monthStart && start <= monthEnd;
+  }
+
+  if (contract.startDate) {
+    const start = new Date(contract.startDate + "T00:00:00");
+    return start <= monthEnd;
+  }
+
+  if (contract.endDate) {
+    const end = new Date(contract.endDate + "T00:00:00");
+    return end >= monthStart;
+  }
+
+  return contract.status === "active";
+}
+
+export function getContractExpectedLabel(
+  contract: Contract,
+  periodMonth: string
+): string {
+  const monthDate = new Date(`${periodMonth}T00:00:00`);
+  const expected = getContractMonthlyValue(contract, monthDate);
+
+  if (expected > 0) {
+    return `${formatCurrency(expected)} expected`;
+  }
+
+  if (contract.status !== "active") {
+    return `${contractStatusLabels[contract.status]} — not counted`;
+  }
+
+  if (!contractOverlapsPeriodMonth(contract, periodMonth)) {
+    return "Outside this month";
+  }
+
+  return "No value this month";
+}
+
 export function getContractMonthlyValue(contract: Contract, now = new Date()): number {
   if (contract.status !== "active" || contract.contractValue <= 0) return 0;
 

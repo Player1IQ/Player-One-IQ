@@ -328,11 +328,23 @@ export async function syncCreatorPlatformAccount(accountId: string) {
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
 
-  const permError = await requireResourceWriteAccess("creators");
-  if (permError) return permError;
-
   const organizationId = await getOrganizationId();
   if (!organizationId) return { error: "Organization not found." };
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+
+  const { data: account } = await supabase
+    .from("creator_platform_accounts")
+    .select("creator_id")
+    .eq("id", accountId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (!account) return { error: "Platform account not found." };
+
+  const permError = await requireCreatorPlatformConnectAccess(account.creator_id);
+  if (permError) return permError;
 
   const { syncCreatorPlatformAccountById } = await import(
     "@/lib/platform-oauth/sync-account"
@@ -342,20 +354,8 @@ export async function syncCreatorPlatformAccount(accountId: string) {
 
   if ("error" in result) return { error: result.error };
 
-  const supabase = await createClient();
-  if (supabase) {
-    const { data: account } = await supabase
-      .from("creator_platform_accounts")
-      .select("creator_id")
-      .eq("id", accountId)
-      .eq("organization_id", organizationId)
-      .maybeSingle();
-
-    if (account?.creator_id) {
-      revalidatePath(`/creators/${account.creator_id}`);
-    }
-  }
-
+  revalidatePath(`/creators/${account.creator_id}`);
+  revalidatePath("/portal/revenue");
   revalidatePath("/");
   revalidatePath("/creators");
   return { success: true };
@@ -365,7 +365,7 @@ export async function syncAllCreatorOAuthAccounts(creatorId: string) {
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
 
-  const permError = await requireResourceWriteAccess("creators");
+  const permError = await requireCreatorPlatformConnectAccess(creatorId);
   if (permError) return permError;
 
   const organizationId = await getOrganizationId();
@@ -401,6 +401,7 @@ export async function syncAllCreatorOAuthAccounts(creatorId: string) {
   }
 
   revalidatePath(`/creators/${creatorId}`);
+  revalidatePath("/portal/revenue");
   revalidatePath("/");
   revalidatePath("/creators");
 
