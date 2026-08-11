@@ -3,7 +3,7 @@ import { SupabaseConfigBanner } from "@/components/auth/SupabaseConfigBanner";
 import { MessageNotificationBell } from "@/components/messages/MessageNotificationBell";
 import { MessageNotifications } from "@/components/messages/MessageNotifications";
 import { PendingInviteBannerWrapper } from "@/components/team/PendingInviteBannerWrapper";
-import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { CommandPaletteTrigger } from "@/components/search/CommandPalette";
 import {
   getOrganizationForUser,
   getUserOrganizations,
@@ -106,7 +106,7 @@ export async function DashboardLayout({
         </div>
         <div className="flex items-center gap-3">
           <MessageNotificationBell messagingEnabled={messagingEnabled} />
-          {!isPortalUser ? <GlobalSearch /> : null}
+          <CommandPaletteTrigger variant="desktop" />
           {headerActions}
           {!isPortalUser ? (
             <div className="hidden items-center gap-2 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs text-gray-400 xl:flex">

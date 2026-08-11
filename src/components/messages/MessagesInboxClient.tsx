@@ -41,6 +41,7 @@ interface MessagesInboxClientProps {
   users: OrgUser[];
   currentUserId: string;
   isPortalUser?: boolean;
+  initialCreateOpen?: boolean;
 }
 
 export function MessagesInboxClient({
@@ -48,10 +49,11 @@ export function MessagesInboxClient({
   users,
   currentUserId,
   isPortalUser = false,
+  initialCreateOpen = false,
 }: MessagesInboxClientProps) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<InboxFilter>("all");
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(initialCreateOpen);
 
   const quickFilters = getQuickFilters(isPortalUser);
   const agencyContacts = users.filter((user) => user.userId !== currentUserId);

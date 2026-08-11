@@ -33,13 +33,15 @@ const quickFilters: Array<{ value: StatusFilter; label: string }> = [
 interface SponsorsPageClientProps {
   sponsors: Sponsor[];
   canWrite?: boolean;
+  initialCreateOpen?: boolean;
 }
 
 export function SponsorsPageClient({
   sponsors,
   canWrite = true,
+  initialCreateOpen = false,
 }: SponsorsPageClientProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 

@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { CommandPaletteProvider, CommandPaletteTrigger } from "@/components/search/CommandPalette";
 import { MessageNotificationBell } from "@/components/messages/MessageNotificationBell";
 import { PresenceHeartbeat } from "@/components/presence/PresenceHeartbeat";
 import { PortalGuidedTour } from "@/components/onboarding/PortalGuidedTour";
@@ -45,7 +46,8 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <CommandPaletteProvider>
+      <div className="min-h-screen bg-surface">
       <PresenceHeartbeat />
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -90,6 +92,7 @@ export function DashboardShell({
             {mobileTitle}
           </span>
           <div className="ml-auto flex items-center gap-1">
+            <CommandPaletteTrigger variant="mobile" />
             {mobileHeaderActions}
             <MessageNotificationBell
               messagingEnabled={messagingEnabled}
@@ -110,6 +113,7 @@ export function DashboardShell({
           />
         </Suspense>
       ) : null}
-    </div>
+      </div>
+    </CommandPaletteProvider>
   );
 }

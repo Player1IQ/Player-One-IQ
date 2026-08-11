@@ -3,7 +3,12 @@ import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPage
 import { MessagesInboxClient } from "@/components/messages/MessagesInboxClient";
 import { loadMessagesPage } from "@/lib/messages/page-data";
 
-export default async function MessagesPage() {
+interface MessagesPageProps {
+  searchParams: Promise<{ create?: string }>;
+}
+
+export default async function MessagesPage({ searchParams }: MessagesPageProps) {
+  const { create } = await searchParams;
   const { conversations, messageUsers, currentUserId, isPortalUser } =
     await loadMessagesPage();
 
@@ -23,6 +28,7 @@ export default async function MessagesPage() {
             users={messageUsers}
             currentUserId={currentUserId}
             isPortalUser={isPortalUser}
+            initialCreateOpen={create === "true"}
           />
         ) : (
           <p className="text-sm text-gray-500">Sign in to view messages.</p>

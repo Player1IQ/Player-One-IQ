@@ -17,7 +17,12 @@ import {
 } from "@/lib/permissions";
 import { isPortalRole } from "@/lib/team";
 
-export default async function OpportunitiesPage() {
+interface OpportunitiesPageProps {
+  searchParams: Promise<{ create?: string }>;
+}
+
+export default async function OpportunitiesPage({ searchParams }: OpportunitiesPageProps) {
+  const { create } = await searchParams;
   const membership = await getCurrentUserMembership();
 
   const isPortalUser = Boolean(membership && isPortalRole(membership.role));
@@ -80,6 +85,7 @@ export default async function OpportunitiesPage() {
         myPendingCount={myPendingCount}
         portalCreator={creator}
         recommendedOpportunities={recommendedOpportunities}
+        initialCreateOpen={create === "true"}
       />
     </DashboardLayout>
   );

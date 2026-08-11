@@ -37,39 +37,50 @@ export interface NavItem {
   icon: NavIconName;
   showUnreadBadge?: boolean;
   requiredFeature?: FeatureKey | FeatureKey[];
+  keywords?: string[];
 }
 
 export const navItems: NavItem[] = [
-  { label: "Dashboard", href: STAFF_DASHBOARD_PATH, icon: "dashboard" },
+  {
+    label: "Dashboard",
+    href: STAFF_DASHBOARD_PATH,
+    icon: "dashboard",
+    keywords: ["home", "overview"],
+  },
   {
     label: "Creators",
     href: "/creators",
     icon: "users",
     requiredFeature: navFeatureRequirements["/creators"],
+    keywords: ["creator", "roster", "talent"],
   },
   {
     label: "Sponsors",
     href: "/sponsors",
     icon: "building",
     requiredFeature: navFeatureRequirements["/sponsors"],
+    keywords: ["sponsor", "brand", "partner"],
   },
   {
     label: "Campaigns",
     href: "/campaigns",
     icon: "target",
     requiredFeature: navFeatureRequirements["/campaigns"],
+    keywords: ["campaign", "activation"],
   },
   {
     label: "Deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],
+    keywords: ["deal", "deals", "contract", "agreement"],
   },
   {
     label: "Opportunities",
     href: "/opportunities",
     icon: "briefcase",
     requiredFeature: navFeatureRequirements["/opportunities"],
+    keywords: ["opportunity", "brief", "listing"],
   },
   {
     label: "Messages",
@@ -77,40 +88,80 @@ export const navItems: NavItem[] = [
     icon: "message-square",
     showUnreadBadge: true,
     requiredFeature: navFeatureRequirements["/messages"],
+    keywords: ["message", "chat", "inbox"],
   },
-  { label: "Schedule", href: "/schedule", icon: "calendar" },
+  {
+    label: "Schedule",
+    href: "/schedule",
+    icon: "calendar",
+    keywords: ["schedule", "calendar", "events"],
+  },
   {
     label: "AI",
     href: "/ai",
     icon: "sparkles",
     requiredFeature: aiFeatureKeys,
+    keywords: ["ai", "assistant", "insights"],
   },
   {
     label: "Reports",
     href: "/reports",
     icon: "bar-chart",
     requiredFeature: ["advanced_analytics", "monthly_reports"],
+    keywords: ["report", "analytics", "metrics"],
   },
   {
     label: "Team",
     href: "/team",
     icon: "user-cog",
     requiredFeature: navFeatureRequirements["/team"],
+    keywords: ["team", "members", "invite"],
   },
-  { label: "Billing", href: "/billing", icon: "credit-card" },
-  { label: "Settings", href: "/settings", icon: "settings" },
+  {
+    label: "Billing",
+    href: "/billing",
+    icon: "credit-card",
+    keywords: ["billing", "payout", "payment", "subscription", "invoice"],
+  },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: "settings",
+    keywords: ["settings", "preferences", "workspace"],
+  },
 ];
 
 export const portalNavItems: NavItem[] = [
-  { label: "Home", href: "/portal", icon: "dashboard" },
-  { label: "Revenue", href: "/portal/revenue", icon: "dollar-sign" },
-  { label: "Schedule", href: "/schedule", icon: "calendar" },
-  { label: "My Profile", href: "/portal/profile", icon: "users" },
+  {
+    label: "Home",
+    href: "/portal",
+    icon: "dashboard",
+    keywords: ["home", "portal"],
+  },
+  {
+    label: "Revenue",
+    href: "/portal/revenue",
+    icon: "dollar-sign",
+    keywords: ["revenue", "earnings", "payout", "money", "income"],
+  },
+  {
+    label: "Schedule",
+    href: "/schedule",
+    icon: "calendar",
+    keywords: ["schedule", "calendar", "events"],
+  },
+  {
+    label: "My Profile",
+    href: "/portal/profile",
+    icon: "users",
+    keywords: ["profile", "account", "platforms"],
+  },
   {
     label: "Deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],
+    keywords: ["deal", "deals", "contract", "agreement"],
   },
   {
     label: "Messages",
@@ -118,25 +169,48 @@ export const portalNavItems: NavItem[] = [
     icon: "message-square",
     showUnreadBadge: true,
     requiredFeature: navFeatureRequirements["/messages"],
+    keywords: ["message", "chat", "inbox"],
   },
-  { label: "Account", href: "/portal/account", icon: "settings" },
+  {
+    label: "Account",
+    href: "/portal/account",
+    icon: "settings",
+    keywords: ["account", "settings", "billing"],
+  },
 ];
 
 export const sponsorPortalNavItems: NavItem[] = [
-  { label: "Home", href: "/portal", icon: "dashboard" },
-  { label: "Schedule", href: "/schedule", icon: "calendar" },
-  { label: "Company", href: "/portal/profile", icon: "building" },
+  {
+    label: "Home",
+    href: "/portal",
+    icon: "dashboard",
+    keywords: ["home", "portal"],
+  },
+  {
+    label: "Schedule",
+    href: "/schedule",
+    icon: "calendar",
+    keywords: ["schedule", "calendar", "events"],
+  },
+  {
+    label: "Company",
+    href: "/portal/profile",
+    icon: "building",
+    keywords: ["company", "profile", "brand"],
+  },
   {
     label: "Deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],
+    keywords: ["deal", "deals", "contract"],
   },
   {
     label: "Campaigns",
     href: "/campaigns",
     icon: "target",
     requiredFeature: navFeatureRequirements["/campaigns"],
+    keywords: ["campaign", "activation"],
   },
   {
     label: "Messages",
@@ -144,8 +218,14 @@ export const sponsorPortalNavItems: NavItem[] = [
     icon: "message-square",
     showUnreadBadge: true,
     requiredFeature: navFeatureRequirements["/messages"],
+    keywords: ["message", "chat", "inbox"],
   },
-  { label: "Account", href: "/portal/account", icon: "settings" },
+  {
+    label: "Account",
+    href: "/portal/account",
+    icon: "settings",
+    keywords: ["account", "settings"],
+  },
 ];
 
 export function getAccessibleNavItems(
@@ -197,6 +277,7 @@ export function getAccessibleNavItems(
       label: "My applications",
       href: "/opportunities/applications",
       icon: "briefcase",
+      keywords: ["applications", "applied", "submissions"],
     };
     if (!items.some((item) => item.href === "/opportunities/applications")) {
       const opportunitiesIndex = items.findIndex(
@@ -215,6 +296,7 @@ export function getAccessibleNavItems(
       label: "Deliverables",
       href: "/portal/deliverables",
       icon: "file-text",
+      keywords: ["deliverable", "deliverables", "tasks"],
     };
     if (!items.some((item) => item.href === "/portal/deliverables")) {
       const contractsIndex = items.findIndex((item) => item.href === "/contracts");
@@ -231,6 +313,7 @@ export function getAccessibleNavItems(
       label: "Growth",
       href: "/portal/growth",
       icon: "bar-chart",
+      keywords: ["growth", "analytics", "performance"],
     };
     if (!items.some((item) => item.href === "/portal/growth")) {
       const homeIndex = items.findIndex((item) => item.href === "/portal");
@@ -247,6 +330,7 @@ export function getAccessibleNavItems(
       label: "Coach",
       href: "/portal/coach",
       icon: "sparkles",
+      keywords: ["coach", "ai", "cadence", "posting"],
     };
     if (!items.some((item) => item.href === "/portal/coach")) {
       const growthIndex = items.findIndex((item) => item.href === "/portal/growth");
@@ -262,6 +346,7 @@ export function getAccessibleNavItems(
       label: "Seasons",
       href: "/portal/seasons",
       icon: "trophy",
+      keywords: ["seasons", "xp", "rewards"],
     };
     if (!items.some((item) => item.href === "/portal/seasons")) {
       const growthIndex = items.findIndex((item) => item.href === "/portal/growth");

@@ -41,6 +41,7 @@ interface CampaignsPageClientProps {
   isPortalUser?: boolean;
   isSponsorOrg?: boolean;
   defaultSponsorId?: string;
+  initialCreateOpen?: boolean;
 }
 
 export function CampaignsPageClient({
@@ -51,8 +52,9 @@ export function CampaignsPageClient({
   isPortalUser = false,
   isSponsorOrg = false,
   defaultSponsorId,
+  initialCreateOpen = false,
 }: CampaignsPageClientProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 

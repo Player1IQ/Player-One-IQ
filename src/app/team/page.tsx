@@ -9,7 +9,12 @@ import { canManageTeam } from "@/lib/team";
 
 import { getSponsors } from "@/lib/sponsors/queries";
 
-export default async function TeamPage() {
+interface TeamPageProps {
+  searchParams: Promise<{ create?: string }>;
+}
+
+export default async function TeamPage({ searchParams }: TeamPageProps) {
+  const { create } = await searchParams;
   const [members, currentUserRole, creators, sponsors] = await Promise.all([
     getTeamMembers(),
     getCurrentUserRole(),
@@ -31,6 +36,7 @@ export default async function TeamPage() {
             sponsors={sponsors}
             canManageTeam={canManageTeam(currentUserRole)}
             currentUserRole={currentUserRole}
+            initialCreateOpen={create === "true"}
           />
         </div>
       </SubscriptionPageGate>

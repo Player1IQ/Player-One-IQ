@@ -36,6 +36,7 @@ interface TeamPageClientProps {
   sponsors: Sponsor[];
   canManageTeam: boolean;
   currentUserRole: TeamRole | null;
+  initialCreateOpen?: boolean;
 }
 
 export function TeamPageClient({
@@ -44,8 +45,9 @@ export function TeamPageClient({
   sponsors,
   canManageTeam,
   currentUserRole,
+  initialCreateOpen = false,
 }: TeamPageClientProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<TeamStatusFilter>("all");
   const stats = getTeamStats(members);

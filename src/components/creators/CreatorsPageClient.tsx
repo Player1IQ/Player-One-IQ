@@ -35,14 +35,16 @@ interface CreatorsPageClientProps {
   creators: Creator[];
   canWrite?: boolean;
   showSeedButton?: boolean;
+  initialCreateOpen?: boolean;
 }
 
 export function CreatorsPageClient({
   creators,
   canWrite = true,
   showSeedButton = false,
+  initialCreateOpen = false,
 }: CreatorsPageClientProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 

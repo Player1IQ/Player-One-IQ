@@ -53,6 +53,7 @@ interface OpportunitiesPageClientProps {
   myPendingCount?: number;
   portalCreator?: Creator | null;
   recommendedOpportunities?: Opportunity[];
+  initialCreateOpen?: boolean;
 }
 
 type PortalTab = "agency" | "marketplace" | "recommended";
@@ -69,6 +70,7 @@ export function OpportunitiesPageClient({
   myPendingCount = 0,
   portalCreator = null,
   recommendedOpportunities = [],
+  initialCreateOpen = false,
 }: OpportunitiesPageClientProps) {
   const searchParams = useSearchParams();
   const initialPortalTab = useMemo((): PortalTab => {
@@ -77,7 +79,7 @@ export function OpportunitiesPageClient({
     if (tab === "recommended") return "recommended";
     return "agency";
   }, [searchParams]);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [portalTab, setPortalTab] = useState<PortalTab>(initialPortalTab);

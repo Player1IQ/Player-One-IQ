@@ -6,7 +6,12 @@ import { getCreators } from "@/lib/creators/queries";
 import { hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
 import { isSeedEnabled } from "@/lib/seed/constants";
 
-export default async function CreatorsPage() {
+interface CreatorsPageProps {
+  searchParams: Promise<{ create?: string }>;
+}
+
+export default async function CreatorsPage({ searchParams }: CreatorsPageProps) {
+  const { create } = await searchParams;
   const [creators, role] = await Promise.all([
     getCreators(),
     getCurrentUserRole(),
@@ -27,6 +32,7 @@ export default async function CreatorsPage() {
             creators={creators}
             canWrite={hasFullAccess(role, "creators")}
             showSeedButton={isSeedEnabled()}
+            initialCreateOpen={create === "true"}
           />
         </div>
       </SubscriptionPageGate>

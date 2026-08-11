@@ -7,7 +7,12 @@ import { enrichSponsorsWithContractStats } from "@/lib/sponsors";
 import { getContracts } from "@/lib/contracts/queries";
 import { hasFullAccess, getCurrentUserRole } from "@/lib/permissions";
 
-export default async function SponsorsPage() {
+interface SponsorsPageProps {
+  searchParams: Promise<{ create?: string }>;
+}
+
+export default async function SponsorsPage({ searchParams }: SponsorsPageProps) {
+  const { create } = await searchParams;
   const [sponsors, contracts, role] = await Promise.all([
     getSponsors(),
     getContracts(),
@@ -29,6 +34,7 @@ export default async function SponsorsPage() {
           <SponsorsPageClient
             sponsors={enrichedSponsors}
             canWrite={hasFullAccess(role, "sponsors")}
+            initialCreateOpen={create === "true"}
           />
         </div>
       </SubscriptionPageGate>

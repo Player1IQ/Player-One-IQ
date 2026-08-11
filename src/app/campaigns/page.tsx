@@ -15,7 +15,12 @@ import { getOrganizationForUser } from "@/lib/organization/queries";
 import { isSponsorBrandOrganizationType } from "@/lib/organization/constants";
 import { ensureSponsorBrandProfile } from "@/lib/organization/sponsor-setup";
 
-export default async function CampaignsPage() {
+interface CampaignsPageProps {
+  searchParams: Promise<{ create?: string }>;
+}
+
+export default async function CampaignsPage({ searchParams }: CampaignsPageProps) {
+  const { create } = await searchParams;
   const membership = await getCurrentUserMembership();
   const organization = await getOrganizationForUser();
 
@@ -58,6 +63,7 @@ export default async function CampaignsPage() {
             isPortalUser={isPortalUser}
             isSponsorOrg={isSponsorOrg}
             defaultSponsorId={isSponsorOrg ? sponsors[0]?.id : undefined}
+            initialCreateOpen={create === "true"}
           />
         </div>
       </SubscriptionPageGate>

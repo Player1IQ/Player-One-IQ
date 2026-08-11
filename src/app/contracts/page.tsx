@@ -13,11 +13,11 @@ import {
 import { isPortalRole } from "@/lib/team";
 
 interface ContractsPageProps {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; create?: string }>;
 }
 
 export default async function ContractsPage({ searchParams }: ContractsPageProps) {
-  const { filter } = await searchParams;
+  const { filter, create } = await searchParams;
   const initialSummaryFilter =
     filter === "expiring" || filter === "overdue" || filter === "active" || filter === "pipeline"
       ? filter
@@ -55,6 +55,7 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
           canWrite={hasFullAccess(role, "contracts")}
           initialSummaryFilter={initialSummaryFilter}
           isPortalUser={isPortalUser}
+          initialCreateOpen={create === "true"}
         />
       </SubscriptionPageGate>
     </DashboardLayout>

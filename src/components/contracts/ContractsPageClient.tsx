@@ -49,6 +49,7 @@ interface ContractsPageClientProps {
   canWrite?: boolean;
   initialSummaryFilter?: ContractSummaryFilter;
   isPortalUser?: boolean;
+  initialCreateOpen?: boolean;
 }
 
 export function ContractsPageClient({
@@ -59,8 +60,9 @@ export function ContractsPageClient({
   canWrite = true,
   initialSummaryFilter = null,
   isPortalUser = false,
+  initialCreateOpen = false,
 }: ContractsPageClientProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [summaryFilter, setSummaryFilter] = useState<ContractSummaryFilter>(
