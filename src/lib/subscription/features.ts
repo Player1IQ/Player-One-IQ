@@ -33,6 +33,11 @@ export const featureLabels: Record<FeatureKey, string> = {
 
 export const creatorCoachFeatureKeys: FeatureKey[] = ["ai_creator_coach"];
 
+export const creatorContentAnalysisFeatureKeys: FeatureKey[] = [
+  "ai_growth",
+  "ai_creator_performance",
+];
+
 export const aiFeatureKeys: FeatureKey[] = [
   "ai_growth",
   "ai_creator_coach",

@@ -20,7 +20,11 @@ import { isCreatorPortalRole, isPortalRole } from "@/lib/team";
 import { getOAuthPlatformUi } from "@/lib/platform-oauth/config";
 import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
-import { hasAnyFeature, hasFeature } from "@/lib/subscription/features";
+import {
+  creatorContentAnalysisFeatureKeys,
+  hasAnyFeature,
+  hasFeature,
+} from "@/lib/subscription/features";
 import { getPeriodMonthFromSearchParams } from "@/lib/revenue/monthly";
 
 interface CreatorDetailPageProps {
@@ -98,7 +102,10 @@ export default async function CreatorDetailPage({
         canWriteRevenue={canWriteRevenue}
         isPortalUser={isPortalUser}
         isContentCreator={isCreatorPortalRole(role)}
-        canUseContentAi={hasFeature(subscription.features, "ai_growth")}
+        canUseContentAi={hasAnyFeature(
+          subscription.features,
+          creatorContentAnalysisFeatureKeys
+        )}
         aiMode={aiLive ? "live" : "demo"}
         audienceAnalytics={audienceAnalytics}
         canViewAnalytics={hasAnyFeature(subscription.features, [

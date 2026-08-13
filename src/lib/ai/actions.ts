@@ -7,7 +7,10 @@ import {
   requireFeatureAccess,
   requireUsageWithinLimit,
 } from "@/lib/permissions";
-import { aiFeatureKeys } from "@/lib/subscription/features";
+import {
+  aiFeatureKeys,
+  creatorContentAnalysisFeatureKeys,
+} from "@/lib/subscription/features";
 import {
   fetchCreatorContentSnapshots,
   getAnalyzablePlatforms,
@@ -154,7 +157,7 @@ export async function runCreatorContentAnalysis(
   scope: ContentAnalysisScope = "all"
 ) {
   const permError = await requireFeatureAccess(
-    ["ai_growth", "ai_creator_performance"],
+    creatorContentAnalysisFeatureKeys,
     "AI content analysis"
   );
   if (permError) return permError;

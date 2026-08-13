@@ -53,7 +53,7 @@ export function CreatorContentCoach({
       <UpgradePrompt
         compact
         featureLabel="AI content analysis"
-        message="Upgrade to Creator Pro or Agency to unlock AI content recommendations."
+        message="Upgrade to Creator Pro or an Agency plan with AI performance analysis to unlock content recommendations."
       />
     );
   }
