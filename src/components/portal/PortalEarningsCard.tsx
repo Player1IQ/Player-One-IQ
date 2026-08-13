@@ -38,11 +38,11 @@ export function PortalEarningsCard({
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 shadow-[0_0_24px_rgba(16,185,129,0.08)]">
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-300/90">
               Cash received
             </p>
-            <p className="mt-1 text-lg font-semibold text-gray-100">
+            <p className="mt-2 text-3xl font-extrabold tracking-tight text-emerald-300">
               {formatCurrency(summary.cashReceived)}
             </p>
           </div>
@@ -50,7 +50,7 @@ export function PortalEarningsCard({
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Platform income
             </p>
-            <p className="mt-1 text-lg font-semibold text-gray-100">
+            <p className="mt-2 text-lg font-medium text-gray-400">
               {formatCurrency(summary.platformRevenue)}
             </p>
           </div>
@@ -58,7 +58,7 @@ export function PortalEarningsCard({
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
               Expected deals
             </p>
-            <p className="mt-1 text-lg font-semibold text-gray-100">
+            <p className="mt-2 text-lg font-medium text-gray-400">
               {formatCurrency(summary.expectedDeals)}
             </p>
           </div>

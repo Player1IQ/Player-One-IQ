@@ -107,8 +107,10 @@ export function PortalRevenueClient({
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_32px_rgba(16,185,129,0.08)]">
           <CardHeader className="pb-2">
-            <CardDescription className="text-emerald-300/80">Cash received</CardDescription>
-            <p className="mt-2 text-4xl font-bold tracking-tight text-emerald-300">
+            <CardDescription className="text-sm font-semibold text-emerald-300/90">
+              Cash received
+            </CardDescription>
+            <p className="mt-2 text-5xl font-extrabold tracking-tight text-emerald-300">
               {formatCurrency(summary.cashReceived)}
             </p>
           </CardHeader>
@@ -117,7 +119,7 @@ export function PortalRevenueClient({
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Platform income</CardDescription>
-            <p className="mt-2 text-2xl font-semibold text-gray-300">
+            <p className="mt-2 text-xl font-medium text-gray-400">
               {formatCurrency(summary.platformIncome.total)}
             </p>
           </CardHeader>
@@ -128,7 +130,7 @@ export function PortalRevenueClient({
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Expected from deals</CardDescription>
-            <p className="mt-2 text-2xl font-semibold text-gray-300">
+            <p className="mt-2 text-xl font-medium text-gray-400">
               {formatCurrency(summary.expectedDeals)}
             </p>
           </CardHeader>

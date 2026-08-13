@@ -56,29 +56,29 @@ export function CreatorIncomeOverview({
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-accent/20 bg-accent/5 p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-5 shadow-[0_0_32px_rgba(16,185,129,0.08)]">
+          <p className="text-sm font-semibold uppercase tracking-wide text-emerald-300/90">
             Cash received
           </p>
-          <p className="mt-2 text-2xl font-bold text-white">
+          <p className="mt-3 text-4xl font-extrabold tracking-tight text-emerald-300 sm:text-5xl">
             {formatCurrency(summary.cashReceived)}
           </p>
-          <p className="mt-1 text-xs text-gray-500">{periodLabel}</p>
+          <p className="mt-2 text-xs text-emerald-300/70">{periodLabel}</p>
         </div>
         <div className="rounded-lg border border-border-subtle bg-surface p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
             Platform income
           </p>
-          <p className="mt-2 text-2xl font-bold text-white">
+          <p className="mt-2 text-xl font-medium text-gray-400">
             {formatCurrency(summary.platformIncome.total)}
           </p>
           <p className="mt-1 text-xs text-gray-500">Ads, subs, donations, other</p>
         </div>
         <div className="rounded-lg border border-border-subtle bg-surface p-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
             Expected from deals
           </p>
-          <p className="mt-2 text-2xl font-bold text-white">
+          <p className="mt-2 text-xl font-medium text-gray-400">
             {formatCurrency(summary.expectedDeals)}
           </p>
           <p className="mt-1 text-xs text-gray-500">Amortized deal value</p>
