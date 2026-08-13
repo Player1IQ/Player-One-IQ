@@ -57,6 +57,7 @@ interface SidebarProps {
   organizationName?: string;
   organizationLogoUrl?: string | null;
   teamRole?: TeamRole | null;
+  isWorkspaceFounder?: boolean;
   onNavigate?: () => void;
 }
 
@@ -67,21 +68,23 @@ export function Sidebar({
   organizationName,
   organizationLogoUrl,
   teamRole = null,
+  isWorkspaceFounder = false,
   onNavigate,
 }: SidebarProps) {
   const pathname = usePathname();
   const items = useMemo(() => {
     const features = new Set(enabledFeatures ?? []);
-    return getAccessibleNavItems(features, teamRole);
-  }, [enabledFeatures, teamRole]);
+    return getAccessibleNavItems(features, teamRole, { isWorkspaceFounder });
+  }, [enabledFeatures, teamRole, isWorkspaceFounder]);
   const activeHref = useMemo(
     () => getActiveNavHref(pathname, items),
     [pathname, items]
   );
   const showBillingCta =
-    teamRole !== "player" &&
-    teamRole !== "content_creator" &&
-    teamRole !== "sponsor";
+    isWorkspaceFounder ||
+    (teamRole !== "player" &&
+      teamRole !== "content_creator" &&
+      teamRole !== "sponsor");
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-white/[0.06] bg-surface-raised/95 backdrop-blur-xl">

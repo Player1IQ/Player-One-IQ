@@ -25,6 +25,7 @@ import {
 import {
   canManageSettings,
   canViewSettings,
+  getCurrentUserMembership,
   getCurrentUserRole,
 } from "@/lib/permissions";
 import { isSeedEnabled } from "@/lib/seed/constants";
@@ -58,9 +59,10 @@ async function getOAuthConnectedAccountCount(): Promise<number> {
 }
 
 export default async function SettingsPage() {
-  const [organization, role, memberCount, oauthConnectedCount, payoutRecipients, creators, avatarUrl] =
+  const [organization, membership, role, memberCount, oauthConnectedCount, payoutRecipients, creators, avatarUrl] =
     await Promise.all([
       getOrganizationForUser(),
+      getCurrentUserMembership(),
       getCurrentUserRole(),
       getOrganizationMemberCount(),
       getOAuthConnectedAccountCount(),
@@ -69,8 +71,9 @@ export default async function SettingsPage() {
       getMyAvatarUrl(),
     ]);
 
-  const canView = canViewSettings(role);
-  const canEdit = canManageSettings(role);
+  const isWorkspaceFounder = membership?.isWorkspaceFounder ?? false;
+  const canView = canViewSettings(role, isWorkspaceFounder);
+  const canEdit = canManageSettings(role, isWorkspaceFounder);
 
   if (!canView) {
     redirect(STAFF_DASHBOARD_PATH);

@@ -122,6 +122,7 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
       const portalContext = {
         linkedCreatorId: membership.linkedCreatorId,
         linkedSponsorId: membership.linkedSponsorId,
+        isWorkspaceFounder: membership.isWorkspaceFounder,
       };
       if (!isPathAllowedForPortalUser(pathname, role, portalContext)) {
         redirect(getPortalRedirectPath(pathname, portalContext));

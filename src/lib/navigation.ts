@@ -230,7 +230,8 @@ export const sponsorPortalNavItems: NavItem[] = [
 
 export function getAccessibleNavItems(
   features: Set<FeatureKey>,
-  role?: TeamRole | null
+  role?: TeamRole | null,
+  options?: { isWorkspaceFounder?: boolean }
 ): NavItem[] {
   let items =
     role && isSponsorPortalRole(role)
@@ -356,6 +357,38 @@ export function getAccessibleNavItems(
         seasonsItem,
         ...items.slice(insertIndex),
       ];
+    }
+
+    if (options?.isWorkspaceFounder) {
+      const workspaceAdminItems: NavItem[] = [
+        {
+          label: "Settings",
+          href: "/settings",
+          icon: "settings",
+          keywords: ["settings", "ai", "integration", "api key"],
+        },
+        {
+          label: "Billing",
+          href: "/billing",
+          icon: "credit-card",
+          keywords: ["billing", "plan", "subscription", "upgrade"],
+        },
+      ];
+
+      for (const adminItem of workspaceAdminItems) {
+        if (!items.some((item) => item.href === adminItem.href)) {
+          const accountIndex = items.findIndex(
+            (item) => item.href === "/portal/account"
+          );
+          const insertIndex =
+            accountIndex >= 0 ? accountIndex : items.length;
+          items = [
+            ...items.slice(0, insertIndex),
+            adminItem,
+            ...items.slice(insertIndex),
+          ];
+        }
+      }
     }
   }
 

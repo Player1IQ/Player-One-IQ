@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Building2, Shield, User } from "lucide-react";
+import { ArrowLeft, Building2, CreditCard, Shield, Sparkles, User } from "lucide-react";
 import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
 import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
 import { ProfilePhotoUpload } from "@/components/account/ProfilePhotoUpload";
@@ -15,6 +15,7 @@ interface PortalAccountClientProps {
   profileHref: string;
   userId: string;
   avatarUrl?: string | null;
+  isWorkspaceFounder?: boolean;
 }
 
 export function PortalAccountClient({
@@ -25,6 +26,7 @@ export function PortalAccountClient({
   profileHref,
   userId,
   avatarUrl,
+  isWorkspaceFounder = false,
 }: PortalAccountClientProps) {
   return (
     <div className="mx-auto max-w-2xl space-y-6 animate-fade-in">
@@ -57,7 +59,9 @@ export function PortalAccountClient({
         <CardHeader>
           <CardTitle>Account</CardTitle>
           <CardDescription>
-            Your portal access is managed by {organizationName}
+            {isWorkspaceFounder
+              ? "You manage this solo creator workspace."
+              : `Your portal access is managed by ${organizationName}`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
@@ -95,6 +99,43 @@ export function PortalAccountClient({
           </div>
         </CardContent>
       </Card>
+
+      {isWorkspaceFounder ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Workspace</CardTitle>
+            <CardDescription>
+              Connect your AI provider and manage your plan.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 pt-0 sm:grid-cols-2">
+            <Link
+              href="/settings#ai-integration"
+              className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-4 transition hover:border-accent/30 hover:bg-accent/5"
+            >
+              <div className="flex items-center gap-2 text-sm font-medium text-white">
+                <Sparkles className="h-4 w-4 text-accent-light" />
+                AI integration
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Connect OpenAI or Claude for live Coach and content analysis.
+              </p>
+            </Link>
+            <Link
+              href="/billing"
+              className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-4 transition hover:border-accent/30 hover:bg-accent/5"
+            >
+              <div className="flex items-center gap-2 text-sm font-medium text-white">
+                <CreditCard className="h-4 w-4 text-accent-light" />
+                Billing
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                View your plan, trial status, and usage limits.
+              </p>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <ReplayOnboardingButton />
       <ReplayPortalTourButton />

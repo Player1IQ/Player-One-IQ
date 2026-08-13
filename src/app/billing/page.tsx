@@ -7,16 +7,20 @@ import { getBillingOverview } from "@/lib/billing/queries";
 import {
   canManageBilling,
   canViewBilling,
+  getCurrentUserMembership,
   getCurrentUserRole,
 } from "@/lib/permissions";
 
 export default async function BillingPage() {
-  const [billing, role] = await Promise.all([
+  const [billing, membership, role] = await Promise.all([
     getBillingOverview(),
+    getCurrentUserMembership(),
     getCurrentUserRole(),
   ]);
 
-  if (!canViewBilling(role)) {
+  const isWorkspaceFounder = membership?.isWorkspaceFounder ?? false;
+
+  if (!canViewBilling(role, isWorkspaceFounder)) {
     redirect(STAFF_DASHBOARD_PATH);
   }
 
@@ -37,7 +41,7 @@ export default async function BillingPage() {
           usage={billing.usage}
           aiUsage={billing.aiUsage}
           tierPlans={billing.tierPlans}
-          canManage={canManageBilling(role)}
+          canManage={canManageBilling(role, isWorkspaceFounder)}
           features={billing.features}
         />
       </Suspense>

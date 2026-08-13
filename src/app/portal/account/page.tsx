@@ -77,6 +77,7 @@ export default async function PortalAccountPage() {
           profileHref={`/creators/${creator.id}`}
           userId={userId}
           avatarUrl={avatarUrl}
+          isWorkspaceFounder={membership.isWorkspaceFounder}
         />
         <CreatorPortalPayoutSection
           creatorId={linkedCreatorId}

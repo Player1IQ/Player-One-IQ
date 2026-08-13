@@ -15,6 +15,7 @@ export const PORTAL_HOME = "/portal";
 export interface PortalPathContext {
   linkedCreatorId?: string | null;
   linkedSponsorId?: string | null;
+  isWorkspaceFounder?: boolean;
 }
 
 const STAFF_ONLY_PREFIXES = [
@@ -54,6 +55,19 @@ export function isPathAllowedForPortalUser(
     typeof context === "object" && context !== null
       ? (context.linkedSponsorId ?? null)
       : null;
+  const isWorkspaceFounder =
+    typeof context === "object" && context !== null
+      ? Boolean(context.isWorkspaceFounder)
+      : false;
+
+  if (isWorkspaceFounder) {
+    if (pathname === "/settings" || pathname.startsWith("/settings/")) {
+      return true;
+    }
+    if (pathname === "/billing" || pathname.startsWith("/billing/")) {
+      return true;
+    }
+  }
 
   if (
     pathname === STAFF_DASHBOARD_PATH ||

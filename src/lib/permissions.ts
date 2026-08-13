@@ -8,6 +8,7 @@ import {
   ROLE_PREVIEW_COOKIE,
 } from "@/lib/dev/role-preview";
 import { getOrganizationId } from "@/lib/organization/queries";
+import { isSoloCreatorWorkspaceFounder } from "@/lib/organization/founder";
 import {
   getLimitForMetric,
   hasAnyFeature,
@@ -44,6 +45,7 @@ export interface CurrentUserMembership {
   role: TeamRole;
   linkedCreatorId: string | null;
   linkedSponsorId: string | null;
+  isWorkspaceFounder: boolean;
 }
 
 export async function getCurrentUserMembership(): Promise<CurrentUserMembership | null> {
@@ -60,6 +62,26 @@ const getCurrentUserMembershipCached = cache(
 
   const organizationId = await getOrganizationId();
   if (!organizationId) return null;
+
+  const { data: organization } = await supabase
+    .from("organizations")
+    .select("user_id, type")
+    .eq("id", organizationId)
+    .maybeSingle();
+
+  function withFounderFlag(
+    membership: Omit<CurrentUserMembership, "isWorkspaceFounder">
+  ): CurrentUserMembership {
+    return {
+      ...membership,
+      isWorkspaceFounder: isSoloCreatorWorkspaceFounder({
+        organizationType: organization?.type,
+        organizationUserId: organization?.user_id,
+        currentUserId: user.id,
+        role: membership.role,
+      }),
+    };
+  }
 
   const { data: membership } = await supabase
     .from("team_members")
@@ -79,11 +101,11 @@ const getCurrentUserMembershipCached = cache(
 
   if (portalRole) {
     return applyRolePreviewIfAllowed(
-      {
+      withFounderFlag({
         role: portalRole,
         linkedCreatorId: membership?.linked_creator_id ?? null,
         linkedSponsorId: membership?.linked_sponsor_id ?? null,
-      },
+      }),
       user.email
     );
   }
@@ -98,27 +120,31 @@ const getCurrentUserMembershipCached = cache(
   if (ownedOrg) {
     if (membership?.linked_creator_id || membership?.linked_sponsor_id) {
       return applyRolePreviewIfAllowed(
-        {
+        withFounderFlag({
           role: (membership.role as TeamRole) ?? "owner",
           linkedCreatorId: membership.linked_creator_id ?? null,
           linkedSponsorId: membership.linked_sponsor_id ?? null,
-        },
+        }),
         user.email
       );
     }
     return applyRolePreviewIfAllowed(
-      { role: "owner", linkedCreatorId: null, linkedSponsorId: null },
+      withFounderFlag({
+        role: "owner",
+        linkedCreatorId: null,
+        linkedSponsorId: null,
+      }),
       user.email
     );
   }
 
   if (!membership?.role) return null;
 
-  const baseMembership = {
+  const baseMembership = withFounderFlag({
     role: membership.role as TeamRole,
     linkedCreatorId: membership.linked_creator_id ?? null,
     linkedSponsorId: membership.linked_sponsor_id ?? null,
-  };
+  });
 
   return applyRolePreviewIfAllowed(baseMembership, user.email);
 });
@@ -139,6 +165,7 @@ async function applyRolePreviewIfAllowed(
     role: preview.role,
     linkedCreatorId: preview.linkedCreatorId,
     linkedSponsorId: preview.linkedSponsorId,
+    isWorkspaceFounder: membership.isWorkspaceFounder,
   };
 }
 
@@ -506,21 +533,30 @@ export async function requirePortalApplicationAccess(
   return null;
 }
 
-export function canViewSettings(role: TeamRole | null): boolean {
+export function canViewSettings(
+  role: TeamRole | null,
+  isWorkspaceFounder = false
+): boolean {
   if (!role) return false;
+  if (isWorkspaceFounder && isCreatorPortalRole(role)) return true;
   return permissionMatrix[role].settings !== "none";
 }
 
-export function canManageSettings(role: TeamRole | null): boolean {
+export function canManageSettings(
+  role: TeamRole | null,
+  isWorkspaceFounder = false
+): boolean {
   if (!role) return false;
+  if (isWorkspaceFounder && isCreatorPortalRole(role)) return true;
   return hasFullAccess(role, "settings");
 }
 
 export async function requireSettingsManageAccess(): Promise<
   { error: string } | null
 > {
-  const role = await getCurrentUserRole();
-  if (!canManageSettings(role)) {
+  const membership = await getCurrentUserMembership();
+  const role = membership?.role ?? (await getCurrentUserRole());
+  if (!canManageSettings(role, membership?.isWorkspaceFounder)) {
     return {
       error: "You do not have permission to update organization settings.",
     };
@@ -528,12 +564,20 @@ export async function requireSettingsManageAccess(): Promise<
   return null;
 }
 
-export function canManageBilling(role: TeamRole | null): boolean {
+export function canManageBilling(
+  role: TeamRole | null,
+  isWorkspaceFounder = false
+): boolean {
+  if (isWorkspaceFounder && isCreatorPortalRole(role)) return true;
   return role === "owner";
 }
 
-export function canViewBilling(role: TeamRole | null): boolean {
+export function canViewBilling(
+  role: TeamRole | null,
+  isWorkspaceFounder = false
+): boolean {
   if (!role) return false;
+  if (isWorkspaceFounder && isCreatorPortalRole(role)) return true;
   return permissionMatrix[role].billing !== "none";
 }
 

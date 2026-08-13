@@ -102,6 +102,27 @@ const contentCreatorCases: PortalCase[] = [
     context: { linkedCreatorId: LINKED_CREATOR },
     expected: true,
   },
+  {
+    role: "content_creator",
+    pathname: "/settings",
+    context: { linkedCreatorId: LINKED_CREATOR, isWorkspaceFounder: true },
+    expected: true,
+    label: "workspace founder settings",
+  },
+  {
+    role: "content_creator",
+    pathname: "/settings",
+    context: { linkedCreatorId: LINKED_CREATOR, isWorkspaceFounder: false },
+    expected: false,
+    label: "invited creator settings blocked",
+  },
+  {
+    role: "content_creator",
+    pathname: "/billing",
+    context: { linkedCreatorId: LINKED_CREATOR, isWorkspaceFounder: true },
+    expected: true,
+    label: "workspace founder billing",
+  },
 ];
 
 const sponsorCases: PortalCase[] = [

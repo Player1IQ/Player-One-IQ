@@ -24,6 +24,7 @@ interface DashboardShellProps {
   organizationName?: string;
   organizationLogoUrl?: string | null;
   teamRole?: TeamRole | null;
+  isWorkspaceFounder?: boolean;
   portalTourSteps?: PortalTourStep[];
   portalTourEnabled?: boolean;
 }
@@ -40,6 +41,7 @@ export function DashboardShell({
   organizationName,
   organizationLogoUrl,
   teamRole = null,
+  isWorkspaceFounder = false,
   portalTourSteps = [],
   portalTourEnabled = false,
 }: DashboardShellProps) {
@@ -70,6 +72,7 @@ export function DashboardShell({
           organizationName={organizationName}
           organizationLogoUrl={organizationLogoUrl}
           teamRole={teamRole}
+          isWorkspaceFounder={isWorkspaceFounder}
           onNavigate={() => setMobileOpen(false)}
         />
       </div>

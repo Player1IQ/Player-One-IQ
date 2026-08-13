@@ -20,6 +20,7 @@ function getPortalPathContext(
   return {
     linkedCreatorId: membership.linkedCreatorId,
     linkedSponsorId: membership.linkedSponsorId,
+    isWorkspaceFounder: membership.isWorkspaceFounder,
   };
 }
 

@@ -9,7 +9,7 @@ import {
   getUserOrganizations,
 } from "@/lib/organization/queries";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
-import { getCurrentUserRole, isRolePreviewActiveForCurrentUser } from "@/lib/permissions";
+import { getCurrentUserRole, isRolePreviewActiveForCurrentUser, getCurrentUserMembership } from "@/lib/permissions";
 import { getAuthUser } from "@/lib/auth/cached";
 import { isRolePreviewAllowed } from "@/lib/dev/role-preview";
 import { RolePreviewSwitcher } from "@/components/dev/RolePreviewSwitcher";
@@ -52,11 +52,13 @@ export async function DashboardLayout({
 }: DashboardLayoutProps) {
   await enforcePortalRouteAccess();
 
-  const [authUser, currentUserRole, rolePreviewActive] = await Promise.all([
+  const [authUser, membership, currentUserRole, rolePreviewActive] = await Promise.all([
     getAuthUser(),
+    getCurrentUserMembership(),
     getCurrentUserRole(),
     isRolePreviewActiveForCurrentUser(),
   ]);
+  const isWorkspaceFounder = membership?.isWorkspaceFounder ?? false;
   const showRolePreviewSwitcher = isRolePreviewAllowed(authUser?.email);
   const isPortalUser = !canAccessStaffDashboard(currentUserRole);
 
@@ -84,7 +86,7 @@ export async function DashboardLayout({
 
   const subscription = subscriptionContext.subscription;
   const onPlatformTrial =
-    !isPortalUser &&
+    (!isPortalUser || isWorkspaceFounder) &&
     subscription &&
     isPlatformTrialActive(
       subscription.status,
@@ -136,6 +138,7 @@ export async function DashboardLayout({
         organizationName={activeOrganization?.name}
         organizationLogoUrl={activeOrganization?.logo_url ?? null}
         teamRole={currentUserRole}
+        isWorkspaceFounder={isWorkspaceFounder}
         mobileTitle={title}
         portalTourSteps={portalTourSteps}
         portalTourEnabled={portalTourEnabled}
