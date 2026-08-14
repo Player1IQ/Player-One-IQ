@@ -3,13 +3,18 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { BRAND_LOGO_PATH } from "@/lib/branding";
 
+function brandLogoFilePath(): string {
+  const [pathname] = BRAND_LOGO_PATH.split("?");
+  return pathname.replace(/^\//, "");
+}
+
 export const alt = "Player One IQ";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpenGraphImage() {
   const logoBuffer = await readFile(
-    join(process.cwd(), "public", BRAND_LOGO_PATH.replace(/^\//, ""))
+    join(process.cwd(), "public", brandLogoFilePath())
   );
   const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
 

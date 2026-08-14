@@ -26,6 +26,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/branding/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, must-revalidate",
+          },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },
