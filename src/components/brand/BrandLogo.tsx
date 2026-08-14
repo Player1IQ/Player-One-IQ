@@ -28,10 +28,16 @@ export function BrandLogo({
     <Image
       src={BRAND_LOGO_PATH}
       alt={BRAND_LOGO_ALT}
-      width={512}
-      height={512}
+      width={1024}
+      height={1024}
       priority={priority}
-      className={cn("w-auto shrink-0 object-contain", sizeClasses[size], className)}
+      className={cn(
+        "w-auto shrink-0 object-contain",
+        // Transparent wordmark: white "P1" needs a soft halo on lighter surfaces.
+        "drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]",
+        sizeClasses[size],
+        className
+      )}
     />
   );
 }

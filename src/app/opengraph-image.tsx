@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { BRAND_LOGO_PATH } from "@/lib/branding";
 
 export const alt = "Player One IQ";
 export const size = { width: 1200, height: 630 };
@@ -8,7 +9,7 @@ export const contentType = "image/png";
 
 export default async function OpenGraphImage() {
   const logoBuffer = await readFile(
-    join(process.cwd(), "public/branding/player-one-iq-logo.png")
+    join(process.cwd(), "public", BRAND_LOGO_PATH.replace(/^\//, ""))
   );
   const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
 
