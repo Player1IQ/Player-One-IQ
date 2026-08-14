@@ -60,6 +60,8 @@ const getCurrentUserMembershipCached = cache(
   const user = await getAuthUser();
   if (!user) return null;
 
+  const currentUserId = user.id;
+
   const organizationId = await getOrganizationId();
   if (!organizationId) return null;
 
@@ -77,7 +79,7 @@ const getCurrentUserMembershipCached = cache(
       isWorkspaceFounder: isSoloCreatorWorkspaceFounder({
         organizationType: organization?.type,
         organizationUserId: organization?.user_id,
-        currentUserId: user.id,
+        currentUserId,
         role: membership.role,
       }),
     };
@@ -87,7 +89,7 @@ const getCurrentUserMembershipCached = cache(
     .from("team_members")
     .select("role, linked_creator_id, linked_sponsor_id")
     .eq("organization_id", organizationId)
-    .eq("user_id", user.id)
+    .eq("user_id", currentUserId)
     .eq("status", "active")
     .maybeSingle();
 
@@ -114,7 +116,7 @@ const getCurrentUserMembershipCached = cache(
     .from("organizations")
     .select("id")
     .eq("id", organizationId)
-    .eq("user_id", user.id)
+    .eq("user_id", currentUserId)
     .maybeSingle();
 
   if (ownedOrg) {
