@@ -31,6 +31,7 @@ export function BrandLogo({
       width={1024}
       height={1024}
       priority={priority}
+      unoptimized
       className={cn(
         "w-auto shrink-0 object-contain",
         // Transparent wordmark: white "P1" needs a soft halo on lighter surfaces.

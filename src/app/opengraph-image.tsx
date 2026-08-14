@@ -1,11 +1,10 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { BRAND_LOGO_PATH } from "@/lib/branding";
+import { BRAND_LOGO_FILE } from "@/lib/branding";
 
 function brandLogoFilePath(): string {
-  const [pathname] = BRAND_LOGO_PATH.split("?");
-  return pathname.replace(/^\//, "");
+  return BRAND_LOGO_FILE.replace(/^\//, "");
 }
 
 export const alt = "Player One IQ";
