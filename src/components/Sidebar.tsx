@@ -108,7 +108,7 @@ export function Sidebar({
           </>
         ) : (
           <div className="min-w-0">
-            <BrandLogo size="sm" className="shrink-0" />
+            <BrandLogo size="md" className="shrink-0" />
             <p className="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-500">
               Creator Platform
             </p>

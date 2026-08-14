@@ -1,13 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { BRAND_LOGO_ALT, BRAND_LOGO_PATH } from "@/lib/branding";
+import { BRAND_LOGO_ALT, BRAND_LOGO_HEIGHT, BRAND_LOGO_PATH, BRAND_LOGO_WIDTH } from "@/lib/branding";
 
 const sizeClasses = {
   xs: "h-5",
   sm: "h-7",
-  md: "h-8",
-  lg: "h-10",
+  md: "h-9",
+  lg: "h-11",
   xl: "h-14",
 } as const;
 
@@ -28,8 +28,8 @@ export function BrandLogo({
     <Image
       src={BRAND_LOGO_PATH}
       alt={BRAND_LOGO_ALT}
-      width={1024}
-      height={1024}
+      width={BRAND_LOGO_WIDTH}
+      height={BRAND_LOGO_HEIGHT}
       priority={priority}
       unoptimized
       className={cn(
