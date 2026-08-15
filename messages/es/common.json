@@ -1,0 +1,12 @@
+{
+  "language": {
+    "label": "Idioma",
+    "en": "Inglés",
+    "es": "Español",
+    "settingsTitle": "Idioma",
+    "settingsDescription": "Elige tu idioma preferido para la interfaz del espacio de trabajo.",
+    "portalTitle": "Idioma",
+    "portalDescription": "Elige tu idioma preferido para la interfaz del portal.",
+    "rolloutNote": "La mayor parte de la aplicación sigue en inglés mientras se agregan traducciones. Tu elección se guarda y más pantallas cambiarán en próximas actualizaciones."
+  }
+}

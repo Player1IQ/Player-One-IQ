@@ -1,0 +1,12 @@
+{
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "es": "Spanish",
+    "settingsTitle": "Language",
+    "settingsDescription": "Choose your preferred language for the workspace interface.",
+    "portalTitle": "Language",
+    "portalDescription": "Choose your preferred language for the portal interface.",
+    "rolloutNote": "Most of the app is still in English while translations are being added. Your choice is saved and more screens will switch over in upcoming updates."
+  }
+}

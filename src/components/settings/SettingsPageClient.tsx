@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, CreditCard, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Bell, CreditCard, Globe, Users } from "lucide-react";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
 import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
 import { OrganizationSettingsForm } from "./OrganizationSettingsForm";
@@ -43,6 +45,8 @@ export function SettingsPageClient({
   platformSync,
   payoutSettings,
 }: SettingsPageClientProps) {
+  const t = useTranslations("language");
+
   if (!canView) {
     return (
       <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-dashed border-white/[0.08] bg-surface-raised/40">
@@ -71,6 +75,22 @@ export function SettingsPageClient({
           </div>
         </section>
       ) : null}
+
+      <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
+        <div className="flex items-start gap-3">
+          <Globe className="mt-0.5 h-5 w-5 text-accent-light" />
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-semibold text-white">
+              {t("settingsTitle")}
+            </h2>
+            <p className="mt-1 text-sm text-gray-500">
+              {t("settingsDescription")}
+            </p>
+            <LanguageSwitcher className="mt-4" />
+            <p className="mt-3 text-xs text-gray-600">{t("rolloutNote")}</p>
+          </div>
+        </div>
+      </section>
 
       <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
         <h2 className="text-base font-semibold text-white">Organization</h2>

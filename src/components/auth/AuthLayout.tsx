@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { SupabaseConfigBanner } from "./SupabaseConfigBanner";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { BrandLogoLink } from "@/components/brand/BrandLogo";
+import { SupabaseConfigBanner } from "./SupabaseConfigBanner";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -63,6 +63,10 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 
           <SupabaseConfigBanner />
           {children}
+
+          <div className="mt-8 border-t border-white/[0.06] pt-6">
+            <LanguageSwitcher variant="compact" />
+          </div>
         </div>
       </div>
     </div>

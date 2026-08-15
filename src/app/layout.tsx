@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
+import { getLocaleDirection, defaultLocale, isAppLocale } from "@/i18n/config";
 import { enforceAuthenticatedRouteAccess } from "@/lib/auth/route-guard";
 import {
   BRAND_FAVICON_PATH,
@@ -83,12 +86,19 @@ export default async function RootLayout({
 }>) {
   await enforceAuthenticatedRouteAccess();
 
+  const resolvedLocale = await getLocale();
+  const locale = isAppLocale(resolvedLocale) ? resolvedLocale : defaultLocale;
+  const messages = await getMessages();
+  const direction = getLocaleDirection(locale);
+
   return (
-    <html lang="en" className="dark">
+    <html lang={locale} dir={direction} className="dark">
       <body
         className={`${inter.variable} font-sans antialiased`}
       >
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -1,7 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Building2, CreditCard, Shield, Sparkles, User } from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  ArrowLeft,
+  Building2,
+  CreditCard,
+  Globe,
+  Shield,
+  Sparkles,
+  User,
+} from "lucide-react";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
 import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
 import { ProfilePhotoUpload } from "@/components/account/ProfilePhotoUpload";
@@ -28,6 +38,8 @@ export function PortalAccountClient({
   avatarUrl,
   isWorkspaceFounder = false,
 }: PortalAccountClientProps) {
+  const t = useTranslations("language");
+
   return (
     <div className="mx-auto max-w-2xl space-y-6 animate-fade-in">
       <Link
@@ -52,6 +64,20 @@ export function PortalAccountClient({
             email={email}
             avatarUrl={avatarUrl}
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-4 w-4 text-accent-light" />
+            {t("portalTitle")}
+          </CardTitle>
+          <CardDescription>{t("portalDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <LanguageSwitcher />
+          <p className="mt-3 text-xs text-gray-600">{t("rolloutNote")}</p>
         </CardContent>
       </Card>
 
