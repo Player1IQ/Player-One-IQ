@@ -5,6 +5,8 @@ export type ScheduleEventType =
   | "stream"
   | "other";
 
+import enStatus from "../../../messages/en/status.json";
+
 export type ScheduleParticipantRole = "organizer" | "attendee" | "optional";
 
 export type ScheduleResponseStatus = "pending" | "accepted" | "declined";
@@ -18,11 +20,11 @@ export const scheduleEventTypes: ScheduleEventType[] = [
 ];
 
 export const scheduleEventTypeLabels: Record<ScheduleEventType, string> = {
-  block: "Blocked time",
-  meeting: "Meeting",
-  practice: "Practice",
-  stream: "Stream",
-  other: "Other",
+  block: enStatus.schedule.eventTypes.block,
+  meeting: enStatus.schedule.eventTypes.meeting,
+  practice: enStatus.schedule.eventTypes.practice,
+  stream: enStatus.schedule.eventTypes.stream,
+  other: enStatus.schedule.eventTypes.other,
 };
 
 export const scheduleEventTypeColors: Record<ScheduleEventType, string> = {
@@ -171,7 +173,7 @@ export function formatScheduleTimeRange(event: {
   endsAt: string;
   allDay: boolean;
 }): string {
-  if (event.allDay) return "All day";
+  if (event.allDay) return enStatus.schedule.allDay;
   const start = formatEventTime(event.startsAt, false);
   const end = formatEventTime(event.endsAt, false);
   return `${start} – ${end}`;

@@ -2,11 +2,11 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Plus, Search, Users } from "lucide-react";
 import {
   type TeamMember,
   type TeamRole,
-  roleLabels,
   getTeamStats,
 } from "@/lib/team";
 import type { Creator } from "@/lib/creators";
@@ -47,6 +47,7 @@ export function TeamPageClient({
   currentUserRole,
   initialCreateOpen = false,
 }: TeamPageClientProps) {
+  const t = useTranslations("team");
   const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<TeamStatusFilter>("all");
@@ -59,7 +60,7 @@ export function TeamPageClient({
         member.name.toLowerCase().includes(query) ||
         member.email.toLowerCase().includes(query) ||
         member.role.toLowerCase().includes(query) ||
-        roleLabels[member.role].toLowerCase().includes(query);
+        t(`roles.${member.role}`).toLowerCase().includes(query);
 
       const matchesStatus =
         statusFilter === "all" ||
@@ -71,7 +72,7 @@ export function TeamPageClient({
 
       return matchesSearch && matchesStatus;
     });
-  }, [members, search, statusFilter]);
+  }, [members, search, statusFilter, t]);
 
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
 

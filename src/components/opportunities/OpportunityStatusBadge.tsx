@@ -1,6 +1,8 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import {
   type OpportunityStatus,
-  opportunityStatusLabels,
 } from "@/lib/opportunities";
 
 const styles: Record<OpportunityStatus, string> = {
@@ -15,11 +17,13 @@ export function OpportunityStatusBadge({
 }: {
   status: OpportunityStatus;
 }) {
+  const t = useTranslations("status");
+
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${styles[status]}`}
     >
-      {opportunityStatusLabels[status]}
+      {t(`opportunities.${status}`)}
     </span>
   );
 }

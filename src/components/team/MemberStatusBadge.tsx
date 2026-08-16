@@ -1,5 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { MemberStatus } from "@/lib/team";
-import { memberStatusLabels } from "@/lib/team";
 
 const statusStyles: Record<MemberStatus, string> = {
   active: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
@@ -12,11 +14,13 @@ interface MemberStatusBadgeProps {
 }
 
 export function MemberStatusBadge({ status }: MemberStatusBadgeProps) {
+  const t = useTranslations("team");
+
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${statusStyles[status]}`}
     >
-      {memberStatusLabels[status]}
+      {t(`memberStatus.${status}`)}
     </span>
   );
 }

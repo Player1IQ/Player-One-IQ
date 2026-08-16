@@ -11,21 +11,23 @@ export type ContractPaymentStatus =
   | "paid_platform"
   | "cancelled";
 
+import enStatus from "../../../messages/en/status.json";
+
 export type PaymentMethod = "external" | "platform";
 
 export const contractPaymentStatusLabels: Record<ContractPaymentStatus, string> =
   {
-    pending: "Pending",
-    ready: "Ready to pay",
-    paid_external: "Paid (external)",
-    paid_platform: "Paid (in app)",
-    cancelled: "Cancelled",
+    pending: enStatus.payments.contract.pending,
+    ready: enStatus.payments.contract.ready,
+    paid_external: enStatus.payments.contract.paid_external,
+    paid_platform: enStatus.payments.contract.paid_platform,
+    cancelled: enStatus.payments.contract.cancelled,
   };
 
 export const connectStatusLabels: Record<ConnectStatus, string> = {
-  not_started: "Not started",
-  pending: "Pending",
-  active: "Active",
+  not_started: enStatus.payments.connect.not_started,
+  pending: enStatus.payments.connect.pending,
+  active: enStatus.payments.connect.active,
 };
 
 export interface PayoutRecipientRow {

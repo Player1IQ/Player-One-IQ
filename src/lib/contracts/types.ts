@@ -6,6 +6,8 @@ export type ContractStatus =
   | "expired"
   | "cancelled";
 
+import enStatus from "../../../messages/en/status.json";
+
 export const contractStatuses: ContractStatus[] = [
   "draft",
   "negotiating",
@@ -16,12 +18,12 @@ export const contractStatuses: ContractStatus[] = [
 ];
 
 export const contractStatusLabels: Record<ContractStatus, string> = {
-  draft: "Draft",
-  negotiating: "Negotiating",
-  active: "Active",
-  completed: "Completed",
-  expired: "Expired",
-  cancelled: "Cancelled",
+  draft: enStatus.contracts.draft,
+  negotiating: enStatus.contracts.negotiating,
+  active: enStatus.contracts.active,
+  completed: enStatus.contracts.completed,
+  expired: enStatus.contracts.expired,
+  cancelled: enStatus.contracts.cancelled,
 };
 
 export const allowedStatusTransitions: Record<ContractStatus, ContractStatus[]> =

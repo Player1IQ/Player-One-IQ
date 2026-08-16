@@ -8,5 +8,34 @@
     "portalTitle": "Language",
     "portalDescription": "Choose your preferred language for the portal interface.",
     "rolloutNote": "Most of the app is still in English while translations are being added. Your choice is saved and more screens will switch over in upcoming updates."
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "create": "Create",
+    "update": "Update",
+    "remove": "Remove",
+    "yes": "Yes",
+    "no": "No",
+    "add": "Add",
+    "view": "View",
+    "search": "Search",
+    "clear": "Clear",
+    "retry": "Retry"
+  },
+  "confirmations": {
+    "areYouSure": "Are you sure you want to {action}?"
+  },
+  "emptyStates": {
+    "noResults": "No results found.",
+    "noData": "No data yet.",
+    "noRecords": "Nothing here yet."
   }
 }

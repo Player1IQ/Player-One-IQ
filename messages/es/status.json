@@ -1,0 +1,64 @@
+{
+  "contracts": {
+    "draft": "Borrador",
+    "negotiating": "En negociación",
+    "active": "Activo",
+    "completed": "Completado",
+    "expired": "Vencido",
+    "cancelled": "Cancelado"
+  },
+  "opportunities": {
+    "draft": "Borrador",
+    "open": "Abierta",
+    "closed": "Cerrada",
+    "filled": "Cubierta"
+  },
+  "applications": {
+    "applied": "Solicitada",
+    "under_review": "En revisión",
+    "accepted": "Aceptada",
+    "rejected": "Rechazada"
+  },
+  "campaigns": {
+    "draft": "Borrador",
+    "active": "Activa",
+    "completed": "Completada",
+    "paused": "Pausada"
+  },
+  "sponsors": {
+    "active": "Activo",
+    "prospect": "Prospecto",
+    "negotiating": "En negociación",
+    "inactive": "Inactivo"
+  },
+  "schedule": {
+    "eventTypes": {
+      "block": "Tiempo bloqueado",
+      "meeting": "Reunión",
+      "practice": "Práctica",
+      "stream": "Stream",
+      "other": "Otro"
+    },
+    "allDay": "Todo el día"
+  },
+  "payments": {
+    "contract": {
+      "pending": "Pendiente",
+      "ready": "Listo para pagar",
+      "paid_external": "Pagado (externo)",
+      "paid_platform": "Pagado (en la app)",
+      "cancelled": "Cancelado"
+    },
+    "connect": {
+      "not_started": "Sin iniciar",
+      "pending": "Pendiente",
+      "active": "Activo"
+    }
+  },
+  "presence": {
+    "online": "En línea",
+    "away": "Ausente",
+    "in_meeting": "En reunión",
+    "inactive": "Inactivo"
+  }
+}

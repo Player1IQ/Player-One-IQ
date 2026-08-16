@@ -64,45 +64,42 @@ export const invitableRoles: Exclude<TeamRole, "owner">[] = [
 ];
 
 export const roleLabels: Record<TeamRole, string> = {
-  owner: "Owner",
-  admin: "Admin",
-  manager: "Manager",
-  partnerships: "Partnerships",
-  talent_manager: "Talent Manager",
-  member: "Member",
-  viewer: "Viewer",
-  player: "Player",
-  content_creator: "Content Creator",
-  sponsor: "Sponsor Contact",
+  owner: enTeam.roles.owner,
+  admin: enTeam.roles.admin,
+  manager: enTeam.roles.manager,
+  partnerships: enTeam.roles.partnerships,
+  talent_manager: enTeam.roles.talent_manager,
+  member: enTeam.roles.member,
+  viewer: enTeam.roles.viewer,
+  player: enTeam.roles.player,
+  content_creator: enTeam.roles.content_creator,
+  sponsor: enTeam.roles.sponsor,
 };
 
 /** Portal-facing label; player and content_creator are unified as Creator. */
 export function getPortalRoleLabel(role: TeamRole): string {
-  if (isCreatorPortalRole(role)) return "Creator";
+  if (isCreatorPortalRole(role)) return enTeam.portalRole.creator;
   if (isSponsorPortalRole(role)) return roleLabels[role];
   return roleLabels[role];
 }
 
 export const roleDescriptions: Record<TeamRole, string> = {
-  owner: "Full access including billing and ownership transfer",
-  admin: "User and role management, settings, all data except billing transfer",
-  manager: "Creators, opportunities, contracts, and deal operations",
-  partnerships: "Sponsors, opportunities, contracts, and messaging",
-  talent_manager: "Creators, applications, and assigned deals",
-  member: "General read access with messaging and limited collaboration",
-  viewer: "Read-only access across the organization",
-  player:
-    "Creator portal: profile, contracts, campaigns, opportunities, and growth",
-  content_creator:
-    "Creator portal: profile, contracts, campaigns, opportunities, and growth",
-  sponsor:
-    "Portal access to your company profile, contracts, campaigns, and deal rooms (read-only)",
+  owner: enTeam.roleDescriptions.owner,
+  admin: enTeam.roleDescriptions.admin,
+  manager: enTeam.roleDescriptions.manager,
+  partnerships: enTeam.roleDescriptions.partnerships,
+  talent_manager: enTeam.roleDescriptions.talent_manager,
+  member: enTeam.roleDescriptions.member,
+  viewer: enTeam.roleDescriptions.viewer,
+  player: enTeam.roleDescriptions.player,
+  content_creator: enTeam.roleDescriptions.content_creator,
+  sponsor: enTeam.roleDescriptions.sponsor,
 };
 
 export const memberStatusLabels: Record<MemberStatus, string> = {
-  active: "Active",
-  pending: "Pending",
-  inactive: "Inactive",
+  active: enTeam.memberStatus.active,
+  pending: enTeam.memberStatus.pending,
+  inactive: enTeam.memberStatus.inactive,
 };
 
 export interface PermissionDefinition {
@@ -114,58 +111,58 @@ export interface PermissionDefinition {
 export const permissions: PermissionDefinition[] = [
   {
     key: "creators",
-    label: "Creators",
-    description: "View and manage creator roster profiles",
+    label: enTeam.permissions.creators.label,
+    description: enTeam.permissions.creators.description,
   },
   {
     key: "sponsors",
-    label: "Sponsors",
-    description: "View and manage sponsor partnerships",
+    label: enTeam.permissions.sponsors.label,
+    description: enTeam.permissions.sponsors.description,
   },
   {
     key: "contracts",
-    label: "Contracts",
-    description: "View and manage sponsorship agreements",
+    label: enTeam.permissions.contracts.label,
+    description: enTeam.permissions.contracts.description,
   },
   {
     key: "opportunities",
-    label: "Opportunities",
-    description: "View and manage sponsorship opportunities",
+    label: enTeam.permissions.opportunities.label,
+    description: enTeam.permissions.opportunities.description,
   },
   {
     key: "campaigns",
-    label: "Campaigns",
-    description: "View and manage sponsor campaigns",
+    label: enTeam.permissions.campaigns.label,
+    description: enTeam.permissions.campaigns.description,
   },
   {
     key: "messages",
-    label: "Messages",
-    description: "Team and deal room messaging",
+    label: enTeam.permissions.messages.label,
+    description: enTeam.permissions.messages.description,
   },
   {
     key: "team",
-    label: "Team",
-    description: "Invite members and manage roles",
+    label: enTeam.permissions.team.label,
+    description: enTeam.permissions.team.description,
   },
   {
     key: "settings",
-    label: "Settings",
-    description: "Organization and workspace settings",
+    label: enTeam.permissions.settings.label,
+    description: enTeam.permissions.settings.description,
   },
   {
     key: "billing",
-    label: "Billing",
-    description: "Subscription and payment management",
+    label: enTeam.permissions.billing.label,
+    description: enTeam.permissions.billing.description,
   },
   {
     key: "ai",
-    label: "AI",
-    description: "AI assistants and growth intelligence",
+    label: enTeam.permissions.ai.label,
+    description: enTeam.permissions.ai.description,
   },
   {
     key: "reports",
-    label: "Reports",
-    description: "Monthly performance and revenue analytics",
+    label: enTeam.permissions.reports.label,
+    description: enTeam.permissions.reports.description,
   },
 ];
 
@@ -336,6 +333,7 @@ export interface TeamInvitationRow {
 }
 
 import type { PresenceStatus } from "@/lib/presence/types";
+import enTeam from "../../messages/en/team.json";
 
 export interface TeamMember {
   id: string;
@@ -543,11 +541,11 @@ export function canWriteData(role: TeamRole | null): boolean {
 }
 
 export const roleGroups: Array<{
-  label: string;
+  labelKey: "staff" | "portal";
   roles: Exclude<TeamRole, "owner">[];
 }> = [
-  { label: "Staff", roles: invitableStaffRoles },
-  { label: "Portal", roles: invitablePortalRoles },
+  { labelKey: "staff", roles: invitableStaffRoles },
+  { labelKey: "portal", roles: invitablePortalRoles },
 ];
 
 export function canAccessStaffDashboard(role: TeamRole | null): boolean {

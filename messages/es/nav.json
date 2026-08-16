@@ -1,0 +1,35 @@
+{
+  "items": {
+    "dashboard": "Panel",
+    "creators": "Creadores",
+    "sponsors": "Patrocinadores",
+    "campaigns": "Campañas",
+    "deals": "Acuerdos",
+    "opportunities": "Oportunidades",
+    "messages": "Mensajes",
+    "schedule": "Calendario",
+    "ai": "IA",
+    "reports": "Informes",
+    "team": "Equipo",
+    "billing": "Facturación",
+    "settings": "Configuración",
+    "home": "Inicio",
+    "revenue": "Ingresos",
+    "myProfile": "Mi perfil",
+    "account": "Cuenta",
+    "company": "Empresa",
+    "myApplications": "Mis solicitudes",
+    "deliverables": "Entregables",
+    "growth": "Crecimiento",
+    "coach": "Coach",
+    "seasons": "Temporadas"
+  },
+  "sidebar": {
+    "creatorPlatform": "Plataforma para creadores",
+    "workspace": "Espacio de trabajo",
+    "organizationLogoAlt": "Logo de la organización",
+    "upgradePlan": "Mejorar plan",
+    "upgradeSubtitle": "Desbloquea IA y analíticas"
+  },
+  "pageSubtitle": "Página"
+}

@@ -8,5 +8,34 @@
     "portalTitle": "Idioma",
     "portalDescription": "Elige tu idioma preferido para la interfaz del portal.",
     "rolloutNote": "La mayor parte de la aplicación sigue en inglés mientras se agregan traducciones. Tu elección se guarda y más pantallas cambiarán en próximas actualizaciones."
+  },
+  "buttons": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "remove": "Quitar",
+    "yes": "Sí",
+    "no": "No",
+    "add": "Agregar",
+    "view": "Ver",
+    "search": "Buscar",
+    "clear": "Limpiar",
+    "retry": "Reintentar"
+  },
+  "confirmations": {
+    "areYouSure": "¿Seguro que quieres {action}?"
+  },
+  "emptyStates": {
+    "noResults": "No se encontraron resultados.",
+    "noData": "Aún no hay datos.",
+    "noRecords": "Todavía no hay nada aquí."
   }
 }

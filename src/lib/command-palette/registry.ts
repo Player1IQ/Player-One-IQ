@@ -1,3 +1,4 @@
+import enCommandPalette from "../../../messages/en/commandPalette.json";
 import { navItemAccessible } from "@/lib/subscription/features";
 import type { FeatureKey } from "@/lib/subscription/types";
 import {
@@ -19,8 +20,6 @@ export type ActionAudience =
 
 interface CommandActionDefinition {
   id: string;
-  label: string;
-  subtitle: string;
   href: string;
   keywords: string[];
   audience: ActionAudience[];
@@ -32,8 +31,6 @@ interface CommandActionDefinition {
 const actionDefinitions: CommandActionDefinition[] = [
   {
     id: "create-deal",
-    label: "Create deal",
-    subtitle: "New sponsorship agreement",
     href: "/contracts?create=true",
     keywords: ["contract", "deal", "agreement", "new deal"],
     audience: ["staff"],
@@ -43,8 +40,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "create-creator",
-    label: "Add creator",
-    subtitle: "Add a creator to your roster",
     href: "/creators?create=true",
     keywords: ["creator", "roster", "talent", "new creator"],
     audience: ["staff"],
@@ -54,8 +49,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "create-sponsor",
-    label: "Add sponsor",
-    subtitle: "Add a brand or sponsor contact",
     href: "/sponsors?create=true",
     keywords: ["sponsor", "brand", "partner", "new sponsor"],
     audience: ["staff"],
@@ -65,8 +58,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "create-campaign",
-    label: "Create campaign",
-    subtitle: "Track a sponsor campaign",
     href: "/campaigns?create=true",
     keywords: ["campaign", "activation", "new campaign"],
     audience: ["staff"],
@@ -76,8 +67,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "create-opportunity",
-    label: "Create opportunity",
-    subtitle: "Post a sponsorship opportunity",
     href: "/opportunities?create=true",
     keywords: ["opportunity", "brief", "listing", "new opportunity"],
     audience: ["staff"],
@@ -87,8 +76,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "invite-team",
-    label: "Invite team member",
-    subtitle: "Send a team invitation",
     href: "/team?create=true",
     keywords: ["invite", "team", "member", "user"],
     audience: ["staff"],
@@ -98,8 +85,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "new-message",
-    label: "Start conversation",
-    subtitle: "Send a new message",
     href: "/messages?create=true",
     keywords: ["message", "chat", "inbox", "dm", "conversation"],
     audience: ["all_authenticated"],
@@ -107,8 +92,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "view-reports",
-    label: "View reports",
-    subtitle: "Analytics and monthly reports",
     href: "/reports",
     keywords: ["report", "analytics", "export", "metrics"],
     audience: ["staff"],
@@ -117,8 +100,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "open-ai",
-    label: "Open AI assistant",
-    subtitle: "Growth, deals, and insights",
     href: "/ai",
     keywords: ["ai", "assistant", "insights", "recommendations"],
     audience: ["staff"],
@@ -126,8 +107,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "manage-billing",
-    label: "Manage billing",
-    subtitle: "Plans, invoices, and payouts",
     href: "/billing",
     keywords: ["billing", "payout", "payment", "subscription", "invoice"],
     audience: ["staff"],
@@ -135,40 +114,30 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "update-profile",
-    label: "Update profile",
-    subtitle: "Edit your creator profile",
     href: "/portal/profile",
     keywords: ["profile", "account", "platforms", "social"],
     audience: ["creator_portal"],
   },
   {
     id: "view-revenue",
-    label: "View revenue",
-    subtitle: "Earnings and payout history",
     href: "/portal/revenue",
     keywords: ["revenue", "earnings", "payout", "money", "income"],
     audience: ["creator_portal"],
   },
   {
     id: "view-growth",
-    label: "View growth",
-    subtitle: "Analytics and performance trends",
     href: "/portal/growth",
     keywords: ["growth", "analytics", "performance", "stats"],
     audience: ["creator_portal"],
   },
   {
     id: "view-coach",
-    label: "Open coach",
-    subtitle: "AI posting and growth guidance",
     href: "/portal/coach",
     keywords: ["coach", "ai", "cadence", "posting", "tips"],
     audience: ["creator_portal"],
   },
   {
     id: "view-deliverables",
-    label: "View deliverables",
-    subtitle: "Track deal deliverables",
     href: "/portal/deliverables",
     keywords: ["deliverable", "deliverables", "tasks", "content"],
     audience: ["creator_portal"],
@@ -176,8 +145,6 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "browse-opportunities",
-    label: "Browse opportunities",
-    subtitle: "Find sponsorship opportunities",
     href: "/opportunities",
     keywords: ["opportunity", "apply", "brief", "marketplace"],
     audience: ["creator_portal"],
@@ -185,30 +152,33 @@ const actionDefinitions: CommandActionDefinition[] = [
   },
   {
     id: "update-company",
-    label: "Update company profile",
-    subtitle: "Edit sponsor company details",
     href: "/portal/profile",
     keywords: ["company", "profile", "brand", "sponsor"],
     audience: ["sponsor_portal"],
   },
   {
     id: "view-schedule",
-    label: "View schedule",
-    subtitle: "Calendar and upcoming events",
     href: "/schedule",
     keywords: ["schedule", "calendar", "events", "booking"],
     audience: ["all_authenticated"],
   },
   {
     id: "org-settings",
-    label: "Organization settings",
-    subtitle: "Workspace preferences",
     href: "/settings",
     keywords: ["settings", "organization", "workspace", "preferences"],
     audience: ["staff"],
     requiredPermission: "settings",
   },
 ];
+
+type ActionField = "label" | "subtitle";
+
+type ActionTranslator = (id: string, field: ActionField) => string;
+
+const defaultActionTranslator: ActionTranslator = (id, field) => {
+  const action = enCommandPalette.actions[id as keyof typeof enCommandPalette.actions];
+  return action?.[field] ?? id;
+};
 
 function matchesAudience(
   role: TeamRole | null,
@@ -253,15 +223,16 @@ function actionAccessible(
 
 export function getAccessibleActions(
   features: Set<FeatureKey>,
-  role: TeamRole | null
+  role: TeamRole | null,
+  translate: ActionTranslator = defaultActionTranslator
 ): CommandPaletteItem[] {
   return actionDefinitions
     .filter((action) => actionAccessible(action, features, role))
     .map((action) => ({
       id: action.id,
       section: "action" as const,
-      label: action.label,
-      subtitle: action.subtitle,
+      label: translate(action.id, "label"),
+      subtitle: translate(action.id, "subtitle"),
       href: action.href,
       keywords: action.keywords,
     }));

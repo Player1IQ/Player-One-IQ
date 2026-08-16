@@ -1,0 +1,88 @@
+{
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "manager": "Manager",
+    "partnerships": "Partnerships",
+    "talent_manager": "Talent Manager",
+    "member": "Member",
+    "viewer": "Viewer",
+    "player": "Player",
+    "content_creator": "Content Creator",
+    "sponsor": "Sponsor Contact"
+  },
+  "portalRole": {
+    "creator": "Creator"
+  },
+  "roleDescriptions": {
+    "owner": "Full access including billing and ownership transfer",
+    "admin": "User and role management, settings, all data except billing transfer",
+    "manager": "Creators, opportunities, contracts, and deal operations",
+    "partnerships": "Sponsors, opportunities, contracts, and messaging",
+    "talent_manager": "Creators, applications, and assigned deals",
+    "member": "General read access with messaging and limited collaboration",
+    "viewer": "Read-only access across the organization",
+    "player": "Creator portal: profile, contracts, campaigns, opportunities, and growth",
+    "content_creator": "Creator portal: profile, contracts, campaigns, opportunities, and growth",
+    "sponsor": "Portal access to your company profile, contracts, campaigns, and deal rooms (read-only)"
+  },
+  "memberStatus": {
+    "active": "Active",
+    "pending": "Pending",
+    "inactive": "Inactive"
+  },
+  "permissions": {
+    "creators": {
+      "label": "Creators",
+      "description": "View and manage creator roster profiles"
+    },
+    "sponsors": {
+      "label": "Sponsors",
+      "description": "View and manage sponsor partnerships"
+    },
+    "contracts": {
+      "label": "Contracts",
+      "description": "View and manage sponsorship agreements"
+    },
+    "opportunities": {
+      "label": "Opportunities",
+      "description": "View and manage sponsorship opportunities"
+    },
+    "campaigns": {
+      "label": "Campaigns",
+      "description": "View and manage sponsor campaigns"
+    },
+    "messages": {
+      "label": "Messages",
+      "description": "Team and deal room messaging"
+    },
+    "team": {
+      "label": "Team",
+      "description": "Invite members and manage roles"
+    },
+    "settings": {
+      "label": "Settings",
+      "description": "Organization and workspace settings"
+    },
+    "billing": {
+      "label": "Billing",
+      "description": "Subscription and payment management"
+    },
+    "ai": {
+      "label": "AI",
+      "description": "AI assistants and growth intelligence"
+    },
+    "reports": {
+      "label": "Reports",
+      "description": "Monthly performance and revenue analytics"
+    }
+  },
+  "roleGroups": {
+    "staff": "Staff",
+    "portal": "Portal"
+  },
+  "permissionLevels": {
+    "read": "Read",
+    "scoped": "Own"
+  }
+}

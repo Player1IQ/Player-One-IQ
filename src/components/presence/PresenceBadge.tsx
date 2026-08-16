@@ -1,6 +1,8 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import {
   presenceDotColors,
-  presenceLabels,
   presenceTextColors,
   type PresenceStatus,
 } from "@/lib/presence/types";
@@ -18,6 +20,7 @@ export function PresenceBadge({
   showLabel = true,
   pulse = true,
 }: PresenceBadgeProps) {
+  const t = useTranslations("status");
   const dotSize = size === "sm" ? "h-2 w-2" : "h-2.5 w-2.5";
   const textSize = size === "sm" ? "text-xs" : "text-sm";
 
@@ -35,7 +38,7 @@ export function PresenceBadge({
           />
         ) : null}
       </span>
-      {showLabel ? <span>{presenceLabels[status]}</span> : null}
+      {showLabel ? <span>{t(`presence.${status}`)}</span> : null}
     </span>
   );
 }

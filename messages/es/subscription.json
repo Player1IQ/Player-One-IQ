@@ -1,0 +1,103 @@
+{
+  "features": {
+    "creator_profiles": "Perfiles de creador",
+    "apply_opportunities": "Postularse a oportunidades",
+    "create_opportunities": "Crear oportunidades",
+    "limited_analytics": "Analíticas limitadas",
+    "advanced_analytics": "Analíticas avanzadas",
+    "ai_growth": "Recomendaciones de crecimiento con IA",
+    "ai_creator_coach": "Chat de AI Creator Coach",
+    "ai_sponsorship": "Sugerencias de patrocinio con IA",
+    "revenue_forecasting": "Pronóstico de ingresos",
+    "monthly_reports": "Informes mensuales",
+    "team_management": "Gestión de equipo",
+    "contracts": "Contratos",
+    "sponsor_crm": "CRM de patrocinadores",
+    "opportunity_management": "Gestión de oportunidades",
+    "ai_creator_performance": "Análisis de rendimiento de creadores con IA",
+    "ai_sponsorship_matching": "Emparejamiento de patrocinio con IA",
+    "ai_contract_summaries": "Resúmenes de contratos con IA",
+    "ai_forecasting": "Pronósticos con IA",
+    "ai_deal_recommendations": "Recomendaciones de acuerdos con IA",
+    "white_label": "Opciones white-label",
+    "api_access": "Acceso a API",
+    "review_creators": "Revisar creadores",
+    "messaging": "Mensajería",
+    "campaign_tracking": "Seguimiento de campañas",
+    "ai_creator_discovery": "Descubrimiento de creadores con IA",
+    "ai_campaign_recommendations": "Recomendaciones de campañas con IA",
+    "ai_roi_forecasting": "Pronóstico de ROI con IA",
+    "advanced_reporting": "Informes avanzados"
+  },
+  "plans": {
+    "free_creator": {
+      "tagline": "Comienza tu camino como creador",
+      "bullets": [
+        "1 perfil de creador",
+        "Postúlate a oportunidades",
+        "Analíticas limitadas"
+      ]
+    },
+    "creator_pro": {
+      "tagline": "Crece más rápido con IA",
+      "bullets": [
+        "Oportunidades ilimitadas",
+        "Analíticas avanzadas",
+        "50 solicitudes de IA/mes incluidas",
+        "Pronóstico de ingresos e informes mensuales"
+      ]
+    },
+    "agency_starter": {
+      "tagline": "Lo esencial después de tu prueba",
+      "bullets": [
+        "Hasta 5 creadores y 2 puestos de equipo",
+        "Contratos, CRM de patrocinadores y mensajería",
+        "Mejora para IA y límites más altos"
+      ]
+    },
+    "agency": {
+      "tagline": "Gestiona tu roster de punta a punta",
+      "bullets": [
+        "Hasta 25 creadores",
+        "Equipo, contratos y CRM de patrocinadores",
+        "200 solicitudes de IA/mes incluidas",
+        "Resúmenes de contratos"
+      ]
+    },
+    "agency_pro": {
+      "tagline": "Escala sin límites",
+      "bullets": [
+        "Creadores y equipo ilimitados",
+        "500 solicitudes de IA/mes incluidas",
+        "Pronósticos con IA y recomendaciones de acuerdos",
+        "Opciones white-label y acceso a API"
+      ]
+    },
+    "sponsor": {
+      "tagline": "Lanza campañas de patrocinio",
+      "bullets": [
+        "Crea oportunidades",
+        "Revisa creadores y envía mensajes",
+        "Analíticas y seguimiento de campañas"
+      ]
+    },
+    "sponsor_pro": {
+      "tagline": "Maximiza el ROI de tus campañas",
+      "bullets": [
+        "Campañas ilimitadas",
+        "75 solicitudes de IA/mes incluidas",
+        "Descubrimiento de creadores y recomendaciones de campañas con IA",
+        "Pronóstico de ROI con IA e informes avanzados"
+      ]
+    }
+  },
+  "pricing": {
+    "free": "Gratis"
+  },
+  "upgradePlans": {
+    "creatorPro": "Creator Pro",
+    "agency": "Agency",
+    "agencyPro": "Agency Pro",
+    "sponsorPro": "Sponsor Pro"
+  }
+}

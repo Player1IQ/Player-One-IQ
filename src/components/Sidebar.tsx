@@ -25,6 +25,7 @@ import { OrganizationSwitcher } from "@/components/organization/OrganizationSwit
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import type { UserOrganization } from "@/lib/organization/queries";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import type { FeatureKey } from "@/lib/subscription/types";
 import { getAccessibleNavItems, getActiveNavHref, type NavIconName } from "@/lib/navigation";
 import type { TeamRole } from "@/lib/team";
@@ -71,6 +72,7 @@ export function Sidebar({
   isWorkspaceFounder = false,
   onNavigate,
 }: SidebarProps) {
+  const t = useTranslations("nav");
   const pathname = usePathname();
   const items = useMemo(() => {
     const features = new Set(enabledFeatures ?? []);
@@ -94,15 +96,19 @@ export function Sidebar({
           <>
             <img
               src={organizationLogoUrl}
-              alt={organizationName ? `${organizationName} logo` : "Organization logo"}
+              alt={
+                organizationName
+                  ? `${organizationName} logo`
+                  : t("sidebar.organizationLogoAlt")
+              }
               className="h-9 w-9 shrink-0 rounded-xl object-cover ring-1 ring-white/10"
             />
             <div className="min-w-0">
               <p className="truncate text-sm font-bold tracking-tight text-white">
-                {organizationName ?? "Workspace"}
+                {organizationName ?? t("sidebar.workspace")}
               </p>
               <p className="text-[10px] font-medium uppercase tracking-widest text-gray-500">
-                Creator Platform
+                {t("sidebar.creatorPlatform")}
               </p>
             </div>
           </>
@@ -110,7 +116,7 @@ export function Sidebar({
           <div className="min-w-0">
             <BrandLogo size="md" className="shrink-0" />
             <p className="mt-1 text-[10px] font-medium uppercase tracking-widest text-gray-500">
-              Creator Platform
+              {t("sidebar.creatorPlatform")}
             </p>
           </div>
         )}
@@ -149,7 +155,7 @@ export function Sidebar({
                     : "text-gray-500 group-hover:text-gray-300"
                 )}
               />
-              <span className="flex-1">{item.label}</span>
+              <span className="flex-1">{t(`items.${item.labelKey}`)}</span>
               {item.showUnreadBadge && <UnreadBadge />}
             </Link>
           );
@@ -167,8 +173,12 @@ export function Sidebar({
               <Zap className="h-4 w-4 text-accent-light" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-white">Upgrade Plan</p>
-              <p className="text-[10px] text-gray-500">Unlock AI & analytics</p>
+              <p className="text-xs font-semibold text-white">
+                {t("sidebar.upgradePlan")}
+              </p>
+              <p className="text-[10px] text-gray-500">
+                {t("sidebar.upgradeSubtitle")}
+              </p>
             </div>
           </Link>
         </div>

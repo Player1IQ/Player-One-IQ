@@ -1,5 +1,7 @@
 export type PresenceStatus = "online" | "away" | "in_meeting" | "inactive";
 
+import enStatus from "../../../messages/en/status.json";
+
 export const presenceStatuses: PresenceStatus[] = [
   "online",
   "away",
@@ -8,10 +10,10 @@ export const presenceStatuses: PresenceStatus[] = [
 ];
 
 export const presenceLabels: Record<PresenceStatus, string> = {
-  online: "Online",
-  away: "Away",
-  in_meeting: "In meeting",
-  inactive: "Inactive",
+  online: enStatus.presence.online,
+  away: enStatus.presence.away,
+  in_meeting: enStatus.presence.in_meeting,
+  inactive: enStatus.presence.inactive,
 };
 
 export const presenceDotColors: Record<PresenceStatus, string> = {

@@ -1,0 +1,64 @@
+{
+  "contracts": {
+    "draft": "Draft",
+    "negotiating": "Negotiating",
+    "active": "Active",
+    "completed": "Completed",
+    "expired": "Expired",
+    "cancelled": "Cancelled"
+  },
+  "opportunities": {
+    "draft": "Draft",
+    "open": "Open",
+    "closed": "Closed",
+    "filled": "Filled"
+  },
+  "applications": {
+    "applied": "Applied",
+    "under_review": "Under Review",
+    "accepted": "Accepted",
+    "rejected": "Rejected"
+  },
+  "campaigns": {
+    "draft": "Draft",
+    "active": "Active",
+    "completed": "Completed",
+    "paused": "Paused"
+  },
+  "sponsors": {
+    "active": "Active",
+    "prospect": "Prospect",
+    "negotiating": "Negotiating",
+    "inactive": "Inactive"
+  },
+  "schedule": {
+    "eventTypes": {
+      "block": "Blocked time",
+      "meeting": "Meeting",
+      "practice": "Practice",
+      "stream": "Stream",
+      "other": "Other"
+    },
+    "allDay": "All day"
+  },
+  "payments": {
+    "contract": {
+      "pending": "Pending",
+      "ready": "Ready to pay",
+      "paid_external": "Paid (external)",
+      "paid_platform": "Paid (in app)",
+      "cancelled": "Cancelled"
+    },
+    "connect": {
+      "not_started": "Not started",
+      "pending": "Pending",
+      "active": "Active"
+    }
+  },
+  "presence": {
+    "online": "Online",
+    "away": "Away",
+    "in_meeting": "In meeting",
+    "inactive": "Inactive"
+  }
+}

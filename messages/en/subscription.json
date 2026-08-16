@@ -1,0 +1,103 @@
+{
+  "features": {
+    "creator_profiles": "Creator profiles",
+    "apply_opportunities": "Apply to opportunities",
+    "create_opportunities": "Create opportunities",
+    "limited_analytics": "Limited analytics",
+    "advanced_analytics": "Advanced analytics",
+    "ai_growth": "AI growth recommendations",
+    "ai_creator_coach": "AI Creator Coach chat",
+    "ai_sponsorship": "AI sponsorship suggestions",
+    "revenue_forecasting": "Revenue forecasting",
+    "monthly_reports": "Monthly reports",
+    "team_management": "Team management",
+    "contracts": "Contracts",
+    "sponsor_crm": "Sponsor CRM",
+    "opportunity_management": "Opportunity management",
+    "ai_creator_performance": "AI creator performance analysis",
+    "ai_sponsorship_matching": "AI sponsorship matching",
+    "ai_contract_summaries": "AI contract summaries",
+    "ai_forecasting": "AI forecasting",
+    "ai_deal_recommendations": "AI deal recommendations",
+    "white_label": "White-label options",
+    "api_access": "API access",
+    "review_creators": "Review creators",
+    "messaging": "Messaging",
+    "campaign_tracking": "Campaign tracking",
+    "ai_creator_discovery": "AI creator discovery",
+    "ai_campaign_recommendations": "AI campaign recommendations",
+    "ai_roi_forecasting": "AI ROI forecasting",
+    "advanced_reporting": "Advanced reporting"
+  },
+  "plans": {
+    "free_creator": {
+      "tagline": "Start your creator journey",
+      "bullets": [
+        "1 creator profile",
+        "Apply to opportunities",
+        "Limited analytics"
+      ]
+    },
+    "creator_pro": {
+      "tagline": "Grow faster with AI",
+      "bullets": [
+        "Unlimited opportunities",
+        "Advanced analytics",
+        "50 AI requests/month included",
+        "Revenue forecasting & monthly reports"
+      ]
+    },
+    "agency_starter": {
+      "tagline": "Essentials after your trial",
+      "bullets": [
+        "Up to 5 creators & 2 team seats",
+        "Contracts, sponsor CRM & messaging",
+        "Upgrade for AI and higher limits"
+      ]
+    },
+    "agency": {
+      "tagline": "Run your roster end-to-end",
+      "bullets": [
+        "Up to 25 creators",
+        "Team, contracts & sponsor CRM",
+        "200 AI requests/month included",
+        "Contract summaries"
+      ]
+    },
+    "agency_pro": {
+      "tagline": "Scale without limits",
+      "bullets": [
+        "Unlimited creators & team",
+        "500 AI requests/month included",
+        "AI forecasting & deal recommendations",
+        "White-label options & API access"
+      ]
+    },
+    "sponsor": {
+      "tagline": "Launch sponsorship campaigns",
+      "bullets": [
+        "Create opportunities",
+        "Review creators & message",
+        "Analytics & campaign tracking"
+      ]
+    },
+    "sponsor_pro": {
+      "tagline": "Maximize campaign ROI",
+      "bullets": [
+        "Unlimited campaigns",
+        "75 AI requests/month included",
+        "AI creator discovery & campaign recommendations",
+        "AI ROI forecasting & advanced reporting"
+      ]
+    }
+  },
+  "pricing": {
+    "free": "Free"
+  },
+  "upgradePlans": {
+    "creatorPro": "Creator Pro",
+    "agency": "Agency",
+    "agencyPro": "Agency Pro",
+    "sponsorPro": "Sponsor Pro"
+  }
+}

@@ -1,5 +1,6 @@
 import { platforms, type Platform } from "../creators/types";
 import { industries, type Industry } from "../sponsors/types";
+import enStatus from "../../../messages/en/status.json";
 
 export type OpportunityStatus = "draft" | "open" | "closed" | "filled";
 
@@ -227,15 +228,15 @@ export function getOpportunityStats(opportunities: Opportunity[]) {
 }
 
 export const opportunityStatusLabels: Record<OpportunityStatus, string> = {
-  draft: "Draft",
-  open: "Open",
-  closed: "Closed",
-  filled: "Filled",
+  draft: enStatus.opportunities.draft,
+  open: enStatus.opportunities.open,
+  closed: enStatus.opportunities.closed,
+  filled: enStatus.opportunities.filled,
 };
 
 export const applicationStatusLabels: Record<ApplicationStatus, string> = {
-  applied: "Applied",
-  under_review: "Under Review",
-  accepted: "Accepted",
-  rejected: "Rejected",
+  applied: enStatus.applications.applied,
+  under_review: enStatus.applications.under_review,
+  accepted: enStatus.applications.accepted,
+  rejected: enStatus.applications.rejected,
 };

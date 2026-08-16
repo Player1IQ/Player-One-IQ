@@ -1,0 +1,88 @@
+{
+  "roles": {
+    "owner": "Propietario",
+    "admin": "Administrador",
+    "manager": "Manager",
+    "partnerships": "Alianzas",
+    "talent_manager": "Manager de talento",
+    "member": "Miembro",
+    "viewer": "Solo lectura",
+    "player": "Jugador",
+    "content_creator": "Creador de contenido",
+    "sponsor": "Contacto de patrocinio"
+  },
+  "portalRole": {
+    "creator": "Creador"
+  },
+  "roleDescriptions": {
+    "owner": "Acceso total, incluida facturación y transferencia de propiedad",
+    "admin": "Gestión de usuarios y roles, configuración y todos los datos excepto transferencia de facturación",
+    "manager": "Creadores, oportunidades, contratos y operaciones de acuerdos",
+    "partnerships": "Patrocinadores, oportunidades, contratos y mensajería",
+    "talent_manager": "Creadores, solicitudes y acuerdos asignados",
+    "member": "Acceso de lectura general con mensajería y colaboración limitada",
+    "viewer": "Acceso de solo lectura en toda la organización",
+    "player": "Portal de creador: perfil, contratos, campañas, oportunidades y crecimiento",
+    "content_creator": "Portal de creador: perfil, contratos, campañas, oportunidades y crecimiento",
+    "sponsor": "Acceso al portal de tu empresa, contratos, campañas y salas de acuerdos (solo lectura)"
+  },
+  "memberStatus": {
+    "active": "Activo",
+    "pending": "Pendiente",
+    "inactive": "Inactivo"
+  },
+  "permissions": {
+    "creators": {
+      "label": "Creadores",
+      "description": "Ver y gestionar perfiles del roster de creadores"
+    },
+    "sponsors": {
+      "label": "Patrocinadores",
+      "description": "Ver y gestionar alianzas de patrocinio"
+    },
+    "contracts": {
+      "label": "Contratos",
+      "description": "Ver y gestionar acuerdos de patrocinio"
+    },
+    "opportunities": {
+      "label": "Oportunidades",
+      "description": "Ver y gestionar oportunidades de patrocinio"
+    },
+    "campaigns": {
+      "label": "Campañas",
+      "description": "Ver y gestionar campañas de patrocinio"
+    },
+    "messages": {
+      "label": "Mensajes",
+      "description": "Mensajería del equipo y salas de acuerdos"
+    },
+    "team": {
+      "label": "Equipo",
+      "description": "Invitar miembros y gestionar roles"
+    },
+    "settings": {
+      "label": "Configuración",
+      "description": "Configuración de la organización y el espacio de trabajo"
+    },
+    "billing": {
+      "label": "Facturación",
+      "description": "Gestión de suscripción y pagos"
+    },
+    "ai": {
+      "label": "IA",
+      "description": "Asistentes de IA e inteligencia de crecimiento"
+    },
+    "reports": {
+      "label": "Informes",
+      "description": "Analíticas mensuales de rendimiento e ingresos"
+    }
+  },
+  "roleGroups": {
+    "staff": "Equipo interno",
+    "portal": "Portal"
+  },
+  "permissionLevels": {
+    "read": "Lectura",
+    "scoped": "Propio"
+  }
+}

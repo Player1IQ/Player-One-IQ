@@ -1,5 +1,7 @@
 export type SponsorStatus = "active" | "prospect" | "inactive" | "negotiating";
 
+import enStatus from "../../../messages/en/status.json";
+
 export type Industry =
   | "Gaming"
   | "Apparel"
@@ -27,10 +29,10 @@ export const sponsorStatuses: SponsorStatus[] = [
 ];
 
 export const sponsorStatusLabels: Record<SponsorStatus, string> = {
-  active: "Active",
-  prospect: "Prospect",
-  negotiating: "Negotiating",
-  inactive: "Inactive",
+  active: enStatus.sponsors.active,
+  prospect: enStatus.sponsors.prospect,
+  negotiating: enStatus.sponsors.negotiating,
+  inactive: enStatus.sponsors.inactive,
 };
 
 export interface ContactInfo {

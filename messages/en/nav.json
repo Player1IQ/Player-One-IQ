@@ -1,0 +1,35 @@
+{
+  "items": {
+    "dashboard": "Dashboard",
+    "creators": "Creators",
+    "sponsors": "Sponsors",
+    "campaigns": "Campaigns",
+    "deals": "Deals",
+    "opportunities": "Opportunities",
+    "messages": "Messages",
+    "schedule": "Schedule",
+    "ai": "AI",
+    "reports": "Reports",
+    "team": "Team",
+    "billing": "Billing",
+    "settings": "Settings",
+    "home": "Home",
+    "revenue": "Revenue",
+    "myProfile": "My Profile",
+    "account": "Account",
+    "company": "Company",
+    "myApplications": "My applications",
+    "deliverables": "Deliverables",
+    "growth": "Growth",
+    "coach": "Coach",
+    "seasons": "Seasons"
+  },
+  "sidebar": {
+    "creatorPlatform": "Creator Platform",
+    "workspace": "Workspace",
+    "organizationLogoAlt": "Organization logo",
+    "upgradePlan": "Upgrade Plan",
+    "upgradeSubtitle": "Unlock AI & analytics"
+  },
+  "pageSubtitle": "Page"
+}

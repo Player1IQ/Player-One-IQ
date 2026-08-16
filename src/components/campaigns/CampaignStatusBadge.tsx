@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { CampaignStatus } from "@/lib/campaigns";
 
 const statusStyles: Record<CampaignStatus, string> = {
@@ -12,11 +15,13 @@ interface CampaignStatusBadgeProps {
 }
 
 export function CampaignStatusBadge({ status }: CampaignStatusBadgeProps) {
+  const t = useTranslations("status");
+
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${statusStyles[status]}`}
     >
-      {status}
+      {t(`campaigns.${status}`)}
     </span>
   );
 }

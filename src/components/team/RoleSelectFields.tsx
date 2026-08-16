@@ -1,11 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   type TeamRole,
   invitableRoles,
-  roleDescriptions,
   roleGroups,
-  roleLabels,
   requiresLinkedCreator,
   requiresLinkedSponsor,
 } from "@/lib/team";
@@ -35,6 +34,7 @@ export function RoleSelectFields({
   sponsors,
   availableRoles,
 }: RoleSelectFieldsProps) {
+  const t = useTranslations("team");
   const allowedRoles = availableRoles ?? invitableRoles;
 
   return (
@@ -49,19 +49,19 @@ export function RoleSelectFields({
           className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
         >
           {roleGroups.map((group) => (
-            <optgroup key={group.label} label={group.label}>
+            <optgroup key={group.labelKey} label={t(`roleGroups.${group.labelKey}`)}>
               {group.roles
                 .filter((groupRole) => allowedRoles.includes(groupRole))
                 .map((groupRole) => (
                   <option key={groupRole} value={groupRole}>
-                    {roleLabels[groupRole]}
+                    {t(`roles.${groupRole}`)}
                   </option>
                 ))}
             </optgroup>
           ))}
         </select>
         <p className="mt-2 text-xs leading-relaxed text-gray-500">
-          {roleDescriptions[role]}
+          {t(`roleDescriptions.${role}`)}
         </p>
       </div>
 

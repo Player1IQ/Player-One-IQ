@@ -1,0 +1,106 @@
+{
+  "placeholder": "Search or jump to...",
+  "searchShort": "Search",
+  "closeAriaLabel": "Close command palette",
+  "searchAriaLabel": "Search or jump to",
+  "sections": {
+    "recent": "Recent",
+    "pages": "Pages",
+    "actions": "Actions",
+    "entities": "Entities"
+  },
+  "badges": {
+    "action": "Action",
+    "page": "Page"
+  },
+  "entityTypes": {
+    "creator": "Creator",
+    "sponsor": "Sponsor",
+    "contract": "Contract",
+    "campaign": "Campaign",
+    "opportunity": "Opportunity",
+    "message": "Message"
+  },
+  "loading": "Loading...",
+  "loadError": "Could not load search results. Try again.",
+  "noResults": "No results found.",
+  "noRecords": "No searchable records yet.",
+  "actions": {
+    "create-deal": {
+      "label": "Create deal",
+      "subtitle": "New sponsorship agreement"
+    },
+    "create-creator": {
+      "label": "Add creator",
+      "subtitle": "Add a creator to your roster"
+    },
+    "create-sponsor": {
+      "label": "Add sponsor",
+      "subtitle": "Add a brand or sponsor contact"
+    },
+    "create-campaign": {
+      "label": "Create campaign",
+      "subtitle": "Track a sponsor campaign"
+    },
+    "create-opportunity": {
+      "label": "Create opportunity",
+      "subtitle": "Post a sponsorship opportunity"
+    },
+    "invite-team": {
+      "label": "Invite team member",
+      "subtitle": "Send a team invitation"
+    },
+    "new-message": {
+      "label": "Start conversation",
+      "subtitle": "Send a new message"
+    },
+    "view-reports": {
+      "label": "View reports",
+      "subtitle": "Analytics and monthly reports"
+    },
+    "open-ai": {
+      "label": "Open AI assistant",
+      "subtitle": "Growth, deals, and insights"
+    },
+    "manage-billing": {
+      "label": "Manage billing",
+      "subtitle": "Plans, invoices, and payouts"
+    },
+    "update-profile": {
+      "label": "Update profile",
+      "subtitle": "Edit your creator profile"
+    },
+    "view-revenue": {
+      "label": "View revenue",
+      "subtitle": "Earnings and payout history"
+    },
+    "view-growth": {
+      "label": "View growth",
+      "subtitle": "Analytics and performance trends"
+    },
+    "view-coach": {
+      "label": "Open coach",
+      "subtitle": "AI posting and growth guidance"
+    },
+    "view-deliverables": {
+      "label": "View deliverables",
+      "subtitle": "Track deal deliverables"
+    },
+    "browse-opportunities": {
+      "label": "Browse opportunities",
+      "subtitle": "Find sponsorship opportunities"
+    },
+    "update-company": {
+      "label": "Update company profile",
+      "subtitle": "Edit sponsor company details"
+    },
+    "view-schedule": {
+      "label": "View schedule",
+      "subtitle": "Calendar and upcoming events"
+    },
+    "org-settings": {
+      "label": "Organization settings",
+      "subtitle": "Workspace preferences"
+    }
+  }
+}

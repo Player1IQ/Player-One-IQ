@@ -1,5 +1,7 @@
 export type CampaignStatus = "draft" | "active" | "completed" | "paused";
 
+import enStatus from "../../../messages/en/status.json";
+
 export const campaignStatuses: CampaignStatus[] = [
   "draft",
   "active",
@@ -8,10 +10,10 @@ export const campaignStatuses: CampaignStatus[] = [
 ];
 
 export const campaignStatusLabels: Record<CampaignStatus, string> = {
-  draft: "Draft",
-  active: "Active",
-  completed: "Completed",
-  paused: "Paused",
+  draft: enStatus.campaigns.draft,
+  active: enStatus.campaigns.active,
+  completed: enStatus.campaigns.completed,
+  paused: enStatus.campaigns.paused,
 };
 
 export interface SponsorCampaignRow {

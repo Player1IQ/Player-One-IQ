@@ -1,3 +1,4 @@
+import enSubscription from "../../../messages/en/subscription.json";
 import type {
   FeatureKey,
   PlanCode,
@@ -105,66 +106,13 @@ export const planHighlights: Record<
   PlanCode,
   { tagline: string; bullets: string[] }
 > = {
-  free_creator: {
-    tagline: "Start your creator journey",
-    bullets: [
-      "1 creator profile",
-      "Apply to opportunities",
-      "Limited analytics",
-    ],
-  },
-  creator_pro: {
-    tagline: "Grow faster with AI",
-    bullets: [
-      "Unlimited opportunities",
-      "Advanced analytics",
-      "50 AI requests/month included",
-      "Revenue forecasting & monthly reports",
-    ],
-  },
-  agency_starter: {
-    tagline: "Essentials after your trial",
-    bullets: [
-      "Up to 5 creators & 2 team seats",
-      "Contracts, sponsor CRM & messaging",
-      "Upgrade for AI and higher limits",
-    ],
-  },
-  agency: {
-    tagline: "Run your roster end-to-end",
-    bullets: [
-      "Up to 25 creators",
-      "Team, contracts & sponsor CRM",
-      "200 AI requests/month included",
-      "Contract summaries",
-    ],
-  },
-  agency_pro: {
-    tagline: "Scale without limits",
-    bullets: [
-      "Unlimited creators & team",
-      "500 AI requests/month included",
-      "AI forecasting & deal recommendations",
-      "White-label options & API access",
-    ],
-  },
-  sponsor: {
-    tagline: "Launch sponsorship campaigns",
-    bullets: [
-      "Create opportunities",
-      "Review creators & message",
-      "Analytics & campaign tracking",
-    ],
-  },
-  sponsor_pro: {
-    tagline: "Maximize campaign ROI",
-    bullets: [
-      "Unlimited campaigns",
-      "75 AI requests/month included",
-      "AI creator discovery & campaign recommendations",
-      "AI ROI forecasting & advanced reporting",
-    ],
-  },
+  free_creator: enSubscription.plans.free_creator,
+  creator_pro: enSubscription.plans.creator_pro,
+  agency_starter: enSubscription.plans.agency_starter,
+  agency: enSubscription.plans.agency,
+  agency_pro: enSubscription.plans.agency_pro,
+  sponsor: enSubscription.plans.sponsor,
+  sponsor_pro: enSubscription.plans.sponsor_pro,
 };
 
 export const upgradePaths: Record<PlanCode, PlanCode[]> = {
@@ -193,8 +141,12 @@ export function getDefaultPlanForOrgType(orgType: string): PlanCode {
   return "free_creator";
 }
 
-export function formatPlanPrice(cents: number, interval: "monthly" | "yearly") {
-  if (cents === 0) return "Free";
+export function formatPlanPrice(
+  cents: number,
+  interval: "monthly" | "yearly",
+  freeLabel: string = enSubscription.pricing.free
+) {
+  if (cents === 0) return freeLabel;
   const amount = (cents / 100).toLocaleString("en-US", {
     style: "currency",
     currency: "USD",

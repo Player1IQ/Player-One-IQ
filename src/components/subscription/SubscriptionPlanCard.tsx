@@ -1,7 +1,8 @@
 "use client";
 
 import { Check, Loader2 } from "lucide-react";
-import { formatPlanPrice, planHighlights, planRequiresStripeCheckout } from "@/lib/subscription/plans";
+import { useTranslations } from "next-intl";
+import { formatPlanPrice, planRequiresStripeCheckout } from "@/lib/subscription/plans";
 import { PLATFORM_TRIAL_DAYS } from "@/lib/subscription/trials";
 import type { BillingInterval, PlanCode, SubscriptionPlan } from "@/lib/subscription/types";
 
@@ -30,7 +31,11 @@ export function SubscriptionPlanCard({
   trialAvailable = false,
   trialUsed = false,
 }: SubscriptionPlanCardProps) {
-  const highlights = planHighlights[plan.code];
+  const t = useTranslations("subscription");
+  const highlights = {
+    tagline: t(`plans.${plan.code}.tagline`),
+    bullets: t.raw(`plans.${plan.code}.bullets`) as string[],
+  };
   const priceCents =
     billingInterval === "yearly" && plan.priceYearlyCents !== null
       ? plan.priceYearlyCents
@@ -58,7 +63,7 @@ export function SubscriptionPlanCard({
       <p className="mt-1 text-sm text-gray-500">{highlights.tagline}</p>
 
       <p className="mt-4 text-3xl font-bold text-white">
-        {formatPlanPrice(priceCents, billingInterval)}
+        {formatPlanPrice(priceCents, billingInterval, t("pricing.free"))}
       </p>
 
       <ul className="mt-6 flex-1 space-y-2">

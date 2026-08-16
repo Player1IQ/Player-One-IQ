@@ -31,8 +31,33 @@ export type NavIconName =
   | "trophy"
   | "dollar-sign";
 
+export type NavLabelKey =
+  | "dashboard"
+  | "creators"
+  | "sponsors"
+  | "campaigns"
+  | "deals"
+  | "opportunities"
+  | "messages"
+  | "schedule"
+  | "ai"
+  | "reports"
+  | "team"
+  | "billing"
+  | "settings"
+  | "home"
+  | "revenue"
+  | "myProfile"
+  | "account"
+  | "company"
+  | "myApplications"
+  | "deliverables"
+  | "growth"
+  | "coach"
+  | "seasons";
+
 export interface NavItem {
-  label: string;
+  labelKey: NavLabelKey;
   href: string;
   icon: NavIconName;
   showUnreadBadge?: boolean;
@@ -42,48 +67,48 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   {
-    label: "Dashboard",
+    labelKey: "dashboard",
     href: STAFF_DASHBOARD_PATH,
     icon: "dashboard",
     keywords: ["home", "overview"],
   },
   {
-    label: "Creators",
+    labelKey: "creators",
     href: "/creators",
     icon: "users",
     requiredFeature: navFeatureRequirements["/creators"],
     keywords: ["creator", "roster", "talent"],
   },
   {
-    label: "Sponsors",
+    labelKey: "sponsors",
     href: "/sponsors",
     icon: "building",
     requiredFeature: navFeatureRequirements["/sponsors"],
     keywords: ["sponsor", "brand", "partner"],
   },
   {
-    label: "Campaigns",
+    labelKey: "campaigns",
     href: "/campaigns",
     icon: "target",
     requiredFeature: navFeatureRequirements["/campaigns"],
     keywords: ["campaign", "activation"],
   },
   {
-    label: "Deals",
+    labelKey: "deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],
     keywords: ["deal", "deals", "contract", "agreement"],
   },
   {
-    label: "Opportunities",
+    labelKey: "opportunities",
     href: "/opportunities",
     icon: "briefcase",
     requiredFeature: navFeatureRequirements["/opportunities"],
     keywords: ["opportunity", "brief", "listing"],
   },
   {
-    label: "Messages",
+    labelKey: "messages",
     href: "/messages",
     icon: "message-square",
     showUnreadBadge: true,
@@ -91,40 +116,40 @@ export const navItems: NavItem[] = [
     keywords: ["message", "chat", "inbox"],
   },
   {
-    label: "Schedule",
+    labelKey: "schedule",
     href: "/schedule",
     icon: "calendar",
     keywords: ["schedule", "calendar", "events"],
   },
   {
-    label: "AI",
+    labelKey: "ai",
     href: "/ai",
     icon: "sparkles",
     requiredFeature: aiFeatureKeys,
     keywords: ["ai", "assistant", "insights"],
   },
   {
-    label: "Reports",
+    labelKey: "reports",
     href: "/reports",
     icon: "bar-chart",
     requiredFeature: ["advanced_analytics", "monthly_reports"],
     keywords: ["report", "analytics", "metrics"],
   },
   {
-    label: "Team",
+    labelKey: "team",
     href: "/team",
     icon: "user-cog",
     requiredFeature: navFeatureRequirements["/team"],
     keywords: ["team", "members", "invite"],
   },
   {
-    label: "Billing",
+    labelKey: "billing",
     href: "/billing",
     icon: "credit-card",
     keywords: ["billing", "payout", "payment", "subscription", "invoice"],
   },
   {
-    label: "Settings",
+    labelKey: "settings",
     href: "/settings",
     icon: "settings",
     keywords: ["settings", "preferences", "workspace"],
@@ -133,38 +158,38 @@ export const navItems: NavItem[] = [
 
 export const portalNavItems: NavItem[] = [
   {
-    label: "Home",
+    labelKey: "home",
     href: "/portal",
     icon: "dashboard",
     keywords: ["home", "portal"],
   },
   {
-    label: "Revenue",
+    labelKey: "revenue",
     href: "/portal/revenue",
     icon: "dollar-sign",
     keywords: ["revenue", "earnings", "payout", "money", "income"],
   },
   {
-    label: "Schedule",
+    labelKey: "schedule",
     href: "/schedule",
     icon: "calendar",
     keywords: ["schedule", "calendar", "events"],
   },
   {
-    label: "My Profile",
+    labelKey: "myProfile",
     href: "/portal/profile",
     icon: "users",
     keywords: ["profile", "account", "platforms"],
   },
   {
-    label: "Deals",
+    labelKey: "deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],
     keywords: ["deal", "deals", "contract", "agreement"],
   },
   {
-    label: "Messages",
+    labelKey: "messages",
     href: "/portal/messages",
     icon: "message-square",
     showUnreadBadge: true,
@@ -172,7 +197,7 @@ export const portalNavItems: NavItem[] = [
     keywords: ["message", "chat", "inbox"],
   },
   {
-    label: "Account",
+    labelKey: "account",
     href: "/portal/account",
     icon: "settings",
     keywords: ["account", "settings", "billing"],
@@ -181,39 +206,39 @@ export const portalNavItems: NavItem[] = [
 
 export const sponsorPortalNavItems: NavItem[] = [
   {
-    label: "Home",
+    labelKey: "home",
     href: "/portal",
     icon: "dashboard",
     keywords: ["home", "portal"],
   },
   {
-    label: "Schedule",
+    labelKey: "schedule",
     href: "/schedule",
     icon: "calendar",
     keywords: ["schedule", "calendar", "events"],
   },
   {
-    label: "Company",
+    labelKey: "company",
     href: "/portal/profile",
     icon: "building",
     keywords: ["company", "profile", "brand"],
   },
   {
-    label: "Deals",
+    labelKey: "deals",
     href: "/contracts",
     icon: "file-text",
     requiredFeature: navFeatureRequirements["/contracts"],
     keywords: ["deal", "deals", "contract"],
   },
   {
-    label: "Campaigns",
+    labelKey: "campaigns",
     href: "/campaigns",
     icon: "target",
     requiredFeature: navFeatureRequirements["/campaigns"],
     keywords: ["campaign", "activation"],
   },
   {
-    label: "Messages",
+    labelKey: "messages",
     href: "/portal/messages",
     icon: "message-square",
     showUnreadBadge: true,
@@ -221,7 +246,7 @@ export const sponsorPortalNavItems: NavItem[] = [
     keywords: ["message", "chat", "inbox"],
   },
   {
-    label: "Account",
+    labelKey: "account",
     href: "/portal/account",
     icon: "settings",
     keywords: ["account", "settings"],
@@ -275,7 +300,7 @@ export function getAccessibleNavItems(
     }
 
     const applicationsItem: NavItem = {
-      label: "My applications",
+      labelKey: "myApplications",
       href: "/opportunities/applications",
       icon: "briefcase",
       keywords: ["applications", "applied", "submissions"],
@@ -294,7 +319,7 @@ export function getAccessibleNavItems(
     }
 
     const deliverablesItem: NavItem = {
-      label: "Deliverables",
+      labelKey: "deliverables",
       href: "/portal/deliverables",
       icon: "file-text",
       keywords: ["deliverable", "deliverables", "tasks"],
@@ -311,7 +336,7 @@ export function getAccessibleNavItems(
     }
 
     const growthItem: NavItem = {
-      label: "Growth",
+      labelKey: "growth",
       href: "/portal/growth",
       icon: "bar-chart",
       keywords: ["growth", "analytics", "performance"],
@@ -328,7 +353,7 @@ export function getAccessibleNavItems(
     }
 
     const coachItem: NavItem = {
-      label: "Coach",
+      labelKey: "coach",
       href: "/portal/coach",
       icon: "sparkles",
       keywords: ["coach", "ai", "cadence", "posting"],
@@ -344,7 +369,7 @@ export function getAccessibleNavItems(
     }
 
     const seasonsItem: NavItem = {
-      label: "Seasons",
+      labelKey: "seasons",
       href: "/portal/seasons",
       icon: "trophy",
       keywords: ["seasons", "xp", "rewards"],
@@ -362,13 +387,13 @@ export function getAccessibleNavItems(
     if (options?.isWorkspaceFounder) {
       const workspaceAdminItems: NavItem[] = [
         {
-          label: "Settings",
+          labelKey: "settings",
           href: "/settings",
           icon: "settings",
           keywords: ["settings", "ai", "integration", "api key"],
         },
         {
-          label: "Billing",
+          labelKey: "billing",
           href: "/billing",
           icon: "credit-card",
           keywords: ["billing", "plan", "subscription", "upgrade"],

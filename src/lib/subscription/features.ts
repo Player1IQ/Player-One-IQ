@@ -1,34 +1,35 @@
+import enSubscription from "../../../messages/en/subscription.json";
 import type { FeatureKey, PlanLimits, UsageMetricKey } from "./types";
 
 export const featureLabels: Record<FeatureKey, string> = {
-  creator_profiles: "Creator profiles",
-  apply_opportunities: "Apply to opportunities",
-  create_opportunities: "Create opportunities",
-  limited_analytics: "Limited analytics",
-  advanced_analytics: "Advanced analytics",
-  ai_growth: "AI growth recommendations",
-  ai_creator_coach: "AI Creator Coach chat",
-  ai_sponsorship: "AI sponsorship suggestions",
-  revenue_forecasting: "Revenue forecasting",
-  monthly_reports: "Monthly reports",
-  team_management: "Team management",
-  contracts: "Contracts",
-  sponsor_crm: "Sponsor CRM",
-  opportunity_management: "Opportunity management",
-  ai_creator_performance: "AI creator performance analysis",
-  ai_sponsorship_matching: "AI sponsorship matching",
-  ai_contract_summaries: "AI contract summaries",
-  ai_forecasting: "AI forecasting",
-  ai_deal_recommendations: "AI deal recommendations",
-  white_label: "White-label options",
-  api_access: "API access",
-  review_creators: "Review creators",
-  messaging: "Messaging",
-  campaign_tracking: "Campaign tracking",
-  ai_creator_discovery: "AI creator discovery",
-  ai_campaign_recommendations: "AI campaign recommendations",
-  ai_roi_forecasting: "AI ROI forecasting",
-  advanced_reporting: "Advanced reporting",
+  creator_profiles: enSubscription.features.creator_profiles,
+  apply_opportunities: enSubscription.features.apply_opportunities,
+  create_opportunities: enSubscription.features.create_opportunities,
+  limited_analytics: enSubscription.features.limited_analytics,
+  advanced_analytics: enSubscription.features.advanced_analytics,
+  ai_growth: enSubscription.features.ai_growth,
+  ai_creator_coach: enSubscription.features.ai_creator_coach,
+  ai_sponsorship: enSubscription.features.ai_sponsorship,
+  revenue_forecasting: enSubscription.features.revenue_forecasting,
+  monthly_reports: enSubscription.features.monthly_reports,
+  team_management: enSubscription.features.team_management,
+  contracts: enSubscription.features.contracts,
+  sponsor_crm: enSubscription.features.sponsor_crm,
+  opportunity_management: enSubscription.features.opportunity_management,
+  ai_creator_performance: enSubscription.features.ai_creator_performance,
+  ai_sponsorship_matching: enSubscription.features.ai_sponsorship_matching,
+  ai_contract_summaries: enSubscription.features.ai_contract_summaries,
+  ai_forecasting: enSubscription.features.ai_forecasting,
+  ai_deal_recommendations: enSubscription.features.ai_deal_recommendations,
+  white_label: enSubscription.features.white_label,
+  api_access: enSubscription.features.api_access,
+  review_creators: enSubscription.features.review_creators,
+  messaging: enSubscription.features.messaging,
+  campaign_tracking: enSubscription.features.campaign_tracking,
+  ai_creator_discovery: enSubscription.features.ai_creator_discovery,
+  ai_campaign_recommendations: enSubscription.features.ai_campaign_recommendations,
+  ai_roi_forecasting: enSubscription.features.ai_roi_forecasting,
+  advanced_reporting: enSubscription.features.advanced_reporting,
 };
 
 export const creatorCoachFeatureKeys: FeatureKey[] = ["ai_creator_coach"];
@@ -127,36 +128,36 @@ export function getUpgradePlanForFeature(
 ): string {
   const tierUpgrades: Record<string, Partial<Record<FeatureKey, string>>> = {
     creator: {
-      advanced_analytics: "Creator Pro",
-      ai_growth: "Creator Pro",
-      ai_creator_coach: "Creator Pro",
-      ai_sponsorship: "Creator Pro",
-      revenue_forecasting: "Creator Pro",
-      monthly_reports: "Creator Pro",
-      team_management: "Agency",
+      advanced_analytics: enSubscription.upgradePlans.creatorPro,
+      ai_growth: enSubscription.upgradePlans.creatorPro,
+      ai_creator_coach: enSubscription.upgradePlans.creatorPro,
+      ai_sponsorship: enSubscription.upgradePlans.creatorPro,
+      revenue_forecasting: enSubscription.upgradePlans.creatorPro,
+      monthly_reports: enSubscription.upgradePlans.creatorPro,
+      team_management: enSubscription.upgradePlans.agency,
     },
     agency: {
-      ai_forecasting: "Agency Pro",
-      ai_deal_recommendations: "Agency Pro",
-      ai_creator_coach: "Agency Pro",
-      white_label: "Agency Pro",
-      api_access: "Agency Pro",
+      ai_forecasting: enSubscription.upgradePlans.agencyPro,
+      ai_deal_recommendations: enSubscription.upgradePlans.agencyPro,
+      ai_creator_coach: enSubscription.upgradePlans.agencyPro,
+      white_label: enSubscription.upgradePlans.agencyPro,
+      api_access: enSubscription.upgradePlans.agencyPro,
     },
     sponsor: {
-      ai_creator_discovery: "Sponsor Pro",
-      ai_campaign_recommendations: "Sponsor Pro",
-      ai_roi_forecasting: "Sponsor Pro",
-      advanced_reporting: "Sponsor Pro",
-      advanced_analytics: "Sponsor Pro",
+      ai_creator_discovery: enSubscription.upgradePlans.sponsorPro,
+      ai_campaign_recommendations: enSubscription.upgradePlans.sponsorPro,
+      ai_roi_forecasting: enSubscription.upgradePlans.sponsorPro,
+      advanced_reporting: enSubscription.upgradePlans.sponsorPro,
+      advanced_analytics: enSubscription.upgradePlans.sponsorPro,
     },
   };
 
   return (
     tierUpgrades[tierGroup]?.[feature] ??
     (tierGroup === "creator"
-      ? "Creator Pro"
+      ? enSubscription.upgradePlans.creatorPro
       : tierGroup === "agency"
-        ? "Agency Pro"
-        : "Sponsor Pro")
+        ? enSubscription.upgradePlans.agencyPro
+        : enSubscription.upgradePlans.sponsorPro)
   );
 }

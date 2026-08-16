@@ -1,14 +1,18 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Check, X } from "lucide-react";
 import {
   permissions,
   teamRoles,
   permissionMatrix,
   type PermissionLevel,
-  roleLabels,
   getRoleColor,
 } from "@/lib/team";
 
 function PermissionCell({ level }: { level: PermissionLevel }) {
+  const t = useTranslations("team");
+
   if (level === "full") {
     return (
       <div className="flex justify-center">
@@ -21,14 +25,14 @@ function PermissionCell({ level }: { level: PermissionLevel }) {
   if (level === "read") {
     return (
       <div className="flex justify-center">
-        <span className="text-xs font-medium text-sky-400">Read</span>
+        <span className="text-xs font-medium text-sky-400">{t("permissionLevels.read")}</span>
       </div>
     );
   }
   if (level === "scoped") {
     return (
       <div className="flex justify-center">
-        <span className="text-xs font-medium text-amber-400">Own</span>
+        <span className="text-xs font-medium text-amber-400">{t("permissionLevels.scoped")}</span>
       </div>
     );
   }
@@ -42,6 +46,8 @@ function PermissionCell({ level }: { level: PermissionLevel }) {
 }
 
 export function PermissionMatrix() {
+  const t = useTranslations("team");
+
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-surface-raised shadow-sm">
       <div className="border-b border-border px-6 py-4">
@@ -68,7 +74,7 @@ export function PermissionMatrix() {
                   <span
                     className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${getRoleColor(role)}`}
                   >
-                    {roleLabels[role]}
+                    {t(`roles.${role}`)}
                   </span>
                 </th>
               ))}
@@ -81,9 +87,11 @@ export function PermissionMatrix() {
                 className="transition-colors hover:bg-surface-overlay/20"
               >
                 <td className="sticky left-0 z-10 bg-surface-raised px-6 py-4">
-                  <p className="font-medium text-gray-200">{perm.label}</p>
+                  <p className="font-medium text-gray-200">
+                    {t(`permissions.${perm.key}.label`)}
+                  </p>
                   <p className="mt-0.5 text-xs text-gray-500">
-                    {perm.description}
+                    {t(`permissions.${perm.key}.description`)}
                   </p>
                 </td>
                 {teamRoles.map((role) => (

@@ -1,0 +1,106 @@
+{
+  "placeholder": "Buscar o ir a...",
+  "searchShort": "Buscar",
+  "closeAriaLabel": "Cerrar paleta de comandos",
+  "searchAriaLabel": "Buscar o ir a",
+  "sections": {
+    "recent": "Recientes",
+    "pages": "Páginas",
+    "actions": "Acciones",
+    "entities": "Entidades"
+  },
+  "badges": {
+    "action": "Acción",
+    "page": "Página"
+  },
+  "entityTypes": {
+    "creator": "Creador",
+    "sponsor": "Patrocinador",
+    "contract": "Acuerdo",
+    "campaign": "Campaña",
+    "opportunity": "Oportunidad",
+    "message": "Mensaje"
+  },
+  "loading": "Cargando...",
+  "loadError": "No se pudieron cargar los resultados. Inténtalo de nuevo.",
+  "noResults": "No se encontraron resultados.",
+  "noRecords": "Aún no hay registros buscables.",
+  "actions": {
+    "create-deal": {
+      "label": "Crear acuerdo",
+      "subtitle": "Nuevo acuerdo de patrocinio"
+    },
+    "create-creator": {
+      "label": "Agregar creador",
+      "subtitle": "Agrega un creador a tu roster"
+    },
+    "create-sponsor": {
+      "label": "Agregar patrocinador",
+      "subtitle": "Agrega una marca o contacto de patrocinio"
+    },
+    "create-campaign": {
+      "label": "Crear campaña",
+      "subtitle": "Gestiona una campaña de patrocinio"
+    },
+    "create-opportunity": {
+      "label": "Crear oportunidad",
+      "subtitle": "Publica una oportunidad de patrocinio"
+    },
+    "invite-team": {
+      "label": "Invitar miembro del equipo",
+      "subtitle": "Envía una invitación al equipo"
+    },
+    "new-message": {
+      "label": "Iniciar conversación",
+      "subtitle": "Envía un nuevo mensaje"
+    },
+    "view-reports": {
+      "label": "Ver informes",
+      "subtitle": "Analíticas e informes mensuales"
+    },
+    "open-ai": {
+      "label": "Abrir asistente de IA",
+      "subtitle": "Crecimiento, acuerdos e insights"
+    },
+    "manage-billing": {
+      "label": "Gestionar facturación",
+      "subtitle": "Planes, facturas y pagos"
+    },
+    "update-profile": {
+      "label": "Actualizar perfil",
+      "subtitle": "Edita tu perfil de creador"
+    },
+    "view-revenue": {
+      "label": "Ver ingresos",
+      "subtitle": "Ganancias e historial de pagos"
+    },
+    "view-growth": {
+      "label": "Ver crecimiento",
+      "subtitle": "Analíticas y tendencias de rendimiento"
+    },
+    "view-coach": {
+      "label": "Abrir coach",
+      "subtitle": "Guía de IA para publicaciones y crecimiento"
+    },
+    "view-deliverables": {
+      "label": "Ver entregables",
+      "subtitle": "Seguimiento de entregables del acuerdo"
+    },
+    "browse-opportunities": {
+      "label": "Explorar oportunidades",
+      "subtitle": "Encuentra oportunidades de patrocinio"
+    },
+    "update-company": {
+      "label": "Actualizar perfil de empresa",
+      "subtitle": "Edita los datos de la empresa patrocinadora"
+    },
+    "view-schedule": {
+      "label": "Ver calendario",
+      "subtitle": "Calendario y próximos eventos"
+    },
+    "org-settings": {
+      "label": "Configuración de la organización",
+      "subtitle": "Preferencias del espacio de trabajo"
+    }
+  }
+}

@@ -10,11 +10,11 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Loader2, Search, X } from "lucide-react";
 import type { CommandPaletteIndex, CommandPaletteItem } from "@/lib/command-palette/types";
 import {
   filterCommandPaletteResults,
-  getSectionLabel,
 } from "@/lib/command-palette/filter";
 import { cn } from "@/lib/utils";
 
@@ -56,14 +56,6 @@ function writeRecentItem(item: CommandPaletteItem) {
   window.localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(next));
 }
 
-const entityTypeLabels: Record<NonNullable<CommandPaletteItem["entityType"]>, string> = {
-  creator: "Creator",
-  sponsor: "Sponsor",
-  contract: "Contract",
-  campaign: "Campaign",
-  opportunity: "Opportunity",
-  message: "Message",
-};
 
 interface CommandPaletteProviderProps {
   children: ReactNode;
@@ -71,6 +63,7 @@ interface CommandPaletteProviderProps {
 
 export function CommandPaletteProvider({ children }: CommandPaletteProviderProps) {
   const router = useRouter();
+  const t = useTranslations("commandPalette");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -89,36 +82,36 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
   const displaySections = useMemo(() => {
     if (query.trim()) {
       return [
-        { key: "routes", label: getSectionLabel("route"), items: results.routes },
-        { key: "actions", label: getSectionLabel("action"), items: results.actions },
-        { key: "entities", label: getSectionLabel("entity"), items: results.entities },
+        { key: "routes", label: t("sections.pages"), items: results.routes },
+        { key: "actions", label: t("sections.actions"), items: results.actions },
+        { key: "entities", label: t("sections.entities"), items: results.entities },
       ].filter((section) => section.items.length > 0);
     }
 
     const recent =
       recentItems.length > 0
-        ? [{ key: "recent", label: "Recent", items: recentItems }]
+        ? [{ key: "recent", label: t("sections.recent"), items: recentItems }]
         : [];
 
     return [
       ...recent,
       {
         key: "routes",
-        label: getSectionLabel("route"),
+        label: t("sections.pages"),
         items: results.routes,
       },
       {
         key: "actions",
-        label: getSectionLabel("action"),
+        label: t("sections.actions"),
         items: results.actions,
       },
       {
         key: "entities",
-        label: getSectionLabel("entity"),
+        label: t("sections.entities"),
         items: results.entities,
       },
     ].filter((section) => section.items.length > 0);
-  }, [query, recentItems, results]);
+  }, [query, recentItems, results, t]);
 
   const flatItems = useMemo(
     () => displaySections.flatMap((section) => section.items),
@@ -155,7 +148,7 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
       })
       .catch(() => {
         if (!cancelled) {
-          setLoadError("Could not load search results. Try again.");
+          setLoadError(t("loadError"));
         }
       })
       .finally(() => {
@@ -167,7 +160,7 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
     return () => {
       cancelled = true;
     };
-  }, [open, index]);
+  }, [open, index, t]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -228,14 +221,14 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search or jump to..."
+                placeholder={t("placeholder")}
                 className="w-full bg-transparent py-4 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none"
               />
               <button
                 type="button"
                 onClick={closePalette}
                 className="rounded-lg p-1 text-gray-500 hover:text-gray-300"
-                aria-label="Close command palette"
+                aria-label={t("closeAriaLabel")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -245,7 +238,7 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
               {loading ? (
                 <div className="flex items-center justify-center gap-2 px-3 py-8 text-sm text-gray-500">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading...
+                  {t("loading")}
                 </div>
               ) : loadError ? (
                 <p className="px-3 py-6 text-center text-sm text-red-400">
@@ -253,7 +246,7 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
                 </p>
               ) : flatItems.length === 0 ? (
                 <p className="px-3 py-6 text-center text-sm text-gray-500">
-                  {index ? "No results found." : "No searchable records yet."}
+                  {index ? t("noResults") : t("noRecords")}
                 </p>
               ) : (
                 displaySections.map((section) => {
@@ -269,10 +262,10 @@ export function CommandPaletteProvider({ children }: CommandPaletteProviderProps
                         const globalIndex = sectionStart + sectionIndex;
                         const badge =
                           item.section === "entity" && item.entityType
-                            ? entityTypeLabels[item.entityType]
+                            ? t(`entityTypes.${item.entityType}`)
                             : item.section === "action"
-                              ? "Action"
-                              : "Page";
+                              ? t("badges.action")
+                              : t("badges.page");
 
                         return (
                           <button
@@ -320,6 +313,7 @@ export function CommandPaletteTrigger({
   variant = "desktop",
 }: CommandPaletteTriggerProps) {
   const { open } = useCommandPaletteContext();
+  const t = useTranslations("commandPalette");
 
   if (variant === "mobile") {
     return (
@@ -327,7 +321,7 @@ export function CommandPaletteTrigger({
         type="button"
         onClick={open}
         className="rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white"
-        aria-label="Search or jump to"
+        aria-label={t("searchAriaLabel")}
       >
         <Search className="h-5 w-5" />
       </button>
@@ -341,8 +335,8 @@ export function CommandPaletteTrigger({
       className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-raised px-3 py-1.5 text-sm text-gray-400 transition-colors hover:border-accent/30 hover:text-gray-200"
     >
       <Search className="h-4 w-4" />
-      <span className="hidden sm:inline">Search or jump to...</span>
-      <span className="sm:hidden">Search</span>
+      <span className="hidden sm:inline">{t("placeholder")}</span>
+      <span className="sm:hidden">{t("searchShort")}</span>
       <kbd className="hidden rounded border border-border px-1.5 py-0.5 text-[10px] text-gray-500 md:inline">
         Ctrl K
       </kbd>

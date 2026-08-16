@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { ContractStatus } from "@/lib/contracts";
 
 const statusStyles: Record<ContractStatus, string> = {
@@ -9,25 +12,18 @@ const statusStyles: Record<ContractStatus, string> = {
   cancelled: "bg-zinc-500/10 text-zinc-400 ring-zinc-500/20",
 };
 
-const statusLabels: Record<ContractStatus, string> = {
-  draft: "Draft",
-  negotiating: "Negotiating",
-  active: "Active",
-  completed: "Completed",
-  expired: "Expired",
-  cancelled: "Cancelled",
-};
-
 interface ContractStatusBadgeProps {
   status: ContractStatus;
 }
 
 export function ContractStatusBadge({ status }: ContractStatusBadgeProps) {
+  const t = useTranslations("status");
+
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${statusStyles[status]}`}
     >
-      {statusLabels[status]}
+      {t(`contracts.${status}`)}
     </span>
   );
 }
