@@ -14,5 +14,102 @@
   "empty": {
     "noData": "Sin datos de reporte para este período",
     "noDataDescription": "Agrega creadores, contratos o entradas de ingresos para generar reportes."
+  },
+  "sparseBanner": {
+    "title": "Pocos datos este mes.",
+    "description": "Agrega creadores, conecta cuentas de plataforma o registra contratos para completar tu reporte. Aún puedes exportar lo que tienes hoy.",
+    "addCreators": "Agregar creadores",
+    "createContract": "Crear un contrato",
+    "syncRevenue": "Sincronizar ingresos de plataforma"
+  },
+  "periodCard": {
+    "monthlyReportFor": "Reporte mensual de",
+    "creators": "{count, plural, one {# creador} other {# creadores}}",
+    "platforms": "{count, plural, one {# plataforma conectada por OAuth} other {# plataformas conectadas por OAuth}}",
+    "vsLastMonth": "· vs mes anterior: {delta}"
+  },
+  "metrics": {
+    "totalRevenue": "Ingresos totales",
+    "contractPipeline": "Pipeline de contratos",
+    "activeInPipeline": "{count} activos en pipeline",
+    "opportunities": "Oportunidades",
+    "totalOpportunities": "{count} oportunidades en total",
+    "aiRequests": "Solicitudes de IA",
+    "remainingThisMonth": "{count} restantes este mes",
+    "unlimitedPlan": "Ilimitado en tu plan"
+  },
+  "campaignSummary": {
+    "title": "Resumen de campañas",
+    "emptyTitle": "Aún no hay campañas",
+    "emptyDescription": "Crea campañas de patrocinadores para rastrear presupuestos y estado en tus deals.",
+    "viewCampaigns": "Ver campañas",
+    "active": "Activas",
+    "totalBudget": "Presupuesto total",
+    "totalCampaigns": "Campañas totales",
+    "topByBudget": "Top por presupuesto"
+  },
+  "deliverableHealth": {
+    "title": "Salud de entregables",
+    "emptyTitle": "Sin entregables registrados",
+    "emptyDescription": "Agrega entregables a contratos para monitorear completitud e items vencidos.",
+    "viewContracts": "Ver contratos",
+    "completionRate": "Tasa de completitud",
+    "completedOf": "{completed} de {total} completados",
+    "overdue": "Vencidos",
+    "overdueSubtitle": "Pasada la fecha, sin completar",
+    "pending": "Pendientes",
+    "inProgress": "En progreso",
+    "completed": "Completados"
+  },
+  "sponsors": {
+    "title": "Top patrocinadores por pipeline",
+    "emptyTitle": "Aún no hay pipeline de patrocinadores",
+    "emptyDescription": "Contratos activos y en negociación aparecerán aquí agrupados por patrocinador.",
+    "viewSponsors": "Ver patrocinadores",
+    "columns": {
+      "sponsor": "Patrocinador",
+      "pipelineValue": "Valor de pipeline",
+      "activeContracts": "Contratos activos",
+      "totalContracts": "Contratos totales"
+    }
+  },
+  "creators": {
+    "title": "Top creadores por ingresos",
+    "emptyNoRevenueTitle": "Aún no hay ingresos de creadores",
+    "emptyNoCreatorsDescription": "Agrega creadores a tu roster, luego conecta contratos o ingresos de plataforma.",
+    "emptyHasCreatorsDescription": "Los creadores de tu roster no tienen ingresos de contrato o plataforma registrados este mes.",
+    "addFirstCreator": "Agrega tu primer creador",
+    "reviewCreators": "Revisar creadores",
+    "breakdown": {
+      "contracts": "contratos {amount}",
+      "platform": "plataforma {amount}",
+      "none": "Sin desglose"
+    }
+  },
+  "platformIncome": {
+    "title": "Ingresos de plataforma",
+    "emptyConnectedTitle": "Sin ingresos de plataforma este mes",
+    "emptyNoAccountsTitle": "Sin cuentas de plataforma conectadas",
+    "emptyConnectedDescription": "Las cuentas OAuth están vinculadas pero aún no hay ingresos sincronizados para este período. Ejecuta una sincronización manual o espera el job diario.",
+    "emptyNoAccountsDescription": "Conecta YouTube, Twitch u otras plataformas en un perfil de creador para rastrear ingresos.",
+    "openSyncSettings": "Abrir configuración de sincronización",
+    "connectPlatform": "Conectar una plataforma"
+  },
+  "aiUsage": {
+    "title": "Uso de IA",
+    "requestsThisMonth": "solicitudes este mes",
+    "emptyTitle": "Sin solicitudes de IA este mes",
+    "emptyDescription": "Ejecuta resúmenes de crecimiento, patrocinio o contratos desde la página de IA para ver el uso aquí.",
+    "openAi": "Abrir asistentes de IA"
+  },
+  "exportMenu": {
+    "upgradeTitle": "Mejora tu plan para exportar reportes",
+    "upgradeAria": "Mejora tu plan para exportar reportes",
+    "exportAria": "Exportar reporte",
+    "monthlyReport": "Reporte mensual",
+    "currentPeriod": "Período actual",
+    "downloadCsv": "Descargar CSV",
+    "printPdf": "Imprimir / Guardar PDF",
+    "exportFailed": "Error al exportar."
   }
 }

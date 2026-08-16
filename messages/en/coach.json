@@ -1,0 +1,255 @@
+{
+  "panel": {
+    "sectorTitle": "Creator Coach",
+    "descriptionPersonalized": "{greeting} — Personalized recommendations based on your goals and real workspace data.",
+    "descriptionDefault": "{greeting} — Recommendations to grow your creator business, powered by your real workspace data.",
+    "allCaughtUp": "You're all caught up",
+    "noRecommendations": "No active recommendations right now. Check back as your metrics change."
+  },
+  "layout": {
+    "topRecommendations": "Top recommendations",
+    "sidebarCaughtUp": "No active recommendations right now.",
+    "missionSidebarNote": "Your daily mission and recommendations remain available in the sidebar.",
+    "unavailableTitle": "Creator Coach is temporarily unavailable",
+    "unavailableDescription": "Refresh the page or try again in a moment."
+  },
+  "card": {
+    "whyItMatters": "Why this matters",
+    "estimatedImpact": "Estimated impact",
+    "confidence": "Confidence",
+    "learnMore": "Learn more",
+    "markComplete": "Mark complete",
+    "dismiss": "Dismiss",
+    "expand": "Expand recommendation",
+    "collapse": "Collapse recommendation"
+  },
+  "mission": {
+    "label": "Today's Mission",
+    "progress": "Progress",
+    "localSaveNote": "Progress is saved on this device. Connect workspace sync to keep it across sessions.",
+    "titles": {
+      "clearBacklog": "Clear your sponsorship backlog",
+      "postingRhythm": "Get back on your posting rhythm",
+      "revenueFoundation": "Set up your revenue foundation",
+      "streamingRhythm": "Build your streaming rhythm",
+      "contractPipeline": "Protect your contract pipeline",
+      "growCreator": "Grow your creator business today",
+      "moveRoster": "Move your roster forward today"
+    },
+    "subtitles": {
+      "withGoal": "Three focused actions tuned to your goal: {goal}.",
+      "creator": "Three focused actions based on your real metrics and profile.",
+      "organization": "Three workspace priorities based on your roster and pipeline data."
+    },
+    "tasks": {
+      "clearOverdue": "Clear {count, plural, one {# overdue deliverable} other {# overdue deliverables}}",
+      "scheduleBlock": "Block time on your schedule",
+      "cadenceMissedSingle": "Publish for missed {day} upload",
+      "cadenceMissedMultiple": "Catch up on {count} missed uploads",
+      "respondMessages": "Respond to {count, plural, one {# unread message} other {# unread messages}}",
+      "reviewApplications": "Review {count, plural, one {# pending application} other {# pending applications}}",
+      "reviewPerformance": "Review your latest content performance",
+      "planContent": "Plan your next piece of content",
+      "engageCommunity": "Engage with your community",
+      "reviewRoster": "Review roster performance metrics",
+      "checkInCreator": "Check in with a creator on your roster",
+      "reviewOpportunities": "Review open sponsorship opportunities"
+    }
+  },
+  "greeting": {
+    "defaultName": "Creator",
+    "full": "{period, select, morning {Good Morning} afternoon {Good Afternoon} other {Good Evening}}, {name}"
+  },
+  "goals": {
+    "growth": { "label": "Grow my audience" },
+    "monetization": { "label": "Make more money" },
+    "sponsorship": { "label": "Land sponsorships" },
+    "consistency": { "label": "Post more consistently" },
+    "brand": { "label": "Build my brand" }
+  },
+  "categories": {
+    "Content": "Content",
+    "Streaming": "Streaming",
+    "Community": "Community",
+    "Sponsors": "Sponsors",
+    "Business": "Business",
+    "Monetization": "Monetization",
+    "Productivity": "Productivity",
+    "Learning": "Learning",
+    "Networking": "Networking",
+    "Branding": "Branding",
+    "Analytics": "Analytics",
+    "Revenue": "Revenue",
+    "Goals": "Goals",
+    "Personal Development": "Personal Development",
+    "Financial": "Financial"
+  },
+  "priorities": {
+    "Critical": "Critical",
+    "High": "High",
+    "Medium": "Medium",
+    "Low": "Low"
+  },
+  "rules": {
+    "content-clip-repurpose": {
+      "title": "Turn streams into short-form clips",
+      "description": "You've put in roughly {streamedHours} hours of streaming recently but only have {clipsCreated} clips. Repurpose highlights to reach audiences who don't catch live streams.",
+      "whyItMatters": "Short-form clips drive discovery on TikTok, YouTube Shorts, and Instagram Reels — often outperforming full VOD uploads for new viewer acquisition.",
+      "estimatedImpact": "15–30% more reach from existing content",
+      "actionLabel": "Review content"
+    },
+    "sponsors-engagement-ready": {
+      "title": "You're ready to pitch sponsors",
+      "description": "Your content engagement rate is {engagementRate}% with no active sponsorship deals. Brands look for creators with proven audience interaction before signing.",
+      "whyItMatters": "Strong engagement signals an invested audience — the top metric sponsors evaluate alongside reach and brand fit.",
+      "estimatedImpact": "Unlock sponsorship pipeline",
+      "actionLabel": "Browse opportunities"
+    },
+    "goals-missed-posting-cadence": {
+      "title": "Catch up on missed uploads",
+      "description": "You missed your usual upload days this week ({missedLabel}).",
+      "descriptionWithRhythm": "You missed {missedCount, plural, one {# expected upload} other {# expected uploads}} this week ({missedLabel}). Your connected platforms show you usually publish on {rhythmOnlyLabel}.",
+      "whyItMatters": "Consistent publishing on your strongest days compounds algorithmic reach and trains your audience when to show up.",
+      "estimatedImpact": "Recover weekly posting momentum",
+      "actionLabel": "Open content planner"
+    },
+    "goals-upload-consistency": {
+      "title": "Build a consistent upload rhythm",
+      "description": "You've published {uploadsCompleted} recent pieces against a goal of {uploadGoal} this period. Consistency compounds algorithmic favor and audience habit.",
+      "whyItMatters": "Platforms reward regular publishing schedules. Creators who post consistently see 2–3× better retention over 90 days.",
+      "estimatedImpact": "Steadier audience growth",
+      "actionLabel": "Plan your schedule"
+    },
+    "goals-momentum-double-down": {
+      "title": "Double down on what's working",
+      "description": "Your audience is growing at {followersGrowth}% — well above average. Capitalize on this momentum before it plateaus.",
+      "whyItMatters": "Growth spurts are windows to convert casual viewers into loyal followers and monetize through memberships or merch.",
+      "estimatedImpact": "Accelerate growth phase",
+      "actionLabel": "Analyze performance"
+    },
+    "productivity-stream-schedule": {
+      "title": {
+        "creator": "Block streaming time on your calendar",
+        "organization": "Add today's schedule blocks"
+      },
+      "description": {
+        "creator": "You don't have recurring schedule blocks set up. A visible streaming schedule helps your audience show up and improves platform recommendations.",
+        "organization": "No events are scheduled for today. Blocking time keeps your roster accountable and surfaces conflicts early."
+      },
+      "whyItMatters": "Creators with predictable schedules retain 40% more returning viewers than those who stream sporadically.",
+      "estimatedImpact": "Better audience retention",
+      "actionLabel": "Open schedule"
+    },
+    "business-revenue-tracking": {
+      "title": "Start tracking your revenue",
+      "description": {
+        "creator": "Connect a platform account or log revenue entries so you can see earnings trends and make informed business decisions.",
+        "organization": "No platform revenue is connected across your roster. Link creator accounts to unlock earnings visibility and forecasting."
+      },
+      "whyItMatters": "You can't optimize what you don't measure. Revenue tracking reveals which platforms and deal types drive the most income.",
+      "estimatedImpact": "Clearer financial picture",
+      "actionLabel": {
+        "creator": "Connect platforms",
+        "organization": "View creators"
+      }
+    },
+    "sponsors-overdue-deliverables": {
+      "title": "Clear overdue deliverables",
+      "description": "You have {overdueDeliverables, plural, one {# overdue deliverable} other {# overdue deliverables}}. Late deliverables risk contract renewals and future sponsor trust.",
+      "whyItMatters": "Sponsors track fulfillment closely. On-time delivery is the strongest predictor of repeat deals.",
+      "estimatedImpact": "Protect sponsor relationships",
+      "actionLabel": "View deliverables"
+    },
+    "branding-connect-platform": {
+      "title": "Connect your primary platform",
+      "description": "Link your {primaryPlatform} account to unlock performance insights and personalized coaching based on real content data.",
+      "whyItMatters": "Connected accounts power analytics, revenue tracking, and AI recommendations tailored to your actual audience.",
+      "estimatedImpact": "Unlock personalized insights",
+      "actionLabel": "Connect now"
+    },
+    "networking-apply-opportunities": {
+      "title": "Apply to open opportunities",
+      "description": "{openOpportunities, plural, one {# sponsorship opportunity is} other {# sponsorship opportunities are}} open and you haven't submitted an application yet.",
+      "whyItMatters": "Early applicants often get prioritized review. Even a tailored pitch to one opportunity can open your next deal.",
+      "estimatedImpact": "New deal pipeline",
+      "actionLabel": "Browse opportunities"
+    },
+    "community-unread-messages": {
+      "title": "Respond to pending messages",
+      "description": "You have {unreadMessages, plural, one {# unread message} other {# unread messages}}. Quick responses keep sponsor and team conversations moving.",
+      "whyItMatters": "Response time affects deal velocity. Sponsors and managers prioritize creators who communicate reliably.",
+      "estimatedImpact": "Faster deal cycles",
+      "actionLabel": "Open messages"
+    },
+    "personal-development-profile": {
+      "title": "Complete your creator profile",
+      "description": "Your profile is {profileReadinessScore}% ready. Next step: {nextStep}.",
+      "whyItMatters": "Complete profiles rank higher in sponsor searches and give managers the context they need to pitch you effectively.",
+      "estimatedImpact": "Better sponsor discovery",
+      "actionLabel": "Update profile"
+    },
+    "business-grow-roster": {
+      "title": "Expand your creator roster",
+      "description": "You have {activeCreatorsCount, plural, one {# active creator} other {# active creators}}. Growing your roster diversifies revenue and sponsorship opportunities.",
+      "whyItMatters": "Agencies with diverse rosters close more multi-creator deals and weather platform algorithm changes better.",
+      "estimatedImpact": "Revenue diversification",
+      "actionLabel": "Add creators"
+    },
+    "revenue-expiring-contracts": {
+      "title": "Review expiring contracts",
+      "description": "{expiringContractsCount, plural, one {# contract expires} other {# contracts expire}} within 45 days. Start renewal conversations now.",
+      "whyItMatters": "Proactive renewals prevent revenue gaps and give sponsors time to adjust budgets.",
+      "estimatedImpact": "Protect recurring revenue",
+      "actionLabel": "View contracts"
+    },
+    "productivity-review-applications": {
+      "title": "Review pending applications",
+      "description": "{pendingApplications, plural, one {# creator application needs} other {# creator applications need}} your review.",
+      "whyItMatters": "Fast application turnaround keeps top talent engaged and improves your agency's reputation with creators.",
+      "estimatedImpact": "Faster talent pipeline",
+      "actionLabel": "Review applications"
+    },
+    "goals-personalized-consistency": {
+      "title": "Stick to your posting plan",
+      "description": "You set consistency as your top goal. Block time on {days} and publish at least {uploadGoal} pieces this period.",
+      "whyItMatters": "Creators who publish on a predictable rhythm see stronger retention and algorithmic reach over 90 days.",
+      "estimatedImpact": "Stronger weekly momentum",
+      "actionLabel": "Open schedule"
+    },
+    "goals-personalized-monetization": {
+      "title": "Map your monetization paths",
+      "description": "Connect platforms or log revenue entries to see which income streams are gaining traction.",
+      "whyItMatters": "Clear revenue data helps you double down on the channels that actually pay off.",
+      "estimatedImpact": "Clearer income picture",
+      "actionLabel": "Connect platforms"
+    },
+    "goals-personalized-sponsorship": {
+      "title": "Build your sponsor-ready package",
+      "description": "Sponsors look for complete profiles and proven engagement. Update your creator profile and browse open deals.",
+      "whyItMatters": "A sponsor-ready profile plus active applications is the fastest path to your first brand deal.",
+      "estimatedImpact": "Faster sponsor pipeline",
+      "actionLabel": "Browse opportunities"
+    },
+    "goals-personalized-growth-clips": {
+      "title": "Scale your short-form output",
+      "description": "You said short-form clips are a focus. Repurpose stream or long-form highlights into clips to reach new audiences.",
+      "whyItMatters": "Short-form discovery often outpaces live-only growth on TikTok, YouTube Shorts, and Reels.",
+      "estimatedImpact": "Broader top-of-funnel reach",
+      "actionLabel": "Review content"
+    },
+    "goals-personalized-brand": {
+      "title": "Sharpen your creator positioning",
+      "description": "Building your brand starts with a complete profile — bio, platforms, and portfolio pieces sponsors can evaluate quickly.",
+      "whyItMatters": "Strong positioning makes you memorable to sponsors and helps your content feel cohesive across platforms.",
+      "estimatedImpact": "Better sponsor discovery",
+      "actionLabel": "Update profile"
+    },
+    "analytics-connect-platforms": {
+      "title": "Connect creator platform accounts",
+      "description": "No platform accounts are linked yet. Connecting accounts unlocks revenue tracking and performance analytics across your roster.",
+      "whyItMatters": "Platform data powers accurate reporting for sponsors and helps you identify which creators are ready for bigger deals.",
+      "estimatedImpact": "Data-driven decisions",
+      "actionLabel": "Manage creators"
+    }
+  }
+}

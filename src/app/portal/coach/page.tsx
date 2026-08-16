@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PortalCoachLayout } from "@/components/creator-ai/PortalCoachLayout";
 import { listCreatorAiConversations } from "@/lib/creator-ai/queries";
@@ -10,6 +11,9 @@ import { hasFeature } from "@/lib/subscription/features";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 
 export default async function PortalCoachPage() {
+  const t = await getTranslations("pages.portalCoach");
+  const tPortal = await getTranslations("portal.coach");
+  const tLayout = await getTranslations("coach.layout");
   const { linkedCreatorId } = await requireCreatorPortalUser();
   const [data, subscription, userId] = await Promise.all([
     loadPortalCoachPageData(linkedCreatorId),
@@ -29,10 +33,7 @@ export default async function PortalCoachPage() {
       : [];
 
   return (
-    <DashboardLayout
-      title="Creator Coach"
-      description="AI coaching chat and personalized recommendations for your creator business"
-    >
+    <DashboardLayout title={t("title")} description={tPortal("pageDescription")}>
       {data.coachSnapshot ? (
         <PortalCoachLayout
           snapshot={data.coachSnapshot}
@@ -45,10 +46,10 @@ export default async function PortalCoachPage() {
       ) : (
         <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/50 px-6 py-12 text-center">
           <p className="text-sm font-medium text-gray-300">
-            Creator Coach is temporarily unavailable
+            {tLayout("unavailableTitle")}
           </p>
           <p className="mt-1 text-sm text-gray-500">
-            Refresh the page or try again in a moment.
+            {tLayout("unavailableDescription")}
           </p>
         </div>
       )}

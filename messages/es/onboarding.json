@@ -1,0 +1,65 @@
+{
+  "welcome": {
+    "tagline": "Gestión de creadores y patrocinadores para agencias gaming y organizaciones de creadores.",
+    "signIn": "Iniciar sesión",
+    "createAccount": "Crear cuenta",
+    "terms": "Términos de servicio",
+    "privacy": "Política de privacidad"
+  },
+  "invite": {
+    "pageTitle": "Invitación al equipo",
+    "pageSubtitle": "Únete a {organizationName} en Player One IQ",
+    "dashboardTitle": "Invitación al equipo",
+    "dashboardDescription": "Acepta tu invitación para unirte a la organización",
+    "unavailableTitle": "Invitación no disponible",
+    "expired": "Esta invitación ha expirado. Pide a tu administrador que envíe una nueva.",
+    "invalid": "Esta invitación ya no es válida.",
+    "invitedTitle": "¡Estás invitado!",
+    "invitedSubtitle": "Únete a {organizationName} en Player One IQ",
+    "emailLabel": "Correo invitado",
+    "roleLabel": "Rol",
+    "expiresLabel": "Expira",
+    "signInPrompt": "Inicia sesión con {email} para aceptar esta invitación.",
+    "signInButton": "Iniciar sesión para aceptar",
+    "emailMismatch": "Has iniciado sesión como {userEmail}, pero esta invitación se envió a {inviteEmail}.",
+    "switchAccount": "Cambiar de cuenta",
+    "acceptButton": "Aceptar invitación",
+    "accepting": "Aceptando..."
+  },
+  "organizationSetup": {
+    "creatorTitle": "Configura tu perfil de creador",
+    "creatorSubtitle": "Algunos datos para desbloquear tu portal de creador",
+    "sponsorTitle": "Configura tu espacio de marca",
+    "sponsorSubtitle": "Cuéntanos sobre tu marca para comenzar",
+    "agencyTitle": "Configura tu espacio de trabajo",
+    "agencySubtitle": "Elige tipo de creador/jugador u organización para comenzar"
+  },
+  "wizard": {
+    "steps": {
+      "welcome": "Bienvenida",
+      "connect": "Conectar plataformas",
+      "finish": "Listo"
+    },
+    "welcomeTitle": "¡Bienvenido{userName, select, other {, {userName}}}!",
+    "welcomeSubtitle": "Configuremos tu espacio de trabajo en unos pocos pasos.",
+    "connectTitle": "Conecta tus plataformas",
+    "connectSubtitle": "Vincula cuentas para desbloquear analítica, seguimiento de ingresos y coaching personalizado.",
+    "finishTitle": "Todo listo",
+    "finishSubtitle": "Tu espacio de trabajo está listo. Ve al panel para comenzar.",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "finish": "Ir al panel",
+    "completing": "Finalizando configuración...",
+    "skipForNow": "Omitir por ahora"
+  },
+  "founding": {
+    "heroTitle": "Únete al Roster Fundador",
+    "heroSubtitle": "Ayuda a dar forma a Player One IQ antes del lanzamiento y desbloquea beneficios exclusivos de creador fundador.",
+    "applyButton": "Postular ahora",
+    "learnMore": "Saber más",
+    "perksTitle": "Beneficios de miembro fundador",
+    "spotsLimited": "Plazas fundadoras limitadas",
+    "formTitle": "Postular al Roster Fundador",
+    "formSubtitle": "Cuéntanos sobre tu negocio de creador. Revisaremos postulaciones y contactaremos a miembros seleccionados."
+  }
+}

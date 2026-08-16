@@ -45,5 +45,27 @@
     "noMatchingDescription": "Try a different search, status, or summary filter."
   },
   "showing": "Showing {filtered} of {total} contracts",
-  "showingDeals": "Showing {filtered} of {total} deals"
+  "showingDeals": "Showing {filtered} of {total} deals",
+  "modal": {
+    "editTitle": "Edit Contract",
+    "createTitle": "New Contract",
+    "needBoth": "Add creators and sponsors before creating a contract.",
+    "needCreators": "Add at least one creator before creating a contract.",
+    "needSponsors": "Add at least one sponsor before creating a contract.",
+    "contractName": "Contract Name",
+    "contractNamePlaceholder": "Q2 Stream Partnership",
+    "creator": "Creator",
+    "selectCreator": "Select creator",
+    "sponsor": "Sponsor",
+    "selectSponsor": "Select sponsor",
+    "value": "Contract Value",
+    "status": "Status",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "deliverables": "Deliverables",
+    "deliverablesPlaceholder": "Describe deliverables...",
+    "notes": "Notes",
+    "notesPlaceholder": "Internal notes...",
+    "saving": "Saving..."
+  }
 }

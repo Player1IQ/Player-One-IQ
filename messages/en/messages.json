@@ -49,5 +49,27 @@
     "noMessages": "No messages yet",
     "noMessagesDescription": "Send the first message to start this conversation.",
     "viewRelated": "View {type}"
+  },
+  "modals": {
+    "newConversation": "New Conversation",
+    "directMessage": "Direct message",
+    "groupChat": "Group chat",
+    "noContactsPortal": "No contacts yet. Once you're connected with an agency or sponsor, you'll be able to message them directly here.",
+    "noContactsStaff": "No other team members available yet.",
+    "inviteHint": "Invite colleagues from the Team page and have them accept the invitation before starting a conversation.",
+    "teamPage": "Team page",
+    "agencyContact": "Agency contact",
+    "teamMember": "Team member",
+    "selectMember": "Select a team member",
+    "groupName": "Group name",
+    "groupNamePlaceholder": "e.g. Campaign planning",
+    "members": "Members",
+    "membersHint": "You will be added automatically. Select at least one member or create a solo group for notes.",
+    "startConversation": "Start Conversation",
+    "createGroup": "Create Group",
+    "selectContactError": "Select an agency contact to start a conversation.",
+    "selectMemberError": "Select at least one member for the group.",
+    "addMembersTitle": "Add members",
+    "addMembersDescription": "Select team members to add to this conversation."
   }
 }

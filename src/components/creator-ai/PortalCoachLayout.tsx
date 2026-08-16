@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
 import type { CoachProfile } from "@/lib/creator-coach/profile-types";
 import {
@@ -33,6 +34,8 @@ export function PortalCoachLayout({
   hasAiCoachChat,
   initialConversations,
 }: PortalCoachLayoutProps) {
+  const t = useTranslations("coach.layout");
+  const tPanel = useTranslations("coach.panel");
   const router = useRouter();
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [localDismissed, setLocalDismissed] = useState<string[]>([]);
@@ -101,8 +104,7 @@ export function PortalCoachLayout({
               />
               <div className="rounded-2xl border border-dashed border-white/[0.08] bg-surface-raised/40 px-6 py-16 text-center">
                 <p className="text-sm text-gray-400">
-                  Your daily mission and recommendations remain available in the
-                  sidebar.
+                  {t("missionSidebarNote")}
                 </p>
               </div>
             </div>
@@ -122,7 +124,7 @@ export function PortalCoachLayout({
           {sidebarRecommendations.length > 0 ? (
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Top recommendations
+                {t("topRecommendations")}
               </p>
               {sidebarRecommendations.map((recommendation) => (
                 <RecommendationCard
@@ -144,10 +146,10 @@ export function PortalCoachLayout({
           ) : (
             <div className="rounded-xl border border-white/[0.06] bg-surface-raised/50 px-4 py-6 text-center">
               <p className="text-sm font-medium text-gray-300">
-                You&apos;re all caught up
+                {tPanel("allCaughtUp")}
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                No active recommendations right now.
+                {t("sidebarCaughtUp")}
               </p>
             </div>
           )}

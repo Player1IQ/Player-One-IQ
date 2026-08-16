@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DailyMission } from "@/lib/creator-coach/types";
@@ -15,6 +16,7 @@ import {
   setLocalMissionState,
 } from "@/lib/creator-coach/client-state";
 import type { CoachContext } from "@/lib/creator-coach/types";
+import { useMissionText } from "@/lib/i18n/coach-text";
 
 interface TodaysMissionCardProps {
   greeting: string;
@@ -33,13 +35,31 @@ export function TodaysMissionCard({
   coachContext,
   onSnapshotUpdate,
 }: TodaysMissionCardProps) {
-  const [missionState, setMissionState] = useState(mission);
+  const t = useTranslations("coach.mission");
+  const missionText = useMissionText(mission, coachContext);
+
+  function applyMissionText(source: DailyMission): DailyMission {
+    const translatedTasksById = new Map(
+      missionText.tasks.map((task) => [task.id, task.title])
+    );
+    return {
+      ...source,
+      title: missionText.title,
+      subtitle: missionText.subtitle,
+      tasks: source.tasks.map((task) => ({
+        ...task,
+        title: translatedTasksById.get(task.id) ?? task.title,
+      })),
+    };
+  }
+
+  const [missionState, setMissionState] = useState(() => applyMissionText(mission));
   const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (stateId) {
-      setMissionState(mission);
+      setMissionState(applyMissionText(mission));
       return;
     }
 
@@ -48,8 +68,8 @@ export function TodaysMissionCard({
       coachContext.scopeId,
       mission.id
     );
-    setMissionState(localMission ?? mission);
-  }, [mission, stateId, coachContext.scope, coachContext.scopeId]);
+    setMissionState(applyMissionText(localMission ?? mission));
+  }, [mission, stateId, coachContext.scope, coachContext.scopeId, missionText.title, missionText.subtitle, missionText.tasks]);
 
   const progressPercent = stateId
     ? serverProgressPercent
@@ -87,7 +107,7 @@ export function TodaysMissionCard({
         <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-              Today&apos;s Mission
+              {t("label")}
             </p>
             <h2 className="mt-1 text-2xl font-bold text-white sm:text-3xl">
               {missionState.title}
@@ -96,7 +116,7 @@ export function TodaysMissionCard({
           </div>
           <div className="shrink-0 rounded-xl border border-white/[0.08] bg-black/20 px-4 py-3 text-right">
             <p className="text-xs uppercase tracking-wider text-gray-500">
-              Progress
+              {t("progress")}
             </p>
             <p className="text-2xl font-bold text-white">{progressPercent}%</p>
           </div>
@@ -156,7 +176,7 @@ export function TodaysMissionCard({
 
         {!stateId ? (
           <p className="mt-4 text-xs text-gray-500">
-            Progress is saved on this device. Connect workspace sync to keep it across sessions.
+            {t("localSaveNote")}
           </p>
         ) : null}
       </div>

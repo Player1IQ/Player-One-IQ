@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Loader2, Mail, Shield } from "lucide-react";
 import { roleLabels } from "@/lib/team";
 import { acceptInvitation } from "@/app/team/actions";
@@ -26,6 +27,7 @@ export function AcceptInviteClient({
   expiresAt,
   userEmail,
 }: AcceptInviteClientProps) {
+  const t = useTranslations("onboarding.invite");
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,13 +57,9 @@ export function AcceptInviteClient({
   if (status !== "pending" || expired) {
     return (
       <div className="mx-auto max-w-md rounded-xl border border-border bg-surface-raised p-8 text-center">
-        <p className="text-lg font-semibold text-white">
-          Invitation unavailable
-        </p>
+        <p className="text-lg font-semibold text-white">{t("unavailableTitle")}</p>
         <p className="mt-2 text-sm text-gray-400">
-          {expired
-            ? "This invitation has expired. Ask your admin to send a new one."
-            : "This invitation is no longer valid."}
+          {expired ? t("expired") : t("invalid")}
         </p>
       </div>
     );
@@ -73,10 +71,9 @@ export function AcceptInviteClient({
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10">
           <Mail className="h-7 w-7 text-accent-light" />
         </div>
-        <h1 className="text-xl font-bold text-white">You&apos;re invited!</h1>
+        <h1 className="text-xl font-bold text-white">{t("invitedTitle")}</h1>
         <p className="mt-2 text-sm text-gray-400">
-          Join <span className="text-gray-200">{organizationName}</span> on
-          Player One IQ
+          {t("invitedSubtitle", { organizationName })}
         </p>
       </div>
 

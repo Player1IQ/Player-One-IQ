@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { X, Loader2 } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
@@ -55,6 +56,7 @@ export function ContractFormModal({
   creators,
   sponsors,
 }: ContractFormModalProps) {
+  const t = useTranslations("contracts.modal");
   const router = useRouter();
   const isEdit = !!contract;
   const [form, setForm] = useState<ContractInput>(defaultInput());
@@ -105,7 +107,7 @@ export function ContractFormModal({
       <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-surface-raised shadow-2xl">
         <div className="sticky top-0 flex items-center justify-between border-b border-border bg-surface-raised px-6 py-4">
           <h2 className="text-lg font-semibold text-white">
-            {isEdit ? "Edit Contract" : "New Contract"}
+            {isEdit ? t("editTitle") : t("createTitle")}
           </h2>
           <button
             onClick={onClose}

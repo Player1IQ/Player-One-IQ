@@ -14,5 +14,102 @@
   "empty": {
     "noData": "No report data for this period",
     "noDataDescription": "Add creators, contracts, or revenue entries to generate reports."
+  },
+  "sparseBanner": {
+    "title": "Light data this month.",
+    "description": "Add creators, connect platform accounts, or log contracts to fill out your report. You can still export what you have today.",
+    "addCreators": "Add creators",
+    "createContract": "Create a contract",
+    "syncRevenue": "Sync platform revenue"
+  },
+  "periodCard": {
+    "monthlyReportFor": "Monthly report for",
+    "creators": "{count, plural, one {# creator} other {# creators}}",
+    "platforms": "{count, plural, one {# OAuth-connected platform} other {# OAuth-connected platforms}}",
+    "vsLastMonth": "· vs last month: {delta}"
+  },
+  "metrics": {
+    "totalRevenue": "Total revenue",
+    "contractPipeline": "Contract pipeline",
+    "activeInPipeline": "{count} active in pipeline",
+    "opportunities": "Opportunities",
+    "totalOpportunities": "{count} total opportunities",
+    "aiRequests": "AI requests",
+    "remainingThisMonth": "{count} remaining this month",
+    "unlimitedPlan": "Unlimited on your plan"
+  },
+  "campaignSummary": {
+    "title": "Campaign summary",
+    "emptyTitle": "No campaigns yet",
+    "emptyDescription": "Create sponsor campaigns to track budgets and status across your deals.",
+    "viewCampaigns": "View campaigns",
+    "active": "Active",
+    "totalBudget": "Total budget",
+    "totalCampaigns": "Total campaigns",
+    "topByBudget": "Top by budget"
+  },
+  "deliverableHealth": {
+    "title": "Deliverable health",
+    "emptyTitle": "No deliverables tracked",
+    "emptyDescription": "Add deliverables to contracts to monitor completion and overdue items.",
+    "viewContracts": "View contracts",
+    "completionRate": "Completion rate",
+    "completedOf": "{completed} of {total} done",
+    "overdue": "Overdue",
+    "overdueSubtitle": "Past due date, not completed",
+    "pending": "Pending",
+    "inProgress": "In progress",
+    "completed": "Completed"
+  },
+  "sponsors": {
+    "title": "Top sponsors by pipeline",
+    "emptyTitle": "No sponsor pipeline yet",
+    "emptyDescription": "Active and negotiating contracts will appear here grouped by sponsor.",
+    "viewSponsors": "View sponsors",
+    "columns": {
+      "sponsor": "Sponsor",
+      "pipelineValue": "Pipeline value",
+      "activeContracts": "Active contracts",
+      "totalContracts": "Total contracts"
+    }
+  },
+  "creators": {
+    "title": "Top creators by revenue",
+    "emptyNoRevenueTitle": "No creator revenue yet",
+    "emptyNoCreatorsDescription": "Add creators to your roster, then connect contracts or platform income.",
+    "emptyHasCreatorsDescription": "Creators in your roster have no contract or platform revenue recorded for this month.",
+    "addFirstCreator": "Add your first creator",
+    "reviewCreators": "Review creators",
+    "breakdown": {
+      "contracts": "contracts {amount}",
+      "platform": "platform {amount}",
+      "none": "No breakdown"
+    }
+  },
+  "platformIncome": {
+    "title": "Platform income",
+    "emptyConnectedTitle": "No platform income this month",
+    "emptyNoAccountsTitle": "No platform accounts connected",
+    "emptyConnectedDescription": "OAuth accounts are linked but no revenue synced for this period yet. Run a manual sync or wait for the daily job.",
+    "emptyNoAccountsDescription": "Connect YouTube, Twitch, or other platforms on a creator profile to track platform income.",
+    "openSyncSettings": "Open platform sync settings",
+    "connectPlatform": "Connect a platform"
+  },
+  "aiUsage": {
+    "title": "AI usage",
+    "requestsThisMonth": "requests this month",
+    "emptyTitle": "No AI requests this month",
+    "emptyDescription": "Run growth, sponsorship, or contract summaries from the AI page to see usage here.",
+    "openAi": "Open AI assistants"
+  },
+  "exportMenu": {
+    "upgradeTitle": "Upgrade to export reports",
+    "upgradeAria": "Upgrade to export reports",
+    "exportAria": "Export report",
+    "monthlyReport": "Monthly report",
+    "currentPeriod": "Current period",
+    "downloadCsv": "Download CSV",
+    "printPdf": "Print / Save PDF",
+    "exportFailed": "Export failed."
   }
 }

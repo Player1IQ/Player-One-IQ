@@ -23,5 +23,44 @@
     "expired": "Prueba expirada"
   },
   "features": "Funciones incluidas",
-  "noPermission": "No tienes permiso para gestionar la facturación."
+  "noPermission": "No tienes permiso para gestionar la facturación.",
+  "planHero": {
+    "noActivePlan": "Sin plan activo",
+    "selectPlan": "Selecciona un plan para comenzar",
+    "billingPeriod": "{start} – {end} · facturación {interval}",
+    "trialing": "en prueba"
+  },
+  "trialBanner": {
+    "description": "Estás en una prueba gratuita de {planName} con acceso completo a funciones (aplican límites de uso). Las pruebas son opcionales — inicia una desde cualquier plan de pago abajo, o suscríbete directamente. Cada plan de pago incluye una prueba de {days} días por espacio de trabajo."
+  },
+  "planMessages": {
+    "trialStarted": "Prueba de {planName} iniciada — explora el plan por {days} días.",
+    "planUpdated": "Plan actualizado a {planName}."
+  },
+  "usageSection": {
+    "aiRequests": "Solicitudes de IA",
+    "thisBillingPeriod": "Este período de facturación",
+    "usageMeters": "Medidores de uso",
+    "usageMetersDescription": "Límites del período de facturación actual"
+  },
+  "plansSection": {
+    "title": "Planes disponibles",
+    "description": "Prueba un plan de pago gratis por {days} días, o suscríbete directamente",
+    "monthly": "mensual",
+    "yearly": "anual",
+    "ownersOnly": "Solo propietarios y administradores de la organización pueden cambiar planes."
+  },
+  "payment": {
+    "methodTitle": "Método de pago",
+    "methodDescriptionStripe": "Actualiza tu tarjeta y datos de pago en el portal de clientes de Stripe.",
+    "methodDescriptionNone": "Suscríbete a un plan de pago para agregar un método de pago.",
+    "openPortal": "Abrir portal de facturación"
+  },
+  "invoices": {
+    "title": "Historial de facturas",
+    "descriptionStripe": "Consulta recibos y facturas anteriores en el portal de clientes de Stripe.",
+    "descriptionNone": "Las facturas aparecen después de tu primera suscripción de pago.",
+    "managedByStripe": "Gestionado por Stripe",
+    "noneYet": "Aún no hay facturas"
+  }
 }

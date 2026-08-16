@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PortalRevenueClient } from "@/components/portal/PortalRevenueClient";
 import { getCreatorById } from "@/lib/creators/queries";
@@ -26,6 +27,7 @@ export default async function PortalRevenuePage({
 }: {
   searchParams: Promise<{ month?: string }>;
 }) {
+  const t = await getTranslations("pages.portalRevenue");
   const { linkedCreatorId } = await requireCreatorPortalUser();
   const resolvedSearchParams = await searchParams;
   const periodMonth = getPeriodMonthFromSearchParams(resolvedSearchParams);
@@ -69,10 +71,7 @@ export default async function PortalRevenuePage({
   );
 
   return (
-    <DashboardLayout
-      title="Revenue"
-      description="Track cash received, platform income, and expected deal value"
-    >
+    <DashboardLayout title={t("title")} description={t("description")}>
       <PortalRevenueClient
         creator={creator}
         contracts={creatorContracts}

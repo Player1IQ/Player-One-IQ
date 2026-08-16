@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { AcceptInviteClient } from "@/components/team/AcceptInviteClient";
 import { getInvitationByToken } from "@/lib/team/queries";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 interface InvitePageProps {
@@ -11,6 +12,7 @@ interface InvitePageProps {
 
 export default async function InvitePage({ params }: InvitePageProps) {
   const { token } = await params;
+  const t = await getTranslations("onboarding.invite");
   const invitation = await getInvitationByToken(token);
 
   if (!invitation) {
@@ -37,8 +39,8 @@ export default async function InvitePage({ params }: InvitePageProps) {
   if (!user) {
     return (
       <AuthLayout
-        title="Team invitation"
-        subtitle={`Join ${invitation.organizationName} on Player One IQ`}
+        title={t("pageTitle")}
+        subtitle={t("pageSubtitle", { organizationName: invitation.organizationName })}
       >
         {inviteContent}
       </AuthLayout>
@@ -47,8 +49,8 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
   return (
     <DashboardLayout
-      title="Team Invitation"
-      description="Accept your invitation to join the organization"
+      title={t("dashboardTitle")}
+      description={t("dashboardDescription")}
     >
       {inviteContent}
     </DashboardLayout>

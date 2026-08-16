@@ -31,5 +31,33 @@
     "noSponsorsDescription": "Add your first brand partner to track relationships and deals.",
     "noMatchingDescription": "Try a different search or status filter."
   },
-  "showing": "Showing {filtered} of {total} sponsors"
+  "showing": "Showing {filtered} of {total} sponsors",
+  "detail": {
+    "backToSponsors": "Back to sponsors",
+    "editSponsor": "Edit sponsor",
+    "deleteSponsor": "Delete sponsor",
+    "deleteConfirm": "Are you sure you want to delete this sponsor?",
+    "overview": "Overview",
+    "contacts": "Contacts",
+    "primaryContact": "Primary contact",
+    "secondaryContact": "Secondary contact",
+    "deals": "Deals",
+    "campaigns": "Campaigns",
+    "messages": "Messages",
+    "unreadMessages": "{count, plural, one {# unread message} other {# unread messages}}",
+    "noCampaigns": "No campaigns yet",
+    "noCampaignsDescription": "Campaigns linked to this sponsor will appear here.",
+    "website": "Website",
+    "location": "Location",
+    "since": "Partner since"
+  },
+  "modal": {
+    "editTitle": "Edit Sponsor",
+    "createTitle": "Add Sponsor",
+    "companyName": "Company name",
+    "industry": "Industry",
+    "status": "Status",
+    "website": "Website",
+    "saving": "Saving..."
+  }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
 import type { CoachProfile } from "@/lib/creator-coach/profile-types";
 import {
@@ -30,6 +31,7 @@ export function CreatorCoachPanel({
   creatorId = null,
   showSectionHeader = true,
 }: CreatorCoachPanelProps) {
+  const t = useTranslations("coach.panel");
   const router = useRouter();
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [localDismissed, setLocalDismissed] = useState<string[]>([]);
@@ -112,11 +114,11 @@ export function CreatorCoachPanel({
       {showSectionHeader ? (
         <SectorHeader
           sector="Coach"
-          title="Creator Coach"
+          title={t("sectorTitle")}
           description={
             coachProfile?.onboardingCompleted
-              ? `${snapshot.greeting} — Personalized recommendations based on your goals and real workspace data.`
-              : `${snapshot.greeting} — Recommendations to grow your creator business, powered by your real workspace data.`
+              ? t("descriptionPersonalized", { greeting: snapshot.greeting })
+              : t("descriptionDefault", { greeting: snapshot.greeting })
           }
         />
       ) : null}
@@ -125,10 +127,10 @@ export function CreatorCoachPanel({
         {visibleRecommendations.length === 0 ? (
           <div className="rounded-2xl border border-white/[0.06] bg-surface-raised/50 px-6 py-10 text-center">
             <p className="text-sm font-medium text-gray-300">
-              You&apos;re all caught up
+              {t("allCaughtUp")}
             </p>
             <p className="mt-1 text-sm text-gray-500">
-              No active recommendations right now. Check back as your metrics change.
+              {t("noRecommendations")}
             </p>
           </div>
         ) : (

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { OrganizationSetupForm } from "@/components/auth/OrganizationSetupForm";
 import { getPendingInvitationForUser } from "@/lib/team/queries";
@@ -24,22 +25,23 @@ export default async function OrganizationSetupPage({
   const { account } = await searchParams;
   const accountType = parseAccountType(account);
   const isCreator = accountType === "creator";
+  const t = await getTranslations("onboarding.organizationSetup");
 
   return (
     <AuthLayout
       title={
         isCreator
-          ? "Set up your creator profile"
+          ? t("creatorTitle")
           : accountType === "sponsor"
-            ? "Set up your brand workspace"
-            : "Set up your workspace"
+            ? t("sponsorTitle")
+            : t("agencyTitle")
       }
       subtitle={
         isCreator
-          ? "A few details to unlock your creator portal"
+          ? t("creatorSubtitle")
           : accountType === "sponsor"
-            ? "Tell us about your brand to get started"
-            : "Choose creator/player or organization type to get started"
+            ? t("sponsorSubtitle")
+            : t("agencySubtitle")
       }
     >
       <OrganizationSetupForm accountType={accountType} />

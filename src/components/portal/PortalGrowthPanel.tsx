@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BarChart3, Link2, TrendingUp } from "lucide-react";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
 import { PlatformBadge } from "@/components/creators/PlatformBadge";
@@ -22,6 +23,7 @@ function formatViews(views: number): string {
 }
 
 export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps) {
+  const t = useTranslations("portal.growth");
   const profileHref = `/creators/${creatorId}`;
 
   return (
@@ -29,17 +31,17 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-accent-light" />
-          Growth & platforms
+          {t("title")}
         </CardTitle>
         <CardDescription>
-          Connected social accounts and recent content performance
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-              Connected platforms
+              {t("connectedPlatforms")}
             </p>
             <p className="mt-1 text-2xl font-bold text-white">
               {summary.connectedCount}
@@ -48,7 +50,7 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
           {summary.totalAudience && summary.totalAudience > 0 ? (
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-                Total audience
+                {t("totalAudience")}
               </p>
               <p className="mt-1 text-2xl font-bold text-sky-300">
                 {formatViews(summary.totalAudience)}
@@ -58,7 +60,7 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
           {summary.hasOAuthContent && summary.totalRecentViews !== null ? (
             <div className="text-right">
               <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-                Recent content views
+                {t("recentViews")}
               </p>
               <p className="mt-1 text-2xl font-bold text-emerald-300">
                 {formatViews(summary.totalRecentViews)}
@@ -67,8 +69,8 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
           ) : summary.totalAudience && summary.totalAudience > 0 ? null : (
             <p className="max-w-xs text-sm text-gray-500">
               {summary.youtubeConnected
-                ? "Syncing content metrics from your connected accounts."
-                : "Connect YouTube to see growth metrics from recent content."}
+                ? t("syncingMetrics")
+                : t("connectYoutube")}
             </p>
           )}
         </div>
@@ -83,7 +85,7 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
           </ul>
         ) : (
           <p className="text-sm text-gray-500">
-            No platforms connected yet. Link your accounts to track audience growth.
+            {t("noPlatforms")}
           </p>
         )}
 
@@ -93,7 +95,7 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
             className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-accent/40 hover:text-accent-light"
           >
             <Link2 className="h-4 w-4" />
-            Connect more platforms
+            {t("connectMore")}
           </Link>
           {summary.hasOAuthContent ? (
             <Link
@@ -101,7 +103,7 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
               className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:border-accent/20 hover:text-gray-200"
             >
               <BarChart3 className="h-4 w-4" />
-              View full analytics
+              {t("viewAnalytics")}
             </Link>
           ) : null}
         </div>

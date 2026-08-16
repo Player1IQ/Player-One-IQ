@@ -1,0 +1,65 @@
+{
+  "welcome": {
+    "tagline": "Creator and sponsor management for gaming agencies and creator organizations.",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  },
+  "invite": {
+    "pageTitle": "Team invitation",
+    "pageSubtitle": "Join {organizationName} on Player One IQ",
+    "dashboardTitle": "Team Invitation",
+    "dashboardDescription": "Accept your invitation to join the organization",
+    "unavailableTitle": "Invitation unavailable",
+    "expired": "This invitation has expired. Ask your admin to send a new one.",
+    "invalid": "This invitation is no longer valid.",
+    "invitedTitle": "You're invited!",
+    "invitedSubtitle": "Join {organizationName} on Player One IQ",
+    "emailLabel": "Invited email",
+    "roleLabel": "Role",
+    "expiresLabel": "Expires",
+    "signInPrompt": "Sign in with {email} to accept this invitation.",
+    "signInButton": "Sign in to accept",
+    "emailMismatch": "You're signed in as {userEmail}, but this invite was sent to {inviteEmail}.",
+    "switchAccount": "Switch accounts",
+    "acceptButton": "Accept invitation",
+    "accepting": "Accepting..."
+  },
+  "organizationSetup": {
+    "creatorTitle": "Set up your creator profile",
+    "creatorSubtitle": "A few details to unlock your creator portal",
+    "sponsorTitle": "Set up your brand workspace",
+    "sponsorSubtitle": "Tell us about your brand to get started",
+    "agencyTitle": "Set up your workspace",
+    "agencySubtitle": "Choose creator/player or organization type to get started"
+  },
+  "wizard": {
+    "steps": {
+      "welcome": "Welcome",
+      "connect": "Connect platforms",
+      "finish": "Ready to go"
+    },
+    "welcomeTitle": "Welcome{userName, select, other {, {userName}}}!",
+    "welcomeSubtitle": "Let's get your workspace set up in a few quick steps.",
+    "connectTitle": "Connect your platforms",
+    "connectSubtitle": "Link accounts to unlock analytics, revenue tracking, and personalized coaching.",
+    "finishTitle": "You're all set",
+    "finishSubtitle": "Your workspace is ready. Head to the dashboard to get started.",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Go to dashboard",
+    "completing": "Finishing setup...",
+    "skipForNow": "Skip for now"
+  },
+  "founding": {
+    "heroTitle": "Join the Founding Roster",
+    "heroSubtitle": "Help shape Player One IQ before launch and unlock exclusive founding creator benefits.",
+    "applyButton": "Apply now",
+    "learnMore": "Learn more",
+    "perksTitle": "Founding member perks",
+    "spotsLimited": "Limited founding spots",
+    "formTitle": "Apply to the Founding Roster",
+    "formSubtitle": "Tell us about your creator business. We'll review applications and reach out to selected members."
+  }
+}

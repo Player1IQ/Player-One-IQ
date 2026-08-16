@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   Check,
   ChevronDown,
@@ -22,6 +23,7 @@ import {
   addLocalDismissedRecommendation,
 } from "@/lib/creator-coach/client-state";
 import { categoryIcons, priorityStyles } from "./category-config";
+import { useRecommendationText } from "@/lib/i18n/coach-text";
 
 interface RecommendationCardProps {
   recommendation: Recommendation;
@@ -42,6 +44,8 @@ export function RecommendationCard({
   onLocalDismiss,
   onLocalComplete,
 }: RecommendationCardProps) {
+  const t = useTranslations("coach.card");
+  const text = useRecommendationText(recommendation, coachContext);
   const [expanded, setExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
   const Icon = categoryIcons[recommendation.category];
@@ -132,7 +136,7 @@ export function RecommendationCard({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-medium text-gray-500">
-                {recommendation.category}
+                {text.category}
               </span>
               <span
                 className={cn(
@@ -141,11 +145,11 @@ export function RecommendationCard({
                 )}
               >
                 <span className={cn("h-1.5 w-1.5 rounded-full", priority.dot)} />
-                {recommendation.priority}
+                {text.priority}
               </span>
             </div>
             <h3 className={cn("mt-1 font-semibold text-white", compact ? "text-sm" : "text-base")}>
-              {recommendation.title}
+              {text.title}
             </h3>
             <p
               className={cn(
@@ -153,7 +157,7 @@ export function RecommendationCard({
                 compact ? "line-clamp-2" : !expanded && "line-clamp-2"
               )}
             >
-              {recommendation.description}
+              {text.description}
             </p>
           </div>
           {!compact ? (
@@ -162,7 +166,7 @@ export function RecommendationCard({
             onClick={() => setExpanded((value) => !value)}
             className="rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-white/5 hover:text-white"
             aria-expanded={expanded}
-            aria-label={expanded ? "Collapse recommendation" : "Expand recommendation"}
+            aria-label={expanded ? t("collapse") : t("expand")}
           >
             <ChevronDown
               className={cn(
@@ -178,21 +182,21 @@ export function RecommendationCard({
           <div className="mt-4 space-y-4 border-t border-white/[0.04] pt-4 animate-fade-in">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Why this matters
+                {t("whyItMatters")}
               </p>
               <p className="mt-1 text-sm text-gray-300">
-                {recommendation.whyItMatters}
+                {text.whyItMatters}
               </p>
             </div>
             <div className="flex flex-wrap gap-4 text-sm">
               <div>
-                <p className="text-xs text-gray-500">Estimated impact</p>
+                <p className="text-xs text-gray-500">{t("estimatedImpact")}</p>
                 <p className="font-medium text-accent-light">
-                  {recommendation.estimatedImpact}
+                  {text.estimatedImpact}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Confidence</p>
+                <p className="text-xs text-gray-500">{t("confidence")}</p>
                 <p className="font-medium text-gray-200">
                   {recommendation.confidenceScore}%
                 </p>
@@ -206,14 +210,14 @@ export function RecommendationCard({
             href={recommendation.actionRoute}
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white shadow-lg shadow-accent/25 transition-all hover:bg-accent-dark"
           >
-            {recommendation.actionLabel}
+            {text.actionLabel}
           </Link>
           {!compact && recommendation.learnMoreRoute ? (
             <Link
               href={recommendation.learnMoreRoute}
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-gray-300 transition-all hover:border-accent/40 hover:text-accent-light"
             >
-              Learn more
+              {t("learnMore")}
             </Link>
           ) : null}
           {!compact ? (
@@ -228,7 +232,7 @@ export function RecommendationCard({
             ) : (
               <Check className="h-3.5 w-3.5" />
             )}
-            Mark complete
+            {t("markComplete")}
           </Button>
           ) : null}
           {!compact && recommendation.dismissible ? (
@@ -239,7 +243,7 @@ export function RecommendationCard({
               onClick={handleDismiss}
             >
               <X className="h-3.5 w-3.5" />
-              Dismiss
+              {t("dismiss")}
             </Button>
           ) : null}
         </div>

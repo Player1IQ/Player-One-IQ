@@ -25,6 +25,8 @@ async function loadMessages(locale: AppLocale) {
     reports,
     ai,
     pages,
+    coach,
+    onboarding,
   ] = await Promise.all([
     import(`../../messages/${locale}/common.json`),
     import(`../../messages/${locale}/nav.json`),
@@ -47,6 +49,8 @@ async function loadMessages(locale: AppLocale) {
     import(`../../messages/${locale}/reports.json`),
     import(`../../messages/${locale}/ai.json`),
     import(`../../messages/${locale}/pages.json`),
+    import(`../../messages/${locale}/coach.json`),
+    import(`../../messages/${locale}/onboarding.json`),
   ]);
 
   return {
@@ -71,6 +75,8 @@ async function loadMessages(locale: AppLocale) {
     reports: reports.default,
     ai: ai.default,
     pages: pages.default,
+    coach: coach.default,
+    onboarding: onboarding.default,
   };
 }
 

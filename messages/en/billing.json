@@ -23,5 +23,44 @@
     "expired": "Trial expired"
   },
   "features": "Features included",
-  "noPermission": "You do not have permission to manage billing."
+  "noPermission": "You do not have permission to manage billing.",
+  "planHero": {
+    "noActivePlan": "No active plan",
+    "selectPlan": "Select a plan to get started",
+    "billingPeriod": "{start} – {end} · {interval} billing",
+    "trialing": "trialing"
+  },
+  "trialBanner": {
+    "description": "You're on a free {planName} trial with full feature access (usage caps apply). Trials are optional — start one from any paid plan below, or subscribe directly. Each paid plan includes one {days}-day trial per workspace."
+  },
+  "planMessages": {
+    "trialStarted": "{planName} trial started — explore the plan for {days} days.",
+    "planUpdated": "Plan updated to {planName}."
+  },
+  "usageSection": {
+    "aiRequests": "AI Requests",
+    "thisBillingPeriod": "This billing period",
+    "usageMeters": "Usage Meters",
+    "usageMetersDescription": "Current billing period limits"
+  },
+  "plansSection": {
+    "title": "Available Plans",
+    "description": "Try a paid plan free for {days} days, or subscribe directly",
+    "monthly": "monthly",
+    "yearly": "yearly",
+    "ownersOnly": "Only organization owners and admins can change plans."
+  },
+  "payment": {
+    "methodTitle": "Payment method",
+    "methodDescriptionStripe": "Update your card and payment details in the Stripe customer portal.",
+    "methodDescriptionNone": "Subscribe to a paid plan to add a payment method.",
+    "openPortal": "Open billing portal"
+  },
+  "invoices": {
+    "title": "Invoice history",
+    "descriptionStripe": "View receipts and past invoices in the Stripe customer portal.",
+    "descriptionNone": "Invoices appear after your first paid subscription.",
+    "managedByStripe": "Managed by Stripe",
+    "noneYet": "No invoices yet"
+  }
 }

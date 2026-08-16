@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Briefcase,
   Building2,
@@ -56,6 +57,8 @@ function ReportEmptyState({
 }
 
 export function ReportsPageClient({ report }: ReportsPageClientProps) {
+  const t = useTranslations("reports");
+  const locale = useLocale();
   const aiRequestUsage = report.usage.find(
     (entry) => entry.metricKey === "ai_requests"
   );
@@ -73,19 +76,18 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
         <Card className="border-amber-500/20 bg-amber-500/5">
           <CardContent className="px-5 py-4">
             <p className="text-sm text-amber-100">
-              <span className="font-medium text-amber-200">Light data this month.</span>{" "}
-              Add creators, connect platform accounts, or log contracts to fill out
-              your report. You can still export what you have today.
+              <span className="font-medium text-amber-200">{t("sparseBanner.title")}</span>{" "}
+              {t("sparseBanner.description")}
             </p>
             <div className="mt-3 flex flex-wrap gap-3 text-sm">
               <Link href="/creators" className="text-accent-light hover:text-white">
-                Add creators
+                {t("sparseBanner.addCreators")}
               </Link>
               <Link href="/contracts" className="text-accent-light hover:text-white">
-                Create a contract
+                {t("sparseBanner.createContract")}
               </Link>
               <Link href="/settings" className="text-accent-light hover:text-white">
-                Sync platform revenue
+                {t("sparseBanner.syncRevenue")}
               </Link>
             </div>
           </CardContent>
@@ -96,15 +98,13 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
         <CardContent className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div>
             <p className="text-sm text-gray-400">
-              Monthly report for{" "}
+              {t("periodCard.monthlyReportFor")}{" "}
               <span className="font-medium text-white">{report.periodLabel}</span>
             </p>
             <p className="mt-0.5 text-xs text-gray-500">
-              {report.creatorCount} creator{report.creatorCount === 1 ? "" : "s"}
+              {t("periodCard.creators", { count: report.creatorCount })}
               {report.connectedAccountCount > 0
-                ? ` · ${report.connectedAccountCount} OAuth-connected platform${
-                    report.connectedAccountCount === 1 ? "" : "s"
-                  }`
+                ? ` · ${t("periodCard.platforms", { count: report.connectedAccountCount })}`
                 : ""}
               {report.revenueComparison ? (
                 <span
@@ -117,7 +117,9 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
                   }
                 >
                   {" "}
-                  · vs last month: {report.revenueComparison.deltaDisplay}
+                  {t("periodCard.vsLastMonth", {
+                    delta: report.revenueComparison.deltaDisplay,
+                  })}
                 </span>
               ) : null}
             </p>
@@ -128,33 +130,39 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          title="Total revenue"
+          title={t("metrics.totalRevenue")}
           value={report.revenue.totalDisplay}
           subtitle={report.revenue.subtitle}
           icon={DollarSign}
           iconColor="text-accent-light"
         />
         <MetricCard
-          title="Contract pipeline"
+          title={t("metrics.contractPipeline")}
           value={report.contractStats.totalValueDisplay}
-          subtitle={`${report.contractStats.activeCount} active in pipeline`}
+          subtitle={t("metrics.activeInPipeline", {
+            count: report.contractStats.activeCount,
+          })}
           icon={FileText}
           iconColor="text-fuchsia-400"
         />
         <MetricCard
-          title="Opportunities"
+          title={t("metrics.opportunities")}
           value={String(report.opportunityStats.openCount)}
-          subtitle={`${report.opportunityStats.totalCount} total opportunities`}
+          subtitle={t("metrics.totalOpportunities", {
+            count: report.opportunityStats.totalCount,
+          })}
           icon={Briefcase}
           iconColor="text-blue-400"
         />
         <MetricCard
-          title="AI requests"
+          title={t("metrics.aiRequests")}
           value={String(aiRequestUsage?.count ?? 0)}
           subtitle={
             aiRequestUsage?.limit
-              ? `${aiRequestUsage.limit - aiRequestUsage.count} remaining this month`
-              : "Unlimited on your plan"
+              ? t("metrics.remainingThisMonth", {
+                  count: aiRequestUsage.limit - aiRequestUsage.count,
+                })
+              : t("metrics.unlimitedPlan")
           }
           icon={Sparkles}
           iconColor="text-violet-400"
@@ -166,35 +174,35 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-accent-light" />
-              <CardTitle className="text-base">Campaign summary</CardTitle>
+              <CardTitle className="text-base">{t("campaignSummary.title")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {report.campaignSummary.totalCount === 0 ? (
               <ReportEmptyState
                 icon={Target}
-                title="No campaigns yet"
-                description="Create sponsor campaigns to track budgets and status across your deals."
+                title={t("campaignSummary.emptyTitle")}
+                description={t("campaignSummary.emptyDescription")}
                 actionHref="/campaigns"
-                actionLabel="View campaigns"
+                actionLabel={t("campaignSummary.viewCampaigns")}
               />
             ) : (
               <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
-                    <p className="text-xs text-gray-500">Active</p>
+                    <p className="text-xs text-gray-500">{t("campaignSummary.active")}</p>
                     <p className="mt-1 text-lg font-semibold text-white">
                       {report.campaignSummary.activeCount}
                     </p>
                   </div>
                   <div className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
-                    <p className="text-xs text-gray-500">Total budget</p>
+                    <p className="text-xs text-gray-500">{t("campaignSummary.totalBudget")}</p>
                     <p className="mt-1 text-lg font-semibold text-white">
                       {report.campaignSummary.totalBudgetDisplay}
                     </p>
                   </div>
                   <div className="rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
-                    <p className="text-xs text-gray-500">Total campaigns</p>
+                    <p className="text-xs text-gray-500">{t("campaignSummary.totalCampaigns")}</p>
                     <p className="mt-1 text-lg font-semibold text-white">
                       {report.campaignSummary.totalCount}
                     </p>
@@ -215,7 +223,7 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
                 {report.campaignSummary.topByBudget.length > 0 ? (
                   <div className="space-y-2">
                     <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-                      Top by budget
+                      {t("campaignSummary.topByBudget")}
                     </p>
                     {report.campaignSummary.topByBudget.map((campaign) => (
                       <Link
@@ -250,32 +258,35 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-accent-light" />
-              <CardTitle className="text-base">Deliverable health</CardTitle>
+              <CardTitle className="text-base">{t("deliverableHealth.title")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {report.deliverableHealth.totalCount === 0 ? (
               <ReportEmptyState
                 icon={ClipboardList}
-                title="No deliverables tracked"
-                description="Add deliverables to contracts to monitor completion and overdue items."
+                title={t("deliverableHealth.emptyTitle")}
+                description={t("deliverableHealth.emptyDescription")}
                 actionHref="/contracts"
-                actionLabel="View contracts"
+                actionLabel={t("deliverableHealth.viewContracts")}
               />
             ) : (
               <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <MetricCard
-                    title="Completion rate"
+                    title={t("deliverableHealth.completionRate")}
                     value={`${report.deliverableHealth.completionRatePercent}%`}
-                    subtitle={`${report.deliverableHealth.completedCount} of ${report.deliverableHealth.totalCount} done`}
+                    subtitle={t("deliverableHealth.completedOf", {
+                      completed: report.deliverableHealth.completedCount,
+                      total: report.deliverableHealth.totalCount,
+                    })}
                     icon={CheckCircle2}
                     iconColor="text-emerald-400"
                   />
                   <MetricCard
-                    title="Overdue"
+                    title={t("deliverableHealth.overdue")}
                     value={String(report.deliverableHealth.overdueCount)}
-                    subtitle="Past due date, not completed"
+                    subtitle={t("deliverableHealth.overdueSubtitle")}
                     icon={report.deliverableHealth.overdueCount > 0 ? TrendingDown : CheckCircle2}
                     iconColor={
                       report.deliverableHealth.overdueCount > 0
@@ -289,19 +300,19 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
                     <p className="text-lg font-semibold text-white">
                       {report.deliverableHealth.pendingCount}
                     </p>
-                    <p className="text-xs text-gray-500">Pending</p>
+                    <p className="text-xs text-gray-500">{t("deliverableHealth.pending")}</p>
                   </div>
                   <div className="rounded-xl border border-white/[0.06] bg-surface px-3 py-3 text-center">
                     <p className="text-lg font-semibold text-white">
                       {report.deliverableHealth.inProgressCount}
                     </p>
-                    <p className="text-xs text-gray-500">In progress</p>
+                    <p className="text-xs text-gray-500">{t("deliverableHealth.inProgress")}</p>
                   </div>
                   <div className="rounded-xl border border-white/[0.06] bg-surface px-3 py-3 text-center">
                     <p className="text-lg font-semibold text-white">
                       {report.deliverableHealth.completedCount}
                     </p>
-                    <p className="text-xs text-gray-500">Completed</p>
+                    <p className="text-xs text-gray-500">{t("deliverableHealth.completed")}</p>
                   </div>
                 </div>
               </div>
@@ -314,27 +325,27 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-accent-light" />
-            <CardTitle className="text-base">Top sponsors by pipeline</CardTitle>
+            <CardTitle className="text-base">{t("sponsors.title")}</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           {report.sponsorBreakdown.length === 0 ? (
             <ReportEmptyState
               icon={Building2}
-              title="No sponsor pipeline yet"
-              description="Active and negotiating contracts will appear here grouped by sponsor."
+              title={t("sponsors.emptyTitle")}
+              description={t("sponsors.emptyDescription")}
               actionHref="/sponsors"
-              actionLabel="View sponsors"
+              actionLabel={t("sponsors.viewSponsors")}
             />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/[0.06] text-left text-xs uppercase tracking-wide text-gray-500">
-                    <th className="pb-2 pr-4 font-medium">Sponsor</th>
-                    <th className="pb-2 pr-4 font-medium">Pipeline value</th>
-                    <th className="pb-2 pr-4 font-medium">Active contracts</th>
-                    <th className="pb-2 font-medium">Total contracts</th>
+                    <th className="pb-2 pr-4 font-medium">{t("sponsors.columns.sponsor")}</th>
+                    <th className="pb-2 pr-4 font-medium">{t("sponsors.columns.pipelineValue")}</th>
+                    <th className="pb-2 pr-4 font-medium">{t("sponsors.columns.activeContracts")}</th>
+                    <th className="pb-2 font-medium">{t("sponsors.columns.totalContracts")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -374,26 +385,24 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-accent-light" />
-              <CardTitle className="text-base">Top creators by revenue</CardTitle>
+              <CardTitle className="text-base">{t("creators.title")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {report.creatorLeaderboard.length === 0 ? (
               <ReportEmptyState
                 icon={Users}
-                title="No creator revenue yet"
+                title={t("creators.emptyNoRevenueTitle")}
                 description={
                   report.creatorCount === 0
-                    ? "Add creators to your roster, then connect contracts or platform income."
-                    : "Creators in your roster have no contract or platform revenue recorded for this month."
+                    ? t("creators.emptyNoCreatorsDescription")
+                    : t("creators.emptyHasCreatorsDescription")
                 }
-                actionHref={
-                  report.creatorCount === 0 ? "/creators" : "/creators"
-                }
+                actionHref="/creators"
                 actionLabel={
                   report.creatorCount === 0
-                    ? "Add your first creator"
-                    : "Review creators"
+                    ? t("creators.addFirstCreator")
+                    : t("creators.reviewCreators")
                 }
               />
             ) : (
@@ -407,7 +416,12 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
                     <div>
                       <p className="text-sm font-medium text-white">{row.name}</p>
                       <p className="text-xs text-gray-500">
-                        {formatBreakdown(row.contractRevenue, row.platformRevenue)}
+                        {formatBreakdown(
+                          row.contractRevenue,
+                          row.platformRevenue,
+                          t,
+                          locale
+                        )}
                       </p>
                     </div>
                     <p className="text-sm font-semibold text-accent-light">
@@ -424,7 +438,7 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-accent-light" />
-              <CardTitle className="text-base">Platform income</CardTitle>
+              <CardTitle className="text-base">{t("platformIncome.title")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -433,21 +447,21 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
                 icon={report.connectedAccountCount > 0 ? TrendingUp : Link2}
                 title={
                   report.connectedAccountCount > 0
-                    ? "No platform income this month"
-                    : "No platform accounts connected"
+                    ? t("platformIncome.emptyConnectedTitle")
+                    : t("platformIncome.emptyNoAccountsTitle")
                 }
                 description={
                   report.connectedAccountCount > 0
-                    ? "OAuth accounts are linked but no revenue synced for this period yet. Run a manual sync or wait for the daily job."
-                    : "Connect YouTube, Twitch, or other platforms on a creator profile to track platform income."
+                    ? t("platformIncome.emptyConnectedDescription")
+                    : t("platformIncome.emptyNoAccountsDescription")
                 }
                 actionHref={
                   report.connectedAccountCount > 0 ? "/settings" : "/creators"
                 }
                 actionLabel={
                   report.connectedAccountCount > 0
-                    ? "Open platform sync settings"
-                    : "Connect a platform"
+                    ? t("platformIncome.openSyncSettings")
+                    : t("platformIncome.connectPlatform")
                 }
               />
             ) : (
@@ -472,7 +486,7 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
       {report.aiUsage.length > 0 ? (
         <Card className="border-white/[0.06] bg-surface-raised/80">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">AI usage</CardTitle>
+            <CardTitle className="text-base">{t("aiUsage.title")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -487,7 +501,7 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
                   <p className="mt-1 text-lg font-semibold text-white">
                     {entry.requestCount}
                   </p>
-                  <p className="text-xs text-gray-500">requests this month</p>
+                  <p className="text-xs text-gray-500">{t("aiUsage.requestsThisMonth")}</p>
                 </div>
               ))}
             </div>
@@ -498,16 +512,16 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-violet-400" />
-              <CardTitle className="text-base">AI usage</CardTitle>
+              <CardTitle className="text-base">{t("aiUsage.title")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <ReportEmptyState
               icon={Sparkles}
-              title="No AI requests this month"
-              description="Run growth, sponsorship, or contract summaries from the AI page to see usage here."
+              title={t("aiUsage.emptyTitle")}
+              description={t("aiUsage.emptyDescription")}
               actionHref="/ai"
-              actionLabel="Open AI assistants"
+              actionLabel={t("aiUsage.openAi")}
             />
           </CardContent>
         </Card>
@@ -516,15 +530,32 @@ export function ReportsPageClient({ report }: ReportsPageClientProps) {
   );
 }
 
-function formatBreakdown(contract: number, platform: number): string {
+function formatBreakdown(
+  contract: number,
+  platform: number,
+  t: ReturnType<typeof useTranslations<"reports">>,
+  locale: string
+): string {
   const parts: string[] = [];
-  if (contract > 0) parts.push(`contracts ${formatCurrency(contract)}`);
-  if (platform > 0) parts.push(`platform ${formatCurrency(platform)}`);
-  return parts.join(" · ") || "No breakdown";
+  if (contract > 0) {
+    parts.push(
+      t("creators.breakdown.contracts", {
+        amount: formatCurrency(contract, locale),
+      })
+    );
+  }
+  if (platform > 0) {
+    parts.push(
+      t("creators.breakdown.platform", {
+        amount: formatCurrency(platform, locale),
+      })
+    );
+  }
+  return parts.join(" · ") || t("creators.breakdown.none");
 }
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
+function formatCurrency(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,

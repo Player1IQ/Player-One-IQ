@@ -52,5 +52,69 @@
     "open": "{count} open",
     "assigned": "{count} assigned",
     "account": "Account"
+  },
+  "revenue": {
+    "viewOnProfile": "View on profile →",
+    "noDataRecorded": "No revenue recorded for {period}. Enter platform income below or receive deal payments to track earnings for this month.",
+    "cashReceived": "Cash received",
+    "platformIncome": "Platform income",
+    "platformIncomeHint": "Self-reported and synced platform revenue",
+    "expectedDeals": "Expected from deals",
+    "expectedDealsHint": "Amortized sponsorship value this month",
+    "totalIncome": "Total income (cash + platform):",
+    "trendTitle": "12-month trend",
+    "trendDescription": "Cash received and platform income over the last year",
+    "chartCashReceived": "Cash received",
+    "chartPlatform": "Platform",
+    "emptyTrendTitle": "No revenue history yet",
+    "emptyTrendDescription": "Record platform income or receive deal payments to see trends",
+    "dealsTitle": "Your deals",
+    "dealsDescription": "Sponsorship agreements active or paying out in {period}",
+    "noDealsOverlap": "No deals overlap {period}. Switch months to see other agreements or payments.",
+    "paymentsThisMonth": "{count, plural, one {# payment} other {# payments}} this month",
+    "platformIncomeTitle": "Platform income",
+    "platformIncomeDescription": "Enter monthly platform revenue. Synced rows are updated automatically from connected accounts."
+  },
+  "growth": {
+    "title": "Growth & platforms",
+    "description": "Connected social accounts and recent content performance",
+    "connectedPlatforms": "Connected platforms",
+    "totalAudience": "Total audience",
+    "recentViews": "Recent content views",
+    "syncingMetrics": "Syncing content metrics from your connected accounts.",
+    "connectYoutube": "Connect YouTube to see growth metrics from recent content.",
+    "noPlatforms": "No platforms connected yet. Link your accounts to track audience growth.",
+    "connectMore": "Connect more platforms",
+    "viewAnalytics": "View full analytics",
+    "upgradeHint": "Connect your platforms and upgrade your plan to unlock full growth analytics.",
+    "connectOnProfile": "Connect platforms on your profile"
+  },
+  "deliverables": {
+    "open": "Open",
+    "overdue": "Overdue",
+    "total": "Total",
+    "filters": {
+      "open": "Open",
+      "overdue": "Overdue",
+      "completed": "Completed",
+      "all": "All"
+    },
+    "emptyNoneTitle": "No deliverables yet",
+    "emptyNoneDescription": "When you land sponsorship deals, deliverables from those contracts will show up here.",
+    "emptyFilterTitle": "No matching deliverables",
+    "emptyFilterDescription": "Try a different filter to see other items.",
+    "listTitle": "Your deliverables",
+    "listDescription": "Track and update status across all your sponsorship deals",
+    "dueDate": "Due {date}",
+    "markIncomplete": "Mark incomplete",
+    "markComplete": "Mark complete",
+    "viewDeal": "View deal"
+  },
+  "seasons": {
+    "noActiveTitle": "No active season",
+    "noActiveDescription": "Check back soon for the next Creator Season."
+  },
+  "coach": {
+    "pageDescription": "AI coaching chat and personalized recommendations for your creator business"
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations, useLocale } from "next-intl";
 import {
   Area,
   AreaChart,
@@ -66,6 +67,8 @@ export function PortalRevenueClient({
   periodMonth,
   oauthPlatformUi,
 }: PortalRevenueClientProps) {
+  const t = useTranslations("portal.revenue");
+  const locale = useLocale();
   const hasTrend = trend.some(
     (point) => point.cashReceived > 0 || point.platform > 0 || point.expectedDeals > 0
   );
@@ -93,14 +96,13 @@ export function PortalRevenueClient({
           href={`/creators/${creator.id}#income-overview`}
           className="text-sm font-medium text-accent-light hover:text-white"
         >
-          View on profile →
+          {t("viewOnProfile")}
         </Link>
       </div>
 
       {showNoDataRecorded ? (
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-sm text-gray-400">
-          No revenue recorded for {periodLabel}. Enter platform income below or receive deal
-          payments to track earnings for this month.
+          {t("noDataRecorded", { period: periodLabel })}
         </div>
       ) : null}
 
@@ -108,7 +110,7 @@ export function PortalRevenueClient({
         <Card className="border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_32px_rgba(16,185,129,0.08)]">
           <CardHeader className="pb-2">
             <CardDescription className="text-sm font-semibold text-emerald-300/90">
-              Cash received
+              {t("cashReceived")}
             </CardDescription>
             <p className="mt-2 text-5xl font-extrabold tracking-tight text-emerald-300">
               {formatCurrency(summary.cashReceived)}
@@ -118,37 +120,37 @@ export function PortalRevenueClient({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Platform income</CardDescription>
+            <CardDescription>{t("platformIncome")}</CardDescription>
             <p className="mt-2 text-xl font-medium text-gray-400">
               {formatCurrency(summary.platformIncome.total)}
             </p>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-gray-500">
-            Self-reported and synced platform revenue
+            {t("platformIncomeHint")}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Expected from deals</CardDescription>
+            <CardDescription>{t("expectedDeals")}</CardDescription>
             <p className="mt-2 text-xl font-medium text-gray-400">
               {formatCurrency(summary.expectedDeals)}
             </p>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-gray-500">
-            Amortized sponsorship value this month
+            {t("expectedDealsHint")}
           </CardContent>
         </Card>
       </div>
 
       <p className="text-sm text-gray-500">
-        Total income (cash + platform):{" "}
+        {t("totalIncome")}{" "}
         <span className="font-medium text-gray-300">{formatCurrency(summary.total)}</span>
       </p>
 
       <Card>
         <CardHeader>
-          <CardTitle>12-month trend</CardTitle>
-          <CardDescription>Cash received and platform income over the last year</CardDescription>
+          <CardTitle>{t("trendTitle")}</CardTitle>
+          <CardDescription>{t("trendDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           {hasTrend ? (
@@ -176,7 +178,7 @@ export function PortalRevenueClient({
                     stroke="#10B981"
                     fill="url(#cashGrad)"
                     strokeWidth={2}
-                    name="Cash received"
+                    name={t("chartCashReceived")}
                   />
                   <Area
                     type="monotone"
@@ -185,7 +187,7 @@ export function PortalRevenueClient({
                     fill="transparent"
                     strokeWidth={2}
                     strokeDasharray="4 4"
-                    name="Platform"
+                    name={t("chartPlatform")}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -193,8 +195,8 @@ export function PortalRevenueClient({
           ) : (
             <EmptyState
               icon={DollarSign}
-              title="No revenue history yet"
-              description="Record platform income or receive deal payments to see trends"
+              title={t("emptyTrendTitle")}
+              description={t("emptyTrendDescription")}
               className="min-h-[18rem]"
             />
           )}
@@ -205,16 +207,16 @@ export function PortalRevenueClient({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-accent-light" />
-            Your deals
+            {t("dealsTitle")}
           </CardTitle>
           <CardDescription>
-            Sponsorship agreements active or paying out in {periodLabel}
+            {t("dealsDescription", { period: periodLabel })}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
           {monthContracts.length === 0 ? (
             <p className="text-sm text-gray-500">
-              No deals overlap {periodLabel}. Switch months to see other agreements or payments.
+              {t("noDealsOverlap", { period: periodLabel })}
             </p>
           ) : (
             <ul className="space-y-3">
@@ -244,8 +246,7 @@ export function PortalRevenueClient({
                         <p className="text-sm font-medium text-gray-200">{expectedLabel}</p>
                         {contractPayments.length > 0 ? (
                           <p className="text-xs text-emerald-400">
-                            {contractPayments.length} payment
-                            {contractPayments.length === 1 ? "" : "s"} this month
+                            {t("paymentsThisMonth", { count: contractPayments.length })}
                           </p>
                         ) : null}
                       </div>
@@ -260,7 +261,7 @@ export function PortalRevenueClient({
                             <span className="text-gray-400">
                               {contractPaymentStatusLabels[payment.status]}
                               {payment.paidAt
-                                ? ` · ${new Date(payment.paidAt).toLocaleDateString()}`
+                                ? ` · ${new Date(payment.paidAt).toLocaleDateString(locale)}`
                                 : ""}
                             </span>
                             <span className="font-medium text-emerald-400">
@@ -280,10 +281,9 @@ export function PortalRevenueClient({
 
       <Card>
         <CardHeader>
-          <CardTitle>Platform income</CardTitle>
+          <CardTitle>{t("platformIncomeTitle")}</CardTitle>
           <CardDescription>
-            Enter monthly platform revenue. Synced rows are updated automatically from connected
-            accounts.
+            {t("platformIncomeDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">

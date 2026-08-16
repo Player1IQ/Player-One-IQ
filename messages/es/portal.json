@@ -52,5 +52,69 @@
     "open": "{count} abiertas",
     "assigned": "{count} asignadas",
     "account": "Cuenta"
+  },
+  "revenue": {
+    "viewOnProfile": "Ver en perfil →",
+    "noDataRecorded": "Sin ingresos registrados para {period}. Ingresa income de plataforma abajo o recibe pagos de deals para rastrear ganancias este mes.",
+    "cashReceived": "Efectivo recibido",
+    "platformIncome": "Ingresos de plataforma",
+    "platformIncomeHint": "Ingresos de plataforma auto-reportados y sincronizados",
+    "expectedDeals": "Esperado de deals",
+    "expectedDealsHint": "Valor de patrocinio amortizado este mes",
+    "totalIncome": "Ingresos totales (efectivo + plataforma):",
+    "trendTitle": "Tendencia de 12 meses",
+    "trendDescription": "Efectivo recibido e ingresos de plataforma en el último año",
+    "chartCashReceived": "Efectivo recibido",
+    "chartPlatform": "Plataforma",
+    "emptyTrendTitle": "Aún no hay historial de ingresos",
+    "emptyTrendDescription": "Registra ingresos de plataforma o recibe pagos de deals para ver tendencias",
+    "dealsTitle": "Tus deals",
+    "dealsDescription": "Acuerdos de patrocinio activos o pagando en {period}",
+    "noDealsOverlap": "Ningún deal coincide con {period}. Cambia de mes para ver otros acuerdos o pagos.",
+    "paymentsThisMonth": "{count, plural, one {# pago} other {# pagos}} este mes",
+    "platformIncomeTitle": "Ingresos de plataforma",
+    "platformIncomeDescription": "Ingresa ingresos mensuales de plataforma. Las filas sincronizadas se actualizan automáticamente desde cuentas conectadas."
+  },
+  "growth": {
+    "title": "Crecimiento y plataformas",
+    "description": "Cuentas sociales conectadas y rendimiento reciente de contenido",
+    "connectedPlatforms": "Plataformas conectadas",
+    "totalAudience": "Audiencia total",
+    "recentViews": "Vistas de contenido reciente",
+    "syncingMetrics": "Sincronizando métricas de contenido desde tus cuentas conectadas.",
+    "connectYoutube": "Conecta YouTube para ver métricas de crecimiento de contenido reciente.",
+    "noPlatforms": "Aún no hay plataformas conectadas. Vincula tus cuentas para rastrear crecimiento de audiencia.",
+    "connectMore": "Conectar más plataformas",
+    "viewAnalytics": "Ver analítica completa",
+    "upgradeHint": "Conecta tus plataformas y mejora tu plan para desbloquear analítica de crecimiento completa.",
+    "connectOnProfile": "Conectar plataformas en tu perfil"
+  },
+  "deliverables": {
+    "open": "Abiertos",
+    "overdue": "Vencidos",
+    "total": "Total",
+    "filters": {
+      "open": "Abiertos",
+      "overdue": "Vencidos",
+      "completed": "Completados",
+      "all": "Todos"
+    },
+    "emptyNoneTitle": "Aún no hay entregables",
+    "emptyNoneDescription": "Cuando cierres deals de patrocinio, los entregables de esos contratos aparecerán aquí.",
+    "emptyFilterTitle": "Sin entregables coincidentes",
+    "emptyFilterDescription": "Prueba otro filtro para ver otros items.",
+    "listTitle": "Tus entregables",
+    "listDescription": "Rastrea y actualiza el estado en todos tus deals de patrocinio",
+    "dueDate": "Vence {date}",
+    "markIncomplete": "Marcar incompleto",
+    "markComplete": "Marcar completado",
+    "viewDeal": "Ver deal"
+  },
+  "seasons": {
+    "noActiveTitle": "Sin temporada activa",
+    "noActiveDescription": "Vuelve pronto para la próxima Creator Season."
+  },
+  "coach": {
+    "pageDescription": "Chat de coaching con IA y recomendaciones personalizadas para tu negocio de creador"
   }
 }

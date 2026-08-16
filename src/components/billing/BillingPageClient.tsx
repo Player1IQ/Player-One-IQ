@@ -114,10 +114,17 @@ export function BillingPageClient({
       if ("success" in result && result.success) {
         if ("trialing" in result && result.trialing) {
           setMessage(
-            `${planCode.replace(/_/g, " ")} trial started — explore the plan for ${PLATFORM_TRIAL_DAYS} days.`
+            t("planMessages.trialStarted", {
+              planName: planCode.replace(/_/g, " "),
+              days: PLATFORM_TRIAL_DAYS,
+            })
           );
         } else {
-          setMessage(`Plan updated to ${planCode.replace(/_/g, " ")}.`);
+          setMessage(
+            t("planMessages.planUpdated", {
+              planName: planCode.replace(/_/g, " "),
+            })
+          );
         }
       }
     });
@@ -153,9 +160,10 @@ export function BillingPageClient({
         <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
           <p className="font-medium">{trialLabel}</p>
           <p className="mt-1 text-xs text-amber-200/80">
-            You&apos;re on a free {currentPlan?.name} trial with full feature access
-            (usage caps apply). Trials are optional — start one from any paid plan below,
-            or subscribe directly. Each paid plan includes one {PLATFORM_TRIAL_DAYS}-day trial per workspace.
+            {t("trialBanner.description", {
+              planName: currentPlan?.name ?? "",
+              days: PLATFORM_TRIAL_DAYS,
+            })}
           </p>
         </div>
       ) : null}
@@ -179,11 +187,11 @@ export function BillingPageClient({
               <div className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-accent-light" />
                 <Badge variant="accent">
-                  {onPlatformTrial ? "trialing" : (subscription?.status ?? "none")}
+                  {onPlatformTrial ? t("planHero.trialing") : (subscription?.status ?? "none")}
                 </Badge>
               </div>
               <h2 className="mt-3 text-3xl font-bold text-white">
-                {currentPlan?.name ?? "No active plan"}
+                {currentPlan?.name ?? t("planHero.noActivePlan")}
               </h2>
               <p className="mt-2 text-lg text-accent-light">
                 {currentPlan
@@ -194,17 +202,18 @@ export function BillingPageClient({
                         : currentPlan.priceMonthlyCents,
                       subscription?.billingInterval ?? "monthly"
                     )
-                  : "Select a plan to get started"}
+                  : t("planHero.selectPlan")}
               </p>
               {onPlatformTrial && trialLabel ? (
                 <p className="mt-2 text-sm text-amber-200">{trialLabel}</p>
               ) : null}
               {subscription && (
                 <p className="mt-2 text-sm text-gray-500">
-                  {new Date(subscription.currentPeriodStart).toLocaleDateString(locale)} –{" "}
-                  {new Date(subscription.currentPeriodEnd).toLocaleDateString(locale)}
-                  {" · "}
-                  <span className="capitalize">{subscription.billingInterval}</span> billing
+                  {t("planHero.billingPeriod", {
+                    start: new Date(subscription.currentPeriodStart).toLocaleDateString(locale),
+                    end: new Date(subscription.currentPeriodEnd).toLocaleDateString(locale),
+                    interval: subscription.billingInterval,
+                  })}
                 </p>
               )}
             </div>
@@ -225,16 +234,16 @@ export function BillingPageClient({
       {/* Usage meters */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <MetricCard
-          title="AI Requests"
+          title={t("usageSection.aiRequests")}
           value={String(totalAiRequests)}
-          subtitle="This billing period"
+          subtitle={t("usageSection.thisBillingPeriod")}
           icon={Sparkles}
           iconColor="text-accent-light"
         />
         <Card className="sm:col-span-1 lg:col-span-2">
           <CardHeader>
-            <CardTitle>Usage Meters</CardTitle>
-            <CardDescription>Current billing period limits</CardDescription>
+            <CardTitle>{t("usageSection.usageMeters")}</CardTitle>
+            <CardDescription>{t("usageSection.usageMetersDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
             <UsageMeter usage={usage} />
@@ -249,10 +258,10 @@ export function BillingPageClient({
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="h-5 w-5 text-accent-light" />
-                Available Plans
+                {t("plansSection.title")}
               </CardTitle>
               <CardDescription>
-                Try a paid plan free for {PLATFORM_TRIAL_DAYS} days, or subscribe directly
+                {t("plansSection.description", { days: PLATFORM_TRIAL_DAYS })}
               </CardDescription>
             </div>
             <div className="flex rounded-xl border border-white/[0.08] p-1">
@@ -267,7 +276,7 @@ export function BillingPageClient({
                       : "text-gray-400 hover:text-gray-200"
                   }`}
                 >
-                  {interval}
+                  {t(`plansSection.${interval}` as "plansSection.monthly" | "plansSection.yearly")}
                 </button>
               ))}
             </div>
@@ -313,7 +322,7 @@ export function BillingPageClient({
           </div>
           {!canManage && (
             <p className="mt-4 text-sm text-gray-500">
-              Only organization owners and admins can change plans.
+              {t("plansSection.ownersOnly")}
             </p>
           )}
         </CardContent>
@@ -327,11 +336,11 @@ export function BillingPageClient({
               <CreditCard className="h-5 w-5 text-accent-light" />
             </div>
             <div>
-              <CardTitle className="text-base">Payment method</CardTitle>
+              <CardTitle className="text-base">{t("payment.methodTitle")}</CardTitle>
               <CardDescription className="mt-1">
                 {hasStripeCustomer
-                  ? "Update your card and payment details in the Stripe customer portal."
-                  : "Subscribe to a paid plan to add a payment method."}
+                  ? t("payment.methodDescriptionStripe")
+                  : t("payment.methodDescriptionNone")}
               </CardDescription>
               {canManage && hasStripeCustomer && (
                 <button
@@ -340,7 +349,7 @@ export function BillingPageClient({
                   disabled={portalPending}
                   className="mt-3 text-sm text-accent-light hover:underline"
                 >
-                  Open billing portal
+                  {t("payment.openPortal")}
                 </button>
               )}
             </div>
@@ -353,15 +362,15 @@ export function BillingPageClient({
               <Receipt className="h-5 w-5 text-gray-400" />
             </div>
             <div>
-              <CardTitle className="text-base">Invoice history</CardTitle>
+              <CardTitle className="text-base">{t("invoices.title")}</CardTitle>
               <CardDescription className="mt-1">
                 {hasStripeCustomer
-                  ? "View receipts and past invoices in the Stripe customer portal."
-                  : "Invoices appear after your first paid subscription."}
+                  ? t("invoices.descriptionStripe")
+                  : t("invoices.descriptionNone")}
               </CardDescription>
               <div className="mt-3 flex items-center gap-2 text-sm text-gray-400">
                 <FileText className="h-4 w-4" />
-                {hasStripeCustomer ? "Managed by Stripe" : "No invoices yet"}
+                {hasStripeCustomer ? t("invoices.managedByStripe") : t("invoices.noneYet")}
               </div>
             </div>
           </CardContent>

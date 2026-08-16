@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { X, Loader2 } from "lucide-react";
 import type { OrgUser } from "@/lib/messages";
 import {
@@ -27,6 +28,9 @@ export function StartConversationModal({
   currentUserId,
   isPortalUser = false,
 }: StartConversationModalProps) {
+  const t = useTranslations("messages.modals");
+  const tActions = useTranslations("messages.actions");
+  const tButtons = useTranslations("buttons");
   const router = useRouter();
   const [mode, setMode] = useState<StartMode>("direct");
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -57,9 +61,9 @@ export function StartConversationModal({
       mode === "direct"
         ? selectedUserId
           ? await getOrCreateDirectConversation(selectedUserId)
-          : { error: "Select an agency contact to start a conversation." }
+          : { error: t("selectContactError") }
         : selectedMemberIds.length === 0
-          ? { error: "Select at least one member for the group." }
+          ? { error: t("selectMemberError") }
           : await createGroupConversation(groupTitle, selectedMemberIds);
 
     if ("error" in result) {
@@ -79,7 +83,7 @@ export function StartConversationModal({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-md rounded-xl border border-border bg-surface-raised shadow-2xl">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold text-white">New Conversation</h2>
+          <h2 className="text-lg font-semibold text-white">{t("newConversation")}</h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:text-gray-200">
             <X className="h-5 w-5" />
           </button>
@@ -106,7 +110,7 @@ export function StartConversationModal({
                     : "text-gray-400 hover:text-gray-200"
                 }`}
               >
-                {option === "direct" ? "Direct message" : "Group chat"}
+                {option === "direct" ? t("directMessage") : t("groupChat")}
               </button>
             ))}
           </div>
@@ -196,16 +200,16 @@ export function StartConversationModal({
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm text-gray-400">
-              Cancel
+              {tButtons("cancel")}
             </button>
             <button
               type="submit"
               disabled={loading || !hasContacts}
-              title={!hasContacts ? "Add a contact first" : undefined}
+              title={!hasContacts ? tActions("addContactFirst") : undefined}
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {mode === "direct" ? "Start Conversation" : "Create Group"}
+              {mode === "direct" ? t("startConversation") : t("createGroup")}
             </button>
           </div>
         </form>

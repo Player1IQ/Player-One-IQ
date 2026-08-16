@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   ChevronDown,
   Download,
@@ -29,6 +30,8 @@ export function ExportReportMenu({
   variant = "page",
   className,
 }: ExportReportMenuProps) {
+  const t = useTranslations("reports.exportMenu");
+  const tReports = useTranslations("reports");
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -75,7 +78,7 @@ export function ExportReportMenu({
         setError(
           exportError instanceof Error
             ? exportError.message
-            : "Export failed."
+            : t("exportFailed")
         );
       }
     });
@@ -92,11 +95,11 @@ export function ExportReportMenu({
               : "hidden items-center gap-1.5 rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-1.5 text-xs font-medium text-gray-500 transition-colors hover:border-accent/30 hover:text-accent-light sm:inline-flex",
             className
           )}
-          title="Upgrade to export reports"
-          aria-label="Upgrade to export reports"
+          title={t("upgradeTitle")}
+          aria-label={t("upgradeAria")}
         >
           <Download className={variant === "mobile" ? "h-5 w-5" : "h-3.5 w-3.5"} />
-          {variant === "header" ? "Export" : null}
+          {variant === "header" ? tReports("export") : null}
         </Link>
       );
     }
@@ -118,10 +121,10 @@ export function ExportReportMenu({
         onClick={() => setOpen((prev) => !prev)}
         disabled={isPending}
         className={triggerClass}
-        aria-label="Export report"
+        aria-label={t("exportAria")}
         aria-expanded={open}
         aria-haspopup="true"
-        title={variant === "mobile" ? "Export report" : undefined}
+        title={variant === "mobile" ? t("exportAria") : undefined}
       >
         {isPending ? (
           <Loader2
@@ -130,7 +133,7 @@ export function ExportReportMenu({
         ) : (
           <Download className={variant === "mobile" ? "h-5 w-5" : "h-3.5 w-3.5"} />
         )}
-        {variant !== "mobile" ? "Export" : null}
+        {variant !== "mobile" ? tReports("export") : null}
         {variant === "page" ? (
           <ChevronDown className="h-4 w-4 text-gray-500" />
         ) : null}
@@ -144,8 +147,8 @@ export function ExportReportMenu({
           )}
         >
           <div className="border-b border-white/[0.06] px-3 py-2">
-            <p className="text-xs font-medium text-white">Monthly report</p>
-            <p className="text-[10px] text-gray-500">Current period</p>
+            <p className="text-xs font-medium text-white">{t("monthlyReport")}</p>
+            <p className="text-[10px] text-gray-500">{t("currentPeriod")}</p>
           </div>
           <button
             type="button"
@@ -154,7 +157,7 @@ export function ExportReportMenu({
             className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-300 transition-colors hover:bg-white/[0.04]"
           >
             <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
-            Download CSV
+            {t("downloadCsv")}
           </button>
           <Link
             href={REPORT_PRINT_PATH}
@@ -164,7 +167,7 @@ export function ExportReportMenu({
             className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-gray-300 transition-colors hover:bg-white/[0.04]"
           >
             <FileText className="h-4 w-4 text-accent-light" />
-            Print / Save PDF
+            {t("printPdf")}
           </Link>
         </div>
       )}

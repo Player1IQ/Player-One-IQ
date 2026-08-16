@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { ReportsPageClient } from "@/components/reports/ReportsPageClient";
@@ -24,6 +25,7 @@ import {
 } from "@/lib/subscription/queries";
 
 export default async function ReportsPage() {
+  const t = await getTranslations("pages.reports");
   const role = await getCurrentUserRole();
   if (!canViewReports(role)) {
     redirect(STAFF_DASHBOARD_PATH);
@@ -73,8 +75,8 @@ export default async function ReportsPage() {
 
   return (
     <DashboardLayout
-      title="Reports"
-      description="Monthly performance and revenue analytics"
+      title={t("title")}
+      description={t("description")}
     >
       <SubscriptionPageGate
         required={["advanced_analytics", "monthly_reports"]}

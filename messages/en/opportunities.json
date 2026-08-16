@@ -109,5 +109,19 @@
       "closed": "Closed",
       "hideMessage": "Hide message"
     }
+  },
+  "modal": {
+    "editTitle": "Edit Opportunity",
+    "createTitle": "New Opportunity",
+    "title": "Title",
+    "titlePlaceholder": "Summer sponsorship campaign",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the opportunity...",
+    "sponsor": "Sponsor",
+    "selectSponsor": "Select sponsor",
+    "budget": "Budget",
+    "deadline": "Application deadline",
+    "status": "Status",
+    "saving": "Saving..."
   }
 }

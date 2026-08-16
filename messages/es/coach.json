@@ -1,0 +1,255 @@
+{
+  "panel": {
+    "sectorTitle": "Creator Coach",
+    "descriptionPersonalized": "{greeting} — Recomendaciones personalizadas según tus metas y datos reales del espacio de trabajo.",
+    "descriptionDefault": "{greeting} — Recomendaciones para hacer crecer tu negocio de creador, basadas en datos reales.",
+    "allCaughtUp": "Estás al día",
+    "noRecommendations": "No hay recomendaciones activas por ahora. Vuelve cuando cambien tus métricas."
+  },
+  "layout": {
+    "topRecommendations": "Recomendaciones principales",
+    "sidebarCaughtUp": "No hay recomendaciones activas por ahora.",
+    "missionSidebarNote": "Tu misión diaria y recomendaciones siguen disponibles en la barra lateral.",
+    "unavailableTitle": "Creator Coach no está disponible temporalmente",
+    "unavailableDescription": "Actualiza la página o inténtalo de nuevo en un momento."
+  },
+  "card": {
+    "whyItMatters": "Por qué importa",
+    "estimatedImpact": "Impacto estimado",
+    "confidence": "Confianza",
+    "learnMore": "Saber más",
+    "markComplete": "Marcar completado",
+    "dismiss": "Descartar",
+    "expand": "Expandir recomendación",
+    "collapse": "Contraer recomendación"
+  },
+  "mission": {
+    "label": "Misión de hoy",
+    "progress": "Progreso",
+    "localSaveNote": "El progreso se guarda en este dispositivo. Conecta la sincronización del espacio de trabajo para mantenerlo entre sesiones.",
+    "titles": {
+      "clearBacklog": "Limpia tu backlog de patrocinios",
+      "postingRhythm": "Recupera tu ritmo de publicación",
+      "revenueFoundation": "Configura tu base de ingresos",
+      "streamingRhythm": "Construye tu ritmo de streaming",
+      "contractPipeline": "Protege tu pipeline de contratos",
+      "growCreator": "Haz crecer tu negocio de creador hoy",
+      "moveRoster": "Avanza tu roster hoy"
+    },
+    "subtitles": {
+      "withGoal": "Tres acciones enfocadas ajustadas a tu meta: {goal}.",
+      "creator": "Tres acciones enfocadas basadas en tus métricas y perfil reales.",
+      "organization": "Tres prioridades del espacio de trabajo basadas en tu roster y pipeline."
+    },
+    "tasks": {
+      "clearOverdue": "Completar {count, plural, one {# entregable vencido} other {# entregables vencidos}}",
+      "scheduleBlock": "Reservar tiempo en tu calendario",
+      "cadenceMissedSingle": "Publicar la subida pendiente del {day}",
+      "cadenceMissedMultiple": "Ponerse al día con {count} subidas pendientes",
+      "respondMessages": "Responder {count, plural, one {# mensaje sin leer} other {# mensajes sin leer}}",
+      "reviewApplications": "Revisar {count, plural, one {# postulación pendiente} other {# postulaciones pendientes}}",
+      "reviewPerformance": "Revisar el rendimiento reciente de tu contenido",
+      "planContent": "Planificar tu próximo contenido",
+      "engageCommunity": "Interactuar con tu comunidad",
+      "reviewRoster": "Revisar métricas de rendimiento del roster",
+      "checkInCreator": "Contactar a un creador de tu roster",
+      "reviewOpportunities": "Revisar oportunidades de patrocinio abiertas"
+    }
+  },
+  "greeting": {
+    "defaultName": "Creador",
+    "full": "{period, select, morning {Buenos días} afternoon {Buenas tardes} other {Buenas noches}}, {name}"
+  },
+  "goals": {
+    "growth": { "label": "Hacer crecer mi audiencia" },
+    "monetization": { "label": "Ganar más dinero" },
+    "sponsorship": { "label": "Conseguir patrocinios" },
+    "consistency": { "label": "Publicar con más consistencia" },
+    "brand": { "label": "Construir mi marca" }
+  },
+  "categories": {
+    "Content": "Contenido",
+    "Streaming": "Streaming",
+    "Community": "Comunidad",
+    "Sponsors": "Patrocinadores",
+    "Business": "Negocio",
+    "Monetization": "Monetización",
+    "Productivity": "Productividad",
+    "Learning": "Aprendizaje",
+    "Networking": "Networking",
+    "Branding": "Marca",
+    "Analytics": "Analítica",
+    "Revenue": "Ingresos",
+    "Goals": "Metas",
+    "Personal Development": "Desarrollo personal",
+    "Financial": "Finanzas"
+  },
+  "priorities": {
+    "Critical": "Crítica",
+    "High": "Alta",
+    "Medium": "Media",
+    "Low": "Baja"
+  },
+  "rules": {
+    "content-clip-repurpose": {
+      "title": "Convierte streams en clips de formato corto",
+      "description": "Has dedicado aproximadamente {streamedHours} horas a streaming recientemente pero solo tienes {clipsCreated} clips. Reutiliza highlights para llegar a audiencias que no ven en vivo.",
+      "whyItMatters": "Los clips cortos impulsan el descubrimiento en TikTok, YouTube Shorts e Instagram Reels — a menudo superan a los VOD completos para captar nuevos espectadores.",
+      "estimatedImpact": "15–30% más alcance del contenido existente",
+      "actionLabel": "Revisar contenido"
+    },
+    "sponsors-engagement-ready": {
+      "title": "Estás listo para presentarte a patrocinadores",
+      "description": "Tu tasa de engagement es {engagementRate}% sin deals de patrocinio activos. Las marcas buscan creadores con interacción comprobada antes de firmar.",
+      "whyItMatters": "Un engagement fuerte indica una audiencia comprometida — la métrica principal que evalúan los patrocinadores junto con el alcance y el fit de marca.",
+      "estimatedImpact": "Desbloquear pipeline de patrocinios",
+      "actionLabel": "Explorar oportunidades"
+    },
+    "goals-missed-posting-cadence": {
+      "title": "Ponte al día con subidas pendientes",
+      "description": "Te perdiste tus días habituales de subida esta semana ({missedLabel}).",
+      "descriptionWithRhythm": "Te perdiste {missedCount, plural, one {# subida esperada} other {# subidas esperadas}} esta semana ({missedLabel}). Tus plataformas conectadas muestran que sueles publicar los {rhythmOnlyLabel}.",
+      "whyItMatters": "Publicar de forma consistente en tus mejores días multiplica el alcance algorítmico y entrena a tu audiencia sobre cuándo aparecer.",
+      "estimatedImpact": "Recuperar el momentum semanal de publicación",
+      "actionLabel": "Abrir planificador de contenido"
+    },
+    "goals-upload-consistency": {
+      "title": "Construye un ritmo de subida consistente",
+      "description": "Has publicado {uploadsCompleted} piezas recientes frente a una meta de {uploadGoal} en este periodo. La consistencia multiplica el favor algorítmico y el hábito de audiencia.",
+      "whyItMatters": "Las plataformas premian calendarios regulares. Los creadores que publican con consistencia ven 2–3× mejor retención en 90 días.",
+      "estimatedImpact": "Crecimiento de audiencia más estable",
+      "actionLabel": "Planificar tu calendario"
+    },
+    "goals-momentum-double-down": {
+      "title": "Duplica lo que está funcionando",
+      "description": "Tu audiencia crece a {followersGrowth}% — muy por encima del promedio. Aprovecha este momentum antes de que se estabilice.",
+      "whyItMatters": "Los picos de crecimiento son ventanas para convertir espectadores casuales en seguidores leales y monetizar con membresías o merch.",
+      "estimatedImpact": "Acelerar la fase de crecimiento",
+      "actionLabel": "Analizar rendimiento"
+    },
+    "productivity-stream-schedule": {
+      "title": {
+        "creator": "Reserva tiempo de streaming en tu calendario",
+        "organization": "Agregar bloques de calendario de hoy"
+      },
+      "description": {
+        "creator": "No tienes bloques de calendario recurrentes configurados. Un horario visible ayuda a tu audiencia a aparecer y mejora las recomendaciones de la plataforma.",
+        "organization": "No hay eventos programados para hoy. Bloquear tiempo mantiene a tu roster responsable y detecta conflictos temprano."
+      },
+      "whyItMatters": "Los creadores con horarios predecibles retienen 40% más espectadores recurrentes que los que transmiten esporádicamente.",
+      "estimatedImpact": "Mejor retención de audiencia",
+      "actionLabel": "Abrir calendario"
+    },
+    "business-revenue-tracking": {
+      "title": "Empieza a rastrear tus ingresos",
+      "description": {
+        "creator": "Conecta una cuenta de plataforma o registra ingresos para ver tendencias y tomar decisiones informadas.",
+        "organization": "No hay ingresos de plataforma conectados en tu roster. Vincula cuentas de creadores para desbloquear visibilidad y pronósticos."
+      },
+      "whyItMatters": "No puedes optimizar lo que no mides. El seguimiento de ingresos revela qué plataformas y tipos de deal generan más income.",
+      "estimatedImpact": "Panorama financiero más claro",
+      "actionLabel": {
+        "creator": "Conectar plataformas",
+        "organization": "Ver creadores"
+      }
+    },
+    "sponsors-overdue-deliverables": {
+      "title": "Completar entregables vencidos",
+      "description": "Tienes {overdueDeliverables, plural, one {# entregable vencido} other {# entregables vencidos}}. Los retrasos ponen en riesgo renovaciones y la confianza futura de patrocinadores.",
+      "whyItMatters": "Los patrocinadores siguen de cerca el cumplimiento. Entregar a tiempo es el mejor predictor de deals repetidos.",
+      "estimatedImpact": "Proteger relaciones con patrocinadores",
+      "actionLabel": "Ver entregables"
+    },
+    "branding-connect-platform": {
+      "title": "Conecta tu plataforma principal",
+      "description": "Vincula tu cuenta de {primaryPlatform} para desbloquear insights de rendimiento y coaching personalizado basado en datos reales.",
+      "whyItMatters": "Las cuentas conectadas alimentan analítica, seguimiento de ingresos y recomendaciones de IA adaptadas a tu audiencia real.",
+      "estimatedImpact": "Desbloquear insights personalizados",
+      "actionLabel": "Conectar ahora"
+    },
+    "networking-apply-opportunities": {
+      "title": "Postular a oportunidades abiertas",
+      "description": "{openOpportunities, plural, one {Hay # oportunidad de patrocinio abierta} other {Hay # oportunidades de patrocinio abiertas}} y aún no has enviado una postulación.",
+      "whyItMatters": "Los postulantes tempranos suelen recibir revisión prioritaria. Incluso un pitch a una oportunidad puede abrir tu próximo deal.",
+      "estimatedImpact": "Nuevo pipeline de deals",
+      "actionLabel": "Explorar oportunidades"
+    },
+    "community-unread-messages": {
+      "title": "Responder mensajes pendientes",
+      "description": "Tienes {unreadMessages, plural, one {# mensaje sin leer} other {# mensajes sin leer}}. Respuestas rápidas mantienen conversaciones con patrocinadores y equipo en movimiento.",
+      "whyItMatters": "El tiempo de respuesta afecta la velocidad de los deals. Patrocinadores y managers priorizan creadores que comunican de forma confiable.",
+      "estimatedImpact": "Ciclos de deal más rápidos",
+      "actionLabel": "Abrir mensajes"
+    },
+    "personal-development-profile": {
+      "title": "Completa tu perfil de creador",
+      "description": "Tu perfil está {profileReadinessScore}% listo. Siguiente paso: {nextStep}.",
+      "whyItMatters": "Los perfiles completos rankean mejor en búsquedas de patrocinadores y dan a los managers el contexto para presentarte.",
+      "estimatedImpact": "Mejor descubrimiento por patrocinadores",
+      "actionLabel": "Actualizar perfil"
+    },
+    "business-grow-roster": {
+      "title": "Expande tu roster de creadores",
+      "description": "Tienes {activeCreatorsCount, plural, one {# creador activo} other {# creadores activos}}. Hacer crecer el roster diversifica ingresos y oportunidades de patrocinio.",
+      "whyItMatters": "Las agencias con rosters diversos cierran más deals multi-creador y resisten mejor cambios de algoritmo.",
+      "estimatedImpact": "Diversificación de ingresos",
+      "actionLabel": "Agregar creadores"
+    },
+    "revenue-expiring-contracts": {
+      "title": "Revisar contratos por vencer",
+      "description": "{expiringContractsCount, plural, one {# contrato vence} other {# contratos vencen}} en 45 días. Inicia conversaciones de renovación ahora.",
+      "whyItMatters": "Renovaciones proactivas previenen brechas de ingresos y dan tiempo a patrocinadores para ajustar presupuestos.",
+      "estimatedImpact": "Proteger ingresos recurrentes",
+      "actionLabel": "Ver contratos"
+    },
+    "productivity-review-applications": {
+      "title": "Revisar postulaciones pendientes",
+      "description": "{pendingApplications, plural, one {# postulación de creador necesita} other {# postulaciones de creadores necesitan}} tu revisión.",
+      "whyItMatters": "Respuestas rápidas a postulaciones mantienen al mejor talento comprometido y mejoran la reputación de tu agencia.",
+      "estimatedImpact": "Pipeline de talento más rápido",
+      "actionLabel": "Revisar postulaciones"
+    },
+    "goals-personalized-consistency": {
+      "title": "Mantén tu plan de publicación",
+      "description": "Definiste consistencia como meta principal. Reserva tiempo los {days} y publica al menos {uploadGoal} piezas en este periodo.",
+      "whyItMatters": "Los creadores con ritmo predecible ven mejor retención y alcance algorítmico en 90 días.",
+      "estimatedImpact": "Momentum semanal más fuerte",
+      "actionLabel": "Abrir calendario"
+    },
+    "goals-personalized-monetization": {
+      "title": "Mapea tus caminos de monetización",
+      "description": "Conecta plataformas o registra ingresos para ver qué flujos de income ganan tracción.",
+      "whyItMatters": "Datos claros de ingresos te ayudan a duplicar los canales que realmente pagan.",
+      "estimatedImpact": "Panorama de ingresos más claro",
+      "actionLabel": "Conectar plataformas"
+    },
+    "goals-personalized-sponsorship": {
+      "title": "Construye tu paquete listo para patrocinadores",
+      "description": "Los patrocinadores buscan perfiles completos y engagement comprobado. Actualiza tu perfil y explora deals abiertos.",
+      "whyItMatters": "Un perfil listo para sponsors más postulaciones activas es el camino más rápido a tu primer deal de marca.",
+      "estimatedImpact": "Pipeline de patrocinios más rápido",
+      "actionLabel": "Explorar oportunidades"
+    },
+    "goals-personalized-growth-clips": {
+      "title": "Escala tu output de formato corto",
+      "description": "Dijiste que los clips cortos son un foco. Reutiliza highlights de streams o contenido largo para llegar a nuevas audiencias.",
+      "whyItMatters": "El descubrimiento en formato corto suele superar el crecimiento solo-en-vivo en TikTok, YouTube Shorts y Reels.",
+      "estimatedImpact": "Mayor alcance top-of-funnel",
+      "actionLabel": "Revisar contenido"
+    },
+    "goals-personalized-brand": {
+      "title": "Afina tu posicionamiento de creador",
+      "description": "Construir tu marca empieza con un perfil completo — bio, plataformas y piezas de portfolio que patrocinadores evalúen rápido.",
+      "whyItMatters": "Un posicionamiento fuerte te hace memorable para patrocinadores y ayuda a que tu contenido se sienta cohesivo.",
+      "estimatedImpact": "Mejor descubrimiento por patrocinadores",
+      "actionLabel": "Actualizar perfil"
+    },
+    "analytics-connect-platforms": {
+      "title": "Conectar cuentas de plataforma de creadores",
+      "description": "Aún no hay cuentas vinculadas. Conectarlas desbloquea seguimiento de ingresos y analítica de rendimiento en tu roster.",
+      "whyItMatters": "Los datos de plataforma alimentan reportes precisos para patrocinadores y ayudan a identificar creadores listos para deals mayores.",
+      "estimatedImpact": "Decisiones basadas en datos",
+      "actionLabel": "Gestionar creadores"
+    }
+  }
+}
