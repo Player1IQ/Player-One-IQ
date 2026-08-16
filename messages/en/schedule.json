@@ -9,6 +9,7 @@
   "actions": {
     "newEvent": "New event",
     "blockTime": "Block time",
+    "blockThisDay": "Block this day",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -26,18 +27,31 @@
     "title": "Title",
     "description": "Description",
     "eventType": "Event type",
+    "type": "Type",
     "location": "Location",
+    "locationPlaceholder": "Discord, office, or link",
     "allDay": "All day",
+    "date": "Date",
     "starts": "Starts",
     "ends": "Ends",
     "participants": "Participants",
     "teamMembers": "Team members",
     "creators": "Creators",
+    "quickLength": "Quick length",
     "blockedDefaultTitle": "Blocked",
+    "titlePlaceholderEvent": "Team sync",
     "createEvent": "Create event",
     "editEvent": "Edit event",
     "createBlock": "Block availability",
-    "editBlock": "Edit block"
+    "editBlock": "Edit block",
+    "blockDescription": "Mark when you're unavailable so your team can plan around it.",
+    "eventDescription": "Set a time and invite teammates or creators."
+  },
+  "views": {
+    "weekView": "Week view",
+    "moreEvents": "+{count} more",
+    "participants": "{count, plural, one {# participant} other {# participants}}",
+    "showingWeek": "Showing events for the week of {start} – {end}."
   },
   "responses": {
     "accepted": "{count} accepted",
@@ -47,9 +61,14 @@
   "empty": {
     "noEvents": "No events this day",
     "noEventsDescription": "Add a meeting or block time on your calendar.",
-    "noEventsPortalDescription": "Block time when you're unavailable for brand deals."
+    "noEventsPortalDescription": "Block time when you're unavailable for brand deals.",
+    "noEventsStaffDescription": "Schedule meetings, practice, or streams"
+  },
+  "badges": {
+    "aiPlan": "AI Plan"
   },
   "confirmDelete": "Delete \"{title}\"?",
+  "deleteAria": "Delete {title}",
   "errors": {
     "noPermission": "You do not have permission to save this event."
   },

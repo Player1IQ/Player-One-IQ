@@ -32,6 +32,7 @@
   },
   "actions": {
     "newContract": "New Contract",
+    "createContract": "Create Contract",
     "clearFilters": "Clear filters"
   },
   "empty": {
@@ -43,5 +44,6 @@
     "noDealsDescription": "Your deals will show up here. As sponsor opportunities go live, any deal you're offered or sign will be tracked in this view — status, terms, and renewal dates, all in one place.",
     "noMatchingDescription": "Try a different search, status, or summary filter."
   },
-  "showing": "Showing {filtered} of {total} contracts"
+  "showing": "Showing {filtered} of {total} contracts",
+  "showingDeals": "Showing {filtered} of {total} deals"
 }

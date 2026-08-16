@@ -1,37 +1,113 @@
 {
   "pageTitle": "Oportunidades",
-  "pageDescription": "Gestiona oportunidades de patrocinio y postulaciones de creadores",
+  "pageDescription": "Gestiona oportunidades de patrocinio y aplicaciones de creadores",
   "filters": {
-    "all": "Todas",
-    "searchPlaceholder": "Buscar oportunidades por título, categoría o patrocinador..."
+    "all": "Todos",
+    "allStatuses": "Todos los estados",
+    "searchPlaceholder": "Buscar oportunidades..."
   },
   "tabs": {
-    "agency": "Agencia",
-    "marketplace": "Marketplace",
-    "recommended": "Recomendadas para ti"
+    "agency": "Tu agencia",
+    "marketplace": "Marketplace abierto",
+    "recommended": "Recomendadas"
   },
   "metrics": {
-    "open": "Abiertas",
-    "openDescription": "Aceptando postulaciones",
-    "applications": "Postulaciones",
-    "needsReview": "{count} por revisar",
-    "draft": "Borrador",
-    "draftDescription": "Aún no publicadas"
+    "openOpportunities": "Oportunidades abiertas",
+    "totalOpportunities": "Total de oportunidades",
+    "totalApplications": "Total de aplicaciones",
+    "inDraft": "{count} en borrador",
+    "yourAgency": "Tu agencia",
+    "agencySubtitle": "Oportunidades abiertas de tu organización",
+    "openMarketplace": "Marketplace abierto",
+    "marketplaceSubtitle": "Oportunidades cross-org para descubrir",
+    "yourApplications": "Tus aplicaciones",
+    "awaitingReview": "{count} en revisión",
+    "submittedApplications": "Aplicaciones enviadas"
+  },
+  "alerts": {
+    "pendingReview": "{count, plural, one {# aplicación esperando revisión} other {# aplicaciones esperando revisión}}",
+    "pendingReviewDetail": "Acepta aplicaciones para crear contratos o rechaza para cerrar el ciclo.",
+    "reviewApplications": "Revisar aplicaciones",
+    "draftReady": "{count, plural, one {# oportunidad en borrador lista para publicar} other {# oportunidades en borrador listas para publicar}}",
+    "draftReadyDetail": "Abre una oportunidad cuando estés listo para que los creadores apliquen.",
+    "viewDrafts": "Ver borradores"
+  },
+  "links": {
+    "viewMyApplications": "Ver mis aplicaciones",
+    "viewAllApplications": "Ver todas las aplicaciones",
+    "toReview": "{count} por revisar",
+    "pending": "{count} pendientes"
   },
   "actions": {
     "newOpportunity": "Nueva oportunidad",
-    "viewApplications": "Ver postulaciones",
+    "createOpportunity": "Crear oportunidad",
+    "viewApplications": "Ver aplicaciones",
     "clearFilters": "Limpiar filtros"
   },
   "empty": {
     "noOpportunities": "Aún no hay oportunidades",
     "noMatching": "Sin oportunidades coincidentes",
     "noOpportunitiesDescription": "Crea oportunidades de patrocinio para conectar creadores con marcas.",
-    "noMatchingDescription": "Prueba otra búsqueda o filtro de estado."
+    "noMatchingDescription": "Prueba otra búsqueda o filtro de estado.",
+    "createFirst": "Crea tu primera oportunidad de patrocinio para que los creadores descubran y apliquen.",
+    "checkBack": "Vuelve cuando se publiquen oportunidades.",
+    "marketplaceComingSoon": "Las oportunidades de patrocinio llegan pronto. Estamos incorporando nuestros primeros partners de marca. Cuando estén activas, verás oportunidades de patrocinio y partnership adaptadas a tu perfil aquí.",
+    "agencyEmpty": "Tu agencia aún no ha publicado oportunidades para ti. Cuando lo haga, las verás aquí primero.",
+    "recommendedEmpty": "No hay oportunidades recomendadas ahora. Conecta más plataformas o actualiza tu perfil para mejorar los matches.",
+    "noDescription": "Sin descripción."
+  },
+  "card": {
+    "marketplace": "Marketplace",
+    "sponsor": "Patrocinador:",
+    "applicants": "{count, plural, one {# aplicante} other {# aplicantes}}",
+    "deadline": "Fecha límite: {date}"
   },
   "showing": "Mostrando {filtered} de {total} oportunidades",
   "portal": {
-    "myApplications": "Mis postulaciones",
-    "pendingReview": "{count} pendientes de revisión"
+    "myApplications": "Mis aplicaciones",
+    "pendingReview": "{count} en revisión"
+  },
+  "applications": {
+    "backToOpportunities": "Volver a oportunidades",
+    "metrics": {
+      "needsAction": "Requiere acción",
+      "needsActionSubtitle": "Aplicadas o en revisión",
+      "underReview": "En revisión",
+      "accepted": "Aceptadas",
+      "totalApplications": "Total de aplicaciones",
+      "pendingReview": "Revisión pendiente",
+      "pendingReviewSubtitle": "Esperando decisión de la agencia",
+      "totalSubmitted": "Total enviadas"
+    },
+    "viewOnly": "Tienes acceso de solo lectura. Owners y admins pueden revisar, aceptar o rechazar aplicaciones desde este hub.",
+    "alerts": {
+      "needsReview": "{count, plural, one {# aplicación necesita revisión} other {# aplicaciones necesitan revisión}}",
+      "needsReviewDetail": "Marca en revisión, acepta para crear un contrato o rechaza para cerrar el ciclo.",
+      "reviewQueue": "Cola de revisión",
+      "allCaughtUp": "Al día — no hay aplicaciones esperando revisión."
+    },
+    "filters": {
+      "all": "Todos",
+      "needsAction": "Requiere acción",
+      "allStatuses": "Todos los estados",
+      "searchPlaceholder": "Buscar creador, oportunidad o mensaje..."
+    },
+    "empty": {
+      "noApplications": "Aún no hay aplicaciones",
+      "noMatching": "Sin aplicaciones coincidentes",
+      "portalDescription": "Aún no has aplicado a ninguna oportunidad. Explora listings abiertos para enviar tu primera aplicación.",
+      "sponsorDescription": "Publica una oportunidad abierta y los creadores de la red pueden aplicar. Las revisarás aquí.",
+      "agencyDescription": "Cuando los creadores apliquen a tus oportunidades, aparecerán en este hub para revisión.",
+      "noMatchingDescription": "Prueba otra búsqueda o filtro de estado.",
+      "browseOpportunities": "Explorar oportunidades →",
+      "postOpportunity": "Publicar oportunidad →",
+      "manageOpportunities": "Gestionar oportunidades →"
+    },
+    "card": {
+      "proposedRate": "Tarifa propuesta:",
+      "applied": "Aplicó {date}",
+      "closed": "Cerrada",
+      "hideMessage": "Ocultar mensaje"
+    }
   }
 }

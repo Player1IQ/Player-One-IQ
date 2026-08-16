@@ -3,23 +3,44 @@
   "pageDescription": "Manage sponsorship opportunities and creator applications",
   "filters": {
     "all": "All",
-    "searchPlaceholder": "Search opportunities by title, category, or sponsor..."
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search opportunities..."
   },
   "tabs": {
-    "agency": "Agency",
-    "marketplace": "Marketplace",
-    "recommended": "Recommended for you"
+    "agency": "Your agency",
+    "marketplace": "Open marketplace",
+    "recommended": "Recommended"
   },
   "metrics": {
-    "open": "Open",
-    "openDescription": "Accepting applications",
-    "applications": "Applications",
-    "needsReview": "{count} need review",
-    "draft": "Draft",
-    "draftDescription": "Not yet published"
+    "openOpportunities": "Open Opportunities",
+    "totalOpportunities": "Total Opportunities",
+    "totalApplications": "Total Applications",
+    "inDraft": "{count} in draft",
+    "yourAgency": "Your agency",
+    "agencySubtitle": "Open opportunities from your organization",
+    "openMarketplace": "Open marketplace",
+    "marketplaceSubtitle": "Cross-org opportunities to discover",
+    "yourApplications": "Your applications",
+    "awaitingReview": "{count} awaiting review",
+    "submittedApplications": "Submitted applications"
+  },
+  "alerts": {
+    "pendingReview": "{count, plural, one {# application waiting for review} other {# applications waiting for review}}",
+    "pendingReviewDetail": "Accept applications to create contracts or reject to close the loop.",
+    "reviewApplications": "Review applications",
+    "draftReady": "{count, plural, one {# draft opportunity ready to publish} other {# draft opportunities ready to publish}}",
+    "draftReadyDetail": "Open an opportunity when you are ready for creators to apply.",
+    "viewDrafts": "View drafts"
+  },
+  "links": {
+    "viewMyApplications": "View my applications",
+    "viewAllApplications": "View all applications",
+    "toReview": "{count} to review",
+    "pending": "{count} pending"
   },
   "actions": {
     "newOpportunity": "New Opportunity",
+    "createOpportunity": "Create Opportunity",
     "viewApplications": "View applications",
     "clearFilters": "Clear filters"
   },
@@ -27,11 +48,66 @@
     "noOpportunities": "No opportunities yet",
     "noMatching": "No matching opportunities",
     "noOpportunitiesDescription": "Create sponsorship opportunities to connect creators with brands.",
-    "noMatchingDescription": "Try a different search or status filter."
+    "noMatchingDescription": "Try a different search or status filter.",
+    "createFirst": "Create your first sponsorship opportunity for creators to discover and apply.",
+    "checkBack": "Check back when opportunities are published.",
+    "marketplaceComingSoon": "Sponsor opportunities are coming soon. We're onboarding our first brand partners. Once live, you'll see sponsorship and partnership opportunities matched to your profile right here.",
+    "agencyEmpty": "Your agency hasn't published any opportunities for you yet. When they do, you'll see them here first.",
+    "recommendedEmpty": "No recommended opportunities right now. Connect more platforms or update your profile to improve matches.",
+    "noDescription": "No description."
+  },
+  "card": {
+    "marketplace": "Marketplace",
+    "sponsor": "Sponsor:",
+    "applicants": "{count, plural, one {# applicant} other {# applicants}}",
+    "deadline": "Deadline: {date}"
   },
   "showing": "Showing {filtered} of {total} opportunities",
   "portal": {
     "myApplications": "My applications",
     "pendingReview": "{count} pending review"
+  },
+  "applications": {
+    "backToOpportunities": "Back to opportunities",
+    "metrics": {
+      "needsAction": "Needs action",
+      "needsActionSubtitle": "Applied or under review",
+      "underReview": "Under review",
+      "accepted": "Accepted",
+      "totalApplications": "Total applications",
+      "pendingReview": "Pending review",
+      "pendingReviewSubtitle": "Awaiting agency decision",
+      "totalSubmitted": "Total submitted"
+    },
+    "viewOnly": "You have view-only access. Owners and admins can review, accept, or reject applications from this hub.",
+    "alerts": {
+      "needsReview": "{count, plural, one {# application needs review} other {# applications need review}}",
+      "needsReviewDetail": "Mark under review, accept to create a contract, or reject to close the loop.",
+      "reviewQueue": "Review queue",
+      "allCaughtUp": "All caught up — no applications waiting for review."
+    },
+    "filters": {
+      "all": "All",
+      "needsAction": "Needs action",
+      "allStatuses": "All statuses",
+      "searchPlaceholder": "Search creator, opportunity, or message..."
+    },
+    "empty": {
+      "noApplications": "No applications yet",
+      "noMatching": "No matching applications",
+      "portalDescription": "You have not applied to any opportunities yet. Browse open listings to submit your first application.",
+      "sponsorDescription": "Publish an open opportunity and creators in the network can apply. You'll review them here.",
+      "agencyDescription": "When creators apply to your opportunities, they'll show up in this hub for review.",
+      "noMatchingDescription": "Try a different search or status filter.",
+      "browseOpportunities": "Browse opportunities →",
+      "postOpportunity": "Post an opportunity →",
+      "manageOpportunities": "Manage opportunities →"
+    },
+    "card": {
+      "proposedRate": "Proposed rate:",
+      "applied": "Applied {date}",
+      "closed": "Closed",
+      "hideMessage": "Hide message"
+    }
   }
 }

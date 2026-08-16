@@ -32,6 +32,7 @@
   },
   "actions": {
     "newContract": "Nuevo contrato",
+    "createContract": "Crear contrato",
     "clearFilters": "Limpiar filtros"
   },
   "empty": {
@@ -43,5 +44,6 @@
     "noDealsDescription": "Tus deals aparecerán aquí. Cuando haya oportunidades de patrocinio activas, cualquier deal que te ofrezcan o firmes se rastreará aquí — estado, términos y fechas de renovación, todo en un solo lugar.",
     "noMatchingDescription": "Prueba otra búsqueda, estado o filtro de resumen."
   },
-  "showing": "Mostrando {filtered} de {total} contratos"
+  "showing": "Mostrando {filtered} de {total} contratos",
+  "showingDeals": "Mostrando {filtered} de {total} deals"
 }

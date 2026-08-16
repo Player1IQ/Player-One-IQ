@@ -1,42 +1,53 @@
 {
   "pageTitle": "Mensajes",
-  "pageDescription": "Conversaciones de equipo y salas de deal",
+  "pageDescription": "Conversaciones del equipo y mensajería de deal rooms",
   "metrics": {
     "conversations": "Conversaciones",
     "unread": "Sin leer",
-    "needsAttention": "Requieren atención",
-    "allCaughtUp": "Todo al día",
+    "needsAttention": "Requiere atención",
+    "allCaughtUp": "Al día",
     "teamMembers": "Miembros del equipo",
     "agencyContacts": "Contactos de agencia"
   },
   "filters": {
-    "all": "Todas",
+    "all": "Todos",
+    "allTypes": "Todos los tipos",
     "unread": "Sin leer",
     "opportunity": "Oportunidad",
     "searchPlaceholder": "Buscar conversaciones..."
   },
   "alerts": {
-    "noContacts": "Aún no hay contactos. Cuando estés conectado con una agencia o patrocinador, podrás enviarles mensajes directamente aquí.",
+    "noContacts": "Aún no hay contactos. Cuando estés conectado con una agencia o patrocinador, podrás escribirles directamente aquí.",
     "unreadBanner": "{count, plural, one {# mensaje sin leer} other {# mensajes sin leer}}",
-    "unreadBannerDetail": "Responde desde tu bandeja para mantener los deals en movimiento."
+    "unreadBannerDetailStaff": "Deal rooms y mensajes directos esperando tu respuesta.",
+    "unreadBannerDetailPortal": "Mensajes directos y deal rooms de contratos esperando tu respuesta.",
+    "viewUnread": "Ver sin leer",
+    "allCaughtUp": "Al día — no hay mensajes sin leer."
   },
   "actions": {
     "newConversation": "Nueva conversación",
+    "newMessage": "Nuevo mensaje",
     "clearFilters": "Limpiar filtros",
-    "markAllRead": "Marcar todo como leído"
+    "markAllRead": "Marcar todo leído",
+    "addContactFirst": "Agrega un contacto primero"
   },
   "empty": {
     "noConversations": "Aún no hay conversaciones",
     "noMatching": "Sin conversaciones coincidentes",
-    "noConversationsDescription": "Inicia una conversación con un compañero o abre una sala de deal.",
-    "noMatchingDescription": "Prueba otra búsqueda o filtro."
+    "noConversationsDescriptionStaff": "Inicia un mensaje directo o abre un deal room desde una oportunidad o contrato.",
+    "noConversationsDescriptionPortalNoContacts": "Aún no hay contactos. Cuando estés conectado con una agencia o patrocinador, podrás escribirles directamente aquí.",
+    "noConversationsDescriptionPortal": "Escribe a tu equipo de agencia o abre un deal room de contrato desde los detalles del contrato.",
+    "noMatchingDescription": "Prueba otra búsqueda o filtro.",
+    "noMessagesYet": "Aún no hay mensajes"
   },
   "showing": "Mostrando {filtered} de {total} conversaciones",
   "conversation": {
-    "backToInbox": "Volver a bandeja",
+    "backToInbox": "Volver al inbox",
+    "inbox": "Inbox",
     "sendPlaceholder": "Escribe un mensaje...",
     "send": "Enviar",
     "noMessages": "Aún no hay mensajes",
-    "noMessagesDescription": "Envía el primer mensaje para iniciar esta conversación."
+    "noMessagesDescription": "Envía el primer mensaje para iniciar esta conversación.",
+    "viewRelated": "Ver {type}"
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import {
   CreditCard,
   FileText,
@@ -55,6 +56,8 @@ export function BillingPageClient({
   tierPlans,
   canManage,
 }: BillingPageClientProps) {
+  const t = useTranslations("billing");
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const [billingInterval, setBillingInterval] =
     useState<BillingInterval>("monthly");
@@ -73,11 +76,11 @@ export function BillingPageClient({
   useEffect(() => {
     const checkout = searchParams.get("checkout");
     if (checkout === "success") {
-      setMessage("Payment successful. Your plan will update in a few seconds.");
+      setMessage(t("checkout.success"));
     } else if (checkout === "canceled") {
-      setMessage("Checkout canceled. No changes were made.");
+      setMessage(t("checkout.canceled"));
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   function runPlanAction(
     planCode: PlanCode,
@@ -198,8 +201,8 @@ export function BillingPageClient({
               ) : null}
               {subscription && (
                 <p className="mt-2 text-sm text-gray-500">
-                  {new Date(subscription.currentPeriodStart).toLocaleDateString()} –{" "}
-                  {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  {new Date(subscription.currentPeriodStart).toLocaleDateString(locale)} –{" "}
+                  {new Date(subscription.currentPeriodEnd).toLocaleDateString(locale)}
                   {" · "}
                   <span className="capitalize">{subscription.billingInterval}</span> billing
                 </p>
@@ -212,7 +215,7 @@ export function BillingPageClient({
                 disabled={portalPending}
               >
                 <CreditCard className="h-4 w-4" />
-                {portalPending ? "Opening portal..." : "Manage billing"}
+                {portalPending ? "..." : t("manageBilling")}
               </Button>
             )}
           </div>

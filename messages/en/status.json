@@ -1,4 +1,10 @@
 {
+  "creators": {
+    "active": "Active",
+    "pending": "Pending",
+    "on-hold": "On Hold",
+    "inactive": "Inactive"
+  },
   "contracts": {
     "draft": "Draft",
     "negotiating": "Negotiating",

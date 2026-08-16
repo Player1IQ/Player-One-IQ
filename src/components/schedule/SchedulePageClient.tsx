@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
   Calendar,
@@ -36,13 +36,13 @@ import {
   toDateTimeLocalValue,
 } from "@/lib/schedule/helpers";
 import {
-  scheduleEventTypeLabels,
   scheduleEventTypes,
   type ScheduleEvent,
   type ScheduleEventType,
   type ScheduleParticipant,
 } from "@/lib/schedule";
 import { cn } from "@/lib/utils";
+import { useStatusLabels } from "@/lib/i18n/use-status-labels";
 
 interface SchedulePageClientProps {
   initialEvents: ScheduleEvent[];
@@ -68,11 +68,11 @@ interface EventFormState {
   selectedCreatorIds: string[];
 }
 
-const BLOCK_DURATION_PRESETS = [
-  { label: "1 hour", hours: 1 },
-  { label: "2 hours", hours: 2 },
-  { label: "4 hours", hours: 4 },
-  { label: "Full day", allDay: true as const },
+const BLOCK_DURATION_PRESET_KEYS = [
+  { key: "oneHour" as const, hours: 1 },
+  { key: "twoHours" as const, hours: 2 },
+  { key: "fourHours" as const, hours: 4 },
+  { key: "fullDay" as const, allDay: true as const },
 ];
 
 function defaultStartForDay(day: Date): Date {
@@ -164,7 +164,10 @@ function getEventParticipation(
   );
 }
 
-function formatAttendeeResponses(event: ScheduleEvent): string | null {
+function formatAttendeeResponses(
+  event: ScheduleEvent,
+  t: (key: "responses.accepted" | "responses.pending" | "responses.declined", values: { count: number }) => string
+): string | null {
   const attendees = event.participants.filter(
     (participant) => participant.role !== "organizer"
   );
@@ -179,9 +182,9 @@ function formatAttendeeResponses(event: ScheduleEvent): string | null {
   const pending = attendees.length - accepted - declined;
 
   const parts: string[] = [];
-  if (accepted > 0) parts.push(`${accepted} accepted`);
-  if (pending > 0) parts.push(`${pending} pending`);
-  if (declined > 0) parts.push(`${declined} declined`);
+  if (accepted > 0) parts.push(t("responses.accepted", { count: accepted }));
+  if (pending > 0) parts.push(t("responses.pending", { count: pending }));
+  if (declined > 0) parts.push(t("responses.declined", { count: declined }));
 
   return parts.join(" · ");
 }
@@ -197,6 +200,9 @@ export function SchedulePageClient({
   participantOptions = [],
 }: SchedulePageClientProps) {
   const t = useTranslations("schedule");
+  const tButtons = useTranslations();
+  const locale = useLocale();
+  const statusLabels = useStatusLabels();
   const router = useRouter();
   const [events, setEvents] = useState(initialEvents);
   const [anchorDate, setAnchorDate] = useState(() => new Date());
@@ -252,7 +258,11 @@ export function SchedulePageClient({
 
   function openCreateModal(forBlock = false) {
     setEditingEvent(null);
-    setForm(forBlock ? blockFormState(selectedDay) : defaultFormState(selectedDay));
+    setForm(
+      forBlock
+        ? { ...blockFormState(selectedDay), title: t("form.blockedDefaultTitle") }
+        : defaultFormState(selectedDay)
+    );
     setError(null);
     setEmailWarning(null);
     setModalOpen(true);
@@ -292,7 +302,7 @@ export function SchedulePageClient({
     }
   }
 
-  function applyDurationPreset(preset: (typeof BLOCK_DURATION_PRESETS)[number]) {
+  function applyDurationPreset(preset: (typeof BLOCK_DURATION_PRESET_KEYS)[number]) {
     if ("allDay" in preset && preset.allDay) {
       setForm((prev) => ({
         ...prev,
@@ -393,7 +403,7 @@ export function SchedulePageClient({
   }
 
   function handleDelete(event: ScheduleEvent) {
-    if (!confirm(`Delete "${event.title}"?`)) return;
+    if (!confirm(t("confirmDelete", { title: event.title }))) return;
     startTransition(async () => {
       try {
         const result = await deleteScheduleEvent(event.id);
@@ -475,12 +485,12 @@ export function SchedulePageClient({
             <ChevronRight className="h-4 w-4" />
           </button>
           <span className="ml-2 text-sm font-medium text-gray-300">
-            {weekDays[0]?.toLocaleDateString("en-US", {
+            {weekDays[0]?.toLocaleDateString(locale, {
               month: "short",
               day: "numeric",
             })}
             {" – "}
-            {weekDays[6]?.toLocaleDateString("en-US", {
+            {weekDays[6]?.toLocaleDateString(locale, {
               month: "short",
               day: "numeric",
               year: "numeric",
@@ -496,7 +506,7 @@ export function SchedulePageClient({
               className="inline-flex items-center gap-2 rounded-xl bg-white/[0.06] px-4 py-2 text-sm font-medium text-gray-200 hover:bg-white/[0.1]"
             >
               <Plus className="h-4 w-4" />
-              Block time
+              {t("actions.blockTime")}
             </button>
           ) : null}
           {isStaff ? (
@@ -506,7 +516,7 @@ export function SchedulePageClient({
               className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90"
             >
               <Plus className="h-4 w-4" />
-              New event
+              {t("actions.newEvent")}
             </button>
           ) : null}
         </div>
@@ -515,7 +525,7 @@ export function SchedulePageClient({
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card>
           <CardHeader>
-            <CardTitle>Week view</CardTitle>
+            <CardTitle>{t("views.weekView")}</CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
@@ -537,7 +547,7 @@ export function SchedulePageClient({
                     )}
                   >
                     <p className="text-[10px] font-medium uppercase tracking-wider text-gray-500">
-                      {day.toLocaleDateString("en-US", { weekday: "short" })}
+                      {day.toLocaleDateString(locale, { weekday: "short" })}
                     </p>
                     <p
                       className={cn(
@@ -562,7 +572,7 @@ export function SchedulePageClient({
                       ))}
                       {items.length > 3 ? (
                         <p className="text-[10px] text-gray-500">
-                          +{items.length - 3} more
+                          {t("views.moreEvents", { count: items.length - 3 })}
                         </p>
                       ) : null}
                     </div>
@@ -576,7 +586,7 @@ export function SchedulePageClient({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
             <CardTitle>
-              {selectedDay.toLocaleDateString("en-US", {
+              {selectedDay.toLocaleDateString(locale, {
                 weekday: "long",
                 month: "long",
                 day: "numeric",
@@ -588,7 +598,7 @@ export function SchedulePageClient({
                 onClick={() => openCreateModal(true)}
                 className="text-xs font-medium text-accent-light hover:text-white"
               >
-                Block this day
+                {t("actions.blockThisDay")}
               </button>
             ) : null}
           </CardHeader>
@@ -596,11 +606,11 @@ export function SchedulePageClient({
             {dayEvents.length === 0 ? (
               <EmptyState
                 icon={Calendar}
-                title="No events this day"
+                title={t("empty.noEvents")}
                 description={
                   isCreatorPortal
-                    ? "Block time when you're unavailable"
-                    : "Schedule meetings, practice, or streams"
+                    ? t("empty.noEventsPortalDescription")
+                    : t("empty.noEventsStaffDescription")
                 }
                 className="min-h-[12rem]"
               />
@@ -613,7 +623,7 @@ export function SchedulePageClient({
                     currentUserId
                   );
                   const responseSummary = isStaff
-                    ? formatAttendeeResponses(event)
+                    ? formatAttendeeResponses(event, t)
                     : null;
                   const canEdit = isStaff || event.isBlock;
 
@@ -642,14 +652,14 @@ export function SchedulePageClient({
                           </p>
                           {event.contentPlanId ? (
                             <span className="shrink-0 rounded-full border border-accent/30 bg-accent/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-accent-light">
-                              AI Plan
+                              {t("badges.aiPlan")}
                             </span>
                           ) : null}
                         </div>
                         <p className="mt-1 text-xs text-gray-500">
                           {event.timeRangeDisplay}
                           {!event.isBlock && (
-                            <span> · {scheduleEventTypeLabels[event.eventType]}</span>
+                            <span> · {statusLabels.scheduleEventType(event.eventType)}</span>
                           )}
                         </p>
                         {event.location ? (
@@ -664,8 +674,7 @@ export function SchedulePageClient({
                         ) : null}
                         {event.participants.length > 0 && isStaff ? (
                           <p className="mt-1 text-xs text-gray-600">
-                            {event.participants.length} participant
-                            {event.participants.length === 1 ? "" : "s"}
+                            {t("views.participants", { count: event.participants.length })}
                           </p>
                         ) : null}
                       </button>
@@ -681,7 +690,7 @@ export function SchedulePageClient({
                                 disabled={pending}
                                 className="rounded-lg bg-emerald-500/15 px-3 py-1 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25"
                               >
-                                Accept
+                                {t("actions.accept")}
                               </button>
                               <button
                                 type="button"
@@ -691,7 +700,7 @@ export function SchedulePageClient({
                                 disabled={pending}
                                 className="rounded-lg bg-white/[0.04] px-3 py-1 text-xs font-medium text-gray-400 hover:bg-white/[0.08]"
                               >
-                                Decline
+                                {t("actions.decline")}
                               </button>
                             </>
                           ) : (
@@ -714,7 +723,7 @@ export function SchedulePageClient({
                           onClick={() => handleDelete(event)}
                           disabled={pending}
                           className="rounded-lg p-2 text-gray-500 hover:bg-red-500/10 hover:text-red-400"
-                          aria-label={`Delete ${event.title}`}
+                          aria-label={t("deleteAria", { title: event.title })}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -737,26 +746,30 @@ export function SchedulePageClient({
           >
             <h2 className="text-lg font-semibold text-white">
               {editingEvent
-                ? "Edit event"
+                ? isBlockMode
+                  ? t("form.editBlock")
+                  : t("form.editEvent")
                 : isBlockMode
-                  ? "Block time"
-                  : "New event"}
+                  ? t("form.createBlock")
+                  : t("form.createEvent")}
             </h2>
             <p className="mt-1 text-sm text-gray-500">
-              {isBlockMode
-                ? "Mark when you're unavailable so your team can plan around it."
-                : "Set a time and invite teammates or creators."}
+              {isBlockMode ? t("form.blockDescription") : t("form.eventDescription")}
             </p>
 
             <form className="mt-4 space-y-4" onSubmit={handleFormSubmit}>
               <label className="block">
-                <span className="text-xs font-medium text-gray-400">Title</span>
+                <span className="text-xs font-medium text-gray-400">{t("form.title")}</span>
                 <input
                   value={form.title}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, title: e.target.value }))
                   }
-                  placeholder={isBlockMode ? "Blocked" : "Team sync"}
+                  placeholder={
+                    isBlockMode
+                      ? t("form.blockedDefaultTitle")
+                      : t("form.titlePlaceholderEvent")
+                  }
                   className="mt-1 w-full rounded-xl border border-white/[0.08] bg-surface px-3 py-2 text-sm text-white"
                 />
               </label>
@@ -764,7 +777,7 @@ export function SchedulePageClient({
               {isStaff && !editingEvent?.isBlock && !isBlockMode ? (
                 <>
                   <label className="block">
-                    <span className="text-xs font-medium text-gray-400">Type</span>
+                    <span className="text-xs font-medium text-gray-400">{t("form.type")}</span>
                     <select
                       value={form.eventType}
                       onChange={(e) =>
@@ -779,7 +792,7 @@ export function SchedulePageClient({
                         .filter((type) => type !== "block")
                         .map((type) => (
                           <option key={type} value={type}>
-                            {scheduleEventTypeLabels[type]}
+                            {statusLabels.scheduleEventType(type)}
                           </option>
                         ))}
                     </select>
@@ -787,7 +800,7 @@ export function SchedulePageClient({
 
                   <label className="block">
                     <span className="text-xs font-medium text-gray-400">
-                      Description
+                      {t("form.description")}
                     </span>
                     <textarea
                       value={form.description}
@@ -804,14 +817,14 @@ export function SchedulePageClient({
 
                   <label className="block">
                     <span className="text-xs font-medium text-gray-400">
-                      Location
+                      {t("form.location")}
                     </span>
                     <input
                       value={form.location}
                       onChange={(e) =>
                         setForm((prev) => ({ ...prev, location: e.target.value }))
                       }
-                      placeholder="Discord, office, or link"
+                      placeholder={t("form.locationPlaceholder")}
                       className="mt-1 w-full rounded-xl border border-white/[0.08] bg-surface px-3 py-2 text-sm text-white"
                     />
                   </label>
@@ -833,12 +846,12 @@ export function SchedulePageClient({
                   }
                   className="rounded border-white/20"
                 />
-                All day
+                {t("form.allDay")}
               </label>
 
               {form.allDay ? (
                 <label className="block">
-                  <span className="text-xs font-medium text-gray-400">Date</span>
+                  <span className="text-xs font-medium text-gray-400">{t("form.date")}</span>
                   <input
                     type="date"
                     value={form.allDayDate}
@@ -852,7 +865,7 @@ export function SchedulePageClient({
                 <div className="space-y-3">
                   <label className="block">
                     <span className="text-xs font-medium text-gray-400">
-                      Starts
+                      {t("form.starts")}
                     </span>
                     <input
                       type="datetime-local"
@@ -868,7 +881,7 @@ export function SchedulePageClient({
                     />
                   </label>
                   <label className="block">
-                    <span className="text-xs font-medium text-gray-400">Ends</span>
+                    <span className="text-xs font-medium text-gray-400">{t("form.ends")}</span>
                     <input
                       type="datetime-local"
                       value={form.endsAtLocal}
@@ -887,16 +900,16 @@ export function SchedulePageClient({
 
               {isBlockMode ? (
                 <div>
-                  <p className="text-xs font-medium text-gray-400">Quick length</p>
+                  <p className="text-xs font-medium text-gray-400">{t("form.quickLength")}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {BLOCK_DURATION_PRESETS.map((preset) => (
+                    {BLOCK_DURATION_PRESET_KEYS.map((preset) => (
                       <button
-                        key={preset.label}
+                        key={preset.key}
                         type="button"
                         onClick={() => applyDurationPreset(preset)}
                         className="rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-gray-300 hover:border-accent/30 hover:text-white"
                       >
-                        {preset.label}
+                        {t(`durationPresets.${preset.key}`)}
                       </button>
                     ))}
                   </div>
@@ -919,7 +932,7 @@ export function SchedulePageClient({
                       )}
                     </p>
                   ) : null}
-                  <p className="text-xs font-medium text-gray-400">Participants</p>
+                  <p className="text-xs font-medium text-gray-400">{t("form.participants")}</p>
                   <div className="mt-2 max-h-40 space-y-1 overflow-y-auto rounded-xl border border-white/[0.06] p-2">
                     {participantOptions.map((option) => {
                       const selected =
@@ -957,7 +970,7 @@ export function SchedulePageClient({
                   }}
                   className="rounded-xl px-4 py-2 text-sm text-gray-400 hover:text-white"
                 >
-                  Cancel
+                  {tButtons("buttons.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -968,7 +981,7 @@ export function SchedulePageClient({
                   className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent/90 disabled:opacity-60"
                 >
                   {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                  Save
+                  {tButtons("buttons.save")}
                 </button>
               </div>
             </form>
@@ -977,19 +990,18 @@ export function SchedulePageClient({
       ) : null}
 
       <p className="text-xs text-gray-600">
-        Showing events for the week of{" "}
-        {weekDays[0]?.toLocaleDateString("en-US", {
-          month: "numeric",
-          day: "numeric",
-          year: "numeric",
-        })}{" "}
-        –{" "}
-        {weekDays[6]?.toLocaleDateString("en-US", {
-          month: "numeric",
-          day: "numeric",
-          year: "numeric",
+        {t("views.showingWeek", {
+          start: weekDays[0]?.toLocaleDateString(locale, {
+            month: "numeric",
+            day: "numeric",
+            year: "numeric",
+          }) ?? "",
+          end: weekDays[6]?.toLocaleDateString(locale, {
+            month: "numeric",
+            day: "numeric",
+            year: "numeric",
+          }) ?? "",
         })}
-        .
       </p>
     </div>
   );

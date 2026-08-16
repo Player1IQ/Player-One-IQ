@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Search, Building2, Handshake, DollarSign } from "lucide-react";
 import {
   type Sponsor,
   type SponsorStatus,
   sponsorStatuses,
-  sponsorStatusLabels,
   getSponsorStats,
 } from "@/lib/sponsors";
 import { SponsorTable } from "./SponsorTable";
@@ -15,20 +15,14 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useFormatCurrency } from "@/lib/i18n/format-client";
+import { useStatusLabels } from "@/lib/i18n/use-status-labels";
 import { cn } from "@/lib/utils";
 
 const selectClassName =
   "rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 backdrop-blur-sm focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30";
 
 type StatusFilter = SponsorStatus | "all";
-
-const quickFilters: Array<{ value: StatusFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "active", label: sponsorStatusLabels.active },
-  { value: "negotiating", label: sponsorStatusLabels.negotiating },
-  { value: "prospect", label: sponsorStatusLabels.prospect },
-  { value: "inactive", label: sponsorStatusLabels.inactive },
-];
 
 interface SponsorsPageClientProps {
   sponsors: Sponsor[];
@@ -41,6 +35,16 @@ export function SponsorsPageClient({
   canWrite = true,
   initialCreateOpen = false,
 }: SponsorsPageClientProps) {
+  const t = useTranslations("sponsors");
+  const statusLabels = useStatusLabels();
+  const formatCurrency = useFormatCurrency();
+  const quickFilters: Array<{ value: StatusFilter; label: string }> = [
+    { value: "all", label: t("filters.all") },
+    { value: "active", label: statusLabels.sponsor("active") },
+    { value: "negotiating", label: statusLabels.sponsor("negotiating") },
+    { value: "prospect", label: statusLabels.sponsor("prospect") },
+    { value: "inactive", label: statusLabels.sponsor("inactive") },
+  ];
   const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -53,13 +57,11 @@ export function SponsorsPageClient({
       return sum + (Number.isFinite(numeric) ? numeric : 0);
     }, 0);
     if (total <= 0) return "—";
-    return total.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
+    return total <= 0 ? "—" : formatCurrency(total, "USD", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     });
-  }, [sponsors]);
+  }, [sponsors, formatCurrency]);
 
   const filtered = useMemo(() => {
     const query = search.toLowerCase();
@@ -68,13 +70,13 @@ export function SponsorsPageClient({
         sponsor.companyName.toLowerCase().includes(query) ||
         sponsor.industry.toLowerCase().includes(query) ||
         sponsor.primaryContact.name.toLowerCase().includes(query) ||
-        sponsorStatusLabels[sponsor.status].toLowerCase().includes(query) ||
+        statusLabels.sponsor(sponsor.status).toLowerCase().includes(query) ||
         sponsor.headquarters.toLowerCase().includes(query);
       const matchesStatus =
         statusFilter === "all" || sponsor.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [sponsors, search, statusFilter]);
+  }, [sponsors, search, statusFilter, statusLabels]);
 
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
 
@@ -82,23 +84,23 @@ export function SponsorsPageClient({
     <div className="animate-fade-in space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard
-          title="Total Sponsors"
+          title={t("metrics.totalSponsors")}
           value={String(stats.totalCount)}
-          subtitle={`${stats.activeCount} active partnerships`}
+          subtitle={t("metrics.activePartners", { count: stats.activeCount })}
           icon={Building2}
           iconColor="text-accent-light"
         />
         <MetricCard
-          title="Active Deals"
+          title={t("metrics.activeDeals")}
           value={String(stats.totalActiveDeals)}
-          subtitle="Draft, negotiating, and active contracts"
+          subtitle={t("metrics.activeDealsSubtitle")}
           icon={Handshake}
           iconColor="text-purple-400"
         />
         <MetricCard
-          title="Pipeline Value"
+          title={t("metrics.pipelineValue")}
           value={pipelineValueDisplay}
-          subtitle="Active and negotiating contracts"
+          subtitle={t("metrics.pipelineSubtitle")}
           icon={DollarSign}
           iconColor="text-emerald-400"
         />
@@ -108,11 +110,10 @@ export function SponsorsPageClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-amber-100">
-              {stats.negotiatingCount} sponsor
-              {stats.negotiatingCount === 1 ? "" : "s"} in negotiation
+              {t("alerts.negotiating", { count: stats.negotiatingCount })}
             </p>
             <p className="mt-0.5 text-xs text-amber-200/80">
-              Follow up on terms and move partners to active when deals close.
+              {t("alerts.negotiatingDetail")}
             </p>
           </div>
           <button
@@ -120,15 +121,14 @@ export function SponsorsPageClient({
             onClick={() => setStatusFilter("negotiating")}
             className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-500/20"
           >
-            View negotiating
+            {t("alerts.viewNegotiating")}
           </button>
         </div>
       ) : null}
 
       {stats.prospectCount > 0 && stats.negotiatingCount === 0 ? (
         <p className="rounded-xl border border-sky-500/20 bg-sky-500/5 px-4 py-3 text-sm text-sky-100">
-          {stats.prospectCount} prospect{stats.prospectCount === 1 ? "" : "s"} in
-          your pipeline — qualify and advance when ready.
+          {t("alerts.prospects", { count: stats.prospectCount })}
         </p>
       ) : null}
 
@@ -137,7 +137,7 @@ export function SponsorsPageClient({
           <Input
             icon={<Search className="h-4 w-4" />}
             type="text"
-            placeholder="Search by company, industry, or contact..."
+            placeholder={t("filters.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -150,17 +150,17 @@ export function SponsorsPageClient({
             }
             className={selectClassName}
           >
-            <option value="all">All statuses</option>
+            <option value="all">{t("filters.allStatuses")}</option>
             {sponsorStatuses.map((status) => (
               <option key={status} value={status}>
-                {sponsorStatusLabels[status]}
+                {statusLabels.sponsor(status)}
               </option>
             ))}
           </select>
           {canWrite ? (
             <Button onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              Add Sponsor
+              {t("actions.addSponsor")}
             </Button>
           ) : null}
         </div>
@@ -195,17 +195,17 @@ export function SponsorsPageClient({
       {filtered.length === 0 ? (
         <EmptyState
           icon={Building2}
-          title={sponsors.length === 0 ? "No sponsors yet" : "No matching sponsors"}
+          title={sponsors.length === 0 ? t("empty.noSponsors") : t("empty.noMatching")}
           description={
             sponsors.length === 0
-              ? "Add your first brand partner to track relationships and deals."
-              : "Try a different search or status filter."
+              ? t("empty.noSponsorsDescription")
+              : t("empty.noMatchingDescription")
           }
           action={
             canWrite && sponsors.length === 0 ? (
               <Button onClick={() => setModalOpen(true)}>
                 <Plus className="h-4 w-4" />
-                Add Sponsor
+                {t("actions.addSponsor")}
               </Button>
             ) : hasActiveFilters ? (
               <button
@@ -216,7 +216,7 @@ export function SponsorsPageClient({
                 }}
                 className="text-sm text-accent-light hover:text-white"
               >
-                Clear filters
+                {t("actions.clearFilters")}
               </button>
             ) : undefined
           }
@@ -224,9 +224,7 @@ export function SponsorsPageClient({
       ) : (
         <>
           <p className="text-sm text-gray-500">
-            Showing{" "}
-            <span className="font-medium text-gray-300">{filtered.length}</span>{" "}
-            of {sponsors.length} sponsors
+            {t("showing", { filtered: filtered.length, total: sponsors.length })}
           </p>
           <SponsorTable sponsors={filtered} canWrite={canWrite} />
         </>

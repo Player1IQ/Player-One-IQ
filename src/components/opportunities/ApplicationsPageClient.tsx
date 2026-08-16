@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -16,7 +17,6 @@ import {
   type OpportunityApplication,
   type ApplicationStatus,
   applicationStatuses,
-  applicationStatusLabels,
   getApplicationStats,
 } from "@/lib/opportunities";
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
@@ -27,6 +27,7 @@ import { MetricCard } from "@/components/ui/MetricCard";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GlowCard } from "@/components/ui/GlowCard";
+import { useStatusLabels } from "@/lib/i18n/use-status-labels";
 import { cn } from "@/lib/utils";
 
 const selectClassName =
@@ -41,25 +42,25 @@ interface ApplicationsPageClientProps {
 
 type StatusFilter = ApplicationStatus | "all" | "needs_action";
 
-const quickFilters: Array<{ value: StatusFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "needs_action", label: "Needs action" },
-  { value: "applied", label: "Applied" },
-  { value: "under_review", label: "Under review" },
-  { value: "accepted", label: "Accepted" },
-  { value: "rejected", label: "Rejected" },
-];
-
 export function ApplicationsPageClient({
   applications,
   canManage,
   organizationType,
   isPortalUser = false,
 }: ApplicationsPageClientProps) {
+  const t = useTranslations("opportunities.applications");
+  const tRoot = useTranslations("opportunities");
+  const statusLabels = useStatusLabels();
+  const quickFilters: Array<{ value: StatusFilter; label: string }> = [
+    { value: "all", label: t("filters.all") },
+    { value: "needs_action", label: t("filters.needsAction") },
+    { value: "applied", label: statusLabels.application("applied") },
+    { value: "under_review", label: statusLabels.application("under_review") },
+    { value: "accepted", label: statusLabels.application("accepted") },
+    { value: "rejected", label: statusLabels.application("rejected") },
+  ];
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
-    "all"
-  );
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
 
@@ -93,32 +94,32 @@ export function ApplicationsPageClient({
         className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to {isPortalUser ? "opportunities" : "Opportunities"}
+        {t("backToOpportunities")}
       </Link>
 
       {!isPortalUser ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard
-            title="Needs action"
+            title={t("metrics.needsAction")}
             value={String(stats.needsAction)}
-            subtitle="Applied or under review"
+            subtitle={t("metrics.needsActionSubtitle")}
             icon={Inbox}
             iconColor="text-amber-400"
           />
           <MetricCard
-            title="Under review"
+            title={t("metrics.underReview")}
             value={String(stats.underReview)}
             icon={Clock}
             iconColor="text-blue-400"
           />
           <MetricCard
-            title="Accepted"
+            title={t("metrics.accepted")}
             value={String(stats.accepted)}
             icon={CheckCircle2}
             iconColor="text-emerald-400"
           />
           <MetricCard
-            title="Total applications"
+            title={t("metrics.totalApplications")}
             value={String(stats.total)}
             icon={Users}
             iconColor="text-accent-light"
@@ -127,26 +128,26 @@ export function ApplicationsPageClient({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <MetricCard
-            title="Pending review"
+            title={t("metrics.pendingReview")}
             value={String(stats.needsAction)}
-            subtitle="Awaiting agency decision"
+            subtitle={t("metrics.pendingReviewSubtitle")}
             icon={Inbox}
             iconColor="text-amber-400"
           />
           <MetricCard
-            title="Under review"
+            title={t("metrics.underReview")}
             value={String(stats.underReview)}
             icon={Clock}
             iconColor="text-blue-400"
           />
           <MetricCard
-            title="Accepted"
+            title={t("metrics.accepted")}
             value={String(stats.accepted)}
-            icon={CheckCircle2}
+            icon={Users}
             iconColor="text-emerald-400"
           />
           <MetricCard
-            title="Total submitted"
+            title={t("metrics.totalSubmitted")}
             value={String(stats.total)}
             icon={Users}
             iconColor="text-accent-light"
@@ -156,8 +157,7 @@ export function ApplicationsPageClient({
 
       {!canManage && !isPortalUser ? (
         <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-sm text-gray-400">
-          You have view-only access. Owners and admins can review, accept, or
-          reject applications from this hub.
+          {t("viewOnly")}
         </p>
       ) : null}
 
@@ -165,12 +165,10 @@ export function ApplicationsPageClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-amber-100">
-              {stats.needsAction} application{stats.needsAction === 1 ? "" : "s"}{" "}
-              need{stats.needsAction === 1 ? "s" : ""} review
+              {t("alerts.needsReview", { count: stats.needsAction })}
             </p>
             <p className="mt-0.5 text-xs text-amber-200/80">
-              Mark under review, accept to create a contract, or reject to close
-              the loop.
+              {t("alerts.needsReviewDetail")}
             </p>
           </div>
           <button
@@ -178,14 +176,14 @@ export function ApplicationsPageClient({
             onClick={() => setStatusFilter("needs_action")}
             className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-500/20"
           >
-            Review queue
+            {t("alerts.reviewQueue")}
           </button>
         </div>
       ) : null}
 
       {canManage && applications.length > 0 && stats.needsAction === 0 ? (
         <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-100">
-          All caught up — no applications waiting for review.
+          {t("alerts.allCaughtUp")}
         </p>
       ) : null}
 
@@ -198,7 +196,7 @@ export function ApplicationsPageClient({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <Input
           type="search"
-          placeholder="Search creator, opportunity, or message..."
+          placeholder={t("filters.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-md flex-1"
@@ -210,11 +208,11 @@ export function ApplicationsPageClient({
           }
           className={selectClassName}
         >
-          <option value="all">All statuses</option>
-          <option value="needs_action">Needs action</option>
+          <option value="all">{t("filters.allStatuses")}</option>
+          <option value="needs_action">{t("filters.needsAction")}</option>
           {applicationStatuses.map((s) => (
             <option key={s} value={s}>
-              {applicationStatusLabels[s]}
+              {statusLabels.application(s)}
             </option>
           ))}
         </select>
@@ -246,17 +244,17 @@ export function ApplicationsPageClient({
           icon={Inbox}
           title={
             applications.length === 0
-              ? "No applications yet"
-              : "No matching applications"
+              ? t("empty.noApplications")
+              : t("empty.noMatching")
           }
           description={
             applications.length === 0
               ? isPortalUser
-                ? "You have not applied to any opportunities yet. Browse open listings to submit your first application."
+                ? t("empty.portalDescription")
                 : isSponsorOrg
-                  ? "Publish an open opportunity and creators in the network can apply. You'll review them here."
-                  : "When creators apply to your opportunities, they'll show up in this hub for review."
-              : "Try a different search or status filter."
+                  ? t("empty.sponsorDescription")
+                  : t("empty.agencyDescription")
+              : t("empty.noMatchingDescription")
           }
           action={
             applications.length === 0 ? (
@@ -266,11 +264,9 @@ export function ApplicationsPageClient({
               >
                 {canManage
                   ? isSponsorOrg
-                    ? "Post an opportunity →"
-                    : "Manage opportunities →"
-                  : isPortalUser
-                    ? "Browse opportunities →"
-                    : "Browse opportunities →"}
+                    ? t("empty.postOpportunity")
+                    : t("empty.manageOpportunities")
+                  : t("empty.browseOpportunities")}
               </Link>
             ) : hasActiveFilters ? (
               <button
@@ -281,7 +277,7 @@ export function ApplicationsPageClient({
                 }}
                 className="text-sm font-medium text-accent-light hover:text-white"
               >
-                Clear filters
+                {tRoot("actions.clearFilters")}
               </button>
             ) : undefined
           }
@@ -325,12 +321,12 @@ export function ApplicationsPageClient({
                       </div>
                       <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                         <span>
-                          Proposed rate:{" "}
+                          {t("card.proposedRate")}{" "}
                           <span className="text-gray-300">
                             {app.proposedRateDisplay}
                           </span>
                         </span>
-                        <span>Applied {app.createdAtDisplay}</span>
+                        <span>{t("card.applied", { date: app.createdAtDisplay })}</span>
                         {app.contractId ? (
                           <ApplicationContractLink contractId={app.contractId} />
                         ) : null}
@@ -348,7 +344,7 @@ export function ApplicationsPageClient({
                     ) : app.status === "rejected" ? (
                       <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
                         <XCircle className="h-3.5 w-3.5" />
-                        Closed
+                        {t("card.closed")}
                       </span>
                     ) : null}
                   </div>
@@ -367,7 +363,7 @@ export function ApplicationsPageClient({
                         <ChevronDown className="h-4 w-4 shrink-0" />
                       )}
                       <span className="line-clamp-1">
-                        {expanded ? "Hide message" : app.coverMessage}
+                        {expanded ? t("card.hideMessage") : app.coverMessage}
                       </span>
                     </button>
                   ) : null}

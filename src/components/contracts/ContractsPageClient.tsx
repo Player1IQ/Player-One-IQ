@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Search, FileText } from "lucide-react";
 import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
@@ -8,7 +9,6 @@ import type { DeliverablesSummary } from "@/lib/contract-deliverables";
 import {
   type Contract,
   type ContractStatus,
-  contractStatusLabels,
   contractStatuses,
   getContractStats,
   isContractOverdue,
@@ -24,22 +24,12 @@ import { ContractDetailPanel } from "./ContractDetailPanel";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useStatusLabels } from "@/lib/i18n/use-status-labels";
 import { cn } from "@/lib/utils";
 
 type SortField = "value" | "startDate" | "endDate" | "status";
 type SortDir = "asc" | "desc";
 type StatusFilter = ContractStatus | "all";
-
-const quickFilters: Array<{
-  value: ContractSummaryFilter | "all";
-  label: string;
-}> = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "pipeline", label: "Pipeline" },
-  { value: "expiring", label: "Expiring" },
-  { value: "overdue", label: "Overdue" },
-];
 
 interface ContractsPageClientProps {
   contracts: Contract[];
@@ -62,6 +52,20 @@ export function ContractsPageClient({
   isPortalUser = false,
   initialCreateOpen = false,
 }: ContractsPageClientProps) {
+  const t = useTranslations("contracts");
+  const statusLabels = useStatusLabels();
+
+  const quickFilters: Array<{
+    value: ContractSummaryFilter | "all";
+    label: string;
+  }> = [
+    { value: "all", label: t("filters.all") },
+    { value: "active", label: t("filters.active") },
+    { value: "pipeline", label: t("filters.pipeline") },
+    { value: "expiring", label: t("filters.expiring") },
+    { value: "overdue", label: t("filters.overdue") },
+  ];
+
   const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -84,7 +88,7 @@ export function ContractsPageClient({
         c.contractName.toLowerCase().includes(query) ||
         c.creatorName.toLowerCase().includes(query) ||
         c.sponsorName.toLowerCase().includes(query) ||
-        contractStatusLabels[c.status].toLowerCase().includes(query);
+        statusLabels.contract(c.status).toLowerCase().includes(query);
 
       const matchesStatus =
         statusFilter === "all" || c.status === statusFilter;
@@ -120,7 +124,7 @@ export function ContractsPageClient({
     });
 
     return result;
-  }, [contracts, search, statusFilter, summaryFilter, sortField, sortDir]);
+  }, [contracts, search, statusFilter, summaryFilter, sortField, sortDir, statusLabels]);
 
   const hasActiveFilters =
     search.trim().length > 0 ||
@@ -153,11 +157,10 @@ export function ContractsPageClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-red-100">
-              {stats.overdueCount} contract{stats.overdueCount === 1 ? "" : "s"}{" "}
-              past end date
+              {t("alerts.overdue", { count: stats.overdueCount })}
             </p>
             <p className="mt-0.5 text-xs text-red-200/80">
-              Review overdue agreements and mark completed or expired.
+              {t("alerts.overdueDetail")}
             </p>
           </div>
           <button
@@ -165,7 +168,7 @@ export function ContractsPageClient({
             onClick={() => setSummaryFilter("overdue")}
             className="shrink-0 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-100 transition-colors hover:bg-red-500/20"
           >
-            View overdue
+            {t("alerts.viewOverdue")}
           </button>
         </div>
       ) : null}
@@ -174,11 +177,10 @@ export function ContractsPageClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-500/25 bg-orange-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-orange-100">
-              {stats.expiringSoonCount} contract
-              {stats.expiringSoonCount === 1 ? "" : "s"} expiring within 45 days
+              {t("alerts.expiring", { count: stats.expiringSoonCount })}
             </p>
             <p className="mt-0.5 text-xs text-orange-200/80">
-              Plan renewals or close out deliverables before the end date.
+              {t("alerts.expiringDetail")}
             </p>
           </div>
           <button
@@ -186,7 +188,7 @@ export function ContractsPageClient({
             onClick={() => setSummaryFilter("expiring")}
             className="shrink-0 rounded-lg border border-orange-500/30 bg-orange-500/10 px-3 py-1.5 text-sm font-medium text-orange-100 transition-colors hover:bg-orange-500/20"
           >
-            View expiring
+            {t("alerts.viewExpiring")}
           </button>
         </div>
       ) : null}
@@ -196,8 +198,7 @@ export function ContractsPageClient({
       summaryFilter !== "pipeline" &&
       !hasActiveFilters ? (
         <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-100">
-          {stats.negotiatingCount} contract
-          {stats.negotiatingCount === 1 ? "" : "s"} in draft or negotiation.
+          {t("alerts.negotiating", { count: stats.negotiatingCount })}
         </p>
       ) : null}
 
@@ -208,8 +209,8 @@ export function ContractsPageClient({
             type="text"
             placeholder={
               isPortalUser
-                ? "Search your deals..."
-                : "Search contracts, creators, or sponsors..."
+                ? t("filters.searchPortal")
+                : t("filters.searchStaff")
             }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -224,10 +225,10 @@ export function ContractsPageClient({
             }
             className="rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
           >
-            <option value="all">All statuses</option>
+            <option value="all">{t("filters.allStatuses")}</option>
             {contractStatuses.map((s) => (
               <option key={s} value={s}>
-                {contractStatusLabels[s]}
+                {statusLabels.contract(s)}
               </option>
             ))}
           </select>
@@ -244,20 +245,20 @@ export function ContractsPageClient({
             }}
             className="rounded-lg border border-border bg-surface-raised px-3 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
           >
-            <option value="value-desc">Value: High to Low</option>
-            <option value="value-asc">Value: Low to High</option>
-            <option value="startDate-desc">Start Date: Newest</option>
-            <option value="startDate-asc">Start Date: Oldest</option>
-            <option value="endDate-desc">End Date: Latest</option>
-            <option value="endDate-asc">End Date: Earliest</option>
-            <option value="status-asc">Status: A–Z</option>
-            <option value="status-desc">Status: Z–A</option>
+            <option value="value-desc">{t("sort.valueDesc")}</option>
+            <option value="value-asc">{t("sort.valueAsc")}</option>
+            <option value="startDate-desc">{t("sort.startDateDesc")}</option>
+            <option value="startDate-asc">{t("sort.startDateAsc")}</option>
+            <option value="endDate-desc">{t("sort.endDateDesc")}</option>
+            <option value="endDate-asc">{t("sort.endDateAsc")}</option>
+            <option value="status-asc">{t("sort.statusAsc")}</option>
+            <option value="status-desc">{t("sort.statusDesc")}</option>
           </select>
 
           {canWrite ? (
             <Button onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              New Contract
+              {t("actions.newContract")}
             </Button>
           ) : null}
         </div>
@@ -307,24 +308,24 @@ export function ContractsPageClient({
           title={
             contracts.length === 0
               ? isPortalUser
-                ? "No deals yet"
-                : "No contracts yet"
+                ? t("empty.noDeals")
+                : t("empty.noContracts")
               : isPortalUser
-                ? "No matching deals"
-                : "No matching contracts"
+                ? t("empty.noMatchingDeals")
+                : t("empty.noMatchingContracts")
           }
           description={
             contracts.length === 0
               ? isPortalUser
-                ? "Your deals will show up here. As sponsor opportunities go live, any deal you're offered or sign will be tracked in this view — status, terms, and renewal dates, all in one place."
-                : "Create your first sponsorship agreement to track value, status, and deliverables."
-              : "Try a different search or filter."
+                ? t("empty.noDealsDescription")
+                : t("empty.noContractsDescription")
+              : t("empty.noMatchingDescription")
           }
           action={
             canWrite && contracts.length === 0 ? (
               <Button onClick={() => setModalOpen(true)}>
                 <Plus className="h-4 w-4" />
-                Create Contract
+                {t("actions.createContract")}
               </Button>
             ) : hasActiveFilters ? (
               <button
@@ -336,7 +337,7 @@ export function ContractsPageClient({
                 }}
                 className="text-sm text-accent-light hover:text-white"
               >
-                Clear filters
+                {t("actions.clearFilters")}
               </button>
             ) : undefined
           }
@@ -344,9 +345,15 @@ export function ContractsPageClient({
       ) : (
         <>
           <p className="text-sm text-gray-500">
-            Showing{" "}
-            <span className="font-medium text-gray-300">{filtered.length}</span>{" "}
-            of {contracts.length} {isPortalUser ? "deals" : "contracts"}
+            {isPortalUser
+              ? t("showingDeals", {
+                  filtered: filtered.length,
+                  total: contracts.length,
+                })
+              : t("showing", {
+                  filtered: filtered.length,
+                  total: contracts.length,
+                })}
           </p>
 
           <div className="flex gap-0 lg:gap-6">

@@ -4,14 +4,22 @@
   "metrics": {
     "totalSponsors": "Total de patrocinadores",
     "activePartners": "{count} partners activos",
-    "active": "Activos",
-    "activeDescription": "Patrocinadores actualmente activos",
+    "activeDeals": "Deals activos",
+    "activeDealsSubtitle": "Contratos en borrador, negociación y activos",
     "pipelineValue": "Valor del pipeline",
-    "acrossDeals": "En deals activos"
+    "acrossDeals": "En deals activos",
+    "pipelineSubtitle": "Contratos activos y en negociación"
   },
   "filters": {
     "all": "Todos",
-    "searchPlaceholder": "Buscar patrocinadores por nombre, industria o contacto..."
+    "allStatuses": "Todos los estados",
+    "searchPlaceholder": "Buscar por empresa, industria o contacto..."
+  },
+  "alerts": {
+    "negotiating": "{count, plural, one {# patrocinador en negociación} other {# patrocinadores en negociación}}",
+    "negotiatingDetail": "Da seguimiento a términos y mueve partners a activo cuando cierren deals.",
+    "viewNegotiating": "Ver en negociación",
+    "prospects": "{count, plural, one {# prospecto en tu pipeline — califica y avanza cuando estés listo.} other {# prospectos en tu pipeline — califica y avanza cuando estés listo.}}"
   },
   "actions": {
     "addSponsor": "Agregar patrocinador",
@@ -20,7 +28,7 @@
   "empty": {
     "noSponsors": "Aún no hay patrocinadores",
     "noMatching": "Sin patrocinadores coincidentes",
-    "noSponsorsDescription": "Agrega tu primer patrocinador para empezar a rastrear partnerships.",
+    "noSponsorsDescription": "Agrega tu primer partner de marca para rastrear relaciones y deals.",
     "noMatchingDescription": "Prueba otra búsqueda o filtro de estado."
   },
   "showing": "Mostrando {filtered} de {total} patrocinadores"

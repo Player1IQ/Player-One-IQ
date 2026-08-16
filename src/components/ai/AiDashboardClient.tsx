@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
   Brain,
   LineChart,
@@ -36,24 +37,50 @@ const assistantIcons = {
   revenue: LineChart,
 } as const;
 
-const assistantDisplayNames: Record<string, string> = {
-  growth: "Growth Coach",
-  sponsorship: "Sponsorship Hunter",
-  revenue: "Revenue Optimizer",
-};
 
-const actionLabels: Record<AiActionType, string> = {
-  analyze_performance: "Analyze performance",
-  growth_recommendations: "Growth recommendations",
-  content_strategy: "Content strategy",
-  sponsorship_targets: "Sponsorship targets",
-  match_creators: "Match creators",
-  match_sponsors: "Match sponsors",
-  rank_opportunities: "Rank opportunities",
-  forecast_earnings: "Forecast earnings",
-  forecast_campaigns: "Forecast campaigns",
-  predict_contract_value: "Predict contract value",
-};
+function getActionLabel(
+  t: ReturnType<typeof useTranslations<"ai">>,
+  action: AiActionType
+) {
+  switch (action) {
+    case "analyze_performance":
+      return t("actions.analyzePerformance");
+    case "growth_recommendations":
+      return t("actions.growthRecommendations");
+    case "content_strategy":
+      return t("actions.contentStrategy");
+    case "sponsorship_targets":
+      return t("actions.sponsorshipTargets");
+    case "match_creators":
+      return t("actions.matchCreators");
+    case "match_sponsors":
+      return t("actions.matchSponsors");
+    case "rank_opportunities":
+      return t("actions.rankOpportunities");
+    case "forecast_earnings":
+      return t("actions.forecastEarnings");
+    case "forecast_campaigns":
+      return t("actions.forecastCampaigns");
+    case "predict_contract_value":
+      return t("actions.predictContractValue");
+  }
+}
+
+function getAssistantLabel(
+  t: ReturnType<typeof useTranslations<"ai">>,
+  type: string
+) {
+  switch (type) {
+    case "growth":
+      return t("assistants.growthCoach");
+    case "sponsorship":
+      return t("assistants.sponsorshipHunter");
+    case "revenue":
+      return t("assistants.revenueOptimizer");
+    default:
+      return type;
+  }
+}
 
 type PanelState =
   | { status: "idle" }
@@ -76,17 +103,19 @@ interface AiDashboardClientProps {
 function ModeBadge({
   mode,
   fallbackNotice,
+  t,
 }: {
   mode: "live" | "demo";
   fallbackNotice?: string;
+  t: ReturnType<typeof useTranslations<"ai">>;
 }) {
   if (mode === "live") {
-    return <Badge variant="success">Live</Badge>;
+    return <Badge variant="success">{t("modes.live")}</Badge>;
   }
   if (fallbackNotice) {
-    return <Badge variant="warning">Sample</Badge>;
+    return <Badge variant="warning">{t("modes.sample")}</Badge>;
   }
-  return <Badge variant="muted">Demo</Badge>;
+  return <Badge variant="muted">{t("modes.demo")}</Badge>;
 }
 
 function formatResultTime(iso: string) {
@@ -157,6 +186,7 @@ export function AiDashboardClient({
   aiRequestCount,
   aiRequestLimit,
 }: AiDashboardClientProps) {
+  const t = useTranslations("ai");
   const resultsRef = useRef<HTMLDivElement>(null);
   const [panelState, setPanelState] = useState<PanelState>({ status: "idle" });
   const [error, setError] = useState("");
@@ -232,7 +262,7 @@ export function AiDashboardClient({
     setActiveAction(action);
     setPanelState({
       status: "loading",
-      label: actionLabels[action],
+      label: getActionLabel(t, action),
     });
     scrollToResults();
     startTransition(async () => {
@@ -246,7 +276,7 @@ export function AiDashboardClient({
       if ("result" in response && response.result) {
         setPanelState({
           status: "result",
-          sourceLabel: actionLabels[action],
+          sourceLabel: getActionLabel(t, action),
           result: response.result,
           mode: response.mode ?? "demo",
           fallbackNotice: response.fallbackNotice,
@@ -258,8 +288,8 @@ export function AiDashboardClient({
   if (!hasAnyAi) {
     return (
       <UpgradePrompt
-        title="AI tools not available"
-        message="Upgrade your plan to unlock AI growth, sponsorship, and revenue assistants."
+        title={t("upgrade.title")}
+        message={t("upgrade.description")}
         featureLabel="AI assistants"
       />
     );
@@ -285,10 +315,10 @@ export function AiDashboardClient({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-white">
-                Included AI requests
+                {t("usage.title")}
               </p>
               <p className="text-xs text-gray-500">
-                Shared across your organization this billing period
+                {t("usage.subtitle")}
               </p>
             </div>
             <p
@@ -331,10 +361,9 @@ export function AiDashboardClient({
               <MessageSquare className="h-6 w-6 text-accent-light" />
             </div>
             <div>
-              <CardTitle>Ask anything</CardTitle>
+              <CardTitle>{t("askAnything.title")}</CardTitle>
               <CardDescription>
-                Get personalized insights about your creators, sponsors, and
-                revenue
+                {t("askAnything.description")}
               </CardDescription>
             </div>
           </div>
@@ -351,7 +380,7 @@ export function AiDashboardClient({
                 submitQuestion();
               }
             }}
-            placeholder="e.g. Which creators should I pitch to energy drink brands this quarter?"
+            placeholder={t("askAnything.placeholder")}
             rows={3}
             disabled={isPending || atAiLimit}
             className="w-full resize-none rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-sm text-gray-200 placeholder:text-gray-500 transition-all focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:opacity-50"
@@ -372,7 +401,7 @@ export function AiDashboardClient({
               )}
               {isPending && panelState.status === "loading"
                 ? "Thinking…"
-                : "Send"}
+                : t("askAnything.send")}
             </Button>
           </div>
           {questionError ? (
@@ -429,6 +458,7 @@ export function AiDashboardClient({
                   <ModeBadge
                     mode={panelState.mode}
                     fallbackNotice={panelState.fallbackNotice}
+                    t={t}
                   />
                   <span className="text-xs text-gray-500">
                     {formatResultTime(panelState.result.generatedAt)}
@@ -470,7 +500,7 @@ export function AiDashboardClient({
         {usage.map((row) => (
           <MetricCard
             key={row.assistantType}
-            title={`${assistantDisplayNames[row.assistantType] ?? row.assistantType}`}
+            title={getAssistantLabel(t, row.assistantType)}
             value={String(row.requestCount)}
             subtitle="requests this month"
             icon={
@@ -487,7 +517,7 @@ export function AiDashboardClient({
         {assistantDefinitions.map((assistant) => {
           const Icon = assistantIcons[assistant.type];
           const displayName =
-            assistantDisplayNames[assistant.type] ?? assistant.title;
+            getAssistantLabel(t, assistant.type);
 
           return (
             <GlowCard key={assistant.type} className="flex flex-col">
@@ -523,7 +553,7 @@ export function AiDashboardClient({
                             "border-accent/50 ring-2 ring-accent/40 bg-accent/5"
                         )}
                       >
-                        <span>{actionLabels[action]}</span>
+                        <span>{getActionLabel(t, action)}</span>
                         {isPending && activeAction === action ? (
                           <Loader2 className="h-4 w-4 animate-spin text-accent-light" />
                         ) : (

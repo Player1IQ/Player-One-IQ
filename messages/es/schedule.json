@@ -9,6 +9,7 @@
   "actions": {
     "newEvent": "Nuevo evento",
     "blockTime": "Bloquear tiempo",
+    "blockThisDay": "Bloquear este día",
     "save": "Guardar",
     "cancel": "Cancelar",
     "delete": "Eliminar",
@@ -26,18 +27,31 @@
     "title": "Título",
     "description": "Descripción",
     "eventType": "Tipo de evento",
+    "type": "Tipo",
     "location": "Ubicación",
+    "locationPlaceholder": "Discord, oficina o enlace",
     "allDay": "Todo el día",
+    "date": "Fecha",
     "starts": "Inicio",
     "ends": "Fin",
     "participants": "Participantes",
     "teamMembers": "Miembros del equipo",
     "creators": "Creadores",
+    "quickLength": "Duración rápida",
     "blockedDefaultTitle": "Bloqueado",
+    "titlePlaceholderEvent": "Sync del equipo",
     "createEvent": "Crear evento",
     "editEvent": "Editar evento",
     "createBlock": "Bloquear disponibilidad",
-    "editBlock": "Editar bloque"
+    "editBlock": "Editar bloque",
+    "blockDescription": "Marca cuando no estás disponible para que tu equipo pueda planificar.",
+    "eventDescription": "Define una hora e invita compañeros o creadores."
+  },
+  "views": {
+    "weekView": "Vista semanal",
+    "moreEvents": "+{count} más",
+    "participants": "{count, plural, one {# participante} other {# participantes}}",
+    "showingWeek": "Mostrando eventos de la semana del {start} – {end}."
   },
   "responses": {
     "accepted": "{count} aceptados",
@@ -47,9 +61,14 @@
   "empty": {
     "noEvents": "Sin eventos este día",
     "noEventsDescription": "Agrega una reunión o bloquea tiempo en tu calendario.",
-    "noEventsPortalDescription": "Bloquea tiempo cuando no estés disponible para deals de marcas."
+    "noEventsPortalDescription": "Bloquea tiempo cuando no estés disponible para deals de marca.",
+    "noEventsStaffDescription": "Programa reuniones, práctica o streams"
+  },
+  "badges": {
+    "aiPlan": "Plan IA"
   },
   "confirmDelete": "¿Eliminar \"{title}\"?",
+  "deleteAria": "Eliminar {title}",
   "errors": {
     "noPermission": "No tienes permiso para guardar este evento."
   },

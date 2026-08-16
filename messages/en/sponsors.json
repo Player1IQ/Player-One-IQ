@@ -4,14 +4,22 @@
   "metrics": {
     "totalSponsors": "Total Sponsors",
     "activePartners": "{count} active partners",
-    "active": "Active",
-    "activeDescription": "Currently engaged sponsors",
+    "activeDeals": "Active Deals",
+    "activeDealsSubtitle": "Draft, negotiating, and active contracts",
     "pipelineValue": "Pipeline Value",
-    "acrossDeals": "Across active deals"
+    "acrossDeals": "Across active deals",
+    "pipelineSubtitle": "Active and negotiating contracts"
   },
   "filters": {
     "all": "All",
-    "searchPlaceholder": "Search sponsors by name, industry, or contact..."
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search by company, industry, or contact..."
+  },
+  "alerts": {
+    "negotiating": "{count, plural, one {# sponsor in negotiation} other {# sponsors in negotiation}}",
+    "negotiatingDetail": "Follow up on terms and move partners to active when deals close.",
+    "viewNegotiating": "View negotiating",
+    "prospects": "{count, plural, one {# prospect in your pipeline — qualify and advance when ready.} other {# prospects in your pipeline — qualify and advance when ready.}}"
   },
   "actions": {
     "addSponsor": "Add Sponsor",
@@ -20,7 +28,7 @@
   "empty": {
     "noSponsors": "No sponsors yet",
     "noMatching": "No matching sponsors",
-    "noSponsorsDescription": "Add your first sponsor to start tracking partnerships.",
+    "noSponsorsDescription": "Add your first brand partner to track relationships and deals.",
     "noMatchingDescription": "Try a different search or status filter."
   },
   "showing": "Showing {filtered} of {total} sponsors"

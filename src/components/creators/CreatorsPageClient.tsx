@@ -7,7 +7,6 @@ import {
   type Creator,
   type CreatorStatus,
   creatorStatuses,
-  creatorStatusLabels,
   getCreatorStats,
 } from "@/lib/creators";
 import { CreatorRosterTable } from "./CreatorRosterTable";
@@ -18,6 +17,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
+import { useStatusLabels } from "@/lib/i18n/use-status-labels";
 
 const selectClassName =
   "rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 backdrop-blur-sm focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30";
@@ -38,12 +38,13 @@ export function CreatorsPageClient({
   initialCreateOpen = false,
 }: CreatorsPageClientProps) {
   const t = useTranslations("creators");
+  const statusLabels = useStatusLabels();
   const quickFilters: Array<{ value: StatusFilter; label: string }> = [
     { value: "all", label: t("filters.all") },
-    { value: "active", label: creatorStatusLabels.active },
-    { value: "pending", label: creatorStatusLabels.pending },
-    { value: "on-hold", label: creatorStatusLabels["on-hold"] },
-    { value: "inactive", label: creatorStatusLabels.inactive },
+    { value: "active", label: statusLabels.creator("active") },
+    { value: "pending", label: statusLabels.creator("pending") },
+    { value: "on-hold", label: statusLabels.creator("on-hold") },
+    { value: "inactive", label: statusLabels.creator("inactive") },
   ];
   const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
@@ -58,7 +59,7 @@ export function CreatorsPageClient({
         creator.name.toLowerCase().includes(query) ||
         (creator.email?.toLowerCase().includes(query) ?? false) ||
         creator.primaryPlatform.toLowerCase().includes(query) ||
-        creatorStatusLabels[creator.status].toLowerCase().includes(query) ||
+        statusLabels.creator(creator.status).toLowerCase().includes(query) ||
         creator.socialHandles.some((h) =>
           h.handle.toLowerCase().includes(query)
         );
@@ -66,7 +67,7 @@ export function CreatorsPageClient({
         statusFilter === "all" || creator.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [creators, search, statusFilter]);
+  }, [creators, search, statusFilter, statusLabels]);
 
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
 
@@ -137,7 +138,7 @@ export function CreatorsPageClient({
             <option value="all">{t("filters.allStatuses")}</option>
             {creatorStatuses.map((status) => (
               <option key={status} value={status}>
-                {creatorStatusLabels[status]}
+                {statusLabels.creator(status)}
               </option>
             ))}
           </select>

@@ -1,5 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { CreatorStatus } from "@/lib/creators";
-import { creatorStatusLabels } from "@/lib/creators";
 
 const statusStyles: Record<CreatorStatus, string> = {
   active: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
@@ -13,11 +15,13 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
+  const t = useTranslations("status");
+
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${statusStyles[status]}`}
     >
-      {creatorStatusLabels[status]}
+      {t(`creators.${status}`)}
     </span>
   );
 }

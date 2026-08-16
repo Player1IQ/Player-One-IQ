@@ -11,6 +11,7 @@
   },
   "filters": {
     "all": "All",
+    "allTypes": "All types",
     "unread": "Unread",
     "opportunity": "Opportunity",
     "searchPlaceholder": "Search conversations..."
@@ -18,25 +19,35 @@
   "alerts": {
     "noContacts": "No contacts yet. Once you're connected with an agency or sponsor, you'll be able to message them directly here.",
     "unreadBanner": "{count, plural, one {# unread message} other {# unread messages}}",
-    "unreadBannerDetail": "Reply from your inbox to keep deals moving."
+    "unreadBannerDetailStaff": "Deal rooms and direct messages waiting for your reply.",
+    "unreadBannerDetailPortal": "Direct messages and contract deal rooms waiting for your reply.",
+    "viewUnread": "View unread",
+    "allCaughtUp": "All caught up — no unread messages."
   },
   "actions": {
     "newConversation": "New conversation",
+    "newMessage": "New Message",
     "clearFilters": "Clear filters",
-    "markAllRead": "Mark all read"
+    "markAllRead": "Mark all read",
+    "addContactFirst": "Add a contact first"
   },
   "empty": {
     "noConversations": "No conversations yet",
     "noMatching": "No matching conversations",
-    "noConversationsDescription": "Start a conversation with a teammate or open a deal room.",
-    "noMatchingDescription": "Try a different search or filter."
+    "noConversationsDescriptionStaff": "Start a direct message or open a deal room from an opportunity or contract.",
+    "noConversationsDescriptionPortalNoContacts": "No contacts yet. Once you're connected with an agency or sponsor, you'll be able to message them directly here.",
+    "noConversationsDescriptionPortal": "Message your agency team or open a contract deal room from your contract details.",
+    "noMatchingDescription": "Try a different search or filter.",
+    "noMessagesYet": "No messages yet"
   },
   "showing": "Showing {filtered} of {total} conversations",
   "conversation": {
     "backToInbox": "Back to inbox",
+    "inbox": "Inbox",
     "sendPlaceholder": "Write a message...",
     "send": "Send",
     "noMessages": "No messages yet",
-    "noMessagesDescription": "Send the first message to start this conversation."
+    "noMessagesDescription": "Send the first message to start this conversation.",
+    "viewRelated": "View {type}"
   }
 }

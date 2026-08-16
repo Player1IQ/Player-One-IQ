@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Plus, Search, Briefcase, FileText, Users } from "lucide-react";
 import {
   type Opportunity,
   type OpportunityStatus,
   opportunityStatuses,
-  opportunityStatusLabels,
   getOpportunityStats,
 } from "@/lib/opportunities";
 import { OpportunityStatusBadge } from "./OpportunityStatusBadge";
@@ -20,10 +20,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
-import {
-  AGENCY_OPPORTUNITIES_EMPTY_COPY,
-  MARKETPLACE_COMING_SOON_COPY,
-} from "@/lib/opportunities/marketplace-copy";
+import { useStatusLabels } from "@/lib/i18n/use-status-labels";
 import type { Creator } from "@/lib/creators";
 import type { Sponsor } from "@/lib/sponsors";
 import { OpportunityFitBadge } from "./OpportunityFitBadge";
@@ -32,14 +29,6 @@ const selectClassName =
   "rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 backdrop-blur-sm focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30";
 
 type StatusFilter = OpportunityStatus | "all";
-
-const quickFilters: Array<{ value: StatusFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "open", label: opportunityStatusLabels.open },
-  { value: "draft", label: opportunityStatusLabels.draft },
-  { value: "closed", label: opportunityStatusLabels.closed },
-  { value: "filled", label: opportunityStatusLabels.filled },
-];
 
 interface OpportunitiesPageClientProps {
   opportunities: Opportunity[];
@@ -72,6 +61,15 @@ export function OpportunitiesPageClient({
   recommendedOpportunities = [],
   initialCreateOpen = false,
 }: OpportunitiesPageClientProps) {
+  const t = useTranslations("opportunities");
+  const statusLabels = useStatusLabels();
+  const quickFilters: Array<{ value: StatusFilter; label: string }> = [
+    { value: "all", label: t("filters.all") },
+    { value: "open", label: statusLabels.opportunity("open") },
+    { value: "draft", label: statusLabels.opportunity("draft") },
+    { value: "closed", label: statusLabels.opportunity("closed") },
+    { value: "filled", label: statusLabels.opportunity("filled") },
+  ];
   const searchParams = useSearchParams();
   const initialPortalTab = useMemo((): PortalTab => {
     const tab = searchParams.get("tab");
@@ -106,12 +104,12 @@ export function OpportunitiesPageClient({
         o.description.toLowerCase().includes(query) ||
         o.category.toLowerCase().includes(query) ||
         o.platform.toLowerCase().includes(query) ||
-        opportunityStatusLabels[o.status].toLowerCase().includes(query) ||
+        statusLabels.opportunity(o.status).toLowerCase().includes(query) ||
         (o.sponsorName?.toLowerCase().includes(query) ?? false);
       const matchesStatus = statusFilter === "all" || o.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
-  }, [sourceOpportunities, search, statusFilter]);
+  }, [sourceOpportunities, search, statusFilter, statusLabels]);
 
   const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
   const portalAllEmpty =
@@ -126,20 +124,20 @@ export function OpportunitiesPageClient({
       {!isPortalUser ? (
         <div className="grid gap-4 sm:grid-cols-3">
           <MetricCard
-            title="Open Opportunities"
+            title={t("metrics.openOpportunities")}
             value={String(stats.openCount)}
-            subtitle={`${stats.draftCount} in draft`}
+            subtitle={t("metrics.inDraft", { count: stats.draftCount })}
             icon={Briefcase}
             iconColor="text-emerald-400"
           />
           <MetricCard
-            title="Total Opportunities"
+            title={t("metrics.totalOpportunities")}
             value={String(stats.totalCount)}
             icon={FileText}
             iconColor="text-accent-light"
           />
           <MetricCard
-            title="Total Applications"
+            title={t("metrics.totalApplications")}
             value={String(stats.applicationCount)}
             icon={Users}
             iconColor="text-violet-400"
@@ -148,26 +146,26 @@ export function OpportunitiesPageClient({
       ) : showPortalStatCards ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <MetricCard
-            title="Your agency"
+            title={t("metrics.yourAgency")}
             value={String(agencyOpportunities.length)}
-            subtitle="Open opportunities from your organization"
+            subtitle={t("metrics.agencySubtitle")}
             icon={Briefcase}
             iconColor="text-emerald-400"
           />
           <MetricCard
-            title="Open marketplace"
+            title={t("metrics.openMarketplace")}
             value={String(marketplaceOpportunities.length)}
-            subtitle="Cross-org opportunities to discover"
+            subtitle={t("metrics.marketplaceSubtitle")}
             icon={Users}
             iconColor="text-violet-400"
           />
           <MetricCard
-            title="Your applications"
+            title={t("metrics.yourApplications")}
             value={String(myApplicationCount)}
             subtitle={
               myPendingCount > 0
-                ? `${myPendingCount} awaiting review`
-                : "Submitted applications"
+                ? t("metrics.awaitingReview", { count: myPendingCount })
+                : t("metrics.submittedApplications")
             }
             icon={FileText}
             iconColor="text-sky-400"
@@ -179,18 +177,17 @@ export function OpportunitiesPageClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-amber-100">
-              {pendingReviewCount} application
-              {pendingReviewCount === 1 ? "" : "s"} waiting for review
+              {t("alerts.pendingReview", { count: pendingReviewCount })}
             </p>
             <p className="mt-0.5 text-xs text-amber-200/80">
-              Accept applications to create contracts or reject to close the loop.
+              {t("alerts.pendingReviewDetail")}
             </p>
           </div>
           <Link
             href="/opportunities/applications"
             className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-500/20"
           >
-            Review applications
+            {t("alerts.reviewApplications")}
           </Link>
         </div>
       ) : null}
@@ -199,11 +196,10 @@ export function OpportunitiesPageClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-500/25 bg-blue-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-blue-100">
-              {stats.draftCount} draft opportunit
-              {stats.draftCount === 1 ? "y" : "ies"} ready to publish
+              {t("alerts.draftReady", { count: stats.draftCount })}
             </p>
             <p className="mt-0.5 text-xs text-blue-200/80">
-              Open an opportunity when you are ready for creators to apply.
+              {t("alerts.draftReadyDetail")}
             </p>
           </div>
           <button
@@ -211,7 +207,7 @@ export function OpportunitiesPageClient({
             onClick={() => setStatusFilter("draft")}
             className="shrink-0 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1.5 text-sm font-medium text-blue-100 transition-colors hover:bg-blue-500/20"
           >
-            View drafts
+            {t("alerts.viewDrafts")}
           </button>
         </div>
       ) : null}
@@ -221,14 +217,14 @@ export function OpportunitiesPageClient({
           href="/opportunities/applications"
           className="inline-flex items-center gap-2 text-sm text-accent-light hover:text-white"
         >
-          {isPortalUser ? "View my applications" : "View all applications"}
+          {isPortalUser ? t("links.viewMyApplications") : t("links.viewAllApplications")}
           {canManage && pendingReviewCount > 0 ? (
             <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300 ring-1 ring-amber-500/25">
-              {pendingReviewCount} to review
+              {t("links.toReview", { count: pendingReviewCount })}
             </span>
           ) : isPortalUser && myPendingCount > 0 ? (
             <span className="rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-300 ring-1 ring-violet-500/25">
-              {myPendingCount} pending
+              {t("links.pending", { count: myPendingCount })}
             </span>
           ) : null}
           <span aria-hidden>→</span>
@@ -238,7 +234,7 @@ export function OpportunitiesPageClient({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <Input
           type="search"
-          placeholder="Search opportunities..."
+          placeholder={t("filters.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           icon={<Search className="h-4 w-4" />}
@@ -253,10 +249,10 @@ export function OpportunitiesPageClient({
               }
               className={selectClassName}
             >
-              <option value="all">All statuses</option>
+              <option value="all">{t("filters.allStatuses")}</option>
               {opportunityStatuses.map((s) => (
                 <option key={s} value={s}>
-                  {opportunityStatusLabels[s]}
+                  {statusLabels.opportunity(s)}
                 </option>
               ))}
             </select>
@@ -264,7 +260,7 @@ export function OpportunitiesPageClient({
           {canManage ? (
             <Button type="button" onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              Create Opportunity
+              {t("actions.newOpportunity")}
             </Button>
           ) : null}
         </div>
@@ -308,7 +304,7 @@ export function OpportunitiesPageClient({
                 : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
             )}
           >
-            Your agency
+            {t("tabs.agency")}
             {agencyOpportunities.length > 0 ? (
               <span className="ml-1.5 text-emerald-400">
                 ({agencyOpportunities.length})
@@ -325,7 +321,7 @@ export function OpportunitiesPageClient({
                 : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
             )}
           >
-            Recommended
+            {t("tabs.recommended")}
             {recommendedOpportunities.length > 0 ? (
               <span className="ml-1.5 text-amber-400">
                 ({recommendedOpportunities.length})
@@ -342,7 +338,7 @@ export function OpportunitiesPageClient({
                 : "border-white/[0.08] text-gray-500 hover:border-white/[0.12] hover:text-gray-300"
             )}
           >
-            Open marketplace
+            {t("tabs.marketplace")}
             {marketplaceOpportunities.length > 0 ? (
               <span className="ml-1.5 text-violet-400">
                 ({marketplaceOpportunities.length})
@@ -357,26 +353,26 @@ export function OpportunitiesPageClient({
           icon={Briefcase}
           title={
             opportunities.length === 0
-              ? "No opportunities yet"
-              : "No matching opportunities"
+              ? t("empty.noOpportunities")
+              : t("empty.noMatching")
           }
           description={
             sourceOpportunities.length === 0
               ? isPortalUser
                 ? portalTab === "marketplace"
-                  ? MARKETPLACE_COMING_SOON_COPY
+                  ? t("empty.marketplaceComingSoon")
                   : portalTab === "recommended"
-                    ? "No recommended opportunities right now. Connect more platforms or update your profile to improve matches."
-                    : AGENCY_OPPORTUNITIES_EMPTY_COPY
+                    ? t("empty.recommendedEmpty")
+                    : t("empty.agencyEmpty")
                 : canManage
-                  ? "Create your first sponsorship opportunity for creators to discover and apply."
-                  : "Check back when opportunities are published."
-              : "Try a different search or status filter."
+                  ? t("empty.createFirst")
+                  : t("empty.checkBack")
+              : t("empty.noMatchingDescription")
           }
           action={
             canManage && opportunities.length === 0 ? (
               <Button type="button" size="sm" onClick={() => setModalOpen(true)}>
-                Create Opportunity
+                {t("actions.createOpportunity")}
               </Button>
             ) : hasActiveFilters ? (
               <button
@@ -387,7 +383,7 @@ export function OpportunitiesPageClient({
                 }}
                 className="text-sm text-accent-light hover:text-white"
               >
-                Clear filters
+                {t("actions.clearFilters")}
               </button>
             ) : undefined
           }
@@ -408,14 +404,14 @@ export function OpportunitiesPageClient({
                 <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                   {opportunity.marketplaceListing ? (
                     <span className="rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-300 ring-1 ring-violet-500/25">
-                      Marketplace
+                      {t("card.marketplace")}
                     </span>
                   ) : null}
                   <OpportunityStatusBadge status={opportunity.status} />
                 </div>
               </div>
               <p className="mt-2 line-clamp-2 text-sm text-gray-500">
-                {opportunity.description || "No description."}
+                {opportunity.description || t("empty.noDescription")}
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-2">
                 <IndustryBadge industry={opportunity.category} />
@@ -429,7 +425,7 @@ export function OpportunitiesPageClient({
               </div>
               {opportunity.sponsorName ? (
                 <p className="mt-3 text-sm text-gray-400">
-                  Sponsor:{" "}
+                  {t("card.sponsor")}{" "}
                   <span className="text-gray-300">{opportunity.sponsorName}</span>
                 </p>
               ) : null}
@@ -439,13 +435,12 @@ export function OpportunitiesPageClient({
                 </span>
                 {!isPortalUser ? (
                   <span className="text-gray-500">
-                    {opportunity.applicationCount} applicant
-                    {opportunity.applicationCount !== 1 ? "s" : ""}
+                    {t("card.applicants", { count: opportunity.applicationCount })}
                   </span>
                 ) : null}
               </div>
               <p className="mt-2 text-xs text-gray-500">
-                Deadline: {opportunity.applicationDeadlineDisplay}
+                {t("card.deadline", { date: opportunity.applicationDeadlineDisplay })}
               </p>
             </Link>
           ))}

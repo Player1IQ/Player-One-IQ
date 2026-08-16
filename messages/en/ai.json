@@ -30,7 +30,19 @@
   },
   "modes": {
     "live": "Live",
-    "demo": "Demo"
+    "demo": "Demo",
+    "sample": "Sample"
+  },
+  "usage": {
+    "title": "Included AI requests",
+    "subtitle": "Shared across your organization this billing period"
+  },
+  "askAnything": {
+    "title": "Ask anything",
+    "description": "Get personalized insights about your creators, sponsors, and revenue",
+    "placeholder": "e.g. Which creators should I pitch to energy drink brands this quarter?",
+    "send": "Send",
+    "sending": "Sending…"
   },
   "empty": {
     "selectAssistant": "Select an assistant to get started",

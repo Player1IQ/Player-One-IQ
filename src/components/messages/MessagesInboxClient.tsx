@@ -19,21 +19,25 @@ const selectClassName =
 
 type InboxFilter = "all" | "unread" | ConversationType;
 
-function getQuickFilters(isPortalUser: boolean): Array<{ value: InboxFilter; label: string }> {
+function getQuickFilters(
+  isPortalUser: boolean,
+  t: (key: "filters.all" | "filters.unread" | "filters.opportunity") => string,
+  conversationTypeLabel: (type: "direct" | "group" | "contract") => string
+): Array<{ value: InboxFilter; label: string }> {
   const filters: Array<{ value: InboxFilter; label: string }> = [
-    { value: "all", label: "All" },
-    { value: "unread", label: "Unread" },
-    { value: "direct", label: conversationTypeLabels.direct },
+    { value: "all", label: t("filters.all") },
+    { value: "unread", label: t("filters.unread") },
+    { value: "direct", label: conversationTypeLabel("direct") },
   ];
 
   if (!isPortalUser) {
     filters.push(
-      { value: "group", label: conversationTypeLabels.group },
-      { value: "opportunity", label: "Opportunity" }
+      { value: "group", label: conversationTypeLabel("group") },
+      { value: "opportunity", label: t("filters.opportunity") }
     );
   }
 
-  filters.push({ value: "contract", label: conversationTypeLabels.contract });
+  filters.push({ value: "contract", label: conversationTypeLabel("contract") });
   return filters;
 }
 
@@ -57,7 +61,7 @@ export function MessagesInboxClient({
   const [typeFilter, setTypeFilter] = useState<InboxFilter>("all");
   const [modalOpen, setModalOpen] = useState(initialCreateOpen);
 
-  const quickFilters = getQuickFilters(isPortalUser);
+  const quickFilters = getQuickFilters(isPortalUser, t, (type) => conversationTypeLabels[type]);
   const agencyContacts = users.filter((user) => user.userId !== currentUserId);
 
   const totalUnread = conversations.reduce(
@@ -118,12 +122,12 @@ export function MessagesInboxClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/25 bg-accent/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-accent-light">
-              {totalUnread} unread message{totalUnread === 1 ? "" : "s"}
+              {t("alerts.unreadBanner", { count: totalUnread })}
             </p>
             <p className="mt-0.5 text-xs text-gray-400">
               {isPortalUser
-                ? "Direct messages and contract deal rooms waiting for your reply."
-                : "Deal rooms and direct messages waiting for your reply."}
+                ? t("alerts.unreadBannerDetailPortal")
+                : t("alerts.unreadBannerDetailStaff")}
             </p>
           </div>
           <button
@@ -131,19 +135,19 @@ export function MessagesInboxClient({
             onClick={() => setTypeFilter("unread")}
             className="shrink-0 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-sm font-medium text-accent-light transition-colors hover:bg-accent/20"
           >
-            View unread
+            {t("alerts.viewUnread")}
           </button>
         </div>
       ) : conversations.length > 0 ? (
         <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-100">
-          All caught up — no unread messages.
+          {t("alerts.allCaughtUp")}
         </p>
       ) : null}
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <Input
           type="search"
-          placeholder="Search conversations..."
+          placeholder={t("filters.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           icon={<Search className="h-4 w-4" />}
@@ -157,8 +161,8 @@ export function MessagesInboxClient({
             }
             className={selectClassName}
           >
-            <option value="all">All types</option>
-            <option value="unread">Unread</option>
+            <option value="all">{t("filters.allTypes")}</option>
+            <option value="unread">{t("filters.unread")}</option>
             <option value="direct">{conversationTypeLabels.direct}</option>
             {!isPortalUser ? (
               <option value="opportunity">{conversationTypeLabels.opportunity}</option>
@@ -167,7 +171,7 @@ export function MessagesInboxClient({
           </select>
           <Button type="button" onClick={() => setModalOpen(true)}>
             <MessageSquarePlus className="h-4 w-4" />
-            New Message
+            {t("actions.newMessage")}
           </Button>
         </div>
       </div>
@@ -198,17 +202,17 @@ export function MessagesInboxClient({
           icon={MessageSquare}
           title={
             conversations.length === 0
-              ? "No conversations yet"
-              : "No matching conversations"
+              ? t("empty.noConversations")
+              : t("empty.noMatching")
           }
           description={
             conversations.length === 0
               ? isPortalUser
                 ? agencyContacts.length === 0
-                  ? "No contacts yet. Once you're connected with an agency or sponsor, you'll be able to message them directly here."
-                  : "Message your agency team or open a contract deal room from your contract details."
-                : "Start a direct message or open a deal room from an opportunity or contract."
-              : "Try a different search or filter."
+                  ? t("empty.noConversationsDescriptionPortalNoContacts")
+                  : t("empty.noConversationsDescriptionPortal")
+                : t("empty.noConversationsDescriptionStaff")
+              : t("empty.noMatchingDescription")
           }
           action={
             conversations.length === 0 ? (
@@ -218,12 +222,12 @@ export function MessagesInboxClient({
                 disabled={isPortalUser && agencyContacts.length === 0}
                 title={
                   isPortalUser && agencyContacts.length === 0
-                    ? "Add a contact first"
+                    ? t("actions.addContactFirst")
                     : undefined
                 }
                 onClick={() => setModalOpen(true)}
               >
-                New Message
+                {t("actions.newMessage")}
               </Button>
             ) : hasActiveFilters ? (
               <button
@@ -234,7 +238,7 @@ export function MessagesInboxClient({
                 }}
                 className="text-sm text-accent-light hover:text-white"
               >
-                Clear filters
+                {t("actions.clearFilters")}
               </button>
             ) : undefined
           }
@@ -276,7 +280,7 @@ export function MessagesInboxClient({
                         conversation.unreadCount > 0 ? "text-gray-300" : "text-gray-500"
                       )}
                     >
-                      {conversation.lastMessage ?? "No messages yet"}
+                      {conversation.lastMessage ?? t("empty.noMessagesYet")}
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
@@ -328,7 +332,7 @@ export function MessagesInboxClient({
                           conversation.unreadCount > 0 ? "text-gray-300" : "text-gray-500"
                         )}
                       >
-                        {conversation.lastMessage ?? "No messages yet"}
+                        {conversation.lastMessage ?? t("empty.noMessagesYet")}
                       </p>
                     </div>
                     <div className="shrink-0 text-right">

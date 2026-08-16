@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -35,6 +36,7 @@ export function ConversationClient({
   dealRoomContext,
   relatedHref,
 }: ConversationClientProps) {
+  const t = useTranslations("messages.conversation");
   const router = useRouter();
   const [messages, setMessages] = useState(initialMessages);
   const [content, setContent] = useState("");
@@ -96,7 +98,7 @@ export function ConversationClient({
               className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-accent-light"
             >
               <ArrowLeft className="h-4 w-4" />
-              Inbox
+              {t("inbox")}
             </Link>
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -113,7 +115,7 @@ export function ConversationClient({
               href={relatedHref}
               className="text-xs font-medium text-accent-light hover:text-white"
             >
-              View {conversation.type}
+              {t("viewRelated", { type: conversation.type })}
             </Link>
           )}
         </div>
@@ -122,7 +124,7 @@ export function ConversationClient({
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <p className="text-sm text-gray-500">
-                No messages yet. Send the first message to start the conversation.
+                {t("noMessagesDescription")}
               </p>
             </div>
           ) : (
@@ -177,7 +179,7 @@ export function ConversationClient({
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Write a message..."
+              placeholder={t("sendPlaceholder")}
               rows={2}
               className="flex-1 resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200"
             />
@@ -191,7 +193,7 @@ export function ConversationClient({
               ) : (
                 <Send className="h-4 w-4" />
               )}
-              Send
+              {t("send")}
             </button>
           </div>
         </form>

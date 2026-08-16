@@ -30,7 +30,19 @@
   },
   "modes": {
     "live": "En vivo",
-    "demo": "Demo"
+    "demo": "Demo",
+    "sample": "Muestra"
+  },
+  "usage": {
+    "title": "Solicitudes de IA incluidas",
+    "subtitle": "Compartidas en tu organización en este periodo de facturación"
+  },
+  "askAnything": {
+    "title": "Pregunta lo que quieras",
+    "description": "Obtén insights personalizados sobre tus creadores, patrocinadores e ingresos",
+    "placeholder": "ej. ¿Qué creadores debería pitch a marcas de bebidas energéticas este trimestre?",
+    "send": "Enviar",
+    "sending": "Enviando…"
   },
   "empty": {
     "selectAssistant": "Selecciona un asistente para empezar",
