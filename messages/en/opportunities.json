@@ -1,0 +1,37 @@
+{
+  "pageTitle": "Opportunities",
+  "pageDescription": "Manage sponsorship opportunities and creator applications",
+  "filters": {
+    "all": "All",
+    "searchPlaceholder": "Search opportunities by title, category, or sponsor..."
+  },
+  "tabs": {
+    "agency": "Agency",
+    "marketplace": "Marketplace",
+    "recommended": "Recommended for you"
+  },
+  "metrics": {
+    "open": "Open",
+    "openDescription": "Accepting applications",
+    "applications": "Applications",
+    "needsReview": "{count} need review",
+    "draft": "Draft",
+    "draftDescription": "Not yet published"
+  },
+  "actions": {
+    "newOpportunity": "New Opportunity",
+    "viewApplications": "View applications",
+    "clearFilters": "Clear filters"
+  },
+  "empty": {
+    "noOpportunities": "No opportunities yet",
+    "noMatching": "No matching opportunities",
+    "noOpportunitiesDescription": "Create sponsorship opportunities to connect creators with brands.",
+    "noMatchingDescription": "Try a different search or status filter."
+  },
+  "showing": "Showing {filtered} of {total} opportunities",
+  "portal": {
+    "myApplications": "My applications",
+    "pendingReview": "{count} pending review"
+  }
+}

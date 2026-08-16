@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { getTranslations } from "next-intl/server";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { PlanBillingSection } from "@/components/subscription/PlanBillingSection";
 import { TeamPageClient } from "@/components/team/TeamPageClient";
@@ -22,10 +23,12 @@ export default async function TeamPage({ searchParams }: TeamPageProps) {
     getSponsors(),
   ]);
 
+  const t = await getTranslations("pages.team");
+
   return (
     <DashboardLayout
-      title="Team"
-      description="Manage team members, roles, and permissions"
+      title={t("title")}
+      description={t("description")}
     >
       <SubscriptionPageGate required="team_management" featureLabel="Team management">
         <div className="space-y-6">

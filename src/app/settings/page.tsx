@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { SeedTestDataButton } from "@/components/dev/SeedTestDataButton";
@@ -33,9 +34,10 @@ import { getCreators } from "@/lib/creators/queries";
 import { getPayoutRecipientsForOrg } from "@/lib/payments/queries";
 import { PayoutSettingsSection } from "@/components/payments/PayoutSettingsSection";
 import { getMyAvatarUrl } from "@/app/account/actions";
+import { formatDate } from "@/lib/i18n/format";
 
-function formatCreatedAt(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
+async function formatCreatedAt(iso: string): Promise<string> {
+  return formatDate(iso, {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -59,6 +61,7 @@ async function getOAuthConnectedAccountCount(): Promise<number> {
 }
 
 export default async function SettingsPage() {
+  const t = await getTranslations("pages.settings");
   const [organization, membership, role, memberCount, oauthConnectedCount, payoutRecipients, creators, avatarUrl] =
     await Promise.all([
       getOrganizationForUser(),
@@ -106,8 +109,8 @@ export default async function SettingsPage() {
 
   return (
     <DashboardLayout
-      title="Settings"
-      description="Configure your workspace preferences"
+      title={t("title")}
+      description={t("description")}
     >
       <SettingsPageClient
         organizationId={organization?.id ?? ""}
@@ -117,7 +120,7 @@ export default async function SettingsPage() {
         memberCount={memberCount}
         createdAtDisplay={
           organization?.created_at
-            ? formatCreatedAt(organization.created_at)
+            ? await formatCreatedAt(organization.created_at)
             : "—"
         }
         canEdit={canEdit}

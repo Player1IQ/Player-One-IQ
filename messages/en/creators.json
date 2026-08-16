@@ -1,0 +1,33 @@
+{
+  "pageTitle": "Creators",
+  "pageDescription": "Manage your creator roster",
+  "metrics": {
+    "totalCreators": "Total Creators",
+    "activeOnRoster": "{count} active on roster",
+    "active": "Active",
+    "activeDescription": "Currently managed creators",
+    "pending": "Pending",
+    "onHold": "{count} on hold"
+  },
+  "alerts": {
+    "pendingOnboarding": "{count, plural, one {# creator pending onboarding} other {# creators pending onboarding}}",
+    "pendingOnboardingDetail": "Complete profiles and connect platforms to activate them.",
+    "viewPending": "View pending"
+  },
+  "filters": {
+    "all": "All",
+    "searchPlaceholder": "Search creators by name, email, or platform...",
+    "allStatuses": "All statuses"
+  },
+  "actions": {
+    "addCreator": "Add Creator",
+    "clearFilters": "Clear filters"
+  },
+  "empty": {
+    "noCreators": "No creators yet",
+    "noMatching": "No matching creators",
+    "noCreatorsDescription": "Add your first creator to start building your roster.",
+    "noMatchingDescription": "Try a different search or status filter."
+  },
+  "showing": "Showing {filtered} of {total} creators"
+}

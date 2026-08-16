@@ -1,0 +1,27 @@
+{
+  "pageTitle": "Sponsors",
+  "pageDescription": "Manage brand partnerships and sponsor relationships",
+  "metrics": {
+    "totalSponsors": "Total Sponsors",
+    "activePartners": "{count} active partners",
+    "active": "Active",
+    "activeDescription": "Currently engaged sponsors",
+    "pipelineValue": "Pipeline Value",
+    "acrossDeals": "Across active deals"
+  },
+  "filters": {
+    "all": "All",
+    "searchPlaceholder": "Search sponsors by name, industry, or contact..."
+  },
+  "actions": {
+    "addSponsor": "Add Sponsor",
+    "clearFilters": "Clear filters"
+  },
+  "empty": {
+    "noSponsors": "No sponsors yet",
+    "noMatching": "No matching sponsors",
+    "noSponsorsDescription": "Add your first sponsor to start tracking partnerships.",
+    "noMatchingDescription": "Try a different search or status filter."
+  },
+  "showing": "Showing {filtered} of {total} sponsors"
+}

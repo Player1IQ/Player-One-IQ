@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
@@ -25,6 +26,8 @@ function buildAuthQuery(params: {
 }
 
 export function LoginForm() {
+  const t = useTranslations("auth.login");
+  const tErrors = useTranslations("auth.errors");
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? STAFF_DASHBOARD_PATH;
@@ -48,9 +51,7 @@ export function LoginForm() {
 
     const supabase = createClient();
     if (!supabase) {
-      setError(
-        "Supabase is not configured. Add your credentials to .env.local and restart the server."
-      );
+      setError(tErrors("supabaseNotConfigured"));
       setLoading(false);
       return;
     }
@@ -86,9 +87,9 @@ export function LoginForm() {
       )}
 
       <AuthInput
-        label="Email address"
+        label={t("emailLabel")}
         type="email"
-        placeholder="you@company.com"
+        placeholder={t("emailPlaceholder")}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -98,13 +99,13 @@ export function LoginForm() {
       <div>
         <div className="mb-1.5 flex items-center justify-between">
           <label htmlFor="password" className="text-sm font-medium text-gray-300">
-            Password
+            {t("passwordLabel")}
           </label>
           <Link
             href="/forgot-password"
             className="text-xs text-accent-light transition-colors hover:text-white"
           >
-            Forgot password?
+            {t("forgotPassword")}
           </Link>
         </div>
         <input
@@ -127,30 +128,30 @@ export function LoginForm() {
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Signing in...
+            {t("signingIn")}
           </>
         ) : (
-          "Sign in"
+          t("signIn")
         )}
       </button>
 
       <p className="text-center text-xs text-gray-600">
         <Link href="/terms" className="underline hover:text-gray-400">
-          Terms
+          {t("terms")}
         </Link>
         {" · "}
         <Link href="/privacy" className="underline hover:text-gray-400">
-          Privacy
+          {t("privacy")}
         </Link>
       </p>
 
       <p className="text-center text-sm text-gray-500">
-        Don&apos;t have an account?{" "}
+        {t("noAccount")}{" "}
         <Link
           href={signupHref}
           className="font-medium text-accent-light transition-colors hover:text-white"
         >
-          Create account
+          {t("createAccount")}
         </Link>
       </p>
     </form>

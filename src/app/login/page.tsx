@@ -1,15 +1,18 @@
 import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { InviteAuthSubtitle } from "@/components/auth/InviteAuthContext";
 import { LoginForm } from "@/components/auth/LoginForm";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations("auth.login");
+
   return (
     <AuthLayout
-      title="Welcome back"
+      title={t("title")}
       subtitle={
-        <Suspense fallback="Sign in to your Player One IQ workspace">
-          <InviteAuthSubtitle fallback="Sign in to your Player One IQ workspace" />
+        <Suspense fallback={t("subtitle")}>
+          <InviteAuthSubtitle fallback={t("subtitle")} />
         </Suspense>
       }
     >

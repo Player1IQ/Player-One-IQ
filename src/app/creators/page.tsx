@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { getTranslations } from "next-intl/server";
 import { CreatorsPageClient } from "@/components/creators/CreatorsPageClient";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { PlanBillingSection } from "@/components/subscription/PlanBillingSection";
@@ -17,10 +18,12 @@ export default async function CreatorsPage({ searchParams }: CreatorsPageProps) 
     getCurrentUserRole(),
   ]);
 
+  const t = await getTranslations("pages.creators");
+
   return (
     <DashboardLayout
-      title="Creators"
-      description="Manage your creator roster and partnerships"
+      title={t("title")}
+      description={t("description")}
     >
       <SubscriptionPageGate
         required="creator_profiles"

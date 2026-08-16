@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { getTranslations } from "next-intl/server";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { MessagesInboxClient } from "@/components/messages/MessagesInboxClient";
 import { loadMessagesPage } from "@/lib/messages/page-data";
@@ -12,14 +13,12 @@ export default async function MessagesPage({ searchParams }: MessagesPageProps) 
   const { conversations, messageUsers, currentUserId, isPortalUser } =
     await loadMessagesPage();
 
+  const t = await getTranslations("pages.messages");
+
   return (
     <DashboardLayout
-      title="Messages"
-      description={
-        isPortalUser
-          ? "Messages with your agency team and contract deal rooms"
-          : "Inbox, deal rooms, and team conversations"
-      }
+      title={t("title")}
+      description={t("description")}
     >
       <SubscriptionPageGate required="messaging" featureLabel="Messaging">
         {currentUserId ? (

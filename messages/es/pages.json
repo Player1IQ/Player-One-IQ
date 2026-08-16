@@ -1,0 +1,102 @@
+{
+  "dashboard": {
+    "title": "Panel",
+    "description": "Vista ejecutiva de tu ecosistema de creadores"
+  },
+  "creators": {
+    "title": "Creadores",
+    "description": "Gestiona tu roster de creadores"
+  },
+  "sponsors": {
+    "title": "Patrocinadores",
+    "description": "Gestiona partnerships de marca y relaciones con patrocinadores"
+  },
+  "contracts": {
+    "title": "Contratos",
+    "description": "Rastrea acuerdos de patrocinio y pipeline de deals"
+  },
+  "opportunities": {
+    "title": "Oportunidades",
+    "description": "Gestiona oportunidades de patrocinio y postulaciones de creadores"
+  },
+  "applications": {
+    "title": "Postulaciones",
+    "description": "Revisa postulaciones de creadores en oportunidades abiertas"
+  },
+  "messages": {
+    "title": "Mensajes",
+    "description": "Conversaciones de equipo y salas de deal"
+  },
+  "schedule": {
+    "title": "Agenda",
+    "description": "Planifica eventos, reuniones y bloques de disponibilidad"
+  },
+  "team": {
+    "title": "Equipo",
+    "description": "Gestiona miembros, roles e invitaciones"
+  },
+  "settings": {
+    "title": "Configuración",
+    "description": "Configura las preferencias de tu espacio de trabajo"
+  },
+  "billing": {
+    "title": "Facturación",
+    "description": "Gestiona tu plan de suscripción y uso"
+  },
+  "reports": {
+    "title": "Reportes",
+    "description": "Análisis mensual de rendimiento e ingresos"
+  },
+  "ai": {
+    "title": "Espacio de IA",
+    "description": "Inteligencia de crecimiento y matching de patrocinios"
+  },
+  "campaigns": {
+    "title": "Campañas",
+    "description": "Gestiona campañas de patrocinio y entregables"
+  },
+  "portal": {
+    "title": "Portal",
+    "description": "Tu panel de creador"
+  },
+  "portalRevenue": {
+    "title": "Ingresos",
+    "description": "Rastrea ganancias e historial de pagos"
+  },
+  "portalGrowth": {
+    "title": "Crecimiento",
+    "description": "Rendimiento de plataforma e insights de audiencia"
+  },
+  "portalDeliverables": {
+    "title": "Entregables",
+    "description": "Rastrea entregables de patrocinio en tus deals"
+  },
+  "portalSeasons": {
+    "title": "Temporadas",
+    "description": "Tus temporadas competitivas e hitos"
+  },
+  "portalCoach": {
+    "title": "Coach",
+    "description": "Coaching de crecimiento con IA"
+  },
+  "portalAccount": {
+    "title": "Cuenta",
+    "description": "Perfil, idioma y configuración del espacio de trabajo"
+  },
+  "welcome": {
+    "title": "Bienvenido",
+    "description": "Empieza con Player One IQ"
+  },
+  "founding": {
+    "title": "Roster fundador",
+    "description": "Postula para unirte al roster fundador de creadores"
+  },
+  "organizationSetup": {
+    "title": "Configuración de organización",
+    "description": "Configura tu espacio de trabajo"
+  },
+  "onboarding": {
+    "title": "Primeros pasos",
+    "description": "Completa la configuración de tu espacio de trabajo"
+  }
+}

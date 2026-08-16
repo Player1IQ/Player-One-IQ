@@ -1,0 +1,27 @@
+{
+  "pageTitle": "Patrocinadores",
+  "pageDescription": "Gestiona partnerships de marca y relaciones con patrocinadores",
+  "metrics": {
+    "totalSponsors": "Total de patrocinadores",
+    "activePartners": "{count} partners activos",
+    "active": "Activos",
+    "activeDescription": "Patrocinadores actualmente activos",
+    "pipelineValue": "Valor del pipeline",
+    "acrossDeals": "En deals activos"
+  },
+  "filters": {
+    "all": "Todos",
+    "searchPlaceholder": "Buscar patrocinadores por nombre, industria o contacto..."
+  },
+  "actions": {
+    "addSponsor": "Agregar patrocinador",
+    "clearFilters": "Limpiar filtros"
+  },
+  "empty": {
+    "noSponsors": "Aún no hay patrocinadores",
+    "noMatching": "Sin patrocinadores coincidentes",
+    "noSponsorsDescription": "Agrega tu primer patrocinador para empezar a rastrear partnerships.",
+    "noMatchingDescription": "Prueba otra búsqueda o filtro de estado."
+  },
+  "showing": "Mostrando {filtered} de {total} patrocinadores"
+}

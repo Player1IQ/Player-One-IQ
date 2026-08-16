@@ -1,0 +1,61 @@
+{
+  "pageTitle": "Schedule",
+  "pageDescription": "Plan events, meetings, and creator availability blocks",
+  "navigation": {
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "Today"
+  },
+  "actions": {
+    "newEvent": "New event",
+    "blockTime": "Block time",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "accept": "Accept",
+    "decline": "Decline",
+    "edit": "Edit"
+  },
+  "durationPresets": {
+    "oneHour": "1 hour",
+    "twoHours": "2 hours",
+    "fourHours": "4 hours",
+    "fullDay": "Full day"
+  },
+  "form": {
+    "title": "Title",
+    "description": "Description",
+    "eventType": "Event type",
+    "location": "Location",
+    "allDay": "All day",
+    "starts": "Starts",
+    "ends": "Ends",
+    "participants": "Participants",
+    "teamMembers": "Team members",
+    "creators": "Creators",
+    "blockedDefaultTitle": "Blocked",
+    "createEvent": "Create event",
+    "editEvent": "Edit event",
+    "createBlock": "Block availability",
+    "editBlock": "Edit block"
+  },
+  "responses": {
+    "accepted": "{count} accepted",
+    "pending": "{count} pending",
+    "declined": "{count} declined"
+  },
+  "empty": {
+    "noEvents": "No events this day",
+    "noEventsDescription": "Add a meeting or block time on your calendar.",
+    "noEventsPortalDescription": "Block time when you're unavailable for brand deals."
+  },
+  "confirmDelete": "Delete \"{title}\"?",
+  "errors": {
+    "noPermission": "You do not have permission to save this event."
+  },
+  "todayCard": {
+    "title": "Today's schedule",
+    "noEvents": "Nothing scheduled today",
+    "viewSchedule": "View schedule"
+  }
+}

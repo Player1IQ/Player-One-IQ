@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { BrandLogoLink } from "@/components/brand/BrandLogo";
 import { SupabaseConfigBanner } from "./SupabaseConfigBanner";
@@ -8,7 +9,9 @@ interface AuthLayoutProps {
   subtitle: React.ReactNode;
 }
 
-export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
+export async function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
+  const t = await getTranslations("auth.layout");
+
   return (
     <div className="flex min-h-screen bg-surface">
       <div className="relative hidden w-1/2 overflow-hidden lg:flex lg:flex-col lg:justify-between">
@@ -23,28 +26,27 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 
         <div className="relative z-10 px-10 pb-16">
           <h2 className="text-4xl font-bold leading-tight text-white">
-            The creator economy,
+            {t("headline")}
             <br />
             <span className="bg-gradient-to-r from-accent-light to-white bg-clip-text text-transparent">
-              managed.
+              {t("headlineAccent")}
             </span>
           </h2>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-gray-400">
-            Unify creators, sponsors, contracts, and team workflows in one
-            premium platform built for gaming agencies and creator organizations.
+            {t("tagline")}
           </p>
           <div className="mt-10 flex gap-8 text-sm text-gray-500">
             <div>
               <p className="text-2xl font-bold text-white">128+</p>
-              <p>Creators managed</p>
+              <p>{t("statCreators")}</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-white">$664K</p>
-              <p>Deal pipeline</p>
+              <p>{t("statPipeline")}</p>
             </div>
             <div>
               <p className="text-2xl font-bold text-white">47</p>
-              <p>Active sponsors</p>
+              <p>{t("statSponsors")}</p>
             </div>
           </div>
         </div>

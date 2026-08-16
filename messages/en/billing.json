@@ -1,0 +1,27 @@
+{
+  "pageTitle": "Billing",
+  "pageDescription": "Manage your subscription plan and usage",
+  "checkout": {
+    "success": "Payment successful. Your plan will update in a few seconds.",
+    "canceled": "Checkout canceled. No changes were made."
+  },
+  "currentPlan": "Current plan",
+  "usage": "Usage",
+  "aiUsage": "AI usage",
+  "manageBilling": "Manage billing",
+  "upgradePlan": "Upgrade plan",
+  "startTrial": "Start trial",
+  "selectPlan": "Select plan",
+  "billingInterval": {
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "savePercent": "Save {percent}%"
+  },
+  "trial": {
+    "active": "Trial active",
+    "daysRemaining": "{count, plural, one {# day remaining} other {# days remaining}}",
+    "expired": "Trial expired"
+  },
+  "features": "Features included",
+  "noPermission": "You do not have permission to manage billing."
+}

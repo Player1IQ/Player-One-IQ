@@ -1,0 +1,42 @@
+{
+  "pageTitle": "Mensajes",
+  "pageDescription": "Conversaciones de equipo y salas de deal",
+  "metrics": {
+    "conversations": "Conversaciones",
+    "unread": "Sin leer",
+    "needsAttention": "Requieren atención",
+    "allCaughtUp": "Todo al día",
+    "teamMembers": "Miembros del equipo",
+    "agencyContacts": "Contactos de agencia"
+  },
+  "filters": {
+    "all": "Todas",
+    "unread": "Sin leer",
+    "opportunity": "Oportunidad",
+    "searchPlaceholder": "Buscar conversaciones..."
+  },
+  "alerts": {
+    "noContacts": "Aún no hay contactos. Cuando estés conectado con una agencia o patrocinador, podrás enviarles mensajes directamente aquí.",
+    "unreadBanner": "{count, plural, one {# mensaje sin leer} other {# mensajes sin leer}}",
+    "unreadBannerDetail": "Responde desde tu bandeja para mantener los deals en movimiento."
+  },
+  "actions": {
+    "newConversation": "Nueva conversación",
+    "clearFilters": "Limpiar filtros",
+    "markAllRead": "Marcar todo como leído"
+  },
+  "empty": {
+    "noConversations": "Aún no hay conversaciones",
+    "noMatching": "Sin conversaciones coincidentes",
+    "noConversationsDescription": "Inicia una conversación con un compañero o abre una sala de deal.",
+    "noMatchingDescription": "Prueba otra búsqueda o filtro."
+  },
+  "showing": "Mostrando {filtered} de {total} conversaciones",
+  "conversation": {
+    "backToInbox": "Volver a bandeja",
+    "sendPlaceholder": "Escribe un mensaje...",
+    "send": "Enviar",
+    "noMessages": "Aún no hay mensajes",
+    "noMessagesDescription": "Envía el primer mensaje para iniciar esta conversación."
+  }
+}

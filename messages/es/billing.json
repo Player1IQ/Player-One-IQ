@@ -1,0 +1,27 @@
+{
+  "pageTitle": "Facturación",
+  "pageDescription": "Gestiona tu plan de suscripción y uso",
+  "checkout": {
+    "success": "Pago exitoso. Tu plan se actualizará en unos segundos.",
+    "canceled": "Pago cancelado. No se realizaron cambios."
+  },
+  "currentPlan": "Plan actual",
+  "usage": "Uso",
+  "aiUsage": "Uso de IA",
+  "manageBilling": "Gestionar facturación",
+  "upgradePlan": "Mejorar plan",
+  "startTrial": "Iniciar prueba",
+  "selectPlan": "Seleccionar plan",
+  "billingInterval": {
+    "monthly": "Mensual",
+    "annual": "Anual",
+    "savePercent": "Ahorra {percent}%"
+  },
+  "trial": {
+    "active": "Prueba activa",
+    "daysRemaining": "{count, plural, one {# día restante} other {# días restantes}}",
+    "expired": "Prueba expirada"
+  },
+  "features": "Funciones incluidas",
+  "noPermission": "No tienes permiso para gestionar la facturación."
+}

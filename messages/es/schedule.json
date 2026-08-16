@@ -1,0 +1,61 @@
+{
+  "pageTitle": "Agenda",
+  "pageDescription": "Planifica eventos, reuniones y bloques de disponibilidad de creadores",
+  "navigation": {
+    "previousWeek": "Semana anterior",
+    "nextWeek": "Semana siguiente",
+    "today": "Hoy"
+  },
+  "actions": {
+    "newEvent": "Nuevo evento",
+    "blockTime": "Bloquear tiempo",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "accept": "Aceptar",
+    "decline": "Rechazar",
+    "edit": "Editar"
+  },
+  "durationPresets": {
+    "oneHour": "1 hora",
+    "twoHours": "2 horas",
+    "fourHours": "4 horas",
+    "fullDay": "Día completo"
+  },
+  "form": {
+    "title": "Título",
+    "description": "Descripción",
+    "eventType": "Tipo de evento",
+    "location": "Ubicación",
+    "allDay": "Todo el día",
+    "starts": "Inicio",
+    "ends": "Fin",
+    "participants": "Participantes",
+    "teamMembers": "Miembros del equipo",
+    "creators": "Creadores",
+    "blockedDefaultTitle": "Bloqueado",
+    "createEvent": "Crear evento",
+    "editEvent": "Editar evento",
+    "createBlock": "Bloquear disponibilidad",
+    "editBlock": "Editar bloque"
+  },
+  "responses": {
+    "accepted": "{count} aceptados",
+    "pending": "{count} pendientes",
+    "declined": "{count} rechazados"
+  },
+  "empty": {
+    "noEvents": "Sin eventos este día",
+    "noEventsDescription": "Agrega una reunión o bloquea tiempo en tu calendario.",
+    "noEventsPortalDescription": "Bloquea tiempo cuando no estés disponible para deals de marcas."
+  },
+  "confirmDelete": "¿Eliminar \"{title}\"?",
+  "errors": {
+    "noPermission": "No tienes permiso para guardar este evento."
+  },
+  "todayCard": {
+    "title": "Agenda de hoy",
+    "noEvents": "Nada programado hoy",
+    "viewSchedule": "Ver agenda"
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "pageTitle": "Panel",
+  "pageDescription": "Vista ejecutiva de tu ecosistema de creadores",
+  "activity": {
+    "contractCreated": "Contrato creado",
+    "contractUpdated": "Contrato actualizado",
+    "statusChanged": "Estado cambiado",
+    "contractDeleted": "Contrato eliminado"
+  },
+  "opsQueue": {
+    "pastEndDate": "Fecha de fin pasada — {sponsor} × {creator}",
+    "expiringSoon": "{count, plural, one {# contrato por vencer} other {# contratos por vencer}}",
+    "expiringSoonDetail": "Terminan en 45 días — revisa renovaciones",
+    "applicationsAwaiting": "{count, plural, one {# postulación pendiente de revisión} other {# postulaciones pendientes de revisión}}",
+    "applicationsDetail": "Postulaciones de creadores en oportunidades abiertas",
+    "unreadMessages": "{count, plural, one {# mensaje sin leer} other {# mensajes sin leer}}",
+    "unreadMessagesDetail": "Mensajes de equipo y creadores necesitan respuesta"
+  },
+  "metrics": {
+    "monthlyRevenue": "Ingresos mensuales",
+    "cashReceived": "Efectivo recibido",
+    "expectedFromDeals": "{amount} esperados de deals",
+    "openOpportunities": "Oportunidades abiertas",
+    "applications": "{count} postulaciones",
+    "activeCreators": "Creadores activos",
+    "onRoster": "{count} en roster",
+    "activeSponsors": "Patrocinadores activos",
+    "inPipeline": "{count} en pipeline",
+    "expiringSoon": "Por vencer",
+    "contractsEnding45Days": "Contratos que terminan en 45 días",
+    "unreadMessages": "Mensajes sin leer",
+    "conversations": "{count} conversaciones",
+    "platformRevenue": "Ingresos de plataforma",
+    "connectedAccounts": "{count} cuentas conectadas"
+  },
+  "sections": {
+    "revenue": "Ingresos",
+    "performanceOverview": "Resumen de rendimiento",
+    "performanceDescription": "Tendencias de contratos y plataforma — últimos 6 meses",
+    "revenueOverview": "Resumen de ingresos",
+    "revenueOverviewDescription": "Ingresos de contratos y plataforma — últimos 6 meses",
+    "creatorGrowth": "Crecimiento de creadores",
+    "creatorGrowthDescription": "Creadores acumulados en roster — últimos 6 meses",
+    "ai": "IA",
+    "aiWorkspace": "Espacio de IA",
+    "aiWorkspaceDescription": "Asistentes para crecimiento, partnerships y planificación de ingresos",
+    "openAiWorkspace": "Abrir espacio de IA",
+    "team": "Equipo",
+    "creatorsAndActivity": "Creadores y actividad",
+    "creatorsAndActivityDescription": "Destacados del roster y actualizaciones recientes",
+    "contracts": "Contratos",
+    "renewalsOverdue": "Renovaciones y vencidos",
+    "renewalsOverdueDescription": "Deals que necesitan seguimiento antes o después de su fecha de fin"
+  },
+  "charts": {
+    "contracts": "Contratos",
+    "platform": "Plataforma",
+    "creators": "Creadores",
+    "noRevenueTrend": "Aún no hay tendencia de ingresos",
+    "noRevenueTrendDescription": "Agrega contratos o conecta plataformas para ver tendencias",
+    "noCreatorsYet": "Aún no hay creadores",
+    "noCreatorsDescription": "Agrega creadores a tu roster para ver el crecimiento"
+  },
+  "aiAssistants": {
+    "growthCoach": "Coach de crecimiento",
+    "growthCoachDescription": "Analiza rendimiento y recomienda estrategias de crecimiento",
+    "sponsorshipHunter": "Cazador de patrocinios",
+    "sponsorshipHunterDescription": "Empareja creadores con oportunidades de patrocinio ideales",
+    "contentStrategist": "Estratega de contenido",
+    "contentStrategistDescription": "Optimiza la mezcla de contenido entre plataformas",
+    "revenueOptimizer": "Optimizador de ingresos",
+    "revenueOptimizerDescription": "Proyecta ganancias y valor del pipeline de contratos"
+  },
+  "widgets": {
+    "topCreators": "Top creadores",
+    "topCreatorsDescription": "Ranking de tu roster",
+    "viewAll": "Ver todos",
+    "noCreatorsYet": "Aún no hay creadores",
+    "noCreatorsDescription": "Agrega tu primer creador para empezar",
+    "recentActivity": "Actividad reciente",
+    "recentActivityDescription": "Últimas actualizaciones en tu espacio de trabajo",
+    "noActivityYet": "Aún no hay actividad",
+    "noActivityDescription": "Crea un contrato u oportunidad para empezar",
+    "upcomingExpirations": "Próximos vencimientos",
+    "upcomingExpirationsDescription": "Contratos que terminan en 45 días",
+    "overdueContracts": "Contratos vencidos",
+    "overdueContractsDescription": "Fecha de fin pasada, aún activos",
+    "endedOn": "Terminó {date}"
+  }
+}

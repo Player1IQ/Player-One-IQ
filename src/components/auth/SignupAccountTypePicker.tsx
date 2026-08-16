@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   signupAccountOptions,
   type SignupAccountType,
@@ -15,9 +16,11 @@ export function SignupAccountTypePicker({
   value,
   onChange,
 }: SignupAccountTypePickerProps) {
+  const t = useTranslations("auth.signup");
+
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium text-gray-300">I am signing up as a</p>
+      <p className="text-sm font-medium text-gray-300">{t("accountTypeLabel")}</p>
       <div className="grid gap-2">
         {signupAccountOptions.map((option) => {
           const selected = value === option.id;

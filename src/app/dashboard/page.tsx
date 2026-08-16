@@ -1,5 +1,6 @@
 import { getOrganizationForUser } from "@/lib/organization/queries";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { DashboardHomeClient } from "@/components/dashboard/DashboardHomeClient";
 import { getCreators } from "@/lib/creators/queries";
@@ -130,10 +131,12 @@ export default async function DashboardPage({
       })
     : null;
 
+  const t = await getTranslations("pages.dashboard");
+
   return (
     <DashboardLayout
-      title="Dashboard"
-      description="Executive overview of your creator ecosystem"
+      title={t("title")}
+      description={t("description")}
     >
       <DashboardHomeClient
         organizationName={organization?.name ?? "Your workspace"}

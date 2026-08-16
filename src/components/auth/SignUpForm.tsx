@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { formatAuthError } from "@/lib/auth/errors";
@@ -26,6 +27,8 @@ function buildAuthQuery(params: {
 }
 
 export function SignUpForm() {
+  const t = useTranslations("auth.signup");
+  const tErrors = useTranslations("auth.errors");
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
@@ -50,12 +53,12 @@ export function SignUpForm() {
     setNotice("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(tErrors("passwordMismatch"));
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(tErrors("passwordTooShort"));
       return;
     }
 
@@ -63,9 +66,7 @@ export function SignUpForm() {
 
     const supabase = createClient();
     if (!supabase) {
-      setError(
-        "Supabase is not configured. Add your credentials to .env.local and restart the server."
-      );
+      setError(tErrors("supabaseNotConfigured"));
       setLoading(false);
       return;
     }
@@ -90,9 +91,7 @@ export function SignUpForm() {
       }
 
       if (data.user && !data.session) {
-        setNotice(
-          "Account created. Check your email for a confirmation link, then return here to sign in and accept your invitation."
-        );
+        setNotice(tErrors("accountCreatedCheckEmail"));
         setLoading(false);
         return;
       }
@@ -123,7 +122,7 @@ export function SignUpForm() {
 
       {inviteEmail && (
         <p className="text-center text-sm text-gray-400">
-          Use the invited email:{" "}
+          {t("useInvitedEmail")}{" "}
           <span className="text-gray-200">{inviteEmail}</span>
         </p>
       )}
@@ -136,9 +135,9 @@ export function SignUpForm() {
       )}
 
       <AuthInput
-        label={accountType === "creator" ? "Email" : "Work email"}
+        label={accountType === "creator" ? t("emailLabel") : t("workEmailLabel")}
         type="email"
-        placeholder="you@company.com"
+        placeholder={t("emailPlaceholder")}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -146,9 +145,9 @@ export function SignUpForm() {
       />
 
       <AuthInput
-        label="Password"
+        label={t("passwordLabel")}
         type="password"
-        placeholder="Min. 8 characters"
+        placeholder={t("passwordPlaceholder")}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
@@ -156,9 +155,9 @@ export function SignUpForm() {
       />
 
       <AuthInput
-        label="Confirm password"
+        label={t("confirmPasswordLabel")}
         type="password"
-        placeholder="••••••••"
+        placeholder={t("confirmPasswordPlaceholder")}
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         required
@@ -173,38 +172,38 @@ export function SignUpForm() {
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Creating account...
+            {t("creatingAccount")}
           </>
         ) : (
-          "Create account"
+          t("createAccount")
         )}
       </button>
 
       <p className="text-center text-xs text-gray-600">
-        By signing up, you agree to our{" "}
+        {t("termsPrefix")}{" "}
         <Link
           href="/terms"
           className="text-gray-500 underline hover:text-gray-300"
         >
-          Terms of Service
+          {t("termsOfService")}
         </Link>{" "}
-        and{" "}
+        {t("and")}{" "}
         <Link
           href="/privacy"
           className="text-gray-500 underline hover:text-gray-300"
         >
-          Privacy Policy
+          {t("privacyPolicy")}
         </Link>
         .
       </p>
 
       <p className="text-center text-sm text-gray-500">
-        Already have an account?{" "}
+        {t("hasAccount")}{" "}
         <Link
           href={loginHref}
           className="font-medium text-accent-light transition-colors hover:text-white"
         >
-          Sign in
+          {t("signIn")}
         </Link>
       </p>
     </form>

@@ -1,0 +1,47 @@
+{
+  "pageTitle": "Contratos",
+  "pageDescription": "Rastrea acuerdos de patrocinio y pipeline de deals",
+  "filters": {
+    "all": "Todos",
+    "active": "Activos",
+    "pipeline": "Pipeline",
+    "expiring": "Por vencer",
+    "overdue": "Vencidos",
+    "allStatuses": "Todos los estados",
+    "searchStaff": "Buscar contratos, creadores o patrocinadores...",
+    "searchPortal": "Buscar tus deals..."
+  },
+  "sort": {
+    "valueDesc": "Valor: mayor a menor",
+    "valueAsc": "Valor: menor a mayor",
+    "startDateDesc": "Fecha inicio: más reciente",
+    "startDateAsc": "Fecha inicio: más antigua",
+    "endDateDesc": "Fecha fin: más reciente",
+    "endDateAsc": "Fecha fin: más antigua",
+    "statusAsc": "Estado: A–Z",
+    "statusDesc": "Estado: Z–A"
+  },
+  "alerts": {
+    "overdue": "{count, plural, one {# contrato con fecha de fin pasada} other {# contratos con fecha de fin pasada}}",
+    "overdueDetail": "Revisa acuerdos vencidos y márcalos completados o expirados.",
+    "viewOverdue": "Ver vencidos",
+    "expiring": "{count, plural, one {# contrato por vencer en 45 días} other {# contratos por vencer en 45 días}}",
+    "expiringDetail": "Planifica renovaciones o cierra entregables antes de la fecha de fin.",
+    "viewExpiring": "Ver por vencer",
+    "negotiating": "{count, plural, one {# contrato en borrador o negociación.} other {# contratos en borrador o negociación.}}"
+  },
+  "actions": {
+    "newContract": "Nuevo contrato",
+    "clearFilters": "Limpiar filtros"
+  },
+  "empty": {
+    "noContracts": "Aún no hay contratos",
+    "noDeals": "Aún no hay deals",
+    "noMatchingContracts": "Sin contratos coincidentes",
+    "noMatchingDeals": "Sin deals coincidentes",
+    "noContractsDescription": "Crea tu primer acuerdo de patrocinio para rastrear valor, entregables y renovaciones.",
+    "noDealsDescription": "Tus deals aparecerán aquí. Cuando haya oportunidades de patrocinio activas, cualquier deal que te ofrezcan o firmes se rastreará aquí — estado, términos y fechas de renovación, todo en un solo lugar.",
+    "noMatchingDescription": "Prueba otra búsqueda, estado o filtro de resumen."
+  },
+  "showing": "Mostrando {filtered} de {total} contratos"
+}

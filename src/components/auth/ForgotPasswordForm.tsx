@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Loader2, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { AuthInput } from "./AuthInput";
 
 export function ForgotPasswordForm() {
+  const t = useTranslations("auth.forgotPassword");
+  const tErrors = useTranslations("auth.errors");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,9 +22,7 @@ export function ForgotPasswordForm() {
 
     const supabase = createClient();
     if (!supabase) {
-      setError(
-        "Supabase is not configured. Add your credentials to .env.local and restart the server."
-      );
+      setError(tErrors("supabaseNotConfigured"));
       setLoading(false);
       return;
     }
@@ -49,16 +50,16 @@ export function ForgotPasswordForm() {
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 ring-1 ring-accent/20">
           <Mail className="h-6 w-6 text-accent-light" />
         </div>
-        <h3 className="mt-4 text-lg font-semibold text-white">Check your email</h3>
+        <h3 className="mt-4 text-lg font-semibold text-white">{t("checkEmailTitle")}</h3>
         <p className="mt-2 text-sm text-gray-400">
-          We sent a password reset link to{" "}
+          {t("checkEmailBody")}{" "}
           <span className="text-gray-200">{email}</span>
         </p>
         <Link
           href="/login"
           className="mt-6 inline-block text-sm font-medium text-accent-light transition-colors hover:text-white"
         >
-          Back to sign in
+          {t("backToSignIn")}
         </Link>
       </div>
     );
@@ -73,9 +74,9 @@ export function ForgotPasswordForm() {
       )}
 
       <AuthInput
-        label="Email address"
+        label={t("emailLabel")}
         type="email"
-        placeholder="you@company.com"
+        placeholder={t("emailPlaceholder")}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
@@ -90,20 +91,20 @@ export function ForgotPasswordForm() {
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Sending...
+            {t("sending")}
           </>
         ) : (
-          "Send reset link"
+          t("sendResetLink")
         )}
       </button>
 
       <p className="text-center text-sm text-gray-500">
-        Remember your password?{" "}
+        {t("rememberPassword")}{" "}
         <Link
           href="/login"
           className="font-medium text-accent-light transition-colors hover:text-white"
         >
-          Sign in
+          {t("signIn")}
         </Link>
       </p>
     </form>

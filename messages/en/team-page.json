@@ -1,0 +1,27 @@
+{
+  "page": {
+    "viewOnlyAccess": "You have view-only access to the team roster. Owners and admins can invite members and manage roles.",
+    "pendingInvites": "{count, plural, one {# pending invite} other {# pending invites}}",
+    "pendingInvitesDetail": "Resend links or revoke invites that are no longer needed.",
+    "viewPending": "View pending",
+    "allActive": "All team members are active — no pending invitations.",
+    "searchPlaceholder": "Search by name, email, or role...",
+    "allMembers": "All members",
+    "active": "Active",
+    "pendingInvitesFilter": "Pending invites",
+    "inviteMember": "Invite Member",
+    "viewRolePermissions": "View role permissions →",
+    "noMembers": "No team members yet",
+    "noMatching": "No matching members",
+    "noMembersDescription": "Invite colleagues to collaborate on creators, sponsors, and contracts.",
+    "noMembersViewOnly": "Your organization has not added team members yet.",
+    "noMatchingDescription": "Try a different search or status filter.",
+    "clearFilters": "Clear filters",
+    "showing": "Showing {filtered} of {total} members",
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "pending": "Pending invites"
+    }
+  }
+}

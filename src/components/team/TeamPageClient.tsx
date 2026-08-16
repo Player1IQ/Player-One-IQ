@@ -22,12 +22,6 @@ import { cn } from "@/lib/utils";
 const selectClassName =
   "rounded-xl border border-white/[0.08] bg-surface-raised/80 px-3 py-2.5 text-sm text-gray-200 backdrop-blur-sm focus:border-accent/40 focus:outline-none focus:ring-1 focus:ring-accent/30";
 
-const quickFilters: Array<{ value: TeamStatusFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "active", label: "Active" },
-  { value: "pending", label: "Pending invites" },
-];
-
 import type { Sponsor } from "@/lib/sponsors";
 
 interface TeamPageClientProps {
@@ -48,6 +42,12 @@ export function TeamPageClient({
   initialCreateOpen = false,
 }: TeamPageClientProps) {
   const t = useTranslations("team");
+  const tp = useTranslations("teamPage.page");
+  const quickFilters: Array<{ value: TeamStatusFilter; label: string }> = [
+    { value: "all", label: tp("filters.all") },
+    { value: "active", label: tp("filters.active") },
+    { value: "pending", label: tp("filters.pending") },
+  ];
   const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<TeamStatusFilter>("all");
@@ -91,8 +91,7 @@ export function TeamPageClient({
 
       {!canManageTeam ? (
         <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-sm text-gray-400">
-          You have view-only access to the team roster. Owners and admins can
-          invite members and manage roles.
+          {tp("viewOnlyAccess")}
         </p>
       ) : null}
 
@@ -100,11 +99,10 @@ export function TeamPageClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-amber-100">
-              {stats.pendingCount} pending invite
-              {stats.pendingCount === 1 ? "" : "s"}
+              {tp("pendingInvites", { count: stats.pendingCount })}
             </p>
             <p className="mt-0.5 text-xs text-amber-200/80">
-              Resend links or revoke invites that are no longer needed.
+              {tp("pendingInvitesDetail")}
             </p>
           </div>
           <button
@@ -112,14 +110,14 @@ export function TeamPageClient({
             onClick={() => setStatusFilter("pending")}
             className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-500/20"
           >
-            View pending
+            {tp("viewPending")}
           </button>
         </div>
       ) : null}
 
       {canManageTeam && members.length > 0 && stats.pendingCount === 0 ? (
         <p className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-100">
-          All team members are active — no pending invitations.
+          {tp("allActive")}
         </p>
       ) : null}
 
@@ -128,7 +126,7 @@ export function TeamPageClient({
           <Input
             icon={<Search className="h-4 w-4" />}
             type="text"
-            placeholder="Search by name, email, or role..."
+            placeholder={tp("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -141,14 +139,14 @@ export function TeamPageClient({
             }
             className={selectClassName}
           >
-            <option value="all">All members</option>
-            <option value="active">Active</option>
-            <option value="pending">Pending invites</option>
+            <option value="all">{tp("allMembers")}</option>
+            <option value="active">{tp("active")}</option>
+            <option value="pending">{tp("pendingInvitesFilter")}</option>
           </select>
           {canManageTeam ? (
             <Button onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              Invite Member
+              {tp("inviteMember")}
             </Button>
           ) : null}
         </div>
@@ -186,7 +184,7 @@ export function TeamPageClient({
           href="/team/permissions"
           className="text-sm text-accent-light hover:text-white"
         >
-          View role permissions →
+          {tp("viewRolePermissions")}
         </Link>
       </div>
 
@@ -194,20 +192,20 @@ export function TeamPageClient({
         <EmptyState
           icon={Users}
           title={
-            members.length === 0 ? "No team members yet" : "No matching members"
+            members.length === 0 ? tp("noMembers") : tp("noMatching")
           }
           description={
             members.length === 0
               ? canManageTeam
-                ? "Invite colleagues to collaborate on creators, sponsors, and contracts."
-                : "Your organization has not added team members yet."
-              : "Try a different search or status filter."
+                ? tp("noMembersDescription")
+                : tp("noMembersViewOnly")
+              : tp("noMatchingDescription")
           }
           action={
             canManageTeam && members.length === 0 ? (
               <Button onClick={() => setModalOpen(true)}>
                 <Plus className="h-4 w-4" />
-                Invite Member
+                {tp("inviteMember")}
               </Button>
             ) : hasActiveFilters ? (
               <button
@@ -218,7 +216,7 @@ export function TeamPageClient({
                 }}
                 className="text-sm text-accent-light hover:text-white"
               >
-                Clear filters
+                {tp("clearFilters")}
               </button>
             ) : undefined
           }
@@ -226,9 +224,7 @@ export function TeamPageClient({
       ) : (
         <>
           <p className="text-sm text-gray-500">
-            Showing{" "}
-            <span className="font-medium text-gray-300">{filtered.length}</span>{" "}
-            of {members.length} members
+            {tp("showing", { filtered: filtered.length, total: members.length })}
           </p>
           <TeamTable
             members={filtered}

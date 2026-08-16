@@ -1,0 +1,27 @@
+{
+  "page": {
+    "viewOnlyAccess": "Tienes acceso de solo lectura al roster del equipo. Los owners y admins pueden invitar miembros y gestionar roles.",
+    "pendingInvites": "{count, plural, one {# invitación pendiente} other {# invitaciones pendientes}}",
+    "pendingInvitesDetail": "Reenvía enlaces o revoca invitaciones que ya no se necesiten.",
+    "viewPending": "Ver pendientes",
+    "allActive": "Todos los miembros del equipo están activos — no hay invitaciones pendientes.",
+    "searchPlaceholder": "Buscar por nombre, correo o rol...",
+    "allMembers": "Todos los miembros",
+    "active": "Activos",
+    "pendingInvitesFilter": "Invitaciones pendientes",
+    "inviteMember": "Invitar miembro",
+    "viewRolePermissions": "Ver permisos de rol →",
+    "noMembers": "Aún no hay miembros del equipo",
+    "noMatching": "Sin miembros coincidentes",
+    "noMembersDescription": "Invita colegas para colaborar en creadores, patrocinadores y contratos.",
+    "noMembersViewOnly": "Tu organización aún no ha agregado miembros al equipo.",
+    "noMatchingDescription": "Prueba otra búsqueda o filtro de estado.",
+    "clearFilters": "Limpiar filtros",
+    "showing": "Mostrando {filtered} de {total} miembros",
+    "filters": {
+      "all": "Todos",
+      "active": "Activos",
+      "pending": "Invitaciones pendientes"
+    }
+  }
+}

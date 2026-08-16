@@ -1,0 +1,47 @@
+{
+  "pageTitle": "Contracts",
+  "pageDescription": "Track sponsorship agreements and deal pipeline",
+  "filters": {
+    "all": "All",
+    "active": "Active",
+    "pipeline": "Pipeline",
+    "expiring": "Expiring",
+    "overdue": "Overdue",
+    "allStatuses": "All statuses",
+    "searchStaff": "Search contracts, creators, or sponsors...",
+    "searchPortal": "Search your deals..."
+  },
+  "sort": {
+    "valueDesc": "Value: High to Low",
+    "valueAsc": "Value: Low to High",
+    "startDateDesc": "Start Date: Newest",
+    "startDateAsc": "Start Date: Oldest",
+    "endDateDesc": "End Date: Latest",
+    "endDateAsc": "End Date: Earliest",
+    "statusAsc": "Status: A–Z",
+    "statusDesc": "Status: Z–A"
+  },
+  "alerts": {
+    "overdue": "{count, plural, one {# contract past end date} other {# contracts past end date}}",
+    "overdueDetail": "Review overdue agreements and mark completed or expired.",
+    "viewOverdue": "View overdue",
+    "expiring": "{count, plural, one {# contract expiring within 45 days} other {# contracts expiring within 45 days}}",
+    "expiringDetail": "Plan renewals or close out deliverables before the end date.",
+    "viewExpiring": "View expiring",
+    "negotiating": "{count, plural, one {# contract in draft or negotiation.} other {# contracts in draft or negotiation.}}"
+  },
+  "actions": {
+    "newContract": "New Contract",
+    "clearFilters": "Clear filters"
+  },
+  "empty": {
+    "noContracts": "No contracts yet",
+    "noDeals": "No deals yet",
+    "noMatchingContracts": "No matching contracts",
+    "noMatchingDeals": "No matching deals",
+    "noContractsDescription": "Create your first sponsorship agreement to track deal value, deliverables, and renewals.",
+    "noDealsDescription": "Your deals will show up here. As sponsor opportunities go live, any deal you're offered or sign will be tracked in this view — status, terms, and renewal dates, all in one place.",
+    "noMatchingDescription": "Try a different search, status, or summary filter."
+  },
+  "showing": "Showing {filtered} of {total} contracts"
+}

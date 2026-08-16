@@ -1,0 +1,40 @@
+{
+  "pageTitle": "Configuración",
+  "pageDescription": "Configura las preferencias de tu espacio de trabajo",
+  "noPermission": "No tienes permiso para ver la configuración.",
+  "profile": {
+    "title": "Tu perfil",
+    "description": "Agrega una foto para que tus compañeros te reconozcan en el espacio de trabajo."
+  },
+  "organization": {
+    "title": "Organización",
+    "description": "Nombre y tipo del espacio de trabajo mostrados en tu panel.",
+    "teamMembers": "Miembros del equipo",
+    "workspaceSince": "Espacio de trabajo desde"
+  },
+  "branding": {
+    "title": "Marca",
+    "description": "Sube el logo de tu agencia para la barra lateral y el espacio de trabajo."
+  },
+  "teamInvites": {
+    "title": "Equipo e invitaciones",
+    "description": "Invita colegas y gestiona roles desde la página de Equipo.",
+    "openTeamSettings": "Abrir configuración de equipo"
+  },
+  "gettingStarted": {
+    "title": "Primeros pasos",
+    "description": "Repite la configuración y el recorrido guiado del portal sin registrarte de nuevo."
+  },
+  "billing": {
+    "title": "Facturación y suscripción",
+    "description": "Consulta tu plan, límites de uso y opciones de mejora.",
+    "openBilling": "Abrir facturación"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "description": "Las notificaciones de mensajes nuevos aparecen abajo a la derecha mientras trabajas en el panel. Los contadores de no leídos se actualizan automáticamente en la barra lateral."
+  },
+  "development": {
+    "title": "Desarrollo"
+  }
+}

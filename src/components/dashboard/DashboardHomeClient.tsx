@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   AreaChart,
   Area,
@@ -97,16 +98,17 @@ interface DashboardHomeClientProps {
 function activityLabel(
   action: string,
   entityType: string,
-  summary: string
+  summary: string,
+  t: ReturnType<typeof useTranslations<"dashboard">>
 ): string {
   if (entityType === "opportunity" || entityType === "message") {
     return summary;
   }
   const contractLabels: Record<string, string> = {
-    created: "Contract created",
-    updated: "Contract updated",
-    status_changed: "Status changed",
-    deleted: "Contract deleted",
+    created: t("activity.contractCreated"),
+    updated: t("activity.contractUpdated"),
+    status_changed: t("activity.statusChanged"),
+    deleted: t("activity.contractDeleted"),
   };
   return contractLabels[action] ?? summary;
 }
@@ -118,47 +120,18 @@ const chartTooltipStyle = {
   fontSize: "12px",
 };
 
-const aiAssistants = [
-  {
-    title: "Growth Coach",
-    description: "Analyze performance and recommend growth strategies",
-    icon: TrendingUp,
-    href: "/ai",
-    color: "from-violet-500/20 to-purple-600/10",
-  },
-  {
-    title: "Sponsorship Hunter",
-    description: "Match creators with high-fit sponsor opportunities",
-    icon: Target,
-    href: "/ai",
-    color: "from-fuchsia-500/20 to-pink-600/10",
-  },
-  {
-    title: "Content Strategist",
-    description: "Optimize content mix across platforms",
-    icon: Brain,
-    href: "/ai",
-    color: "from-indigo-500/20 to-blue-600/10",
-  },
-  {
-    title: "Revenue Optimizer",
-    description: "Forecast earnings and contract pipeline value",
-    icon: LineChart,
-    href: "/ai",
-    color: "from-emerald-500/20 to-teal-600/10",
-  },
-];
-
 function buildOpsQueueItems({
   overdueContracts,
   contractStats,
   pendingApplications,
   unreadMessages,
+  t,
 }: {
   overdueContracts: Contract[];
   contractStats: { expiringSoonCount: number };
   pendingApplications: number;
   unreadMessages: number;
+  t: ReturnType<typeof useTranslations<"dashboard">>;
 }): OpsQueueItem[] {
   const items: OpsQueueItem[] = [];
 
@@ -166,7 +139,10 @@ function buildOpsQueueItems({
     items.push({
       id: `overdue-${contract.id}`,
       label: contract.contractName,
-      detail: `Past end date — ${contract.sponsorName} × ${contract.creatorName}`,
+      detail: t("opsQueue.pastEndDate", {
+        sponsor: contract.sponsorName,
+        creator: contract.creatorName,
+      }),
       href: `/contracts/${contract.id}`,
       severity: "critical",
     });
@@ -175,8 +151,8 @@ function buildOpsQueueItems({
   if (contractStats.expiringSoonCount > 0) {
     items.push({
       id: "expiring",
-      label: `${contractStats.expiringSoonCount} contract${contractStats.expiringSoonCount === 1 ? "" : "s"} expiring soon`,
-      detail: "Ending within 45 days — review renewals",
+      label: t("opsQueue.expiringSoon", { count: contractStats.expiringSoonCount }),
+      detail: t("opsQueue.expiringSoonDetail"),
       href: "/contracts?filter=expiring",
       severity: "warning",
     });
@@ -185,8 +161,8 @@ function buildOpsQueueItems({
   if (pendingApplications > 0) {
     items.push({
       id: "applications",
-      label: `${pendingApplications} application${pendingApplications === 1 ? "" : "s"} awaiting review`,
-      detail: "Creator applications on open opportunities",
+      label: t("opsQueue.applicationsAwaiting", { count: pendingApplications }),
+      detail: t("opsQueue.applicationsDetail"),
       href: "/opportunities/applications",
       severity: "info",
     });
@@ -195,8 +171,8 @@ function buildOpsQueueItems({
   if (unreadMessages > 0) {
     items.push({
       id: "messages",
-      label: `${unreadMessages} unread message${unreadMessages === 1 ? "" : "s"}`,
-      detail: "Team and creator messages need a response",
+      label: t("opsQueue.unreadMessages", { count: unreadMessages }),
+      detail: t("opsQueue.unreadMessagesDetail"),
       href: "/messages",
       severity: "comms",
     });
@@ -227,6 +203,39 @@ export function DashboardHomeClient({
   coachContext = null,
   periodMonth,
 }: DashboardHomeClientProps) {
+  const t = useTranslations("dashboard");
+
+  const aiAssistants = [
+    {
+      title: t("aiAssistants.growthCoach"),
+      description: t("aiAssistants.growthCoachDescription"),
+      icon: TrendingUp,
+      href: "/ai",
+      color: "from-violet-500/20 to-purple-600/10",
+    },
+    {
+      title: t("aiAssistants.sponsorshipHunter"),
+      description: t("aiAssistants.sponsorshipHunterDescription"),
+      icon: Target,
+      href: "/ai",
+      color: "from-fuchsia-500/20 to-pink-600/10",
+    },
+    {
+      title: t("aiAssistants.contentStrategist"),
+      description: t("aiAssistants.contentStrategistDescription"),
+      icon: Brain,
+      href: "/ai",
+      color: "from-indigo-500/20 to-blue-600/10",
+    },
+    {
+      title: t("aiAssistants.revenueOptimizer"),
+      description: t("aiAssistants.revenueOptimizerDescription"),
+      icon: LineChart,
+      href: "/ai",
+      color: "from-emerald-500/20 to-teal-600/10",
+    },
+  ];
+
   const hasRevenueTrend = revenueTrend.some(
     (point) => point.contract > 0 || point.platform > 0
   );
@@ -237,6 +246,7 @@ export function DashboardHomeClient({
     contractStats,
     pendingApplications,
     unreadMessages,
+    t,
   });
 
   const topCreators = [...creators]
@@ -245,34 +255,36 @@ export function DashboardHomeClient({
 
   const telemetryMetrics = [
     {
-      title: "Active Sponsors",
+      title: t("metrics.activeSponsors"),
       value: String(activeSponsorsCount),
-      subtitle: `${totalSponsors} in pipeline`,
+      subtitle: t("metrics.inPipeline", { count: totalSponsors }),
       href: "/sponsors",
       icon: Building2,
       iconColor: "text-purple-400",
     },
     {
-      title: "Expiring Soon",
+      title: t("metrics.expiringSoon"),
       value: String(contractStats.expiringSoonCount),
-      subtitle: "Contracts ending in 45 days",
+      subtitle: t("metrics.contractsEnding45Days"),
       href: "/contracts?filter=expiring",
       icon: AlertTriangle,
       iconColor: "text-orange-400",
       highlight: contractStats.expiringSoonCount > 0,
     },
     {
-      title: "Unread Messages",
+      title: t("metrics.unreadMessages"),
       value: String(unreadMessages),
-      subtitle: `${conversationCount} conversations`,
+      subtitle: t("metrics.conversations", { count: conversationCount }),
       href: "/messages",
       icon: MessageSquare,
       iconColor: "text-emerald-400",
     },
     {
-      title: "Platform Revenue",
+      title: t("metrics.platformRevenue"),
       value: formatCurrency(monthlyRevenue.platformRevenue),
-      subtitle: `${monthlyRevenue.connectedAccountCount} connected accounts`,
+      subtitle: t("metrics.connectedAccounts", {
+        count: monthlyRevenue.connectedAccountCount,
+      }),
       href: "/creators",
       icon: TrendingUp,
       iconColor: "text-cyan-400",
@@ -303,7 +315,7 @@ export function DashboardHomeClient({
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <CommandHeroMetric
-          telemetry="Monthly revenue"
+          telemetry={t("metrics.monthlyRevenue")}
           value={formatCurrency(monthlyRevenue.total)}
           subtitle={monthlyRevenue.subtitle}
           href="/creators"
@@ -311,26 +323,30 @@ export function DashboardHomeClient({
           iconColor="text-accent-light"
         />
         <CommandHeroMetric
-          telemetry="Cash received"
+          telemetry={t("metrics.cashReceived")}
           value={formatCurrency(monthlyRevenue.cashReceived)}
-          subtitle={`${formatCurrency(monthlyRevenue.expectedDeals)} expected from deals`}
+          subtitle={t("metrics.expectedFromDeals", {
+            amount: formatCurrency(monthlyRevenue.expectedDeals),
+          })}
           href="/contracts"
           icon={FileText}
           iconColor="text-emerald-400"
         />
         <CommandHeroMetric
-          telemetry="Open opportunities"
+          telemetry={t("metrics.openOpportunities")}
           value={String(opportunityStats.openCount)}
-          subtitle={`${opportunityStats.applicationCount} applications`}
+          subtitle={t("metrics.applications", {
+            count: opportunityStats.applicationCount,
+          })}
           href="/opportunities"
           icon={Briefcase}
           iconColor="text-blue-400"
           pulse={pendingApplications > 0}
         />
         <CommandHeroMetric
-          telemetry="Active creators"
+          telemetry={t("metrics.activeCreators")}
           value={String(activeCreators.length)}
-          subtitle={`${creators.length} on roster`}
+          subtitle={t("metrics.onRoster", { count: creators.length })}
           href="/creators"
           icon={Users}
           iconColor="text-violet-400"
@@ -341,17 +357,15 @@ export function DashboardHomeClient({
 
       <section className="space-y-4">
         <SectorHeader
-          sector="Revenue"
-          title="Performance overview"
-          description="Contract and platform trends — last 6 months"
+          sector={t("sections.revenue")}
+          title={t("sections.performanceOverview")}
+          description={t("sections.performanceDescription")}
         />
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Revenue Overview</CardTitle>
-              <CardDescription>
-                Contract & platform revenue — last 6 months
-              </CardDescription>
+              <CardTitle>{t("sections.revenueOverview")}</CardTitle>
+              <CardDescription>{t("sections.revenueOverviewDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
               {hasRevenueTrend ? (
@@ -374,7 +388,7 @@ export function DashboardHomeClient({
                         stroke="#7C3AED"
                         fill="url(#revenueGrad)"
                         strokeWidth={2}
-                        name="Contracts"
+                        name={t("charts.contracts")}
                       />
                       <Area
                         type="monotone"
@@ -383,7 +397,7 @@ export function DashboardHomeClient({
                         fill="transparent"
                         strokeWidth={2}
                         strokeDasharray="4 4"
-                        name="Platform"
+                        name={t("charts.platform")}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
@@ -391,8 +405,8 @@ export function DashboardHomeClient({
               ) : (
                 <EmptyState
                   icon={LineChart}
-                  title="No revenue trend yet"
-                  description="Add contracts or connect platforms to see trends"
+                  title={t("charts.noRevenueTrend")}
+                  description={t("charts.noRevenueTrendDescription")}
                   className="min-h-[16rem]"
                 />
               )}
@@ -401,10 +415,8 @@ export function DashboardHomeClient({
 
           <Card>
             <CardHeader>
-              <CardTitle>Creator Growth</CardTitle>
-              <CardDescription>
-                Cumulative creators on roster — last 6 months
-              </CardDescription>
+              <CardTitle>{t("sections.creatorGrowth")}</CardTitle>
+              <CardDescription>{t("sections.creatorGrowthDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
               {hasCreatorGrowth ? (
@@ -419,7 +431,7 @@ export function DashboardHomeClient({
                         dataKey="creators"
                         fill="#7C3AED"
                         radius={[6, 6, 0, 0]}
-                        name="Creators"
+                        name={t("charts.creators")}
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -427,8 +439,8 @@ export function DashboardHomeClient({
               ) : (
                 <EmptyState
                   icon={Users}
-                  title="No creators yet"
-                  description="Add creators to your roster to see growth over time"
+                  title={t("charts.noCreatorsYet")}
+                  description={t("charts.noCreatorsDescription")}
                   className="min-h-[16rem]"
                 />
               )}
@@ -439,15 +451,15 @@ export function DashboardHomeClient({
 
       <section className="space-y-4">
         <SectorHeader
-          sector="AI"
-          title="AI workspace"
-          description="Deep-dive assistants for growth, partnerships, and revenue planning"
+          sector={t("sections.ai")}
+          title={t("sections.aiWorkspace")}
+          description={t("sections.aiWorkspaceDescription")}
           action={
             <Link
               href="/ai"
               className="flex items-center gap-1 text-xs font-medium text-accent-light hover:text-white"
             >
-              Open AI workspace <ArrowRight className="h-3 w-3" />
+              {t("sections.openAiWorkspace")} <ArrowRight className="h-3 w-3" />
             </Link>
           }
         />
@@ -477,9 +489,9 @@ export function DashboardHomeClient({
 
       <section className="space-y-4">
         <SectorHeader
-          sector="Team"
-          title="Creators and activity"
-          description="Roster highlights and recent workspace updates"
+          sector={t("sections.team")}
+          title={t("sections.creatorsAndActivity")}
+          description={t("sections.creatorsAndActivityDescription")}
         />
         <div className="grid gap-6 lg:grid-cols-3">
           <TodayScheduleCard events={todaySchedule} />
@@ -487,11 +499,11 @@ export function DashboardHomeClient({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Top Creators</CardTitle>
-                  <CardDescription>Your roster leaderboard</CardDescription>
+                  <CardTitle>{t("widgets.topCreators")}</CardTitle>
+                  <CardDescription>{t("widgets.topCreatorsDescription")}</CardDescription>
                 </div>
                 <Link href="/creators" className="text-xs font-medium text-accent-light hover:text-white">
-                  View all
+                  {t("widgets.viewAll")}
                 </Link>
               </div>
             </CardHeader>
@@ -499,8 +511,8 @@ export function DashboardHomeClient({
               {topCreators.length === 0 ? (
                 <EmptyState
                   icon={Users}
-                  title="No creators yet"
-                  description="Add your first creator to get started"
+                  title={t("widgets.noCreatorsYet")}
+                  description={t("widgets.noCreatorsDescription")}
                 />
               ) : (
                 <ul className="space-y-3">
@@ -541,14 +553,14 @@ export function DashboardHomeClient({
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates across your workspace</CardDescription>
+              <CardTitle>{t("widgets.recentActivity")}</CardTitle>
+              <CardDescription>{t("widgets.recentActivityDescription")}</CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
               {activity.length === 0 ? (
                 <EmptyState
-                  title="No activity yet"
-                  description="Create a contract or opportunity to get started"
+                  title={t("widgets.noActivityYet")}
+                  description={t("widgets.noActivityDescription")}
                 />
               ) : (
                 <ul className="space-y-3">
@@ -559,7 +571,7 @@ export function DashboardHomeClient({
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-200">
-                          {activityLabel(item.action, item.entityType, item.summary)}
+                          {activityLabel(item.action, item.entityType, item.summary, t)}
                         </p>
                         {item.detail && (
                           <p className="mt-0.5 truncate text-xs text-gray-500">
@@ -582,9 +594,9 @@ export function DashboardHomeClient({
       {(upcomingExpirations.length > 0 || overdueContracts.length > 0) && (
         <section className="space-y-4">
           <SectorHeader
-            sector="Contracts"
-            title="Renewals and overdue items"
-            description="Deals that need follow-up before or after their end date"
+            sector={t("sections.contracts")}
+            title={t("sections.renewalsOverdue")}
+            description={t("sections.renewalsOverdueDescription")}
           />
           <div className="grid gap-6 lg:grid-cols-2">
             {upcomingExpirations.length > 0 && (
@@ -592,8 +604,8 @@ export function DashboardHomeClient({
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Upcoming Expirations</CardTitle>
-                      <CardDescription>Contracts ending within 45 days</CardDescription>
+                      <CardTitle>{t("widgets.upcomingExpirations")}</CardTitle>
+                      <CardDescription>{t("widgets.upcomingExpirationsDescription")}</CardDescription>
                     </div>
                     <Badge variant="warning">{upcomingExpirations.length}</Badge>
                   </div>
@@ -629,8 +641,8 @@ export function DashboardHomeClient({
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle>Overdue Contracts</CardTitle>
-                      <CardDescription>Past end date, still active</CardDescription>
+                      <CardTitle>{t("widgets.overdueContracts")}</CardTitle>
+                      <CardDescription>{t("widgets.overdueContractsDescription")}</CardDescription>
                     </div>
                     <Badge variant="danger">{overdueContracts.length}</Badge>
                   </div>
@@ -648,7 +660,7 @@ export function DashboardHomeClient({
                             {contract.contractName}
                           </Link>
                           <p className="text-xs text-gray-500">
-                            Ended {contract.endDateDisplay}
+                            {t("widgets.endedOn", { date: contract.endDateDisplay })}
                           </p>
                         </div>
                       </li>

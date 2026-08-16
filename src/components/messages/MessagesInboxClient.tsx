@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { MessageSquarePlus, MessageSquare, Mail, Users, Search } from "lucide-react";
 import type { Conversation, ConversationType, OrgUser } from "@/lib/messages";
@@ -51,6 +52,7 @@ export function MessagesInboxClient({
   isPortalUser = false,
   initialCreateOpen = false,
 }: MessagesInboxClientProps) {
+  const t = useTranslations("messages");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<InboxFilter>("all");
   const [modalOpen, setModalOpen] = useState(initialCreateOpen);
@@ -86,20 +88,20 @@ export function MessagesInboxClient({
     <div className="animate-fade-in space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard
-          title="Conversations"
+          title={t("metrics.conversations")}
           value={String(conversations.length)}
           icon={MessageSquare}
           iconColor="text-accent-light"
         />
         <MetricCard
-          title="Unread"
+          title={t("metrics.unread")}
           value={String(totalUnread)}
-          subtitle={totalUnread > 0 ? "Needs attention" : "All caught up"}
+          subtitle={totalUnread > 0 ? t("metrics.needsAttention") : t("metrics.allCaughtUp")}
           icon={Mail}
           iconColor="text-emerald-400"
         />
         <MetricCard
-          title={isPortalUser ? "Agency Contacts" : "Team Members"}
+          title={isPortalUser ? t("metrics.agencyContacts") : t("metrics.teamMembers")}
           value={String(isPortalUser ? agencyContacts.length : users.length)}
           icon={Users}
           iconColor="text-violet-400"
@@ -108,8 +110,7 @@ export function MessagesInboxClient({
 
       {isPortalUser && agencyContacts.length === 0 ? (
         <div className="rounded-xl border border-white/[0.06] bg-surface-raised/50 px-4 py-4 text-sm text-gray-400">
-          No contacts yet. Once you&apos;re connected with an agency or sponsor,
-          you&apos;ll be able to message them directly here.
+          {t("alerts.noContacts")}
         </div>
       ) : null}
 

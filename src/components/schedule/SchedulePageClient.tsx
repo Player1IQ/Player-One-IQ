@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
   Calendar,
@@ -195,6 +196,7 @@ export function SchedulePageClient({
   currentUserId = null,
   participantOptions = [],
 }: SchedulePageClientProps) {
+  const t = useTranslations("schedule");
   const router = useRouter();
   const [events, setEvents] = useState(initialEvents);
   const [anchorDate, setAnchorDate] = useState(() => new Date());
@@ -369,7 +371,7 @@ export function SchedulePageClient({
             ? await updateScheduleEvent(editingEvent.id, payload)
             : await createScheduleEvent(payload);
         } else {
-          setError("You do not have permission to save this event.");
+          setError(t("errors.noPermission"));
           return;
         }
 
@@ -449,7 +451,7 @@ export function SchedulePageClient({
             type="button"
             onClick={() => shiftWeek(-1)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.06] bg-surface-raised/60 text-gray-400 hover:text-white"
-            aria-label="Previous week"
+            aria-label={t("navigation.previousWeek")}
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -462,13 +464,13 @@ export function SchedulePageClient({
             }}
             className="rounded-xl border border-white/[0.06] bg-surface-raised/60 px-3 py-2 text-sm text-gray-300 hover:text-white"
           >
-            Today
+            {t("navigation.today")}
           </button>
           <button
             type="button"
             onClick={() => shiftWeek(1)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.06] bg-surface-raised/60 text-gray-400 hover:text-white"
-            aria-label="Next week"
+            aria-label={t("navigation.nextWeek")}
           >
             <ChevronRight className="h-4 w-4" />
           </button>

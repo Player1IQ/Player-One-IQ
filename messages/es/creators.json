@@ -1,0 +1,33 @@
+{
+  "pageTitle": "Creadores",
+  "pageDescription": "Gestiona tu roster de creadores",
+  "metrics": {
+    "totalCreators": "Total de creadores",
+    "activeOnRoster": "{count} activos en roster",
+    "active": "Activos",
+    "activeDescription": "Creadores gestionados actualmente",
+    "pending": "Pendientes",
+    "onHold": "{count} en pausa"
+  },
+  "alerts": {
+    "pendingOnboarding": "{count, plural, one {# creador pendiente de onboarding} other {# creadores pendientes de onboarding}}",
+    "pendingOnboardingDetail": "Completa perfiles y conecta plataformas para activarlos.",
+    "viewPending": "Ver pendientes"
+  },
+  "filters": {
+    "all": "Todos",
+    "searchPlaceholder": "Buscar creadores por nombre, correo o plataforma...",
+    "allStatuses": "Todos los estados"
+  },
+  "actions": {
+    "addCreator": "Agregar creador",
+    "clearFilters": "Limpiar filtros"
+  },
+  "empty": {
+    "noCreators": "Aún no hay creadores",
+    "noMatching": "Sin creadores coincidentes",
+    "noCreatorsDescription": "Agrega tu primer creador para empezar a construir tu roster.",
+    "noMatchingDescription": "Prueba otra búsqueda o filtro de estado."
+  },
+  "showing": "Mostrando {filtered} de {total} creadores"
+}

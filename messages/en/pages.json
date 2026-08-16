@@ -1,0 +1,102 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Executive overview of your creator ecosystem"
+  },
+  "creators": {
+    "title": "Creators",
+    "description": "Manage your creator roster"
+  },
+  "sponsors": {
+    "title": "Sponsors",
+    "description": "Manage brand partnerships and sponsor relationships"
+  },
+  "contracts": {
+    "title": "Contracts",
+    "description": "Track sponsorship agreements and deal pipeline"
+  },
+  "opportunities": {
+    "title": "Opportunities",
+    "description": "Manage sponsorship opportunities and creator applications"
+  },
+  "applications": {
+    "title": "Applications",
+    "description": "Review creator applications on open opportunities"
+  },
+  "messages": {
+    "title": "Messages",
+    "description": "Team conversations and deal room messaging"
+  },
+  "schedule": {
+    "title": "Schedule",
+    "description": "Plan events, meetings, and creator availability blocks"
+  },
+  "team": {
+    "title": "Team",
+    "description": "Manage members, roles, and invitations"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Configure your workspace preferences"
+  },
+  "billing": {
+    "title": "Billing",
+    "description": "Manage your subscription plan and usage"
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Monthly performance and revenue analytics"
+  },
+  "ai": {
+    "title": "AI Workspace",
+    "description": "Growth intelligence and sponsorship matching assistants"
+  },
+  "campaigns": {
+    "title": "Campaigns",
+    "description": "Manage sponsor campaigns and deliverables"
+  },
+  "portal": {
+    "title": "Portal",
+    "description": "Your creator dashboard"
+  },
+  "portalRevenue": {
+    "title": "Revenue",
+    "description": "Track earnings and payout history"
+  },
+  "portalGrowth": {
+    "title": "Growth",
+    "description": "Platform performance and audience insights"
+  },
+  "portalDeliverables": {
+    "title": "Deliverables",
+    "description": "Track sponsorship deliverables across your deals"
+  },
+  "portalSeasons": {
+    "title": "Seasons",
+    "description": "Your competitive seasons and milestones"
+  },
+  "portalCoach": {
+    "title": "Coach",
+    "description": "AI-powered growth coaching"
+  },
+  "portalAccount": {
+    "title": "Account",
+    "description": "Profile, language, and workspace settings"
+  },
+  "welcome": {
+    "title": "Welcome",
+    "description": "Get started with Player One IQ"
+  },
+  "founding": {
+    "title": "Founding Roster",
+    "description": "Apply to join the founding creator roster"
+  },
+  "organizationSetup": {
+    "title": "Organization setup",
+    "description": "Set up your workspace"
+  },
+  "onboarding": {
+    "title": "Getting started",
+    "description": "Complete your workspace setup"
+  }
+}

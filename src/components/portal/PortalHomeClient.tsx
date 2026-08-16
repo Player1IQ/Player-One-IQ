@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import type { PortalDeliverableMetrics } from "@/lib/contract-deliverables/queries";
 import {
@@ -86,6 +87,7 @@ export function PortalHomeClient({
   creatorId = null,
   seasonView = null,
 }: PortalHomeClientProps) {
+  const t = useTranslations("portal.home");
   const activeDealCount = countActiveDeals(contracts);
 
   return (
@@ -132,13 +134,13 @@ export function PortalHomeClient({
             className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:border-accent/40 hover:text-accent-light"
           >
             <User className="h-4 w-4" />
-            View full profile
+            {t("viewFullProfile")}
           </Link>
         </div>
         {!whiteLabelEnabled && organizationLogoUrl ? (
           <div className="relative border-t border-white/[0.04] px-6 py-2 sm:px-8">
             <p className="flex items-center gap-2 text-[10px] text-gray-600">
-              <span>Portal powered by</span>
+              <span>{t("poweredBy")}</span>
               <BrandLogo size="xs" className="opacity-70" />
             </p>
           </div>
@@ -147,12 +149,12 @@ export function PortalHomeClient({
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <MetricCard
-          title="Open deliverables"
+          title={t("openDeliverables")}
           value={String(deliverableMetrics.openCount)}
           subtitle={
             deliverableMetrics.overdueCount > 0
-              ? `${deliverableMetrics.overdueCount} overdue`
-              : "Across your deals"
+              ? t("overdue", { count: deliverableMetrics.overdueCount })
+              : t("acrossDeals")
           }
           href="/portal/deliverables"
           icon={CheckSquare}
@@ -163,21 +165,21 @@ export function PortalHomeClient({
           }
         />
         <MetricCard
-          title="Active deals"
+          title={t("activeDeals")}
           value={String(activeDealCount)}
-          subtitle={`${contracts.length} total deals`}
+          subtitle={t("totalDeals", { count: contracts.length })}
           href="/contracts"
           icon={FileText}
           iconColor="text-emerald-400"
         />
         {showCampaigns ? (
           <MetricCard
-            title="Campaigns"
+            title={t("campaigns")}
             value={String(campaignCount)}
             subtitle={
               campaignCount === 1
-                ? "Assigned campaign"
-                : "Assigned campaigns"
+                ? t("assignedCampaign")
+                : t("assignedCampaigns")
             }
             href="/campaigns"
             icon={Target}
@@ -186,12 +188,12 @@ export function PortalHomeClient({
         ) : null}
         {showOpportunities ? (
           <MetricCard
-            title="Opportunities"
+            title={t("opportunities")}
             value={String(openOpportunityCount)}
             subtitle={
               pendingApplicationCount > 0
-                ? `${pendingApplicationCount} pending review`
-                : "Open to apply"
+                ? t("pendingReview", { count: pendingApplicationCount })
+                : t("openToApply")
             }
             href="/opportunities"
             icon={Briefcase}
@@ -199,16 +201,16 @@ export function PortalHomeClient({
           />
         ) : null}
         <MetricCard
-          title="Messages"
+          title={t("messages")}
           value={String(unreadMessages)}
-          subtitle={unreadMessages === 1 ? "Unread conversation" : "Unread conversations"}
+          subtitle={unreadMessages === 1 ? t("unreadConversation") : t("unreadConversations")}
           href="/portal/messages"
           icon={MessageSquare}
           iconColor="text-violet-400"
         />
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
           <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-            Availability
+            {t("availability")}
           </p>
           <div className="mt-3">
             <PresencePicker
@@ -247,7 +249,7 @@ export function PortalHomeClient({
 
       <TodayScheduleCard
         events={todaySchedule}
-        description="Your blocks and events for today"
+        description={t("scheduleDescription")}
       />
 
       {deliverableMetrics.nextDue ? (
@@ -263,7 +265,7 @@ export function PortalHomeClient({
               />
               <div>
                 <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Next deliverable due
+                  {t("nextDeliverableDue")}
                 </p>
                 <p
                   className={`mt-1 text-sm font-medium ${
@@ -275,7 +277,7 @@ export function PortalHomeClient({
                   {deliverableMetrics.nextDue.title}
                 </p>
                 <p className="mt-0.5 text-xs text-gray-500">
-                  Due {deliverableMetrics.nextDue.dueDateDisplay}
+                  {t("dueDate", { date: deliverableMetrics.nextDue.dueDateDisplay })}
                 </p>
               </div>
             </div>
@@ -283,13 +285,13 @@ export function PortalHomeClient({
               href={`/contracts/${deliverableMetrics.nextDue.contractId}`}
               className="text-sm font-medium text-accent-light hover:text-white"
             >
-              View deal
+              {t("viewDeal")}
             </Link>
             <Link
               href="/portal/deliverables"
               className="text-sm font-medium text-gray-400 hover:text-white"
             >
-              All deliverables
+              {t("allDeliverables")}
             </Link>
           </div>
         </div>
@@ -327,17 +329,12 @@ export function PortalHomeClient({
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <Card>
           <CardHeader>
-            <CardTitle>Your deals</CardTitle>
-            <CardDescription>
-              Sponsorship agreements linked to your roster profile
-            </CardDescription>
+            <CardTitle>{t("yourDeals")}</CardTitle>
+            <CardDescription>{t("yourDealsDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
             {contracts.length === 0 ? (
-              <p className="text-sm text-gray-500">
-                No sponsorship deals yet. Browse the open marketplace to find
-                opportunities, or check back as new agency deals are added.
-              </p>
+              <p className="text-sm text-gray-500">{t("noDealsYet")}</p>
             ) : (
               <ul className="space-y-3">
                 {contracts.slice(0, 5).map((contract) => (
@@ -365,7 +362,7 @@ export function PortalHomeClient({
                 href="/contracts"
                 className="mt-4 inline-flex text-sm font-medium text-accent-light hover:text-white"
               >
-                View all deals
+                {t("viewAllDeals")}
               </Link>
             ) : null}
           </CardContent>
@@ -373,8 +370,8 @@ export function PortalHomeClient({
 
         <Card>
           <CardHeader>
-            <CardTitle>Quick links</CardTitle>
-            <CardDescription>Jump to the areas you use most</CardDescription>
+            <CardTitle>{t("quickLinks")}</CardTitle>
+            <CardDescription>{t("quickLinksDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 pt-0">
             <Link
@@ -382,14 +379,14 @@ export function PortalHomeClient({
               className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
             >
               <User className="h-4 w-4 text-accent-light" />
-              My profile
+              {t("myProfile")}
             </Link>
             <Link
               href="/portal/messages"
               className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
             >
               <MessageSquare className="h-4 w-4 text-accent-light" />
-              Messages
+              {t("messages")}
               {unreadMessages > 0 ? (
                 <span className="ml-auto rounded-full bg-accent/20 px-2 py-0.5 text-xs text-accent-light">
                   {unreadMessages}
@@ -402,10 +399,10 @@ export function PortalHomeClient({
                 className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
               >
                 <Target className="h-4 w-4 text-accent-light" />
-                <span className="flex-1">Campaigns</span>
+                <span className="flex-1">{t("campaigns")}</span>
                 {campaignCount > 0 ? (
                   <span className="text-xs text-gray-500">
-                    {campaignCount} assigned
+                    {t("assigned", { count: campaignCount })}
                   </span>
                 ) : null}
               </Link>
@@ -416,10 +413,10 @@ export function PortalHomeClient({
                 className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
               >
                 <Briefcase className="h-4 w-4 text-accent-light" />
-                <span className="flex-1">My applications</span>
+                <span className="flex-1">{t("myApplications")}</span>
                 {portalBenefits && portalBenefits.applicationStats.total > 0 ? (
                   <span className="text-xs text-gray-500">
-                    {portalBenefits.applicationStats.total} submitted
+                    {t("submitted", { count: portalBenefits.applicationStats.total })}
                   </span>
                 ) : null}
               </Link>
@@ -430,10 +427,10 @@ export function PortalHomeClient({
                 className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
               >
                 <Briefcase className="h-4 w-4 text-accent-light" />
-                <span className="flex-1">Opportunities</span>
+                <span className="flex-1">{t("opportunities")}</span>
                 {openOpportunityCount > 0 ? (
                   <span className="text-xs text-gray-500">
-                    {openOpportunityCount} open
+                    {t("open", { count: openOpportunityCount })}
                   </span>
                 ) : null}
               </Link>
@@ -443,7 +440,7 @@ export function PortalHomeClient({
               className="flex items-center gap-3 rounded-xl border border-white/[0.06] px-4 py-3 text-sm text-gray-300 transition-colors hover:border-accent/20 hover:text-white"
             >
               <Briefcase className="h-4 w-4 text-accent-light" />
-              Account
+              {t("account")}
             </Link>
           </CardContent>
         </Card>

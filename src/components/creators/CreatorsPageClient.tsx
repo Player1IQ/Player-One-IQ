@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Search, Users, UserCheck, Clock } from "lucide-react";
 import {
   type Creator,
@@ -23,14 +24,6 @@ const selectClassName =
 
 type StatusFilter = CreatorStatus | "all";
 
-const quickFilters: Array<{ value: StatusFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "active", label: creatorStatusLabels.active },
-  { value: "pending", label: creatorStatusLabels.pending },
-  { value: "on-hold", label: creatorStatusLabels["on-hold"] },
-  { value: "inactive", label: creatorStatusLabels.inactive },
-];
-
 interface CreatorsPageClientProps {
   creators: Creator[];
   canWrite?: boolean;
@@ -44,6 +37,14 @@ export function CreatorsPageClient({
   showSeedButton = false,
   initialCreateOpen = false,
 }: CreatorsPageClientProps) {
+  const t = useTranslations("creators");
+  const quickFilters: Array<{ value: StatusFilter; label: string }> = [
+    { value: "all", label: t("filters.all") },
+    { value: "active", label: creatorStatusLabels.active },
+    { value: "pending", label: creatorStatusLabels.pending },
+    { value: "on-hold", label: creatorStatusLabels["on-hold"] },
+    { value: "inactive", label: creatorStatusLabels.inactive },
+  ];
   const [modalOpen, setModalOpen] = useState(initialCreateOpen);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -73,23 +74,23 @@ export function CreatorsPageClient({
     <div className="animate-fade-in space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <MetricCard
-          title="Total Creators"
+          title={t("metrics.totalCreators")}
           value={String(stats.totalCount)}
-          subtitle={`${stats.activeCount} active on roster`}
+          subtitle={t("metrics.activeOnRoster", { count: stats.activeCount })}
           icon={Users}
           iconColor="text-accent-light"
         />
         <MetricCard
-          title="Active"
+          title={t("metrics.active")}
           value={String(stats.activeCount)}
-          subtitle="Currently managed creators"
+          subtitle={t("metrics.activeDescription")}
           icon={UserCheck}
           iconColor="text-emerald-400"
         />
         <MetricCard
-          title="Pending"
+          title={t("metrics.pending")}
           value={String(stats.pendingCount)}
-          subtitle={`${stats.onHoldCount} on hold`}
+          subtitle={t("metrics.onHold", { count: stats.onHoldCount })}
           icon={Clock}
           iconColor="text-amber-400"
         />
@@ -99,11 +100,10 @@ export function CreatorsPageClient({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3">
           <div>
             <p className="text-sm font-medium text-amber-100">
-              {stats.pendingCount} creator{stats.pendingCount === 1 ? "" : "s"}{" "}
-              pending onboarding
+              {t("alerts.pendingOnboarding", { count: stats.pendingCount })}
             </p>
             <p className="mt-0.5 text-xs text-amber-200/80">
-              Complete profiles and connect platforms to activate them.
+              {t("alerts.pendingOnboardingDetail")}
             </p>
           </div>
           <button
@@ -111,7 +111,7 @@ export function CreatorsPageClient({
             onClick={() => setStatusFilter("pending")}
             className="shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-100 transition-colors hover:bg-amber-500/20"
           >
-            View pending
+            {t("alerts.viewPending")}
           </button>
         </div>
       ) : null}
@@ -121,7 +121,7 @@ export function CreatorsPageClient({
           <Input
             icon={<Search className="h-4 w-4" />}
             type="text"
-            placeholder="Search creators..."
+            placeholder={t("filters.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -134,7 +134,7 @@ export function CreatorsPageClient({
             }
             className={selectClassName}
           >
-            <option value="all">All statuses</option>
+            <option value="all">{t("filters.allStatuses")}</option>
             {creatorStatuses.map((status) => (
               <option key={status} value={status}>
                 {creatorStatusLabels[status]}
@@ -145,7 +145,7 @@ export function CreatorsPageClient({
           {canWrite ? (
             <Button onClick={() => setModalOpen(true)}>
               <Plus className="h-4 w-4" />
-              Add Creator
+              {t("actions.addCreator")}
             </Button>
           ) : null}
         </div>
@@ -178,17 +178,17 @@ export function CreatorsPageClient({
       {filtered.length === 0 ? (
         <EmptyState
           icon={Users}
-          title={creators.length === 0 ? "No creators yet" : "No matching creators"}
+          title={creators.length === 0 ? t("empty.noCreators") : t("empty.noMatching")}
           description={
             creators.length === 0
-              ? "Add your first creator to start building your roster."
-              : "Try a different search or status filter."
+              ? t("empty.noCreatorsDescription")
+              : t("empty.noMatchingDescription")
           }
           action={
             canWrite && creators.length === 0 ? (
               <Button onClick={() => setModalOpen(true)}>
                 <Plus className="h-4 w-4" />
-                Add Creator
+                {t("actions.addCreator")}
               </Button>
             ) : hasActiveFilters ? (
               <button
@@ -199,7 +199,7 @@ export function CreatorsPageClient({
                 }}
                 className="text-sm text-accent-light hover:text-white"
               >
-                Clear filters
+                {t("actions.clearFilters")}
               </button>
             ) : undefined
           }
@@ -207,9 +207,7 @@ export function CreatorsPageClient({
       ) : (
         <>
           <p className="text-sm text-gray-500">
-            Showing{" "}
-            <span className="font-medium text-gray-300">{filtered.length}</span>{" "}
-            of {creators.length} creators
+            {t("showing", { filtered: filtered.length, total: creators.length })}
           </p>
           <CreatorRosterTable creators={filtered} canWrite={canWrite} />
         </>

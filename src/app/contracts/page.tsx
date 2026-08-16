@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { getTranslations } from "next-intl/server";
 import { SubscriptionPageGate } from "@/components/subscription/SubscriptionPageGate";
 import { ContractsPageClient } from "@/components/contracts/ContractsPageClient";
 import { getContracts } from "@/lib/contracts/queries";
@@ -37,14 +38,12 @@ export default async function ContractsPage({ searchParams }: ContractsPageProps
     contracts.map((c) => c.id)
   );
 
+  const t = await getTranslations("pages.contracts");
+
   return (
     <DashboardLayout
-      title={isPortalUser ? "Your Deals" : "Contracts"}
-      description={
-        isPortalUser
-          ? "Sponsorship agreements linked to your profile"
-          : "Manage sponsorship agreements and deliverables"
-      }
+      title={t("title")}
+      description={t("description")}
     >
       <SubscriptionPageGate required="contracts" featureLabel="Deals">
         <ContractsPageClient

@@ -1,4 +1,5 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { getTranslations } from "next-intl/server";
 import { SchedulePageClient } from "@/components/schedule/SchedulePageClient";
 import { getScheduleParticipantOptions } from "@/app/schedule/actions";
 import {
@@ -8,7 +9,6 @@ import {
 } from "@/lib/schedule/queries";
 import { getWeekStart } from "@/lib/schedule/helpers";
 import { getCurrentUserMembership } from "@/lib/permissions";
-import { canAccessStaffDashboard, isCreatorPortalRole } from "@/lib/team";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function SchedulePage() {
@@ -33,19 +33,12 @@ export default async function SchedulePage() {
     isStaff ? getScheduleParticipantOptions() : Promise.resolve([]),
   ]);
 
-  const isPortalOnly =
-    membership &&
-    isCreatorPortalRole(membership.role) &&
-    !canAccessStaffDashboard(membership.role);
+  const t = await getTranslations("pages.schedule");
 
   return (
     <DashboardLayout
-      title="Schedule"
-      description={
-        isPortalOnly
-          ? "Block time and view events you're invited to"
-          : "Plan meetings, practice, and team availability"
-      }
+      title={t("title")}
+      description={t("description")}
     >
       <SchedulePageClient
         initialEvents={events}

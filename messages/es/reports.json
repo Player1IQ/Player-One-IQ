@@ -1,0 +1,18 @@
+{
+  "pageTitle": "Reportes",
+  "pageDescription": "Análisis mensual de rendimiento e ingresos",
+  "export": "Exportar reporte",
+  "print": "Imprimir reporte",
+  "period": "Período del reporte",
+  "sections": {
+    "summary": "Resumen ejecutivo",
+    "revenue": "Ingresos",
+    "creators": "Creadores",
+    "contracts": "Contratos",
+    "opportunities": "Oportunidades"
+  },
+  "empty": {
+    "noData": "Sin datos de reporte para este período",
+    "noDataDescription": "Agrega creadores, contratos o entradas de ingresos para generar reportes."
+  }
+}

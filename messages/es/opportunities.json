@@ -1,0 +1,37 @@
+{
+  "pageTitle": "Oportunidades",
+  "pageDescription": "Gestiona oportunidades de patrocinio y postulaciones de creadores",
+  "filters": {
+    "all": "Todas",
+    "searchPlaceholder": "Buscar oportunidades por título, categoría o patrocinador..."
+  },
+  "tabs": {
+    "agency": "Agencia",
+    "marketplace": "Marketplace",
+    "recommended": "Recomendadas para ti"
+  },
+  "metrics": {
+    "open": "Abiertas",
+    "openDescription": "Aceptando postulaciones",
+    "applications": "Postulaciones",
+    "needsReview": "{count} por revisar",
+    "draft": "Borrador",
+    "draftDescription": "Aún no publicadas"
+  },
+  "actions": {
+    "newOpportunity": "Nueva oportunidad",
+    "viewApplications": "Ver postulaciones",
+    "clearFilters": "Limpiar filtros"
+  },
+  "empty": {
+    "noOpportunities": "Aún no hay oportunidades",
+    "noMatching": "Sin oportunidades coincidentes",
+    "noOpportunitiesDescription": "Crea oportunidades de patrocinio para conectar creadores con marcas.",
+    "noMatchingDescription": "Prueba otra búsqueda o filtro de estado."
+  },
+  "showing": "Mostrando {filtered} de {total} oportunidades",
+  "portal": {
+    "myApplications": "Mis postulaciones",
+    "pendingReview": "{count} pendientes de revisión"
+  }
+}

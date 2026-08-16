@@ -1,0 +1,90 @@
+{
+  "pageTitle": "Dashboard",
+  "pageDescription": "Executive overview of your creator ecosystem",
+  "activity": {
+    "contractCreated": "Contract created",
+    "contractUpdated": "Contract updated",
+    "statusChanged": "Status changed",
+    "contractDeleted": "Contract deleted"
+  },
+  "opsQueue": {
+    "pastEndDate": "Past end date — {sponsor} × {creator}",
+    "expiringSoon": "{count, plural, one {# contract expiring soon} other {# contracts expiring soon}}",
+    "expiringSoonDetail": "Ending within 45 days — review renewals",
+    "applicationsAwaiting": "{count, plural, one {# application awaiting review} other {# applications awaiting review}}",
+    "applicationsDetail": "Creator applications on open opportunities",
+    "unreadMessages": "{count, plural, one {# unread message} other {# unread messages}}",
+    "unreadMessagesDetail": "Team and creator messages need a response"
+  },
+  "metrics": {
+    "monthlyRevenue": "Monthly revenue",
+    "cashReceived": "Cash received",
+    "expectedFromDeals": "{amount} expected from deals",
+    "openOpportunities": "Open opportunities",
+    "applications": "{count} applications",
+    "activeCreators": "Active creators",
+    "onRoster": "{count} on roster",
+    "activeSponsors": "Active Sponsors",
+    "inPipeline": "{count} in pipeline",
+    "expiringSoon": "Expiring Soon",
+    "contractsEnding45Days": "Contracts ending in 45 days",
+    "unreadMessages": "Unread Messages",
+    "conversations": "{count} conversations",
+    "platformRevenue": "Platform Revenue",
+    "connectedAccounts": "{count} connected accounts"
+  },
+  "sections": {
+    "revenue": "Revenue",
+    "performanceOverview": "Performance overview",
+    "performanceDescription": "Contract and platform trends — last 6 months",
+    "revenueOverview": "Revenue Overview",
+    "revenueOverviewDescription": "Contract & platform revenue — last 6 months",
+    "creatorGrowth": "Creator Growth",
+    "creatorGrowthDescription": "Cumulative creators on roster — last 6 months",
+    "ai": "AI",
+    "aiWorkspace": "AI workspace",
+    "aiWorkspaceDescription": "Deep-dive assistants for growth, partnerships, and revenue planning",
+    "openAiWorkspace": "Open AI workspace",
+    "team": "Team",
+    "creatorsAndActivity": "Creators and activity",
+    "creatorsAndActivityDescription": "Roster highlights and recent workspace updates",
+    "contracts": "Contracts",
+    "renewalsOverdue": "Renewals and overdue items",
+    "renewalsOverdueDescription": "Deals that need follow-up before or after their end date"
+  },
+  "charts": {
+    "contracts": "Contracts",
+    "platform": "Platform",
+    "creators": "Creators",
+    "noRevenueTrend": "No revenue trend yet",
+    "noRevenueTrendDescription": "Add contracts or connect platforms to see trends",
+    "noCreatorsYet": "No creators yet",
+    "noCreatorsDescription": "Add creators to your roster to see growth over time"
+  },
+  "aiAssistants": {
+    "growthCoach": "Growth Coach",
+    "growthCoachDescription": "Analyze performance and recommend growth strategies",
+    "sponsorshipHunter": "Sponsorship Hunter",
+    "sponsorshipHunterDescription": "Match creators with high-fit sponsor opportunities",
+    "contentStrategist": "Content Strategist",
+    "contentStrategistDescription": "Optimize content mix across platforms",
+    "revenueOptimizer": "Revenue Optimizer",
+    "revenueOptimizerDescription": "Forecast earnings and contract pipeline value"
+  },
+  "widgets": {
+    "topCreators": "Top Creators",
+    "topCreatorsDescription": "Your roster leaderboard",
+    "viewAll": "View all",
+    "noCreatorsYet": "No creators yet",
+    "noCreatorsDescription": "Add your first creator to get started",
+    "recentActivity": "Recent Activity",
+    "recentActivityDescription": "Latest updates across your workspace",
+    "noActivityYet": "No activity yet",
+    "noActivityDescription": "Create a contract or opportunity to get started",
+    "upcomingExpirations": "Upcoming Expirations",
+    "upcomingExpirationsDescription": "Contracts ending within 45 days",
+    "overdueContracts": "Overdue Contracts",
+    "overdueContractsDescription": "Past end date, still active",
+    "endedOn": "Ended {date}"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "pageTitle": "AI Workspace",
+  "pageDescription": "Growth intelligence and sponsorship matching assistants",
+  "assistants": {
+    "growthCoach": "Growth Coach",
+    "sponsorshipHunter": "Sponsorship Hunter",
+    "revenueOptimizer": "Revenue Optimizer"
+  },
+  "actions": {
+    "analyzePerformance": "Analyze performance",
+    "growthRecommendations": "Growth recommendations",
+    "contentStrategy": "Content strategy",
+    "sponsorshipTargets": "Sponsorship targets",
+    "matchCreators": "Match creators",
+    "matchSponsors": "Match sponsors",
+    "rankOpportunities": "Rank opportunities",
+    "forecastEarnings": "Forecast earnings",
+    "forecastCampaigns": "Forecast campaigns",
+    "predictContractValue": "Predict contract value"
+  },
+  "metrics": {
+    "aiRequests": "AI requests",
+    "remaining": "{count} remaining this month",
+    "unlimited": "Unlimited"
+  },
+  "question": {
+    "placeholder": "Ask a follow-up question...",
+    "send": "Send",
+    "maxLength": "Maximum {max} characters"
+  },
+  "modes": {
+    "live": "Live",
+    "demo": "Demo"
+  },
+  "empty": {
+    "selectAssistant": "Select an assistant to get started",
+    "selectAssistantDescription": "Choose a tool above to analyze creators, match sponsors, or forecast revenue."
+  },
+  "upgrade": {
+    "title": "Upgrade to unlock AI",
+    "description": "AI assistants are available on Growth and Agency plans."
+  }
+}

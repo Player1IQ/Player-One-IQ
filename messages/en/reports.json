@@ -1,0 +1,18 @@
+{
+  "pageTitle": "Reports",
+  "pageDescription": "Monthly performance and revenue analytics",
+  "export": "Export report",
+  "print": "Print report",
+  "period": "Reporting period",
+  "sections": {
+    "summary": "Executive summary",
+    "revenue": "Revenue",
+    "creators": "Creators",
+    "contracts": "Contracts",
+    "opportunities": "Opportunities"
+  },
+  "empty": {
+    "noData": "No report data for this period",
+    "noDataDescription": "Add creators, contracts, or revenue entries to generate reports."
+  }
+}

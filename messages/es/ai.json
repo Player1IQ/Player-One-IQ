@@ -1,0 +1,43 @@
+{
+  "pageTitle": "Espacio de IA",
+  "pageDescription": "Inteligencia de crecimiento y asistentes de matching de patrocinios",
+  "assistants": {
+    "growthCoach": "Coach de crecimiento",
+    "sponsorshipHunter": "Cazador de patrocinios",
+    "revenueOptimizer": "Optimizador de ingresos"
+  },
+  "actions": {
+    "analyzePerformance": "Analizar rendimiento",
+    "growthRecommendations": "Recomendaciones de crecimiento",
+    "contentStrategy": "Estrategia de contenido",
+    "sponsorshipTargets": "Objetivos de patrocinio",
+    "matchCreators": "Emparejar creadores",
+    "matchSponsors": "Emparejar patrocinadores",
+    "rankOpportunities": "Clasificar oportunidades",
+    "forecastEarnings": "Proyectar ganancias",
+    "forecastCampaigns": "Proyectar campañas",
+    "predictContractValue": "Predecir valor de contrato"
+  },
+  "metrics": {
+    "aiRequests": "Solicitudes de IA",
+    "remaining": "{count} restantes este mes",
+    "unlimited": "Ilimitado"
+  },
+  "question": {
+    "placeholder": "Haz una pregunta de seguimiento...",
+    "send": "Enviar",
+    "maxLength": "Máximo {max} caracteres"
+  },
+  "modes": {
+    "live": "En vivo",
+    "demo": "Demo"
+  },
+  "empty": {
+    "selectAssistant": "Selecciona un asistente para empezar",
+    "selectAssistantDescription": "Elige una herramienta arriba para analizar creadores, emparejar patrocinadores o proyectar ingresos."
+  },
+  "upgrade": {
+    "title": "Mejora tu plan para desbloquear IA",
+    "description": "Los asistentes de IA están disponibles en los planes Growth y Agency."
+  }
+}

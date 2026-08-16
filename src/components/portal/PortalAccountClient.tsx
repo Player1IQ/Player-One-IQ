@@ -38,7 +38,8 @@ export function PortalAccountClient({
   avatarUrl,
   isWorkspaceFounder = false,
 }: PortalAccountClientProps) {
-  const t = useTranslations("language");
+  const tLang = useTranslations("language");
+  const t = useTranslations("portal.account");
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 animate-fade-in">
@@ -47,15 +48,13 @@ export function PortalAccountClient({
         className="inline-flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-accent-light"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to portal
+        {t("backToPortal")}
       </Link>
 
       <Card>
         <CardHeader>
-          <CardTitle>Your profile</CardTitle>
-          <CardDescription>
-            Add a photo so your agency and teammates can recognize you.
-          </CardDescription>
+          <CardTitle>{t("profileTitle")}</CardTitle>
+          <CardDescription>{t("profileDescription")}</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <ProfilePhotoUpload
@@ -71,42 +70,42 @@ export function PortalAccountClient({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-4 w-4 text-accent-light" />
-            {t("portalTitle")}
+            {tLang("portalTitle")}
           </CardTitle>
-          <CardDescription>{t("portalDescription")}</CardDescription>
+          <CardDescription>{tLang("portalDescription")}</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <LanguageSwitcher />
-          <p className="mt-3 text-xs text-gray-600">{t("rolloutNote")}</p>
+          <p className="mt-3 text-xs text-gray-600">{tLang("rolloutNote")}</p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Account</CardTitle>
+          <CardTitle>{t("accountTitle")}</CardTitle>
           <CardDescription>
             {isWorkspaceFounder
-              ? "You manage this solo creator workspace."
-              : `Your portal access is managed by ${organizationName}`}
+              ? t("accountDescriptionFounder")
+              : t("accountDescriptionManaged", { organizationName })}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
-            <p className="text-xs uppercase tracking-wider text-gray-500">Signed in as</p>
+            <p className="text-xs uppercase tracking-wider text-gray-500">{t("signedInAs")}</p>
             <p className="mt-1 text-sm font-medium text-white">{email}</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-gray-500">
                 <Building2 className="h-3.5 w-3.5" />
-                Organization
+                {t("organization")}
               </div>
               <p className="mt-1 text-sm font-medium text-white">{organizationName}</p>
             </div>
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
               <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-gray-500">
                 <Shield className="h-3.5 w-3.5" />
-                Role
+                {t("role")}
               </div>
               <p className="mt-1 text-sm font-medium text-white">{roleLabel}</p>
             </div>
@@ -114,7 +113,7 @@ export function PortalAccountClient({
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
             <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-gray-500">
               <User className="h-3.5 w-3.5" />
-              Linked profile
+              {t("linkedProfile")}
             </div>
             <Link
               href={profileHref}
@@ -129,10 +128,8 @@ export function PortalAccountClient({
       {isWorkspaceFounder ? (
         <Card>
           <CardHeader>
-            <CardTitle>Workspace</CardTitle>
-            <CardDescription>
-              Connect your AI provider and manage your plan.
-            </CardDescription>
+            <CardTitle>{t("workspaceTitle")}</CardTitle>
+            <CardDescription>{t("workspaceDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 pt-0 sm:grid-cols-2">
             <Link
@@ -141,11 +138,9 @@ export function PortalAccountClient({
             >
               <div className="flex items-center gap-2 text-sm font-medium text-white">
                 <Sparkles className="h-4 w-4 text-accent-light" />
-                AI integration
+                {t("aiIntegration")}
               </div>
-              <p className="mt-2 text-xs text-gray-500">
-                Connect OpenAI or Claude for live Coach and content analysis.
-              </p>
+              <p className="mt-2 text-xs text-gray-500">{t("aiIntegrationDescription")}</p>
             </Link>
             <Link
               href="/billing"
@@ -153,11 +148,9 @@ export function PortalAccountClient({
             >
               <div className="flex items-center gap-2 text-sm font-medium text-white">
                 <CreditCard className="h-4 w-4 text-accent-light" />
-                Billing
+                {t("billing")}
               </div>
-              <p className="mt-2 text-xs text-gray-500">
-                View your plan, trial status, and usage limits.
-              </p>
+              <p className="mt-2 text-xs text-gray-500">{t("billingDescription")}</p>
             </Link>
           </CardContent>
         </Card>

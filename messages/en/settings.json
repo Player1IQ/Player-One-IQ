@@ -1,0 +1,40 @@
+{
+  "pageTitle": "Settings",
+  "pageDescription": "Configure your workspace preferences",
+  "noPermission": "You do not have permission to view settings.",
+  "profile": {
+    "title": "Your profile",
+    "description": "Add a photo so teammates can recognize you across the workspace."
+  },
+  "organization": {
+    "title": "Organization",
+    "description": "Workspace name and type shown across your dashboard.",
+    "teamMembers": "Team members",
+    "workspaceSince": "Workspace since"
+  },
+  "branding": {
+    "title": "Branding",
+    "description": "Upload your agency logo for the sidebar and workspace."
+  },
+  "teamInvites": {
+    "title": "Team & invites",
+    "description": "Invite colleagues and manage roles from the Team page.",
+    "openTeamSettings": "Open Team settings"
+  },
+  "gettingStarted": {
+    "title": "Getting started",
+    "description": "Re-run setup and the in-portal guided walkthrough without signing up again."
+  },
+  "billing": {
+    "title": "Billing & subscription",
+    "description": "View your plan, usage limits, and upgrade options.",
+    "openBilling": "Open Billing"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "New message toasts appear in the bottom-right while you work in the dashboard. Unread counts update in the sidebar automatically."
+  },
+  "development": {
+    "title": "Development"
+  }
+}
