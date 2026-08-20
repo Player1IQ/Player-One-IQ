@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { defaultLocale, isAppLocale } from "@/i18n/config";
 import { LegalPageLayout, LegalSection } from "@/components/legal/LegalPageLayout";
 import {
   LEGAL_COMPANY_NAME,
@@ -74,11 +75,24 @@ async function renderLegalDocument(documentKey: "privacy" | "terms") {
   );
 }
 
+async function getDraftTranslationNotice(): Promise<string | undefined> {
+  const resolvedLocale = await getLocale();
+  const locale = isAppLocale(resolvedLocale) ? resolvedLocale : defaultLocale;
+  if (locale !== "es") return undefined;
+
+  const t = await getTranslations("legal");
+  const notice = t("draftTranslationNotice").trim();
+  return notice.length > 0 ? notice : undefined;
+}
+
 /** Legal copy is loaded from message files — Spanish requires separate legal review before shipping. */
 export async function PrivacyPolicyContent() {
   const t = await getTranslations("legal.privacy");
   return (
-    <LegalPageLayout title={t("title")}>
+    <LegalPageLayout
+      title={t("title")}
+      draftTranslationNotice={await getDraftTranslationNotice()}
+    >
       {await renderLegalDocument("privacy")}
     </LegalPageLayout>
   );
@@ -88,7 +102,10 @@ export async function PrivacyPolicyContent() {
 export async function TermsOfServiceContent() {
   const t = await getTranslations("legal.terms");
   return (
-    <LegalPageLayout title={t("title")}>
+    <LegalPageLayout
+      title={t("title")}
+      draftTranslationNotice={await getDraftTranslationNotice()}
+    >
       {await renderLegalDocument("terms")}
     </LegalPageLayout>
   );

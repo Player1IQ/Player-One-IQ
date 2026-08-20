@@ -1,6 +1,7 @@
 {
   "_legalReviewRequired": true,
   "_draftNotice": "DRAFT — requires legal-context review before shipping. Do not treat as final translation.",
+  "draftTranslationNotice": "Traducción preliminar: este texto aún no ha completado la revisión legal. No debe considerarse una traducción final. La versión en inglés prevalece hasta que se complete la revisión.",
   "privacy": {
     "title": "Política de privacidad",
     "metaDescription": "Política de privacidad de Player One IQ, incluyendo cómo recopilamos, usamos, almacenamos y protegemos datos de cuenta y conexiones de plataforma.",
