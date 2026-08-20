@@ -35,22 +35,93 @@
     "agencySubtitle": "Choose creator/player or organization type to get started"
   },
   "wizard": {
+    "accountSetup": "Account setup",
+    "stepProgress": "Step {current} of {total} · {stepLabel}",
+    "oauthConnected": "{platform} connected successfully.",
     "steps": {
       "welcome": "Welcome",
       "connect": "Connect platforms",
       "finish": "Ready to go"
     },
-    "welcomeTitle": "Welcome{userName, select, other {, {userName}}}!",
-    "welcomeSubtitle": "Let's get your workspace set up in a few quick steps.",
-    "connectTitle": "Connect your platforms",
-    "connectSubtitle": "Link accounts to unlock analytics, revenue tracking, and personalized coaching.",
-    "finishTitle": "You're all set",
-    "finishSubtitle": "Your workspace is ready. Head to the dashboard to get started.",
+    "welcome": {
+      "creatorTitle": "Welcome, {userName}",
+      "creatorTitleFallback": "Welcome to your creator portal",
+      "creatorBody": "Player One IQ helps you grow your brand, connect platforms, discover sponsorship opportunities, and manage deals in one place. This quick setup takes about two minutes.",
+      "creatorBullets": [
+        "Connect your social platforms for growth analytics",
+        "Browse and apply to sponsorship opportunities",
+        "Track deliverables, contracts, and earnings"
+      ],
+      "sponsorTitle": "Welcome, {userName}",
+      "sponsorTitleFallback": "Welcome to your sponsor workspace",
+      "sponsorBody": "Run campaigns, review creators, manage contracts, and coordinate partnerships from a single portal built for brand teams.",
+      "sponsorBullets": [
+        "Launch and manage sponsorship campaigns",
+        "Review contracts and creator deliverables",
+        "Message partners without leaving the portal"
+      ],
+      "agencyTitle": "Welcome, {userName}",
+      "agencyTitleFallback": "Welcome to Player One IQ",
+      "agencyBody": "Manage creators, sponsors, contracts, opportunities, and team workflows from one premium workspace. Let's walk through the essentials.",
+      "agencyBullets": [
+        "Organize creators and sponsors in one roster",
+        "Post opportunities and manage deal flow",
+        "Invite your team with role-based access"
+      ]
+    },
+    "connect": {
+      "title": "Connect your platforms",
+      "subtitle": "Link YouTube, Twitch, Instagram, or TikTok to unlock growth analytics, revenue tracking, and a stronger creator profile for sponsors.",
+      "oauthHeading": "One-click OAuth connections",
+      "betaNote": "During beta, YouTube uses Google sign-in. If Google blocks access, your workspace admin must add your Gmail as a Google OAuth test user. TikTok requires Login Kit to be configured for this app.",
+      "profileLink": "You can add more platforms or enter handles manually later from <link>your creator profile</link>.",
+      "linkingFallbackTitle": "Connect your platforms",
+      "linkingFallbackBody": "Your creator profile is still linking. You can connect platforms from your portal profile right after setup."
+    },
+    "finish": {
+      "title": "You're all set",
+      "body": "Your workspace is ready. When you enter your {destination}, we'll walk you through each area with a quick guided tour — highlighting where to find opportunities, messages, contracts, and more.",
+      "creatorPortal": "creator portal",
+      "sponsorPortal": "sponsor portal",
+      "dashboard": "dashboard"
+    },
+    "footer": {
+      "helpPrefix": "Need help later? Visit",
+      "accountLink": "Account",
+      "helpMiddle": "from your sidebar, or",
+      "startOver": "start the guide over",
+      "helpSuffix": "."
+    },
     "back": "Back",
-    "next": "Next",
-    "finish": "Go to dashboard",
-    "completing": "Finishing setup...",
+    "continue": "Continue",
+    "completing": "Finishing...",
     "skipForNow": "Skip for now"
+  },
+  "organizationSetupForm": {
+    "sponsorHint": "Tell us about your brand to personalize your sponsor workspace.",
+    "creatorHint": "Set up your creator profile to access growth tools, the open marketplace, and sponsorship opportunities.",
+    "agencyHint": "Tell us about your organization to personalize your workspace.",
+    "supabaseNotConfigured": "Supabase is not configured. Add your credentials to .env.local and restart the server.",
+    "mustBeSignedInCreator": "You must be signed in to complete setup.",
+    "mustBeSignedInOrg": "You must be signed in to set up your organization.",
+    "companyName": "Company name",
+    "companyPlaceholder": "Acme Energy Drinks",
+    "creatorName": "Creator / player name",
+    "creatorPlaceholder": "Your display name or gamertag",
+    "orgName": "Organization name",
+    "orgPlaceholder": "Acme Gaming Agency",
+    "accountType": "Account type",
+    "orgType": "Organization type",
+    "primaryPlatform": "Primary platform",
+    "settingUpCreator": "Setting up your creator portal...",
+    "settingUp": "Setting up...",
+    "enterPortal": "Enter creator portal",
+    "completeSetup": "Complete setup"
+  },
+  "inviteExtra": {
+    "createAccount": "Create account",
+    "signInHint": "Already tried signing up? Use <signInLink>Sign in</signInLink> instead — signup sends a confirmation email and can hit rate limits during testing.",
+    "emailMismatchDetail": "You're signed in as {userEmail}, but this invite was sent to {inviteEmail}. Sign out and sign in with the correct account."
   },
   "founding": {
     "heroTitle": "Join the Founding Roster",

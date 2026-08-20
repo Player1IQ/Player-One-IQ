@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Building2, Gamepad2, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -22,6 +23,7 @@ export function OrganizationSetupForm({
 }: {
   accountType?: SignupAccountType;
 }) {
+  const t = useTranslations("onboarding.organizationSetupForm");
   const router = useRouter();
   const isSponsor = accountType === "sponsor";
   const typeOptions = isSponsor
@@ -47,9 +49,7 @@ export function OrganizationSetupForm({
     if (isCreatorPlayer) {
       const supabase = createClient();
       if (!supabase) {
-        setError(
-          "Supabase is not configured. Add your credentials to .env.local and restart the server."
-        );
+        setError(t("supabaseNotConfigured"));
         setLoading(false);
         return;
       }
@@ -59,7 +59,7 @@ export function OrganizationSetupForm({
       } = await supabase.auth.getUser();
 
       if (!user) {
-        setError("You must be signed in to complete setup.");
+        setError(t("mustBeSignedInCreator"));
         setLoading(false);
         router.push("/login");
         return;
@@ -94,9 +94,7 @@ export function OrganizationSetupForm({
 
     const supabase = createClient();
     if (!supabase) {
-      setError(
-        "Supabase is not configured. Add your credentials to .env.local and restart the server."
-      );
+      setError(t("supabaseNotConfigured"));
       setLoading(false);
       return;
     }
@@ -106,7 +104,7 @@ export function OrganizationSetupForm({
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setError("You must be signed in to set up your organization.");
+      setError(t("mustBeSignedInOrg"));
       setLoading(false);
       router.push("/login");
       return;
@@ -162,10 +160,10 @@ export function OrganizationSetupForm({
           )}
           <p className="text-sm text-gray-300">
             {isSponsor
-              ? "Tell us about your brand to personalize your sponsor workspace."
+              ? t("sponsorHint")
               : isCreatorPlayer
-                ? "Set up your creator profile to access growth tools, the open marketplace, and sponsorship opportunities."
-                : "Tell us about your organization to personalize your workspace."}
+                ? t("creatorHint")
+                : t("agencyHint")}
           </p>
         </div>
       </div>
@@ -179,18 +177,18 @@ export function OrganizationSetupForm({
       <AuthInput
         label={
           isSponsor
-            ? "Company name"
+            ? t("companyName")
             : isCreatorPlayer
-              ? "Creator / player name"
-              : "Organization name"
+              ? t("creatorName")
+              : t("orgName")
         }
         type="text"
         placeholder={
           isSponsor
-            ? "Acme Energy Drinks"
+            ? t("companyPlaceholder")
             : isCreatorPlayer
-              ? "Your display name or gamertag"
-              : "Acme Gaming Agency"
+              ? t("creatorPlaceholder")
+              : t("orgPlaceholder")
         }
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -203,7 +201,7 @@ export function OrganizationSetupForm({
             htmlFor="org-type"
             className="mb-1.5 block text-sm font-medium text-gray-300"
           >
-            {isCreatorPlayer ? "Account type" : "Organization type"}
+            {isCreatorPlayer ? t("accountType") : t("orgType")}
           </label>
           <select
             id="org-type"
@@ -226,7 +224,7 @@ export function OrganizationSetupForm({
             htmlFor="creator-platform"
             className="mb-1.5 block text-sm font-medium text-gray-300"
           >
-            Primary platform
+            {t("primaryPlatform")}
           </label>
           <select
             id="creator-platform"
@@ -253,12 +251,12 @@ export function OrganizationSetupForm({
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            {isCreatorPlayer ? "Setting up your creator portal..." : "Setting up..."}
+            {isCreatorPlayer ? t("settingUpCreator") : t("settingUp")}
           </>
         ) : isCreatorPlayer ? (
-          "Enter creator portal"
+          t("enterPortal")
         ) : (
-          "Complete setup"
+          t("completeSetup")
         )}
       </button>
     </form>

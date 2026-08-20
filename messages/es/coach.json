@@ -251,5 +251,32 @@
       "estimatedImpact": "Decisiones basadas en datos",
       "actionLabel": "Gestionar creadores"
     }
+  },
+  "activation": {
+    "title": "¿Quieres coaching más personalizado?",
+    "description": "Opcional — responde unas preguntas rápidas sobre tus metas y ritmo de publicación. Las combinaremos con tus métricas reales para misiones y tips a medida.",
+    "button": "Personalizar mi Coach"
+  },
+  "onboardingModal": {
+    "title": "Personalizar Creator Coach",
+    "stepProgress": "Paso {current} de {total} · {label}",
+    "closeAria": "Cerrar onboarding",
+    "steps": {
+      "goal": "Meta",
+      "content": "Contenido",
+      "schedule": "Schedule",
+      "monetization": "Monetización",
+      "challenge": "Desafío"
+    },
+    "goalPrompt": "¿Cuál es tu prioridad principal ahora? Afinaremos misiones y tips en torno a ella.",
+    "contentPrompt": "¿En qué tipo de contenido te enfocas?",
+    "schedulePrompt": "¿Qué días sueles publicar? Elige al menos dos para rastrear tu ritmo.",
+    "monetizationPrompt": "¿Cómo te interesa monetizar? Selecciona todas las que apliquen.",
+    "challengePrompt": "¿Cuál es tu mayor desafío ahora? (opcional)",
+    "challengePlaceholder": "ej. mantener consistencia, conseguir patrocinadores, crecer en TikTok...",
+    "chooseGoalError": "Elige una meta principal para continuar.",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "activate": "Activar Coach personalizado"
   }
 }

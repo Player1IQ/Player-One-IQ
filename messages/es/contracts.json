@@ -45,5 +45,27 @@
     "noMatchingDescription": "Prueba otra búsqueda, estado o filtro de resumen."
   },
   "showing": "Mostrando {filtered} de {total} contratos",
-  "showingDeals": "Mostrando {filtered} de {total} deals"
+  "showingDeals": "Mostrando {filtered} de {total} deals",
+  "modal": {
+    "editTitle": "Editar contrato",
+    "createTitle": "Nuevo contrato",
+    "needBoth": "Agrega creadores y patrocinadores antes de crear un contrato.",
+    "needCreators": "Agrega al menos un creador antes de crear un contrato.",
+    "needSponsors": "Agrega al menos un patrocinador antes de crear un contrato.",
+    "contractName": "Nombre del contrato",
+    "contractNamePlaceholder": "Partnership de stream Q2",
+    "creator": "Creador",
+    "selectCreator": "Seleccionar creador",
+    "sponsor": "Patrocinador",
+    "selectSponsor": "Seleccionar patrocinador",
+    "value": "Valor del contrato",
+    "status": "Estado",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "deliverables": "Entregables",
+    "deliverablesPlaceholder": "Describe los entregables...",
+    "notes": "Notas",
+    "notesPlaceholder": "Notas internas...",
+    "saving": "Guardando..."
+  }
 }

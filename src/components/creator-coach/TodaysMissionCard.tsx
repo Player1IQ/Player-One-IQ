@@ -16,10 +16,10 @@ import {
   setLocalMissionState,
 } from "@/lib/creator-coach/client-state";
 import type { CoachContext } from "@/lib/creator-coach/types";
-import { useMissionText } from "@/lib/i18n/coach-text";
+import { useMissionText, useCoachGreeting } from "@/lib/i18n/coach-text";
 
 interface TodaysMissionCardProps {
-  greeting: string;
+  displayName: string;
   mission: DailyMission;
   progressPercent: number;
   stateId: string | null;
@@ -28,7 +28,7 @@ interface TodaysMissionCardProps {
 }
 
 export function TodaysMissionCard({
-  greeting,
+  displayName,
   mission,
   progressPercent: serverProgressPercent,
   stateId,
@@ -36,6 +36,7 @@ export function TodaysMissionCard({
   onSnapshotUpdate,
 }: TodaysMissionCardProps) {
   const t = useTranslations("coach.mission");
+  const greeting = useCoachGreeting(displayName);
   const missionText = useMissionText(mission, coachContext);
 
   function applyMissionText(source: DailyMission): DailyMission {

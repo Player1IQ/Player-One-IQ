@@ -1,0 +1,22 @@
+{
+  "teamInvite": {
+    "subject": "Estás invitado a unirte a {organizationName}",
+    "subjectResend": "Nueva invitación para unirte a {organizationName}",
+    "heading": "Invitación al equipo",
+    "intro": "Has sido invitado a unirte a {organizationName} en Player One IQ.",
+    "introResend": "Aquí tienes un nuevo enlace de invitación para unirte a {organizationName} en Player One IQ.",
+    "role": "Rol",
+    "invitedBy": "Invitado por",
+    "acceptButton": "Aceptar invitación",
+    "copyLink": "O copia este enlace en tu navegador:",
+    "expires": "Este enlace expira en 7 días.",
+    "ignore": "Si no esperabas esta invitación, puedes ignorar este correo.",
+    "notConfigured": "El correo de invitación no está configurado. Agrega RESEND_API_KEY e INVITE_EMAIL_FROM."
+  },
+  "scheduleInvite": {
+    "subject": "Estás invitado a un bloque de schedule en Player One IQ",
+    "heading": "Invitación de schedule",
+    "intro": "Has sido invitado a un bloque de schedule.",
+    "notConfigured": "El correo de invitación de schedule no está configurado."
+  }
+}

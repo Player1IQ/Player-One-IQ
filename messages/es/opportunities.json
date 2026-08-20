@@ -109,5 +109,29 @@
       "closed": "Cerrada",
       "hideMessage": "Ocultar mensaje"
     }
+  },
+  "modal": {
+    "editTitle": "Editar oportunidad",
+    "createTitle": "Nueva oportunidad",
+    "title": "Título",
+    "titlePlaceholder": "Campaña de patrocinio de verano",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Describe la oportunidad...",
+    "sponsor": "Patrocinador",
+    "selectSponsor": "Seleccionar patrocinador",
+    "needActiveSponsor": "Agrega un patrocinador activo antes de crear una oportunidad.",
+    "budget": "Presupuesto ($)",
+    "deadline": "Fecha límite de aplicación",
+    "status": "Estado",
+    "category": "Categoría",
+    "platform": "Plataforma",
+    "deliverables": "Entregables",
+    "deliverablesPlaceholder": "Lista los entregables requeridos...",
+    "marketplaceListing": "Publicar en marketplace abierto",
+    "marketplaceListingHint": "Cuando esté activo, creadores de otras organizaciones pueden descubrir y aplicar a esta oportunidad.",
+    "cancel": "Cancelar",
+    "saveChanges": "Guardar cambios",
+    "createOpportunity": "Crear oportunidad",
+    "saving": "Guardando..."
   }
 }

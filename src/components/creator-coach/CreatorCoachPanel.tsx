@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useCoachGreeting } from "@/lib/i18n/coach-text";
 import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
 import type { CoachProfile } from "@/lib/creator-coach/profile-types";
 import {
@@ -32,6 +33,7 @@ export function CreatorCoachPanel({
   showSectionHeader = true,
 }: CreatorCoachPanelProps) {
   const t = useTranslations("coach.panel");
+  const greeting = useCoachGreeting(snapshot.displayName);
   const router = useRouter();
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [localDismissed, setLocalDismissed] = useState<string[]>([]);
@@ -117,8 +119,8 @@ export function CreatorCoachPanel({
           title={t("sectorTitle")}
           description={
             coachProfile?.onboardingCompleted
-              ? t("descriptionPersonalized", { greeting: snapshot.greeting })
-              : t("descriptionDefault", { greeting: snapshot.greeting })
+              ? t("descriptionPersonalized", { greeting })
+              : t("descriptionDefault", { greeting })
           }
         />
       ) : null}

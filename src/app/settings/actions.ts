@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrganizationId } from "@/lib/organization/queries";
 import { organizationTypes } from "@/lib/organization";
 import { requireSettingsManageAccess } from "@/lib/permissions";
+import { getActionErrors } from "@/lib/i18n/action-errors";
 import {
   ORG_ASSETS_BUCKET,
   buildOrgLogoPath,
@@ -20,22 +21,23 @@ export interface OrganizationSettingsInput {
 }
 
 export async function uploadOrganizationLogo(formData: FormData) {
+  const te = await getActionErrors();
   const permError = await requireSettingsManageAccess();
   if (permError) return permError;
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Please choose an image to upload." };
+    return { error: te("chooseImage") };
   }
 
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const organizationId = await getOrganizationId();
-  if (!organizationId) return { error: "Organization not found." };
+  if (!organizationId) return { error: te("organizationNotFound") };
 
   const extension = getExtensionFromMime(file.type);
-  if (!extension) return { error: "Unsupported image type." };
+  if (!extension) return { error: te("unsupportedImageType") };
 
   const { data: existingOrg } = await supabase
     .from("organizations")
@@ -108,21 +110,22 @@ export async function removeOrganizationLogo() {
 }
 
 export async function updateOrganizationSettings(input: OrganizationSettingsInput) {
+  const te = await getActionErrors();
   const permError = await requireSettingsManageAccess();
   if (permError) return permError;
 
   const name = input.name.trim();
-  if (!name) return { error: "Organization name is required." };
+  if (!name) return { error: te("orgNameRequired") };
 
   if (!organizationTypes.includes(input.type as (typeof organizationTypes)[number])) {
-    return { error: "Invalid organization type." };
+    return { error: te("invalidOrgType") };
   }
 
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const organizationId = await getOrganizationId();
-  if (!organizationId) return { error: "Organization not found." };
+  if (!organizationId) return { error: te("organizationNotFound") };
 
   const { error } = await supabase
     .from("organizations")

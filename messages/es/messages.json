@@ -49,5 +49,30 @@
     "noMessages": "Aún no hay mensajes",
     "noMessagesDescription": "Envía el primer mensaje para iniciar esta conversación.",
     "viewRelated": "Ver {type}"
+  },
+  "modals": {
+    "newConversation": "Nueva conversación",
+    "directMessage": "Mensaje directo",
+    "groupChat": "Chat grupal",
+    "noContactsPortal": "Aún no hay contactos. Cuando estés conectado con una agencia o patrocinador, podrás escribirles directamente aquí.",
+    "noContactsStaff": "Aún no hay otros miembros del equipo disponibles.",
+    "inviteHint": "Invita colegas desde la página de Equipo y pídeles que acepten la invitación antes de iniciar una conversación.",
+    "teamPage": "Página de equipo",
+    "agencyContact": "Contacto de agencia",
+    "teamMember": "Miembro del equipo",
+    "selectMember": "Selecciona un miembro del equipo",
+    "groupName": "Nombre del grupo",
+    "groupNamePlaceholder": "ej. Planificación de campaña",
+    "members": "Miembros",
+    "membersHint": "Se te agregará automáticamente. Selecciona al menos un miembro o crea un grupo solo para notas.",
+    "startConversation": "Iniciar conversación",
+    "createGroup": "Crear grupo",
+    "selectContactError": "Selecciona un contacto de agencia para iniciar una conversación.",
+    "selectMemberError": "Selecciona al menos un miembro para el grupo.",
+    "addMembersTitle": "Agregar miembros",
+    "addMembersDescription": "Selecciona miembros del equipo para agregar a esta conversación.",
+    "addMembersEmpty": "Todos en tu equipo ya están en esta conversación.",
+    "addMembersSubmit": "Agregar seleccionados",
+    "adding": "Agregando..."
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, X } from "lucide-react";
 import type { OrgUser } from "@/lib/messages";
 
@@ -19,6 +20,8 @@ export function AddMembersModal({
   users,
   onSubmit,
 }: AddMembersModalProps) {
+  const t = useTranslations("messages.modals");
+  const tRoot = useTranslations();
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -59,7 +62,7 @@ export function AddMembersModal({
       />
       <div className="relative w-full max-w-md rounded-xl border border-border bg-surface-raised shadow-2xl">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold text-white">Add members</h2>
+          <h2 className="text-lg font-semibold text-white">{t("addMembersTitle")}</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-gray-400 hover:text-gray-200"
@@ -76,9 +79,7 @@ export function AddMembersModal({
           ) : null}
 
           {users.length === 0 ? (
-            <p className="text-sm text-gray-400">
-              Everyone on your team is already in this conversation.
-            </p>
+            <p className="text-sm text-gray-400">{t("addMembersEmpty")}</p>
           ) : (
             <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-white/[0.06] p-2">
               {users.map((user) => (
@@ -111,7 +112,7 @@ export function AddMembersModal({
               onClick={onClose}
               className="rounded-lg px-4 py-2 text-sm text-gray-400"
             >
-              Cancel
+              {tRoot("buttons.cancel")}
             </button>
             <button
               type="submit"
@@ -119,7 +120,7 @@ export function AddMembersModal({
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Add selected
+              {loading ? t("adding") : t("addMembersSubmit")}
             </button>
           </div>
         </form>

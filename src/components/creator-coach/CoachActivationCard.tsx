@@ -1,6 +1,7 @@
 "use client";
 
 import { Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 
 interface CoachActivationCardProps {
@@ -8,6 +9,8 @@ interface CoachActivationCardProps {
 }
 
 export function CoachActivationCard({ onActivate }: CoachActivationCardProps) {
+  const t = useTranslations("coach.activation");
+
   return (
     <div className="rounded-2xl border border-dashed border-accent/25 bg-accent/5 px-6 py-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -16,17 +19,12 @@ export function CoachActivationCard({ onActivate }: CoachActivationCardProps) {
             <Sparkles className="h-5 w-5 text-accent-light" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">
-              Want more personalized coaching?
-            </p>
-            <p className="mt-1 text-sm text-gray-400">
-              Optional — answer a few quick questions about your goals and posting rhythm.
-              We&apos;ll combine that with your real metrics for tailored missions and tips.
-            </p>
+            <p className="text-sm font-semibold text-white">{t("title")}</p>
+            <p className="mt-1 text-sm text-gray-400">{t("description")}</p>
           </div>
         </div>
         <Button onClick={onActivate} className="shrink-0">
-          Personalize my coach
+          {t("button")}
         </Button>
       </div>
     </div>

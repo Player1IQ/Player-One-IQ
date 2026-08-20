@@ -251,5 +251,32 @@
       "estimatedImpact": "Data-driven decisions",
       "actionLabel": "Manage creators"
     }
+  },
+  "activation": {
+    "title": "Want more personalized coaching?",
+    "description": "Optional — answer a few quick questions about your goals and posting rhythm. We'll combine that with your real metrics for tailored missions and tips.",
+    "button": "Personalize my coach"
+  },
+  "onboardingModal": {
+    "title": "Personalize Creator Coach",
+    "stepProgress": "Step {current} of {total} · {label}",
+    "closeAria": "Close onboarding",
+    "steps": {
+      "goal": "Goal",
+      "content": "Content",
+      "schedule": "Schedule",
+      "monetization": "Monetization",
+      "challenge": "Challenge"
+    },
+    "goalPrompt": "What's your top priority right now? We'll tune missions and tips around it.",
+    "contentPrompt": "What kind of content do you focus on?",
+    "schedulePrompt": "Which days do you usually publish? Pick at least two so we can track your rhythm.",
+    "monetizationPrompt": "How are you interested in monetizing? Select all that apply.",
+    "challengePrompt": "What's your biggest challenge right now? (optional)",
+    "challengePlaceholder": "e.g. staying consistent, landing sponsors, growing on TikTok...",
+    "chooseGoalError": "Choose a primary goal to continue.",
+    "back": "Back",
+    "continue": "Continue",
+    "activate": "Activate personalized coach"
   }
 }

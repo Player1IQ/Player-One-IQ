@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { X, Loader2, Sparkles, ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -21,7 +22,7 @@ interface CoachOnboardingModalProps {
   onComplete: () => void;
 }
 
-const STEPS = ["Goal", "Content", "Schedule", "Monetization", "Challenge"] as const;
+const STEP_KEYS = ["goal", "content", "schedule", "monetization", "challenge"] as const;
 
 export function CoachOnboardingModal({
   open,
@@ -29,6 +30,7 @@ export function CoachOnboardingModal({
   creatorId,
   onComplete,
 }: CoachOnboardingModalProps) {
+  const t = useTranslations("coach.onboardingModal");
   const [step, setStep] = useState(0);
   const [primaryGoal, setPrimaryGoal] = useState<CoachPrimaryGoal | null>(null);
   const [contentFocus, setContentFocus] = useState<string[]>([]);
@@ -74,7 +76,7 @@ export function CoachOnboardingModal({
 
   async function handleSubmit() {
     if (!primaryGoal) {
-      setError("Choose a primary goal to continue.");
+      setError(t("chooseGoalError"));
       return;
     }
 
@@ -107,16 +109,20 @@ export function CoachOnboardingModal({
         type="button"
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={handleClose}
-        aria-label="Close onboarding"
+        aria-label={t("closeAria")}
       />
       <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-accent/20 bg-surface shadow-glow">
         <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-accent-light" />
             <div>
-              <p className="text-sm font-semibold text-white">Personalize Creator Coach</p>
+              <p className="text-sm font-semibold text-white">{t("title")}</p>
               <p className="text-xs text-gray-500">
-                Step {step + 1} of {STEPS.length} · {STEPS[step]}
+                {t("stepProgress", {
+                  current: step + 1,
+                  total: STEP_KEYS.length,
+                  label: t(`steps.${STEP_KEYS[step]}`),
+                })}
               </p>
             </div>
           </div>
@@ -132,9 +138,7 @@ export function CoachOnboardingModal({
         <div className="max-h-[60vh] overflow-y-auto px-6 py-6">
           {step === 0 ? (
             <div className="space-y-3">
-              <p className="text-sm text-gray-400">
-                What&apos;s your top priority right now? We&apos;ll tune missions and tips around it.
-              </p>
+              <p className="text-sm text-gray-400">{t("goalPrompt")}</p>
               <div className="grid gap-2">
                 {COACH_PRIMARY_GOALS.map((goal) => (
                   <button
@@ -158,7 +162,7 @@ export function CoachOnboardingModal({
 
           {step === 1 ? (
             <div className="space-y-3">
-              <p className="text-sm text-gray-400">What kind of content do you focus on?</p>
+              <p className="text-sm text-gray-400">{t("contentPrompt")}</p>
               <div className="flex flex-wrap gap-2">
                 {COACH_CONTENT_FOCUS_OPTIONS.map((option) => (
                   <button
@@ -181,9 +185,7 @@ export function CoachOnboardingModal({
 
           {step === 2 ? (
             <div className="space-y-3">
-              <p className="text-sm text-gray-400">
-                Which days do you usually publish? Pick at least two so we can track your rhythm.
-              </p>
+              <p className="text-sm text-gray-400">{t("schedulePrompt")}</p>
               <div className="flex flex-wrap gap-2">
                 {COACH_POSTING_DAYS.map((day) => (
                   <button
@@ -206,9 +208,7 @@ export function CoachOnboardingModal({
 
           {step === 3 ? (
             <div className="space-y-3">
-              <p className="text-sm text-gray-400">
-                How are you interested in monetizing? Select all that apply.
-              </p>
+              <p className="text-sm text-gray-400">{t("monetizationPrompt")}</p>
               <div className="flex flex-wrap gap-2">
                 {COACH_MONETIZATION_OPTIONS.map((option) => (
                   <button
@@ -233,13 +233,11 @@ export function CoachOnboardingModal({
 
           {step === 4 ? (
             <div className="space-y-3">
-              <p className="text-sm text-gray-400">
-                What&apos;s your biggest challenge right now? (optional)
-              </p>
+              <p className="text-sm text-gray-400">{t("challengePrompt")}</p>
               <textarea
                 value={biggestChallenge}
                 onChange={(event) => setBiggestChallenge(event.target.value)}
-                placeholder="e.g. staying consistent, landing sponsors, growing on TikTok..."
+                placeholder={t("challengePlaceholder")}
                 rows={4}
                 className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:border-accent/40 focus:outline-none"
               />
@@ -257,21 +255,21 @@ export function CoachOnboardingModal({
             onClick={() => setStep((value) => Math.max(0, value - 1))}
           >
             <ChevronLeft className="h-4 w-4" />
-            Back
+            {t("back")}
           </Button>
-          {step < STEPS.length - 1 ? (
+          {step < STEP_KEYS.length - 1 ? (
             <Button
               size="sm"
               disabled={!canAdvance() || loading}
               onClick={() => setStep((value) => value + 1)}
             >
-              Continue
+              {t("continue")}
               <ChevronRight className="h-4 w-4" />
             </Button>
           ) : (
             <Button size="sm" disabled={!canAdvance() || loading} onClick={handleSubmit}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Activate personalized coach
+              {t("activate")}
             </Button>
           )}
         </div>

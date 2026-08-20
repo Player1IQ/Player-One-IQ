@@ -28,6 +28,7 @@ export function AcceptInviteClient({
   userEmail,
 }: AcceptInviteClientProps) {
   const t = useTranslations("onboarding.invite");
+  const tExtra = useTranslations("onboarding.inviteExtra");
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -79,11 +80,11 @@ export function AcceptInviteClient({
 
       <div className="mb-6 space-y-3 rounded-lg border border-border-subtle bg-surface p-4 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-500">Email</span>
+          <span className="text-gray-500">{t("emailLabel")}</span>
           <span className="text-gray-200">{email}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-500">Role</span>
+          <span className="text-gray-500">{t("roleLabel")}</span>
           <span className="inline-flex items-center gap-1.5 text-gray-200">
             <Shield className="h-3.5 w-3.5" />
             {roleLabels[role as keyof typeof roleLabels] ?? role}
@@ -100,44 +101,43 @@ export function AcceptInviteClient({
       {!userEmail ? (
         <div className="space-y-3">
           <p className="text-center text-sm text-gray-400">
-            Sign in with <span className="text-gray-200">{email}</span> to accept
-            this invitation.
+            {t("signInPrompt", { email })}
           </p>
           <a
             href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
             className="flex w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
           >
-            Sign in to accept
+            {t("signInButton")}
           </a>
           <a
             href={`/signup?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
             className="flex w-full items-center justify-center rounded-lg border border-border py-2.5 text-sm font-medium text-gray-300 hover:bg-surface-overlay"
           >
-            Create account
+            {tExtra("createAccount")}
           </a>
           <p className="text-center text-xs text-gray-500">
-            Already tried signing up? Use{" "}
-            <a
-              href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
-              className="text-accent-light hover:underline"
-            >
-              Sign in
-            </a>{" "}
-            instead — signup sends a confirmation email and can hit rate limits
-            during testing.
+            {tExtra.rich("signInHint", {
+              signInLink: (chunks) => (
+                <a
+                  href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
+                  className="text-accent-light hover:underline"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
           </p>
         </div>
       ) : emailMismatch ? (
         <div className="space-y-4">
           <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
-            You&apos;re signed in as {userEmail}, but this invite was sent to{" "}
-            {email}. Sign out and sign in with the correct account.
+            {tExtra("emailMismatchDetail", { userEmail, inviteEmail: email })}
           </div>
           <a
             href={`/login?redirect=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(email)}&org=${encodeURIComponent(organizationName)}`}
             className="flex w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
           >
-            Switch account
+            {t("switchAccount")}
           </a>
         </div>
       ) : (
@@ -148,7 +148,7 @@ export function AcceptInviteClient({
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white hover:bg-accent-dark disabled:opacity-50"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-          Accept invitation
+          {loading ? t("accepting") : t("acceptButton")}
         </button>
       )}
     </div>

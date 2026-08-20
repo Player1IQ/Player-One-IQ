@@ -21,6 +21,10 @@ import type ai from "./messages/en/ai.json";
 import type pages from "./messages/en/pages.json";
 import type coach from "./messages/en/coach.json";
 import type onboarding from "./messages/en/onboarding.json";
+import type founding from "./messages/en/founding.json";
+import type legal from "./messages/en/legal.json";
+import type errors from "./messages/en/errors.json";
+import type emails from "./messages/en/emails.json";
 
 type AppMessages = typeof common & {
   nav: typeof nav;
@@ -45,6 +49,10 @@ type AppMessages = typeof common & {
   pages: typeof pages;
   coach: typeof coach;
   onboarding: typeof onboarding;
+  founding: typeof founding;
+  legal: typeof legal;
+  errors: typeof errors;
+  emails: typeof emails;
 };
 
 declare module "next-intl" {

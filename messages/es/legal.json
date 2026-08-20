@@ -1,0 +1,316 @@
+{
+  "_legalReviewRequired": true,
+  "_draftNotice": "DRAFT — requires legal-context review before shipping. Do not treat as final translation.",
+  "privacy": {
+    "title": "Política de privacidad",
+    "metaDescription": "Política de privacidad de Player One IQ, incluyendo cómo recopilamos, usamos, almacenamos y protegemos datos de cuenta y conexiones de plataforma.",
+    "sectionOrder": [
+      "intro",
+      "collect",
+      "use",
+      "oauth",
+      "share",
+      "providers",
+      "retention",
+      "rights",
+      "children",
+      "international",
+      "changes",
+      "contact"
+    ],
+    "sections": {
+      "intro": {
+        "title": "1. Introducción",
+        "paragraphs": [
+          "{companyName} (\"{productName},\" \"nosotros\" o \"nuestro\") opera {websiteUrl} y aplicaciones relacionadas (el \"Servicio\"). Esta Política de privacidad explica cómo recopilamos, usamos, divulgamos y protegemos la información cuando usas el Servicio.",
+          "Al crear una cuenta o usar el Servicio, aceptas esta Política de privacidad. Si no estás de acuerdo, no uses el Servicio."
+        ]
+      },
+      "collect": {
+        "title": "2. Información que recopilamos",
+        "labeled": [
+          {
+            "label": "Información de cuenta.",
+            "text": "Al registrarte, recopilamos información como tu nombre, correo, detalles de organización, rol y credenciales de autenticación gestionadas por nuestro proveedor de identidad."
+          },
+          {
+            "label": "Datos de workspace y creador.",
+            "text": "Tú y tu equipo pueden agregar perfiles de creador, información de patrocinadores, contratos, oportunidades, mensajes, schedules, entregables y registros de negocio relacionados en tu workspace."
+          },
+          {
+            "label": "Datos de conexión de plataforma.",
+            "text": "Si conectas plataformas de creador de terceros, podemos recopilar información de perfil, identificadores de canal, analítica, estimaciones de ingresos, estado de sync y tokens OAuth necesarios para mantener la conexión."
+          },
+          {
+            "label": "Datos de TikTok Login Kit.",
+            "text": "Si conectas TikTok, podemos recibir información disponible a través de las APIs de TikTok y los scopes que autorices, que puede incluir open_id, username, display name, avatar URL y campos de perfil relacionados. Usamos esta información solo para mostrar tu cuenta conectada en el Servicio y soportar funciones de gestión de negocio de creador que solicites."
+          },
+          {
+            "label": "Otras plataformas conectadas.",
+            "text": "Datos similares pueden recopilarse al conectar YouTube, Twitch, Instagram u otras integraciones soportadas."
+          },
+          {
+            "label": "Datos de uso y técnicos.",
+            "text": "Podemos recopilar logs, información de dispositivo/navegador, dirección IP, timestamps e información de diagnóstico necesaria para operar, asegurar y mejorar el Servicio."
+          },
+          {
+            "label": "Comunicaciones.",
+            "text": "Si nos contactas, postulas a programas como el Roster Fundador, o recibes correos de soporte o producto, procesamos la información que proporcionas en esas comunicaciones."
+          }
+        ]
+      },
+      "use": {
+        "title": "3. Cómo usamos la información",
+        "listIntro": "Usamos la información para:",
+        "list": [
+          "Proveer, operar y mantener el Servicio",
+          "Autenticar usuarios y aplicar controles de acceso del workspace",
+          "Sincronizar perfiles, analítica e ingresos de plataformas conectadas",
+          "Soportar contratos, oportunidades, mensajería, schedule y reportes",
+          "Procesar suscripciones y billing cuando aplique",
+          "Enviar correos transaccionales como invitaciones y avisos de cuenta",
+          "Responder solicitudes de soporte y postulaciones al programa fundador",
+          "Monitorear rendimiento, resolver problemas y proteger contra abuso",
+          "Cumplir obligaciones legales y hacer cumplir nuestros Términos de servicio"
+        ],
+        "listOutro": "No vendemos tu información personal."
+      },
+      "oauth": {
+        "title": "4. Tokens OAuth y seguridad",
+        "paragraphs": [
+          "Cuando conectas una plataforma de terceros, los tokens de acceso OAuth y metadatos de conexión relacionados se almacenan de forma segura en nuestros servidores. Estos tokens se usan solo para realizar las integraciones que autorizas, como sync de perfil e ingresos.",
+          "Los tokens OAuth no se exponen a través de nuestras APIs públicas de cliente. El acceso a datos del workspace está protegido por autenticación, autorización y controles de seguridad de base de datos, incluyendo row-level security cuando aplique."
+        ]
+      },
+      "share": {
+        "title": "5. Cómo compartimos información",
+        "listIntro": "Podemos compartir información en las siguientes circunstancias:",
+        "labeled": [
+          {
+            "label": "Proveedores de servicio.",
+            "text": "Usamos vendors de confianza para hospedar, almacenar, enviar correo, facturar y soportar el Servicio. Estos proveedores procesan datos en nuestro nombre bajo obligaciones contractuales."
+          },
+          {
+            "label": "Dentro de tu workspace.",
+            "text": "La información que agregas a un workspace puede ser visible para otros miembros de esa organización según sus roles y permisos asignados."
+          },
+          {
+            "label": "Legal y seguridad.",
+            "text": "Podemos divulgar información si la ley, regulación, proceso legal lo requiere, o para proteger derechos, seguridad de usuarios, el público o el Servicio."
+          },
+          {
+            "label": "Transferencias de negocio.",
+            "text": "Si participamos en fusión, adquisición, financiamiento o venta de activos, la información puede transferirse como parte de esa transacción."
+          }
+        ]
+      },
+      "providers": {
+        "title": "6. Proveedores de servicio y subprocesadores",
+        "paragraphs": [
+          "Usamos proveedores de terceros para operar el Servicio. Según tu uso, estos pueden incluir:"
+        ],
+        "list": [
+          "Supabase (infraestructura de base de datos, autenticación y almacenamiento)",
+          "Vercel (hosting de aplicación)",
+          "Resend (entrega de correo transaccional)",
+          "Stripe (billing de suscripción y procesamiento de pagos)",
+          "OpenAI u otros proveedores de IA cuando las funciones de IA están habilitadas",
+          "Proveedores de plataforma que conectes, incluyendo TikTok, Google/YouTube, Twitch y Meta/Instagram"
+        ],
+        "listOutro": "Tu uso de plataformas de terceros también está sujeto a sus propias políticas de privacidad y términos."
+      },
+      "retention": {
+        "title": "7. Retención de datos",
+        "paragraphs": [
+          "Retenemos información mientras tu cuenta o workspace esté activo y según sea necesario para proveer el Servicio, cumplir obligaciones legales, resolver disputas y hacer cumplir nuestros acuerdos.",
+          "Cuando desconectas una plataforma, dejamos de usar datos nuevos de esa plataforma para syncs futuros. Cuando eliminas tu cuenta o solicitas eliminación, borramos o anonimizamos información personal en un plazo razonable, excepto donde la retención sea requerida por ley o para fines legítimos como registros de billing y logs de seguridad."
+        ]
+      },
+      "rights": {
+        "title": "8. Tus opciones y derechos",
+        "listIntro": "Puedes:",
+        "list": [
+          "Actualizar cierta información de cuenta en tu perfil o configuración",
+          "Desconectar plataformas de terceros desde la configuración de creador en cualquier momento",
+          "Solicitar acceso, corrección o eliminación de tu información personal",
+          "Optar por no recibir comunicaciones de marketing no esenciales cuando se ofrezca"
+        ],
+        "paragraphs": [
+          "Para ejercer derechos de privacidad o enviar una solicitud de datos, contáctanos en {email}. Podemos necesitar verificar tu identidad antes de cumplir una solicitud."
+        ]
+      },
+      "children": {
+        "title": "9. Privacidad de menores",
+        "paragraphs": [
+          "El Servicio no está dirigido a menores de 13 años y no recopilamos conscientemente información personal de menores de 13. Si crees que un menor nos proporcionó información personal, contáctanos y tomaremos medidas para eliminarla."
+        ]
+      },
+      "international": {
+        "title": "10. Usuarios internacionales",
+        "paragraphs": [
+          "Si accedes al Servicio desde fuera de Estados Unidos, entiendes que tu información puede procesarse y almacenarse en Estados Unidos y otros países donde operamos nosotros o nuestros proveedores. Esas ubicaciones pueden tener leyes de protección de datos diferentes a las de tu país de residencia."
+        ]
+      },
+      "changes": {
+        "title": "11. Cambios a esta política",
+        "paragraphs": [
+          "Podemos actualizar esta Política de privacidad periódicamente. Cuando lo hagamos, revisaremos la fecha de \"Última actualización\" al inicio de esta página. Si los cambios son materiales, podemos dar aviso adicional a través del Servicio o por correo cuando corresponda."
+        ]
+      },
+      "contact": {
+        "title": "12. Contáctanos",
+        "paragraphs": [
+          "Para preguntas o solicitudes de privacidad, contacta a {companyName} en {email}."
+        ]
+      }
+    }
+  },
+  "terms": {
+    "title": "Términos de servicio",
+    "metaDescription": "Términos de servicio de Player One IQ, el sistema operativo para la gestión de negocio de creadores.",
+    "sectionOrder": [
+      "agreement",
+      "description",
+      "eligibility",
+      "accounts",
+      "platforms",
+      "acceptableUse",
+      "founding",
+      "billing",
+      "ip",
+      "feedback",
+      "disclaimers",
+      "liability",
+      "indemnification",
+      "termination",
+      "governingLaw",
+      "changes",
+      "contact"
+    ],
+    "sections": {
+      "agreement": {
+        "title": "1. Acuerdo a los términos",
+        "paragraphs": [
+          "Estos Términos de servicio (\"Términos\") rigen tu acceso y uso de {websiteUrl}, aplicaciones relacionadas y servicios provistos por {companyName} (\"{productName},\" \"nosotros\" o \"nuestro\") (colectivamente, el \"Servicio\").",
+          "Al crear una cuenta, acceder o usar el Servicio, aceptas estos Términos y nuestra Política de privacidad. Si usas el Servicio en nombre de una organización, declaras que tienes autoridad para vincular a esa organización a estos Términos."
+        ]
+      },
+      "description": {
+        "title": "2. Descripción del Servicio",
+        "paragraphs": [
+          "{productName} provee software para creadores, agencias y organizaciones para gestionar operaciones de negocio de creador, incluyendo analítica, seguimiento de ingresos, contratos, partnerships, colaboración de equipo, mensajería, schedule y flujos relacionados.",
+          "El Servicio puede incluir integraciones opcionales con plataformas de terceros como TikTok, YouTube, Twitch e Instagram. Las funciones pueden variar por plan, rol y nivel de acceso al programa."
+        ]
+      },
+      "eligibility": {
+        "title": "3. Elegibilidad",
+        "paragraphs": [
+          "Debes tener al menos 18 años, o la mayoría de edad en tu jurisdicción, para usar el Servicio. Si eres menor de 18, puedes usar el Servicio solo con participación y consentimiento de un padre o tutor legal que acepte estos Términos en tu nombre.",
+          "No puedes usar el Servicio si tienes prohibido hacerlo bajo la ley aplicable o los términos de una plataforma de terceros que conectes."
+        ]
+      },
+      "accounts": {
+        "title": "4. Cuentas y seguridad",
+        "paragraphs": [
+          "Eres responsable de mantener la confidencialidad de tus credenciales de inicio de sesión y de toda actividad bajo tu cuenta. Aceptas proporcionar información precisa y mantener actualizados los detalles de tu cuenta.",
+          "Debes notificarnos prontamente en {email} si crees que tu cuenta ha sido comprometida."
+        ]
+      },
+      "platforms": {
+        "title": "5. Plataformas conectadas",
+        "paragraphs": [
+          "Si conectas plataformas de terceros al Servicio, nos autorizas a acceder y usar información de esas plataformas según sea necesario para proveer las funciones solicitadas. Declaras que tienes derecho a conectar cada cuenta y que tu uso cumple con los términos y políticas de la plataforma aplicable.",
+          "Para TikTok Login Kit y otras integraciones OAuth, sigues sujeto a los términos de desarrollador, community guidelines y políticas de privacidad del tercero. No controlamos plataformas de terceros y no somos responsables de su disponibilidad, políticas o acciones.",
+          "Puedes desconectar una plataforma en cualquier momento a través del Servicio, sujeto a cualquier retención de datos descrita en nuestra Política de privacidad."
+        ]
+      },
+      "acceptableUse": {
+        "title": "6. Uso aceptable",
+        "listIntro": "Aceptas no:",
+        "list": [
+          "Usar el Servicio para fines ilegales, fraudulentos o dañinos",
+          "Violar cualquier ley, regulación o derechos de terceros aplicables",
+          "Intentar obtener acceso no autorizado al Servicio u otras cuentas",
+          "Interferir o interrumpir la integridad o rendimiento del Servicio",
+          "Hacer ingeniería inversa o intentar extraer código fuente excepto donde la ley lo permita",
+          "Subir malware o usar el Servicio para enviar spam o contenido abusivo",
+          "Tergiversar tu identidad, afiliación o autoridad sobre cualquier cuenta conectada",
+          "Usar el Servicio para scrapear o recopilar datos fuera de integraciones autorizadas"
+        ]
+      },
+      "founding": {
+        "title": "7. Founding, beta y acceso anticipado",
+        "paragraphs": [
+          "De vez en cuando, podemos ofrecer programas founding, beta, acceso anticipado o preview. Estos programas pueden incluir disponibilidad limitada, funciones cambiantes y expectativas de feedback directo.",
+          "Las funciones de acceso anticipado se proveen para evaluación y mejora. Podemos modificar, suspender o discontinuar cualquier función en cualquier momento, especialmente durante períodos pre-launch o founding."
+        ]
+      },
+      "billing": {
+        "title": "8. Suscripciones y billing",
+        "paragraphs": [
+          "Los planes pagos, trials y términos de billing se presentan en checkout o en el Servicio. Al suscribirte, nos autorizas a nosotros y a nuestro procesador de pagos a cobrar las tarifas aplicables según el plan seleccionado.",
+          "Las tarifas generalmente no son reembolsables excepto donde la ley lo requiera o se indique expresamente lo contrario. Eres responsable de impuestos aplicables. Podemos cambiar precios o funciones del plan con aviso cuando se requiera."
+        ]
+      },
+      "ip": {
+        "title": "9. Propiedad intelectual",
+        "paragraphs": [
+          "El Servicio, incluyendo su software, diseño, branding y documentación, es propiedad de {companyName} o sus licenciantes y está protegido por leyes de propiedad intelectual. Excepto por los derechos limitados expresamente otorgados en estos Términos, no se te transfieren derechos.",
+          "Conservas la propiedad del contenido y datos que envías al Servicio. Nos otorgas una licencia limitada para hospedar, procesar, mostrar y usar ese contenido únicamente para operar y mejorar el Servicio."
+        ]
+      },
+      "feedback": {
+        "title": "10. Confidencialidad y feedback",
+        "paragraphs": [
+          "Si participas en programas founding o de acceso anticipado, puedes recibir acceso a funciones o información no pública. Aceptas no hacer mal uso de información confidencial puesta a tu disposición a través de esos programas.",
+          "Si proporcionas feedback, sugerencias o ideas, nos otorgas el derecho de usarlas sin restricción ni compensación."
+        ]
+      },
+      "disclaimers": {
+        "title": "11. Descargos de responsabilidad",
+        "paragraphs": [
+          "EL SERVICIO SE PROVEE \"TAL CUAL\" Y \"SEGÚN DISPONIBILIDAD\". EN LA MÁXIMA MEDIDA PERMITIDA POR LA LEY, RENUNCIAMOS A TODAS LAS GARANTÍAS, EXPRESAS O IMPLÍCITAS, INCLUYENDO COMERCIABILIDAD, IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN.",
+          "No garantizamos que el Servicio será ininterrumpido, seguro o libre de errores, o que las integraciones con plataformas de terceros siempre estarán disponibles o serán precisas."
+        ]
+      },
+      "liability": {
+        "title": "12. Limitación de responsabilidad",
+        "paragraphs": [
+          "EN LA MÁXIMA MEDIDA PERMITIDA POR LA LEY, {companyName} Y SUS AFILIADOS, OFICIALES, EMPLEADOS Y PROVEEDORES NO SERÁN RESPONSABLES POR DAÑOS INDIRECTOS, INCIDENTALES, ESPECIALES, CONSECUENCIALES O PUNITIVOS, O PÉRDIDA DE GANANCIAS, INGRESOS, DATOS O GOODWILL, DERIVADOS DE O RELACIONADOS CON TU USO DEL SERVICIO.",
+          "NUESTRA RESPONSABILIDAD TOTAL POR CUALQUIER RECLAMO DERIVADO DE O RELACIONADO CON EL SERVICIO NO EXCEDERÁ EL MAYOR DE (A) LO QUE NOS PAGASTE EN LOS DOCE (12) MESES ANTERIORES AL EVENTO QUE DIO ORIGEN AL RECLAMO O (B) CIEN DÓLARES ESTADOUNIDENSES (US $100), EXCEPTO DONDE LA RESPONSABILIDAD NO PUEDA LIMITARSE POR LEY."
+        ]
+      },
+      "indemnification": {
+        "title": "13. Indemnización",
+        "paragraphs": [
+          "Aceptas defender, indemnizar y mantener indemne a {companyName} y sus afiliados, oficiales, empleados y agentes de reclamaciones, daños, pérdidas y gastos (incluyendo honorarios razonables de abogados) derivados de tu uso del Servicio, tu contenido, tus cuentas conectadas o tu violación de estos Términos o la ley aplicable."
+        ]
+      },
+      "termination": {
+        "title": "14. Suspensión y terminación",
+        "paragraphs": [
+          "Podemos suspender o terminar tu acceso al Servicio si violas estos Términos, creas riesgo o exposición legal para nosotros, o si discontinuamos el Servicio. Puedes dejar de usar el Servicio en cualquier momento.",
+          "Al terminar, tu derecho a acceder al Servicio cesa. Las secciones que por su naturaleza deben sobrevivir la terminación sobrevivirán, incluyendo propiedad intelectual, descargos, limitación de responsabilidad e indemnización."
+        ]
+      },
+      "governingLaw": {
+        "title": "15. Ley aplicable",
+        "paragraphs": [
+          "Estos Términos se rigen por las leyes del Estado de Delaware, Estados Unidos, sin considerar principios de conflicto de leyes, excepto donde la ley local obligatoria requiera lo contrario."
+        ]
+      },
+      "changes": {
+        "title": "16. Cambios a estos Términos",
+        "paragraphs": [
+          "Podemos actualizar estos Términos periódicamente. Cuando lo hagamos, revisaremos la fecha de \"Última actualización\" al inicio de esta página. Si los cambios son materiales, podemos dar aviso adicional a través del Servicio o por correo cuando corresponda. El uso continuado del Servicio después de que los cambios entren en vigor constituye aceptación de los Términos revisados."
+        ]
+      },
+      "contact": {
+        "title": "17. Contacto",
+        "paragraphs": [
+          "Preguntas sobre estos Términos pueden enviarse a {companyName} en {email}."
+        ]
+      }
+    }
+  }
+}

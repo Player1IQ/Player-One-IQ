@@ -70,6 +70,9 @@
     "selectContactError": "Select an agency contact to start a conversation.",
     "selectMemberError": "Select at least one member for the group.",
     "addMembersTitle": "Add members",
-    "addMembersDescription": "Select team members to add to this conversation."
+    "addMembersDescription": "Select team members to add to this conversation.",
+    "addMembersEmpty": "Everyone on your team is already in this conversation.",
+    "addMembersSubmit": "Add selected",
+    "adding": "Adding..."
   }
 }

@@ -35,22 +35,93 @@
     "agencySubtitle": "Elige tipo de creador/jugador u organización para comenzar"
   },
   "wizard": {
+    "accountSetup": "Configuración de cuenta",
+    "stepProgress": "Paso {current} de {total} · {stepLabel}",
+    "oauthConnected": "{platform} conectado correctamente.",
     "steps": {
       "welcome": "Bienvenida",
       "connect": "Conectar plataformas",
       "finish": "Listo"
     },
-    "welcomeTitle": "¡Bienvenido{userName, select, other {, {userName}}}!",
-    "welcomeSubtitle": "Configuremos tu espacio de trabajo en unos pocos pasos.",
-    "connectTitle": "Conecta tus plataformas",
-    "connectSubtitle": "Vincula cuentas para desbloquear analítica, seguimiento de ingresos y coaching personalizado.",
-    "finishTitle": "Todo listo",
-    "finishSubtitle": "Tu espacio de trabajo está listo. Ve al panel para comenzar.",
+    "welcome": {
+      "creatorTitle": "Bienvenido, {userName}",
+      "creatorTitleFallback": "Bienvenido a tu portal de creador",
+      "creatorBody": "Player One IQ te ayuda a hacer crecer tu marca, conectar plataformas, descubrir oportunidades de patrocinio y gestionar deals en un solo lugar. Esta configuración rápida toma unos dos minutos.",
+      "creatorBullets": [
+        "Conecta tus redes sociales para analítica de crecimiento",
+        "Explora y aplica a oportunidades de patrocinio",
+        "Rastrea entregables, contratos e ingresos"
+      ],
+      "sponsorTitle": "Bienvenido, {userName}",
+      "sponsorTitleFallback": "Bienvenido a tu espacio de patrocinador",
+      "sponsorBody": "Ejecuta campañas, revisa creadores, gestiona contratos y coordina partnerships desde un portal diseñado para equipos de marca.",
+      "sponsorBullets": [
+        "Lanza y gestiona campañas de patrocinio",
+        "Revisa contratos y entregables de creadores",
+        "Mensajea partners sin salir del portal"
+      ],
+      "agencyTitle": "Bienvenido, {userName}",
+      "agencyTitleFallback": "Bienvenido a Player One IQ",
+      "agencyBody": "Gestiona creadores, patrocinadores, contratos, oportunidades y flujos de equipo desde un workspace premium. Repasemos lo esencial.",
+      "agencyBullets": [
+        "Organiza creadores y patrocinadores en un roster",
+        "Publica oportunidades y gestiona el flujo de deals",
+        "Invita a tu equipo con acceso basado en roles"
+      ]
+    },
+    "connect": {
+      "title": "Conecta tus plataformas",
+      "subtitle": "Vincula YouTube, Twitch, Instagram o TikTok para desbloquear analítica de crecimiento, seguimiento de ingresos y un perfil de creador más fuerte para patrocinadores.",
+      "oauthHeading": "Conexiones OAuth en un clic",
+      "betaNote": "Durante la beta, YouTube usa inicio de sesión de Google. Si Google bloquea el acceso, el admin de tu workspace debe agregar tu Gmail como usuario de prueba OAuth. TikTok requiere Login Kit configurado para esta app.",
+      "profileLink": "Puedes agregar más plataformas o ingresar handles manualmente después desde <link>tu perfil de creador</link>.",
+      "linkingFallbackTitle": "Conecta tus plataformas",
+      "linkingFallbackBody": "Tu perfil de creador aún se está vinculando. Puedes conectar plataformas desde tu perfil del portal justo después de la configuración."
+    },
+    "finish": {
+      "title": "Todo listo",
+      "body": "Tu workspace está listo. Cuando entres a tu {destination}, te guiaremos por cada área con un tour rápido — destacando dónde encontrar oportunidades, mensajes, contratos y más.",
+      "creatorPortal": "portal de creador",
+      "sponsorPortal": "portal de patrocinador",
+      "dashboard": "panel"
+    },
+    "footer": {
+      "helpPrefix": "¿Necesitas ayuda después? Visita",
+      "accountLink": "Cuenta",
+      "helpMiddle": "desde tu sidebar, o",
+      "startOver": "reinicia la guía",
+      "helpSuffix": "."
+    },
     "back": "Atrás",
-    "next": "Siguiente",
-    "finish": "Ir al panel",
-    "completing": "Finalizando configuración...",
+    "continue": "Continuar",
+    "completing": "Finalizando...",
     "skipForNow": "Omitir por ahora"
+  },
+  "organizationSetupForm": {
+    "sponsorHint": "Cuéntanos sobre tu marca para personalizar tu espacio de patrocinador.",
+    "creatorHint": "Configura tu perfil de creador para acceder a herramientas de crecimiento, marketplace abierto y oportunidades de patrocinio.",
+    "agencyHint": "Cuéntanos sobre tu organización para personalizar tu workspace.",
+    "supabaseNotConfigured": "Supabase no está configurado. Agrega tus credenciales a .env.local y reinicia el servidor.",
+    "mustBeSignedInCreator": "Debes iniciar sesión para completar la configuración.",
+    "mustBeSignedInOrg": "Debes iniciar sesión para configurar tu organización.",
+    "companyName": "Nombre de la empresa",
+    "companyPlaceholder": "Acme Energy Drinks",
+    "creatorName": "Nombre de creador / jugador",
+    "creatorPlaceholder": "Tu nombre visible o gamertag",
+    "orgName": "Nombre de la organización",
+    "orgPlaceholder": "Acme Gaming Agency",
+    "accountType": "Tipo de cuenta",
+    "orgType": "Tipo de organización",
+    "primaryPlatform": "Plataforma principal",
+    "settingUpCreator": "Configurando tu portal de creador...",
+    "settingUp": "Configurando...",
+    "enterPortal": "Entrar al portal de creador",
+    "completeSetup": "Completar configuración"
+  },
+  "inviteExtra": {
+    "createAccount": "Crear cuenta",
+    "signInHint": "¿Ya intentaste registrarte? Usa <signInLink>Iniciar sesión</signInLink> — el registro envía un correo de confirmación y puede alcanzar límites de tasa durante pruebas.",
+    "emailMismatchDetail": "Has iniciado sesión como {userEmail}, pero esta invitación se envió a {inviteEmail}. Cierra sesión e inicia con la cuenta correcta."
   },
   "founding": {
     "heroTitle": "Únete al Roster Fundador",

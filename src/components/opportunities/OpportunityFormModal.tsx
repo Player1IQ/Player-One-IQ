@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { X, Loader2 } from "lucide-react";
 import {
   type Opportunity,
@@ -60,6 +61,7 @@ export function OpportunityFormModal({
   opportunity,
   sponsors,
 }: OpportunityFormModalProps) {
+  const t = useTranslations("opportunities.modal");
   const router = useRouter();
   const isEdit = !!opportunity;
   const activeSponsors = sponsors.filter((sponsor) => sponsor.status === "active");
@@ -111,7 +113,7 @@ export function OpportunityFormModal({
       <div className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-surface-raised shadow-2xl">
         <div className="sticky top-0 flex items-center justify-between border-b border-border bg-surface-raised px-6 py-4">
           <h2 className="text-lg font-semibold text-white">
-            {isEdit ? "Edit Opportunity" : "Create Opportunity"}
+            {isEdit ? t("editTitle") : t("createTitle")}
           </h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:text-gray-200">
             <X className="h-5 w-5" />
@@ -126,23 +128,21 @@ export function OpportunityFormModal({
           )}
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">Title</label>
+            <label className="mb-1.5 block text-sm font-medium text-gray-300">{t("title")}</label>
             <input
               type="text"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               required
-              placeholder="Q3 Gaming Campaign"
+              placeholder={t("titlePlaceholder")}
               className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200"
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-300">Sponsor</label>
+            <label className="mb-1.5 block text-sm font-medium text-gray-300">{t("sponsor")}</label>
             {activeSponsors.length === 0 ? (
-              <p className="text-sm text-amber-400">
-                Add an active sponsor before creating an opportunity.
-              </p>
+              <p className="text-sm text-amber-400">{t("needActiveSponsor")}</p>
             ) : (
               <select
                 value={form.sponsorId}
@@ -159,7 +159,7 @@ export function OpportunityFormModal({
                 required
                 className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-200"
               >
-                <option value="">Select a sponsor</option>
+                <option value="">{t("selectSponsor")}</option>
                 {activeSponsors.map((sponsor) => (
                   <option key={sponsor.id} value={sponsor.id}>
                     {sponsor.companyName} ({sponsor.industry})
@@ -290,7 +290,7 @@ export function OpportunityFormModal({
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm text-gray-400">
-              Cancel
+              {t("cancel")}
             </button>
             <button
               type="submit"
@@ -298,7 +298,7 @@ export function OpportunityFormModal({
               className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isEdit ? "Save Changes" : "Create Opportunity"}
+              {isEdit ? t("saveChanges") : t("createOpportunity")}
             </button>
           </div>
         </form>

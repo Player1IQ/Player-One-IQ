@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 export function ReportPrintClient() {
+  const t = useTranslations("reports.printChrome");
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       window.focus();
@@ -14,8 +17,8 @@ export function ReportPrintClient() {
 
   return (
     <p className="print:hidden p-8 text-sm text-gray-600">
-      Preparing report for print… If the dialog does not open, use{" "}
-      <kbd className="rounded border px-1">Ctrl+P</kbd> (or{" "}
+      {t("preparing")}{" "}
+      <kbd className="rounded border px-1">Ctrl+P</kbd> ({t("or")}{" "}
       <kbd className="rounded border px-1">Cmd+P</kbd>).
     </p>
   );

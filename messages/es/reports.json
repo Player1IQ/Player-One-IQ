@@ -102,6 +102,10 @@
     "emptyDescription": "Ejecuta resúmenes de crecimiento, patrocinio o contratos desde la página de IA para ver el uso aquí.",
     "openAi": "Abrir asistentes de IA"
   },
+  "printChrome": {
+    "preparing": "Preparando reporte para imprimir… Si no se abre el diálogo, usa",
+    "or": "o"
+  },
   "exportMenu": {
     "upgradeTitle": "Mejora tu plan para exportar reportes",
     "upgradeAria": "Mejora tu plan para exportar reportes",

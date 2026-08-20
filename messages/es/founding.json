@@ -1,0 +1,116 @@
+{
+  "brand": "Player One IQ",
+  "submitted": {
+    "eyebrow": "Solicitud recibida",
+    "title": "Estás en nuestro radar.",
+    "p1": "Mantenemos el Roster Fundador intencionalmente pequeño para trabajar de cerca con cada miembro.",
+    "p2": "Tu solicitud fue recibida y será revisada personalmente. Si encajas, te contactaremos con los siguientes pasos.",
+    "closing": "Sigue construyendo.",
+    "followJourney": "Sigue el camino",
+    "explore": "Explora Player One IQ"
+  },
+  "hero": {
+    "title": "El Roster Fundador",
+    "subtitle": "Para quienes construyen lo que viene.",
+    "description": "Player One IQ selecciona su primer grupo de creadores y organizaciones para dar forma a la plataforma antes del lanzamiento público.",
+    "stats": {
+      "creators": "Creadores",
+      "organizations": "Organizaciones",
+      "total": "Plazas totales"
+    },
+    "apply": "Postular al Roster Fundador",
+    "seePerks": "Ver beneficios de miembros fundadores"
+  },
+  "thesis": {
+    "title": "Gaming se convirtió en carrera.",
+    "titleMuted": "La infraestructura detrás no lo hizo.",
+    "p1": "Los creadores construyen audiencias, negocios, equipos, partnerships y carreras en plataformas que nunca fueron diseñadas para trabajar juntas.",
+    "p2": "Player One IQ construye el sistema operativo de la economía profesional de creadores, empezando por gaming."
+  },
+  "lookingFor": {
+    "title": "No buscamos a los creadores más grandes.",
+    "subtitle": "Buscamos a quienes van en serio por convertirse en ellos.",
+    "description": "El número de seguidores no te mete en el Roster Fundador. Buscamos creadores que construyen activamente, crean con consistencia y van en serio por convertir el contenido en carrera.",
+    "signals": [
+      "Creando o streameando con consistencia",
+      "Construyendo en múltiples plataformas",
+      "Monetizando o caminando hacia la monetización",
+      "Tratando el contenido como un negocio",
+      "Trabajando con marcas, equipos, editores o colaboradores",
+      "Dispuestos a usar Player One IQ activamente y dar feedback sincero"
+    ]
+  },
+  "perks": {
+    "title": "Ser fundador tiene sus ventajas.",
+    "items": [
+      {
+        "num": "01",
+        "title": "12 meses de Player One IQ Pro",
+        "body": "Los Creadores Fundadores reciben acceso Pro gratuito durante pre-launch más 12 meses desde el lanzamiento público."
+      },
+      {
+        "num": "02",
+        "title": "Estatus fundador permanente",
+        "body": "Tu cuenta mostrará permanentemente que formaste parte del grupo que ayudó a dar forma a Player One IQ antes del lanzamiento.",
+        "badge": "P1 // FOUNDING"
+      },
+      {
+        "num": "03",
+        "title": "Acceso directo a founders",
+        "body": "Acceso directo al equipo que construye Player One IQ para feedback, ideas, bugs y conversaciones de producto."
+      },
+      {
+        "num": "04",
+        "title": "Influencia en el producto",
+        "body": "Ayuda a decidir qué construimos después, prueba funcionalidad nueva antes y cuéntanos qué necesitan los creadores."
+      },
+      {
+        "num": "05",
+        "title": "Acceso anticipado a features",
+        "body": "Los miembros fundadores tienen acceso primero a nueva funcionalidad conforme crece el ecosistema Player One IQ."
+      },
+      {
+        "num": "06",
+        "title": "Spotlights de creador fundador",
+        "body": "Miembros seleccionados pueden aparecer en canales sociales y comunidad de Player One IQ. La participación es opcional."
+      }
+    ]
+  },
+  "nominations": {
+    "title": "Construye el roster con nosotros.",
+    "description": "Los Creadores Fundadores activados desbloquean dos nominaciones para creadores que crean que pertenecen al Roster Fundador.",
+    "count": "2 nominaciones",
+    "disclaimer": "Una nominación no garantiza aceptación. Cada miembro del Roster Fundador es revisado por Player One IQ.",
+    "sampleLabel": "Nominación de ejemplo",
+    "sampleText": "Has sido nominado para el Roster Fundador de Player One IQ."
+  },
+  "builders": {
+    "title": "No necesitamos promotores.",
+    "subtitle": "Necesitamos builders.",
+    "lines": [
+      "No esperamos que publiques sobre Player One IQ.",
+      "No requerimos testimoniales.",
+      "No necesitamos que finjas que todo es perfecto."
+    ],
+    "calls": ["Úsalo.", "Rómpelo.", "Dinos qué falta."],
+    "closing": "Ayúdanos a construir algo que los creadores realmente quieran."
+  },
+  "organizations": {
+    "title": "¿Construyes un equipo?",
+    "description": "También seleccionamos cinco Organizaciones Fundadoras para dar forma al lado organizacional de Player One IQ.",
+    "benefits": [
+      "Acceso pre-launch gratuito",
+      "12 meses de Organization Pro desde el lanzamiento público",
+      "Hasta 5 plazas iniciales de creador",
+      "Onboarding white-glove",
+      "Acceso directo a founders",
+      "Features organizacionales anticipadas",
+      "Estatus permanente de Organización Fundadora"
+    ],
+    "apply": "Postular como organización"
+  },
+  "application": {
+    "eyebrow": "Solicitud al Roster Fundador",
+    "title": "Postular al Roster Fundador"
+  }
+}

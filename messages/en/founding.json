@@ -1,0 +1,116 @@
+{
+  "brand": "Player One IQ",
+  "submitted": {
+    "eyebrow": "Application received",
+    "title": "You're on our radar.",
+    "p1": "We're keeping the Founding Roster intentionally small so we can work closely with every member.",
+    "p2": "Your application has been received and will be personally reviewed. If there's a fit, we'll reach out with next steps.",
+    "closing": "Keep building.",
+    "followJourney": "Follow the journey",
+    "explore": "Explore Player One IQ"
+  },
+  "hero": {
+    "title": "The Founding Roster",
+    "subtitle": "For the ones building what's next.",
+    "description": "Player One IQ is selecting its first group of creators and organizations to help shape the platform before public launch.",
+    "stats": {
+      "creators": "Creators",
+      "organizations": "Organizations",
+      "total": "Total spots"
+    },
+    "apply": "Apply to the Founding Roster",
+    "seePerks": "See what founding members get"
+  },
+  "thesis": {
+    "title": "Gaming became a career.",
+    "titleMuted": "The infrastructure behind it didn't.",
+    "p1": "Creators are building audiences, businesses, teams, partnerships, and careers across platforms that were never designed to work together.",
+    "p2": "Player One IQ is building the operating system for the professional creator economy, starting with gaming."
+  },
+  "lookingFor": {
+    "title": "We're not looking for the biggest creators.",
+    "subtitle": "We're looking for the ones serious about becoming them.",
+    "description": "Follower count isn't what gets you into the Founding Roster. We're looking for creators who are actively building, consistently creating, and serious about turning content into a career.",
+    "signals": [
+      "Consistently creating or streaming",
+      "Building across multiple platforms",
+      "Monetizing or working toward monetization",
+      "Treating content like a business",
+      "Working with brands, teams, editors, or collaborators",
+      "Willing to actively use Player One IQ and give candid feedback"
+    ]
+  },
+  "perks": {
+    "title": "Founding has its perks.",
+    "items": [
+      {
+        "num": "01",
+        "title": "12 months of Player One IQ Pro",
+        "body": "Founding Creators receive complimentary Pro access during pre-launch plus 12 months beginning at public launch."
+      },
+      {
+        "num": "02",
+        "title": "Permanent founding status",
+        "body": "Your account will permanently show that you were part of the group that helped shape Player One IQ before launch.",
+        "badge": "P1 // FOUNDING"
+      },
+      {
+        "num": "03",
+        "title": "Direct founder access",
+        "body": "Direct access to the team building Player One IQ for feedback, ideas, bugs, and product conversations."
+      },
+      {
+        "num": "04",
+        "title": "Product influence",
+        "body": "Help determine what we build next, test new functionality early, and tell us what creators actually need."
+      },
+      {
+        "num": "05",
+        "title": "Early feature access",
+        "body": "Founding members get first access to new functionality as the Player One IQ ecosystem expands."
+      },
+      {
+        "num": "06",
+        "title": "Founding creator spotlights",
+        "body": "Selected members may be featured across Player One IQ social channels and community. Participation is optional."
+      }
+    ]
+  },
+  "nominations": {
+    "title": "Build the roster with us.",
+    "description": "Activated Founding Creators unlock two nominations for creators they believe belong in the Founding Roster.",
+    "count": "2 nominations",
+    "disclaimer": "A nomination does not guarantee acceptance. Every member of the Founding Roster is reviewed by Player One IQ.",
+    "sampleLabel": "Sample nomination",
+    "sampleText": "You've been nominated for the Player One IQ Founding Roster."
+  },
+  "builders": {
+    "title": "We don't need promoters.",
+    "subtitle": "We need builders.",
+    "lines": [
+      "We don't expect you to post about Player One IQ.",
+      "We don't require testimonials.",
+      "We don't need you to pretend everything is perfect."
+    ],
+    "calls": ["Use it.", "Break it.", "Tell us what's missing."],
+    "closing": "Help us build something creators actually want."
+  },
+  "organizations": {
+    "title": "Building a team?",
+    "description": "We're also selecting five Founding Organizations to help shape the organization side of Player One IQ.",
+    "benefits": [
+      "Complimentary pre-launch access",
+      "12 months of Organization Pro beginning at public launch",
+      "Up to 5 initial creator seats",
+      "White-glove onboarding",
+      "Direct founder access",
+      "Early organization features",
+      "Permanent Founding Organization status"
+    ],
+    "apply": "Apply as an organization"
+  },
+  "application": {
+    "eyebrow": "Founding Roster application",
+    "title": "Apply to the Founding Roster"
+  }
+}

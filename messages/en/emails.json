@@ -1,0 +1,22 @@
+{
+  "teamInvite": {
+    "subject": "You're invited to join {organizationName}",
+    "subjectResend": "New invite to join {organizationName}",
+    "heading": "Team invitation",
+    "intro": "You've been invited to join {organizationName} on Player One IQ.",
+    "introResend": "Here is a new invitation link to join {organizationName} on Player One IQ.",
+    "role": "Role",
+    "invitedBy": "Invited by",
+    "acceptButton": "Accept invitation",
+    "copyLink": "Or copy this link into your browser:",
+    "expires": "This link expires in 7 days.",
+    "ignore": "If you did not expect this invitation, you can ignore this email.",
+    "notConfigured": "Invitation email is not configured. Add RESEND_API_KEY and INVITE_EMAIL_FROM."
+  },
+  "scheduleInvite": {
+    "subject": "You're invited to a schedule block on Player One IQ",
+    "heading": "Schedule invitation",
+    "intro": "You've been invited to a schedule block.",
+    "notConfigured": "Schedule invite email is not configured."
+  }
+}

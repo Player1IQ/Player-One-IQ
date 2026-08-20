@@ -113,7 +113,7 @@ export function PortalCoachLayout({
 
         <aside className="space-y-4">
           <TodaysMissionCard
-            greeting={snapshot.greeting}
+            displayName={snapshot.displayName}
             mission={snapshot.mission}
             progressPercent={snapshot.progressPercent}
             stateId={snapshot.stateId}

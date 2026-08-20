@@ -118,10 +118,20 @@
     "description": "Description",
     "descriptionPlaceholder": "Describe the opportunity...",
     "sponsor": "Sponsor",
-    "selectSponsor": "Select sponsor",
-    "budget": "Budget",
+    "selectSponsor": "Select a sponsor",
+    "needActiveSponsor": "Add an active sponsor before creating an opportunity.",
+    "budget": "Budget ($)",
     "deadline": "Application deadline",
     "status": "Status",
+    "category": "Category",
+    "platform": "Platform",
+    "deliverables": "Deliverables",
+    "deliverablesPlaceholder": "List required deliverables...",
+    "marketplaceListing": "List on open marketplace",
+    "marketplaceListingHint": "When open, creators from other organizations can discover and apply to this opportunity.",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "createOpportunity": "Create Opportunity",
     "saving": "Saving..."
   }
 }

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { getActionErrors } from "@/lib/i18n/action-errors";
 import {
   onboardingCompletedMetadata,
   onboardingPendingMetadata,
@@ -14,15 +15,16 @@ import { getOnboardingFlow } from "@/lib/onboarding/tour";
 import { getCurrentUserMembership } from "@/lib/permissions";
 
 export async function beginOnboarding() {
+  const te = await getActionErrors();
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "You must be signed in." };
+    return { error: te("mustBeSignedIn") };
   }
 
   const { error } = await supabase.auth.updateUser({
@@ -44,15 +46,16 @@ export async function beginOnboarding() {
 }
 
 export async function completeOnboarding() {
+  const te = await getActionErrors();
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "You must be signed in." };
+    return { error: te("mustBeSignedIn") };
   }
 
   const membership = await getCurrentUserMembership();
@@ -78,15 +81,16 @@ export async function completeOnboarding() {
 }
 
 export async function completePortalTour() {
+  const te = await getActionErrors();
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "You must be signed in." };
+    return { error: te("mustBeSignedIn") };
   }
 
   const { error } = await supabase.auth.updateUser({
@@ -105,15 +109,16 @@ export async function completePortalTour() {
 }
 
 export async function startPortalTour() {
+  const te = await getActionErrors();
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "You must be signed in." };
+    return { error: te("mustBeSignedIn") };
   }
 
   const membership = await getCurrentUserMembership();

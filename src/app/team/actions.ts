@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getActionErrors } from "@/lib/i18n/action-errors";
 import { getOrganizationForUser, getOrganizationId } from "@/lib/organization/queries";
 import { getAppOrigin } from "@/lib/email/app-url";
 import { sendTeamInviteEmail } from "@/lib/email/team-invite";
@@ -76,6 +77,7 @@ export async function inviteTeamMember(
   linkedCreatorId?: string | null,
   linkedSponsorId?: string | null
 ) {
+  const te = await getActionErrors();
   const permError = await requireTeamManageAccess();
   if (permError) return permError;
 
@@ -83,26 +85,26 @@ export async function inviteTeamMember(
     role === "owner" ||
     !invitableRoles.includes(role as (typeof invitableRoles)[number])
   ) {
-    return { error: "Invalid role for invitation." };
+    return { error: te("invalidRoleForInvite") };
   }
 
   const normalizedEmail = email.trim().toLowerCase();
-  if (!normalizedEmail) return { error: "Email is required." };
+  if (!normalizedEmail) return { error: te("emailRequired") };
 
   const normalizedLinkedCreatorId = linkedCreatorId?.trim() || null;
   const normalizedLinkedSponsorId = linkedSponsorId?.trim() || null;
   if (requiresLinkedCreator(role) && !normalizedLinkedCreatorId) {
-    return { error: "Portal roles must be linked to a roster profile." };
+    return { error: te("portalRoleNeedsCreator") };
   }
   if (requiresLinkedSponsor(role) && !normalizedLinkedSponsorId) {
-    return { error: "Sponsor portal roles must be linked to a sponsor company." };
+    return { error: te("portalRoleNeedsSponsor") };
   }
 
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const organizationId = await getOrganizationId();
-  if (!organizationId) return { error: "Organization not found." };
+  if (!organizationId) return { error: te("organizationNotFound") };
 
   const featureError = await requireTeamFeature();
   if (featureError) return featureError;
@@ -123,7 +125,7 @@ export async function inviteTeamMember(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Not authenticated." };
+  if (!user) return { error: te("notAuthenticated") };
 
   const { data: existingMember } = await supabase
     .from("team_members")
@@ -134,7 +136,7 @@ export async function inviteTeamMember(
     .maybeSingle();
 
   if (existingMember) {
-    return { error: "This user is already a team member." };
+    return { error: te("alreadyTeamMember") };
   }
 
   const { data: existingInvite } = await supabase
@@ -146,7 +148,7 @@ export async function inviteTeamMember(
     .maybeSingle();
 
   if (existingInvite) {
-    return { error: "A pending invitation already exists for this email." };
+    return { error: te("pendingInviteExists") };
   }
 
   if (normalizedLinkedCreatorId) {
@@ -158,7 +160,7 @@ export async function inviteTeamMember(
       .maybeSingle();
 
     if (!creator) {
-      return { error: "Selected roster profile was not found." };
+      return { error: te("rosterProfileNotFound") };
     }
   }
 
@@ -171,7 +173,7 @@ export async function inviteTeamMember(
       .maybeSingle();
 
     if (!sponsor) {
-      return { error: "Selected sponsor company was not found." };
+      return { error: te("sponsorCompanyNotFound") };
     }
   }
 
@@ -529,13 +531,14 @@ export async function revokeInvitation(invitationId: string) {
 }
 
 export async function acceptInvitation(token: string) {
+  const te = await getActionErrors();
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user?.email) return { error: "You must be signed in to accept an invitation." };
+  if (!user?.email) return { error: te("mustBeSignedInAcceptInvite") };
 
   const { data: invite, error: fetchError } = await supabase
     .from("team_invitations")
@@ -544,11 +547,11 @@ export async function acceptInvitation(token: string) {
     .maybeSingle();
 
   if (fetchError || !invite) {
-    return { error: "Invitation not found." };
+    return { error: te("invitationNotFound") };
   }
 
   if (invite.status !== "pending") {
-    return { error: "This invitation is no longer valid." };
+    return { error: te("invitationInvalid") };
   }
 
   if (new Date(invite.expires_at) < new Date()) {
@@ -556,12 +559,12 @@ export async function acceptInvitation(token: string) {
       .from("team_invitations")
       .update({ status: "expired" })
       .eq("id", invite.id);
-    return { error: "This invitation has expired." };
+    return { error: te("invitationExpired") };
   }
 
   if (invite.email.toLowerCase() !== user.email.toLowerCase()) {
     return {
-      error: `This invitation was sent to ${invite.email}. Sign in with that email to accept.`,
+      error: te("inviteEmailMismatch", { email: invite.email }),
     };
   }
 

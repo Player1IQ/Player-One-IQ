@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { getActionErrors } from "@/lib/i18n/action-errors";
 import {
   USER_AVATARS_BUCKET,
   buildUserAvatarPath,
@@ -30,21 +31,22 @@ export async function getMyAvatarUrl(): Promise<string | null> {
 }
 
 export async function uploadMyAvatar(formData: FormData) {
+  const te = await getActionErrors();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Please choose an image to upload." };
+    return { error: te("chooseImage") };
   }
 
   const supabase = await createClient();
-  if (!supabase) return { error: "Supabase is not configured." };
+  if (!supabase) return { error: te("supabaseNotConfigured") };
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "You must be signed in." };
+  if (!user) return { error: te("mustBeSignedIn") };
 
   const extension = getExtensionFromMime(file.type);
-  if (!extension) return { error: "Unsupported image type." };
+  if (!extension) return { error: te("unsupportedImageType") };
 
   const { data: existing } = await supabase
     .from("user_profiles")

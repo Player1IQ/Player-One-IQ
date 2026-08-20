@@ -27,6 +27,10 @@ async function loadMessages(locale: AppLocale) {
     pages,
     coach,
     onboarding,
+    founding,
+    legal,
+    errors,
+    emails,
   ] = await Promise.all([
     import(`../../messages/${locale}/common.json`),
     import(`../../messages/${locale}/nav.json`),
@@ -51,6 +55,10 @@ async function loadMessages(locale: AppLocale) {
     import(`../../messages/${locale}/pages.json`),
     import(`../../messages/${locale}/coach.json`),
     import(`../../messages/${locale}/onboarding.json`),
+    import(`../../messages/${locale}/founding.json`),
+    import(`../../messages/${locale}/legal.json`),
+    import(`../../messages/${locale}/errors.json`),
+    import(`../../messages/${locale}/emails.json`),
   ]);
 
   return {
@@ -77,6 +85,10 @@ async function loadMessages(locale: AppLocale) {
     pages: pages.default,
     coach: coach.default,
     onboarding: onboarding.default,
+    founding: founding.default,
+    legal: legal.default,
+    errors: errors.default,
+    emails: emails.default,
   };
 }
 

@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { completeOnboarding } from "@/app/onboarding/actions";
 import { formatPlatformOAuthError } from "@/lib/platform-oauth/oauth-errors";
 import { OnboardingConnectStep } from "@/components/onboarding/OnboardingConnectStep";
@@ -34,17 +35,6 @@ interface OnboardingWizardProps {
   oauthError?: string | null;
 }
 
-function stepLabel(step: OnboardingStepId): string {
-  switch (step) {
-    case "welcome":
-      return "Welcome";
-    case "connect":
-      return "Connect platforms";
-    case "finish":
-      return "Ready to go";
-  }
-}
-
 export function OnboardingWizard({
   flow,
   userName,
@@ -54,6 +44,7 @@ export function OnboardingWizard({
   oauthSuccess,
   oauthError,
 }: OnboardingWizardProps) {
+  const t = useTranslations("onboarding.wizard");
   const router = useRouter();
   const searchParams = useSearchParams();
   const [storedStep, setStoredStep] = useState<OnboardingStepId | null>(null);
@@ -98,23 +89,34 @@ export function OnboardingWizard({
   const isLastStep = stepIndex === flow.steps.length - 1;
 
   const welcomeCopy = useMemo(() => {
+    const name = userName ?? "";
     if (flow.audience === "creator") {
       return {
-        title: userName ? `Welcome, ${userName}` : "Welcome to your creator portal",
-        body: "Player One IQ helps you grow your brand, connect platforms, discover sponsorship opportunities, and manage deals in one place. This quick setup takes about two minutes.",
+        title: name ? t("welcome.creatorTitle", { userName: name }) : t("welcome.creatorTitleFallback"),
+        body: t("welcome.creatorBody"),
+        bullets: t.raw("welcome.creatorBullets") as string[],
       };
     }
     if (flow.audience === "sponsor") {
       return {
-        title: userName ? `Welcome, ${userName}` : "Welcome to your sponsor workspace",
-        body: "Run campaigns, review creators, manage contracts, and coordinate partnerships from a single portal built for brand teams.",
+        title: name ? t("welcome.sponsorTitle", { userName: name }) : t("welcome.sponsorTitleFallback"),
+        body: t("welcome.sponsorBody"),
+        bullets: t.raw("welcome.sponsorBullets") as string[],
       };
     }
     return {
-      title: userName ? `Welcome, ${userName}` : "Welcome to Player One IQ",
-      body: "Manage creators, sponsors, contracts, opportunities, and team workflows from one premium workspace. Let's walk through the essentials.",
+      title: name ? t("welcome.agencyTitle", { userName: name }) : t("welcome.agencyTitleFallback"),
+      body: t("welcome.agencyBody"),
+      bullets: t.raw("welcome.agencyBullets") as string[],
     };
-  }, [flow.audience, userName]);
+  }, [flow.audience, t, userName]);
+
+  const finishDestination =
+    flow.audience === "creator"
+      ? t("finish.creatorPortal")
+      : flow.audience === "sponsor"
+        ? t("finish.sponsorPortal")
+        : t("finish.dashboard");
 
   async function handleFinish() {
     setError("");
@@ -173,9 +175,13 @@ export function OnboardingWizard({
       <div className="mb-8 flex items-center gap-3">
         <BrandLogo size="md" />
         <div>
-          <p className="text-sm font-semibold text-white">Account setup</p>
+          <p className="text-sm font-semibold text-white">{t("accountSetup")}</p>
           <p className="text-xs text-gray-500">
-            Step {stepIndex + 1} of {flow.steps.length} · {stepLabel(currentStep)}
+            {t("stepProgress", {
+              current: stepIndex + 1,
+              total: flow.steps.length,
+              stepLabel: t(`steps.${currentStep}`),
+            })}
           </p>
         </div>
       </div>
@@ -199,7 +205,7 @@ export function OnboardingWizard({
 
       {oauthSuccessParam ? (
         <div className="mb-5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-          {oauthSuccessParam} connected successfully.
+          {t("oauthConnected", { platform: oauthSuccessParam })}
         </div>
       ) : null}
 
@@ -227,25 +233,9 @@ export function OnboardingWizard({
               {welcomeCopy.body}
             </p>
             <ul className="mt-6 space-y-3 text-sm text-gray-300">
-              {flow.audience === "creator" ? (
-                <>
-                  <li>• Connect your social platforms for growth analytics</li>
-                  <li>• Browse and apply to sponsorship opportunities</li>
-                  <li>• Track deliverables, contracts, and earnings</li>
-                </>
-              ) : flow.audience === "sponsor" ? (
-                <>
-                  <li>• Launch and manage sponsorship campaigns</li>
-                  <li>• Review contracts and creator deliverables</li>
-                  <li>• Message partners without leaving the portal</li>
-                </>
-              ) : (
-                <>
-                  <li>• Organize creators and sponsors in one roster</li>
-                  <li>• Post opportunities and manage deal flow</li>
-                  <li>• Invite your team with role-based access</li>
-                </>
-              )}
+              {welcomeCopy.bullets.map((bullet) => (
+                <li key={bullet}>• {bullet}</li>
+              ))}
             </ul>
           </div>
         ) : null}
@@ -258,27 +248,17 @@ export function OnboardingWizard({
             />
           ) : (
             <div className="space-y-3">
-              <h2 className="text-xl font-bold text-white">Connect your platforms</h2>
-              <p className="text-sm text-gray-400">
-                Your creator profile is still linking. You can connect platforms
-                from your portal profile right after setup.
-              </p>
+              <h2 className="text-xl font-bold text-white">{t("connect.linkingFallbackTitle")}</h2>
+              <p className="text-sm text-gray-400">{t("connect.linkingFallbackBody")}</p>
             </div>
           )
         ) : null}
 
         {currentStep === "finish" ? (
           <div className="space-y-4 text-center">
-            <h2 className="text-2xl font-bold text-white">You&apos;re all set</h2>
+            <h2 className="text-2xl font-bold text-white">{t("finish.title")}</h2>
             <p className="mx-auto max-w-lg text-sm leading-relaxed text-gray-400">
-              Your workspace is ready. When you enter your{" "}
-              {flow.audience === "creator"
-                ? "creator portal"
-                : flow.audience === "sponsor"
-                  ? "sponsor portal"
-                  : "dashboard"}
-              , we&apos;ll walk you through each area with a quick guided tour —
-              highlighting where to find opportunities, messages, contracts, and more.
+              {t("finish.body", { destination: finishDestination })}
             </p>
           </div>
         ) : null}
@@ -293,7 +273,7 @@ export function OnboardingWizard({
               className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] px-4 py-2.5 text-sm text-gray-300 transition-colors hover:bg-white/[0.04]"
             >
               <ChevronLeft className="h-4 w-4" />
-              Back
+              {t("back")}
             </button>
           ) : (
             <span />
@@ -304,7 +284,7 @@ export function OnboardingWizard({
               onClick={goNext}
               className="text-sm text-gray-500 transition-colors hover:text-gray-300"
             >
-              Skip for now
+              {t("skipForNow")}
             </button>
           ) : null}
         </div>
@@ -318,13 +298,13 @@ export function OnboardingWizard({
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Finishing...
+              {t("completing")}
             </>
           ) : isLastStep ? (
             flow.finishLabel
           ) : (
             <>
-              Continue
+              {t("continue")}
               <ChevronRight className="h-4 w-4" />
             </>
           )}
@@ -332,19 +312,19 @@ export function OnboardingWizard({
       </div>
 
       <p className="mt-6 text-center text-xs text-gray-600">
-        Need help later? Visit{" "}
+        {t("footer.helpPrefix")}{" "}
         <Link href="/portal/account" className="text-gray-500 underline hover:text-gray-300">
-          Account
+          {t("footer.accountLink")}
         </Link>{" "}
-        from your sidebar, or{" "}
+        {t("footer.helpMiddle")}{" "}
         <button
           type="button"
           onClick={startOver}
           className="text-gray-500 underline hover:text-gray-300"
         >
-          start the guide over
+          {t("footer.startOver")}
         </button>
-        .
+        {t("footer.helpSuffix")}
       </p>
     </div>
   );
