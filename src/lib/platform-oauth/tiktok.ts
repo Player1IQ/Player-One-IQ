@@ -18,6 +18,13 @@ function getTikTokCredentials() {
   return creds;
 }
 
+/** Default: profile only. Add video.list via TIKTOK_OAUTH_SCOPES once approved in TikTok portal. */
+export function getTikTokOAuthScopes(): string {
+  const custom = process.env.TIKTOK_OAUTH_SCOPES?.trim();
+  if (custom) return custom;
+  return "user.info.basic";
+}
+
 export function createTikTokPkcePair() {
   const codeVerifier = randomBytes(32).toString("base64url");
   const codeChallenge = createHash("sha256")
@@ -35,7 +42,7 @@ export async function getTikTokAuthorizeUrl(
   const params = new URLSearchParams({
     client_key: clientKey,
     redirect_uri: redirectUri,
-    scope: "user.info.basic,video.list",
+    scope: getTikTokOAuthScopes(),
     response_type: "code",
     state,
     code_challenge: codeChallenge,
