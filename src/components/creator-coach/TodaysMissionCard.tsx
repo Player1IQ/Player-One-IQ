@@ -38,39 +38,41 @@ export function TodaysMissionCard({
   const t = useTranslations("coach.mission");
   const greeting = useCoachGreeting(displayName);
   const missionText = useMissionText(mission, coachContext);
+  const translatedTaskTitles = new Map(
+    missionText.tasks.map((task) => [task.id, task.title])
+  );
 
-  function applyMissionText(source: DailyMission): DailyMission {
-    const translatedTasksById = new Map(
-      missionText.tasks.map((task) => [task.id, task.title])
-    );
-    return {
-      ...source,
-      title: missionText.title,
-      subtitle: missionText.subtitle,
-      tasks: source.tasks.map((task) => ({
-        ...task,
-        title: translatedTasksById.get(task.id) ?? task.title,
-      })),
-    };
-  }
-
-  const [missionState, setMissionState] = useState(() => applyMissionText(mission));
+  const [missionState, setMissionState] = useState(mission);
   const [pendingTaskId, setPendingTaskId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const completionKey = mission.tasks
+    .map((task) => `${task.id}:${task.completed}`)
+    .join(",");
 
   useEffect(() => {
-    if (stateId) {
-      setMissionState(applyMissionText(mission));
-      return;
-    }
+    const nextMission = stateId
+      ? mission
+      : (getLocalMissionState(
+          coachContext.scope,
+          coachContext.scopeId,
+          mission.id
+        ) ?? mission);
 
-    const localMission = getLocalMissionState(
-      coachContext.scope,
-      coachContext.scopeId,
-      mission.id
-    );
-    setMissionState(applyMissionText(localMission ?? mission));
-  }, [mission, stateId, coachContext.scope, coachContext.scopeId, missionText.title, missionText.subtitle, missionText.tasks]);
+    setMissionState((current) => {
+      if (
+        current.id === nextMission.id &&
+        current.tasks.length === nextMission.tasks.length &&
+        current.tasks.every(
+          (task, index) =>
+            task.id === nextMission.tasks[index]?.id &&
+            task.completed === nextMission.tasks[index]?.completed
+        )
+      ) {
+        return current;
+      }
+      return nextMission;
+    });
+  }, [mission, completionKey, stateId, coachContext.scope, coachContext.scopeId]);
 
   const progressPercent = stateId
     ? serverProgressPercent
@@ -111,9 +113,9 @@ export function TodaysMissionCard({
               {t("label")}
             </p>
             <h2 className="mt-1 text-2xl font-bold text-white sm:text-3xl">
-              {missionState.title}
+              {missionText.title}
             </h2>
-            <p className="mt-2 text-sm text-gray-400">{missionState.subtitle}</p>
+            <p className="mt-2 text-sm text-gray-400">{missionText.subtitle}</p>
           </div>
           <div className="shrink-0 rounded-xl border border-white/[0.08] bg-black/20 px-4 py-3 text-right">
             <p className="text-xs uppercase tracking-wider text-gray-500">
@@ -167,7 +169,7 @@ export function TodaysMissionCard({
                       task.completed && "line-through"
                     )}
                   >
-                    {task.title}
+                    {translatedTaskTitles.get(task.id) ?? task.title}
                   </span>
                 </button>
               </li>

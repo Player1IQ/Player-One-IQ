@@ -9,6 +9,7 @@ import {
   oauthPlatforms,
 } from "@/lib/platform-oauth/config";
 import { getOAuthRedirectUri } from "@/lib/platform-oauth/redirect-uri";
+import { getTikTokOAuthScopes } from "@/lib/platform-oauth/tiktok";
 import type { OAuthPlatform } from "@/lib/platform-oauth/types";
 import {
   isStripeConfigured,
@@ -48,6 +49,7 @@ export async function GET() {
     platformOAuth: isPlatformOAuthFeatureEnabled(),
     platformOAuthRedirects,
     launchOAuthPlatforms,
+    tiktokOAuthScopes: getTikTokOAuthScopes(),
     cronConfigured: Boolean(process.env.CRON_SECRET),
     serviceRoleConfigured,
     apiV1AuthReady: serviceRoleConfigured,

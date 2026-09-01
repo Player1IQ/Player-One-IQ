@@ -13,7 +13,11 @@ import {
   exchangeInstagramCode,
   getInstagramAuthorizeUrl,
 } from "./instagram";
-import { exchangeTikTokCode, createTikTokPkcePair, getTikTokAuthorizeUrl } from "./tiktok";
+import {
+  exchangeTikTokCode,
+  createTikTokPkcePair,
+  getTikTokAuthorizeUrl,
+} from "./tiktok";
 import { exchangeTwitchCode, getTwitchAuthorizeUrl } from "./twitch";
 import { exchangeYouTubeCode, getYouTubeAuthorizeUrl } from "./youtube";
 import { syncCreatorPlatformAccountById } from "./sync-account";
@@ -167,12 +171,20 @@ export async function handlePlatformOAuthStart(
     { onConflict: "creator_id,platform" }
   );
 
-  const authorizeUrl = await getAuthorizeUrl(
-    platform,
-    state,
-    tiktokPkce?.codeChallenge
-  );
-  return NextResponse.redirect(authorizeUrl);
+  try {
+    const authorizeUrl = await getAuthorizeUrl(
+      platform,
+      state,
+      tiktokPkce?.codeChallenge
+    );
+    return NextResponse.redirect(authorizeUrl);
+  } catch (err) {
+    return NextResponse.redirect(
+      `${await getAppOrigin()}/creators/${creatorId}?oauth_error=${encodeURIComponent(
+        toOAuthErrorQueryValue(err)
+      )}`
+    );
+  }
 }
 
 export async function handlePlatformOAuthCallback(

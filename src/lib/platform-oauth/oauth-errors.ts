@@ -16,6 +16,15 @@ function normalizeOAuthErrorCode(error: string): string {
   if (lower.includes("client_key") || lower === "tiktok_invalid_client_key") {
     return "tiktok_invalid_client_key";
   }
+  if (
+    lower.includes("did not authorize the scope") ||
+    lower.includes("scope_not_authorized")
+  ) {
+    return "tiktok_scope_not_authorized";
+  }
+  if (lower === "tiktok_https_redirect_required") {
+    return "tiktok_https_redirect_required";
+  }
   if (lower === "tiktok_not_configured") {
     return "tiktok_not_configured";
   }
@@ -48,13 +57,29 @@ export function formatPlatformOAuthError(
         adminHint:
           "In Google Cloud Console → OAuth consent screen → Test users, add the tester’s Gmail address. Use the same OAuth client as YOUTUBE_CLIENT_ID.",
       };
+    case "tiktok_scope_not_authorized":
+      return {
+        title: "TikTok connected, but extra permissions are missing",
+        message:
+          "TikTok login succeeded, but Player One IQ asked for a profile field that is not approved on your TikTok app yet. Try Connect again after this is deployed.",
+        adminHint:
+          "Live apps only have user.info.basic. Do not request username or video.list until those scopes are approved.",
+      };
+    case "tiktok_https_redirect_required":
+      return {
+        title: "TikTok must be connected on the live site",
+        message:
+          "TikTok does not allow http://localhost as a login redirect. Open https://www.playeroneiq.com, sign in, and click Connect TikTok there.",
+        adminHint:
+          "In TikTok for Developers, switch the app to Production (not Sandbox). Login Kit redirect URI must be exactly https://www.playeroneiq.com/api/platform-oauth/tiktok/callback",
+      };
     case "tiktok_invalid_client_key":
       return {
         title: "TikTok connection is misconfigured",
         message:
-          "TikTok rejected our app credentials before login could start. This is usually a wrong client key or redirect URL in the TikTok developer portal.",
+          "TikTok rejected our app credentials before login could start. This is usually a Production vs Sandbox key mismatch, or the redirect URI is not registered.",
         adminHint:
-          "In TikTok for Developers → your app → Login Kit, confirm TIKTOK_CLIENT_KEY on Vercel and register redirect URI exactly: https://player-one-iq.vercel.app/api/platform-oauth/tiktok/callback",
+          "Use Production Client Key/Secret in Vercel (not Sandbox). Login Kit redirect URI must be exactly https://www.playeroneiq.com/api/platform-oauth/tiktok/callback",
       };
     case "tiktok_not_configured":
       return {

@@ -18,11 +18,20 @@ function getTikTokCredentials() {
   return creds;
 }
 
+const TIKTOK_PRODUCTION_SCOPES = "user.info.basic";
+
 /** Default: profile only. Add video.list via TIKTOK_OAUTH_SCOPES once approved in TikTok portal. */
 export function getTikTokOAuthScopes(): string {
   const custom = process.env.TIKTOK_OAUTH_SCOPES?.trim();
   if (custom) return custom;
-  return "user.info.basic";
+  return TIKTOK_PRODUCTION_SCOPES;
+}
+
+/** TikTok Login Kit only accepts https redirect URIs. localhost http is rejected as client_key. */
+export function assertTikTokRedirectUri(redirectUri: string): void {
+  if (!redirectUri.startsWith("https://")) {
+    throw new Error("tiktok_https_redirect_required");
+  }
 }
 
 export function createTikTokPkcePair() {
@@ -39,6 +48,7 @@ export async function getTikTokAuthorizeUrl(
 ): Promise<string> {
   const { clientKey } = getTikTokCredentials();
   const redirectUri = await getOAuthRedirectUri("TikTok");
+  assertTikTokRedirectUri(redirectUri);
   const params = new URLSearchParams({
     client_key: clientKey,
     redirect_uri: redirectUri,
@@ -153,8 +163,16 @@ export async function refreshTikTokAccessToken(
 export async function syncTikTokProfile(
   accessToken: string
 ): Promise<TikTokProfile> {
+  const scopes = getTikTokOAuthScopes();
+  const fields = ["open_id", "union_id", "avatar_url", "display_name"];
+  // username moved off user.info.basic; requesting it without user.info.profile
+  // returns "The user did not authorize the scope required for completing this request."
+  if (scopes.split(",").includes("user.info.profile")) {
+    fields.push("username");
+  }
+
   const response = await fetch(
-    "https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name,username",
+    `https://open.tiktokapis.com/v2/user/info/?fields=${fields.join(",")}`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
     }
@@ -168,16 +186,19 @@ export async function syncTikTokProfile(
         username?: string;
       };
     };
-    error?: { message?: string };
+    error?: { code?: string; message?: string };
   };
 
   const user = body.data?.user;
-  if (!response.ok || !user?.open_id) {
-    throw new Error(body.error?.message ?? "Could not read TikTok profile.");
+  const apiError = body.error?.code && body.error.code !== "ok" ? body.error : null;
+  if (!response.ok || apiError || !user?.open_id) {
+    throw new Error(
+      apiError?.message ?? body.error?.message ?? "Could not read TikTok profile."
+    );
   }
 
   return {
-    handle: user.username ?? user.open_id,
+    handle: user.username ?? user.display_name ?? user.open_id,
     displayName: user.display_name ?? user.username ?? "TikTok Creator",
     openId: user.open_id,
   };
