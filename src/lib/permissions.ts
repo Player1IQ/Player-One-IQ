@@ -263,7 +263,7 @@ export async function requireCreatorPlatformConnectAccess(
   if (membership && isCreatorPortalRole(membership.role)) {
     if (membership.linkedCreatorId !== creatorId) {
       return {
-        error: "You can only connect platforms on your own creator profile.",
+        error: "You can only connect or disconnect platforms on your own creator profile.",
       };
     }
     return null;

@@ -184,9 +184,6 @@ export async function disconnectCreatorPlatformAccount(accountId: string) {
   const featureError = await requireCreatorProfilesFeature();
   if (featureError) return featureError;
 
-  const permError = await requireResourceWriteAccess("creators");
-  if (permError) return permError;
-
   const supabase = await createClient();
   if (!supabase) return { error: "Supabase is not configured." };
 
@@ -204,6 +201,9 @@ export async function disconnectCreatorPlatformAccount(accountId: string) {
     return { error: "Platform account not found." };
   }
 
+  const permError = await requireCreatorPlatformConnectAccess(account.creator_id);
+  if (permError) return permError;
+
   const { error } = await supabase
     .from("creator_platform_accounts")
     .update({
@@ -220,6 +220,8 @@ export async function disconnectCreatorPlatformAccount(accountId: string) {
   if (tokenClear.error) return { error: tokenClear.error };
 
   revalidatePath(`/creators/${account.creator_id}`);
+  revalidatePath("/portal");
+  revalidatePath("/portal/revenue");
   revalidatePath("/");
   return { success: true };
 }
