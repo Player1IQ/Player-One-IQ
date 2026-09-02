@@ -53,6 +53,13 @@ function recommendationScore(
   return score;
 }
 
+export function creatorMatchesOpportunity(
+  opportunity: Opportunity,
+  creator: Creator
+): boolean {
+  return getOpportunityFitScore(opportunity, creator) >= 3;
+}
+
 export function getRecommendedOpportunitiesForCreator(
   opportunities: Opportunity[],
   appliedOpportunityIds: Set<string>,

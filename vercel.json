@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/sync-platform-revenue",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/notification-emails",
+      "schedule": "0 14 * * *"
     }
   ]
 }

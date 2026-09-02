@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "crypto";
+import { createPkcePair } from "./pkce";
 import { getTikTokClientCredentials } from "./credentials";
 import { getOAuthRedirectUri } from "./redirect-uri";
 import type { OAuthTokens } from "./tokens";
@@ -35,11 +35,7 @@ export function assertTikTokRedirectUri(redirectUri: string): void {
 }
 
 export function createTikTokPkcePair() {
-  const codeVerifier = randomBytes(32).toString("base64url");
-  const codeChallenge = createHash("sha256")
-    .update(codeVerifier)
-    .digest("base64url");
-  return { codeVerifier, codeChallenge };
+  return createPkcePair();
 }
 
 export async function getTikTokAuthorizeUrl(

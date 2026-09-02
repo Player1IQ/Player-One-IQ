@@ -285,6 +285,11 @@ async function fetchPlatformAudienceSize(
       return typeof followersBody.total === "number" ? followersBody.total : null;
     }
 
+    if (platform === "Kick") {
+      const { fetchKickAudienceSize } = await import("./kick");
+      return fetchKickAudienceSize(accessToken);
+    }
+
     return null;
   } catch {
     return null;

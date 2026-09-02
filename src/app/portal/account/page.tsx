@@ -15,6 +15,7 @@ import {
 } from "@/lib/portal/guard";
 import { roleLabels, isPortalRole, isSponsorPortalRole } from "@/lib/team";
 import { getMyAvatarUrl } from "@/app/account/actions";
+import { getMyNotificationPreferences } from "@/app/notifications/actions";
 
 export default async function PortalAccountPage() {
   const membership = await getCurrentUserMembership();
@@ -22,11 +23,12 @@ export default async function PortalAccountPage() {
     redirect(STAFF_DASHBOARD_PATH);
   }
 
-  const [organization, email, avatarUrl, userId] = await Promise.all([
+  const [organization, email, avatarUrl, userId, notificationPreferences] = await Promise.all([
     getOrganizationForUser(),
     getUserEmail(),
     getMyAvatarUrl(),
     getUserId(),
+    getMyNotificationPreferences(),
   ]);
 
   if (!userId) {
@@ -51,6 +53,7 @@ export default async function PortalAccountPage() {
           profileHref={`/sponsors/${sponsor.id}`}
           userId={userId}
           avatarUrl={avatarUrl}
+          notificationPreferences={notificationPreferences}
         />
       </DashboardLayout>
     );
@@ -78,6 +81,8 @@ export default async function PortalAccountPage() {
           userId={userId}
           avatarUrl={avatarUrl}
           isWorkspaceFounder={membership.isWorkspaceFounder}
+          notificationPreferences={notificationPreferences}
+          showOpportunityEmails
         />
         <CreatorPortalPayoutSection
           creatorId={linkedCreatorId}

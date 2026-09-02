@@ -17,6 +17,7 @@ import { syncTwitchRevenue } from "./twitch";
 import { syncYouTubeRevenue } from "./youtube";
 import { refreshInstagramAccessToken } from "./instagram";
 import { refreshTikTokAccessToken } from "./tiktok";
+import { refreshKickAccessToken, syncKickProfile } from "./kick";
 import { loadPlatformOAuthTokens, savePlatformOAuthTokens } from "./token-store";
 
 export interface PlatformAccountRow {
@@ -116,6 +117,10 @@ export async function ensureFreshTokensForPlatform(
 
   if (platform === "TikTok" && tokens.refresh_token) {
     return refreshTikTokAccessToken(tokens.refresh_token);
+  }
+
+  if (platform === "Kick" && tokens.refresh_token) {
+    return refreshKickAccessToken(tokens.refresh_token);
   }
 
   return tokens;
@@ -253,6 +258,10 @@ export async function syncCreatorPlatformAccountById(
         amount: result.donations,
         periodMonth,
       });
+    } else if (platform === "Kick") {
+      const result = await syncKickProfile(freshTokens.access_token);
+      handle = result.handle;
+      displayName = result.displayName;
     } else {
       return { error: "Automatic sync is not available for this platform yet." };
     }

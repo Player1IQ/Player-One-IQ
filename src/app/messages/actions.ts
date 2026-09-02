@@ -38,6 +38,7 @@ import {
   memberRemovedMessage,
   membersAddedMessage,
 } from "@/lib/messages/system-events";
+import { scheduleNewMessageEmails } from "@/lib/notifications/messages";
 
 async function logMessageActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -1110,6 +1111,12 @@ export async function sendMessage(conversationId: string, content: string) {
   revalidatePath("/messages");
   revalidatePath(`/messages/${conversationId}`);
   revalidatePath("/");
+  scheduleNewMessageEmails({
+    organizationId,
+    conversationId,
+    senderId: currentUserId,
+    preview: trimmed,
+  });
   return { id: message.id };
 }
 

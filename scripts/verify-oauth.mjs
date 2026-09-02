@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Platform OAuth readiness (YouTube, Twitch, Instagram, TikTok).
+ * Platform OAuth readiness (YouTube, Twitch, Instagram, TikTok, Kick).
  * Usage: node scripts/verify-oauth.mjs [appUrl]
  */
 
@@ -66,6 +66,13 @@ const launchPlatforms = [
     clientSecret: env.TIKTOK_CLIENT_SECRET?.trim(),
     callback: `${appUrl}/api/platform-oauth/tiktok/callback`,
   },
+  {
+    name: "Kick",
+    required: false,
+    clientId: env.KICK_CLIENT_ID?.trim(),
+    clientSecret: env.KICK_CLIENT_SECRET?.trim(),
+    callback: `${appUrl}/api/platform-oauth/kick/callback`,
+  },
 ];
 
 async function main() {
@@ -116,13 +123,19 @@ async function main() {
     console.log(`  Register redirect: ${platform.callback}`);
   }
 
-  console.log("\nGoogle / YouTube beta note:");
+  console.log("\nGoogle / YouTube note:");
   console.log(
-    "  OAuth consent screen must be in Testing until verified. Add each beta tester Gmail under"
+    "  Redirect URI must be on the Web OAuth client (not Desktop):"
   );
-  console.log("  Google Cloud → APIs & Services → OAuth consent screen → Test users.");
+  console.log(`  ${appUrl}/api/platform-oauth/youtube/callback`);
   console.log(
-    "  Use the same OAuth client as YOUTUBE_CLIENT_ID. Redirect URI must match exactly.\n"
+    "  Testing mode: add tester Gmails; tokens expire in 7 days."
+  );
+  console.log(
+    "  Google app verification is a post-beta / GA item (Settings → Post-beta launch)."
+  );
+  console.log(
+    "  Use the same OAuth client as YOUTUBE_CLIENT_ID on Vercel.\n"
   );
 
   console.log("\nTikTok beta note:");
@@ -133,13 +146,22 @@ async function main() {
     "  Add beta TikTok accounts as test users if the app is still in sandbox.\n"
   );
 
+  console.log("\nKick note:");
+  console.log(
+    "  Kick Developer Portal → register redirect URI exactly as shown above."
+  );
+  console.log("  OAuth 2.1 + PKCE. Scopes: user:read channel:read.\n");
+
   console.log("\nManual E2E test:");
-  console.log("  1. Creators → open a creator → Connect YouTube / Twitch / Instagram");
+  console.log("  1. Creators → open a creator → Connect YouTube / Twitch / Instagram / TikTok / Kick");
   console.log("  2. Complete OAuth → confirm account shows connected");
   console.log("  3. Instagram requires a Business or Creator Instagram account");
   console.log("  4. Verify revenue/profile sync (or wait for 06:00 UTC cron)");
   console.log(
-    `  5. Cron test: curl -H "Authorization: Bearer $CRON_SECRET" ${appUrl}/api/cron/sync-platform-revenue\n`
+    `  5. Cron tests: curl -H "Authorization: Bearer $CRON_SECRET" ${appUrl}/api/cron/sync-platform-revenue`
+  );
+  console.log(
+    `                 curl -H "Authorization: Bearer $CRON_SECRET" ${appUrl}/api/cron/notification-emails\n`
   );
 
   console.log(

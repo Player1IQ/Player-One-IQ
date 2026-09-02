@@ -1,5 +1,6 @@
 import {
   getInstagramClientCredentials,
+  getKickClientCredentials,
   getTikTokClientCredentials,
   getTwitchClientCredentials,
   getYouTubeClientCredentials,
@@ -36,11 +37,16 @@ export function isTikTokOAuthConfigured(): boolean {
   return Boolean(getTikTokClientCredentials());
 }
 
+export function isKickOAuthConfigured(): boolean {
+  return Boolean(getKickClientCredentials());
+}
+
 export function isPlatformOAuthConfigured(platform: OAuthPlatform): boolean {
   if (platform === "YouTube") return isYouTubeOAuthConfigured();
   if (platform === "Twitch") return isTwitchOAuthConfigured();
   if (platform === "Instagram") return isInstagramOAuthConfigured();
   if (platform === "TikTok") return isTikTokOAuthConfigured();
+  if (platform === "Kick") return isKickOAuthConfigured();
   return false;
 }
 
@@ -56,7 +62,9 @@ export function isPlatformOAuthAvailable(platform: OAuthPlatform): boolean {
     return true;
   }
 
-  return platform === "Instagram" || platform === "TikTok";
+  return (
+    platform === "Instagram" || platform === "TikTok" || platform === "Kick"
+  );
 }
 
 export function getAvailableOAuthPlatforms(): OAuthPlatform[] {
@@ -84,7 +92,7 @@ function getOAuthPlatformUiStatus(platform: OAuthPlatform): OAuthPlatformUiStatu
     return isPlatformOAuthConfigured(platform) ? "available" : "coming_soon";
   }
 
-  if (platform === "Instagram" || platform === "TikTok") {
+  if (platform === "Instagram" || platform === "TikTok" || platform === "Kick") {
     return isPlatformOAuthConfigured(platform) ? "available" : "coming_soon";
   }
 
@@ -117,5 +125,5 @@ export function platformOAuthDescription(platforms: OAuthPlatformUi[]): string {
     return `Connect ${formatOAuthPlatformList(available)} to sync profiles and revenue automatically, or add accounts manually.`;
   }
 
-  return "Link platform accounts manually. YouTube, Twitch, and Instagram auto-sync unlock when OAuth is configured.";
+  return "Link platform accounts manually. YouTube, Twitch, Instagram, TikTok, and Kick auto-sync unlock when OAuth is configured.";
 }

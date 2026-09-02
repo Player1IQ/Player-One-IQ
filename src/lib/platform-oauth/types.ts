@@ -1,6 +1,6 @@
 import type { Platform } from "@/lib/creators";
 
-export type OAuthPlatform = "YouTube" | "Twitch" | "Instagram" | "TikTok";
+export type OAuthPlatform = "YouTube" | "Twitch" | "Instagram" | "TikTok" | "Kick";
 
 export type OAuthPlatformUiStatus = "available" | "coming_soon";
 
@@ -14,6 +14,7 @@ export const oauthPlatforms: OAuthPlatform[] = [
   "Twitch",
   "Instagram",
   "TikTok",
+  "Kick",
 ];
 
 /** Platforms enabled for public launch (v1). */

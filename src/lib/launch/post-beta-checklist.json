@@ -7,14 +7,24 @@
       "title": "Platform integrations (production)",
       "items": [
         {
+          "id": "google-oauth-redirect",
+          "label": "YouTube redirect URI registered on the Web OAuth client",
+          "detail": "Client 351297151080-cqk2t00lr3pem2c209ob2f8k7u6r5dp2 must list https://www.playeroneiq.com/api/platform-oauth/youtube/callback. Confirm Connect YouTube works on the live site."
+        },
+        {
           "id": "google-oauth-production",
-          "label": "Google / YouTube OAuth published to production",
-          "detail": "Submit Google OAuth app for verification; exit Testing mode so any Google user can connect YouTube (not just test users)."
+          "label": "Google OAuth publishing: Testing vs In production",
+          "detail": "Testing: add each tester Gmail; refresh tokens expire every 7 days. In production (unverified): anyone can connect, unverified-app warning, 100-user cap on sensitive scopes. Either is OK for a small beta."
+        },
+        {
+          "id": "google-oauth-verification",
+          "label": "Google OAuth app verification (YouTube scopes)",
+          "detail": "Submit when going public with YouTube connect at scale. Needed to drop the unverified warning and the 100-user cap. Scopes include youtube.readonly, yt-analytics.readonly, and yt-analytics-monetary.readonly (sensitive/restricted). Prepare privacy/terms, a Connect demo video, and allow weeks if Google requires a security assessment. Not a blocker for a small private beta."
         },
         {
           "id": "tiktok-approved",
-          "label": "TikTok Login Kit approved and live",
-          "detail": "Use production Client Key/Secret on Vercel; register redirect on canonical domain."
+          "label": "TikTok Login Kit live (profile connect)",
+          "detail": "Production Client Key/Secret on Vercel; redirect https://www.playeroneiq.com/api/platform-oauth/tiktok/callback. Live app uses user.info.basic only. Add video.list later when TikTok approves it (TIKTOK_OAUTH_SCOPES)."
         },
         {
           "id": "meta-instagram-approved",
@@ -22,9 +32,14 @@
           "detail": "Finish business verification and app review; set INSTAGRAM_CLIENT_ID/SECRET on Vercel."
         },
         {
+          "id": "kick-oauth",
+          "label": "Kick OAuth app registered",
+          "detail": "Create a Kick developer app at kick.com/settings/developer. Set KICK_CLIENT_ID and KICK_CLIENT_SECRET on Vercel. Redirect URI: https://www.playeroneiq.com/api/platform-oauth/kick/callback. Scopes: user:read channel:read."
+        },
+        {
           "id": "oauth-redirects-canonical",
           "label": "All OAuth redirect URIs use canonical domain",
-          "detail": "Update Google, Twitch, TikTok, Meta, and Supabase auth URLs to playeroneiq.com (or www) — remove vercel.app-only URLs when ready."
+          "detail": "Update Google, Twitch, TikTok, Meta, Kick, and Supabase auth URLs to playeroneiq.com (or www) — remove vercel.app-only URLs when ready."
         }
       ]
     },

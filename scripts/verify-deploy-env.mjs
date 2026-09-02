@@ -99,6 +99,16 @@ const checks = [
     hint: "Twitch OAuth",
   },
   {
+    key: "KICK_CLIENT_ID",
+    required: false,
+    hint: "Kick OAuth",
+  },
+  {
+    key: "KICK_CLIENT_SECRET",
+    required: false,
+    hint: "Kick OAuth",
+  },
+  {
     key: "AI_CREDENTIALS_ENCRYPTION_KEY",
     required: false,
     hint: "Required for workspace BYOK keys in Settings → AI integration",

@@ -8,6 +8,7 @@ import { fetchInstagramRecentContent } from "./instagram-content";
 import { fetchTikTokRecentContent } from "./tiktok-content";
 import { fetchTwitchRecentContent } from "./twitch-content";
 import { fetchYouTubeRecentVideos } from "./youtube-content";
+import { fetchKickRecentContent } from "./kick-content";
 
 async function fetchOAuthPlatformContent(
   creatorId: string,
@@ -36,8 +37,12 @@ async function fetchOAuthPlatformContent(
       items = await fetchTwitchRecentContent(tokenResult.accessToken);
     } else if (platform === "Instagram") {
       items = await fetchInstagramRecentContent(tokenResult.accessToken);
-    } else {
+    } else if (platform === "TikTok") {
       items = await fetchTikTokRecentContent(tokenResult.accessToken);
+    } else if (platform === "Kick") {
+      items = await fetchKickRecentContent(tokenResult.accessToken);
+    } else {
+      return { platform, items: [], connectedViaOAuth: false };
     }
 
     return { platform, items, connectedViaOAuth: true };

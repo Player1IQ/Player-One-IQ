@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Bell, CreditCard, Globe, Users } from "lucide-react";
+import { CreditCard, Globe, Users } from "lucide-react";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
 import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
@@ -26,6 +26,7 @@ interface SettingsPageClientProps {
   devTools?: React.ReactNode;
   platformSync?: React.ReactNode;
   payoutSettings?: React.ReactNode;
+  notificationPreferences?: React.ReactNode;
 }
 
 export function SettingsPageClient({
@@ -44,6 +45,7 @@ export function SettingsPageClient({
   devTools,
   platformSync,
   payoutSettings,
+  notificationPreferences,
 }: SettingsPageClientProps) {
   const tLang = useTranslations("language");
   const t = useTranslations("settings");
@@ -177,15 +179,7 @@ export function SettingsPageClient({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/[0.06] bg-surface-raised/80 p-6 backdrop-blur-sm">
-        <div className="flex items-start gap-3">
-          <Bell className="mt-0.5 h-5 w-5 text-accent-light" />
-          <div>
-            <h2 className="text-base font-semibold text-white">{t("notifications.title")}</h2>
-            <p className="mt-1 text-sm text-gray-500">{t("notifications.description")}</p>
-          </div>
-        </div>
-      </section>
+      {notificationPreferences}
 
       {showDevTools && devTools ? (
         <section>

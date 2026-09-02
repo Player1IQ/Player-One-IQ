@@ -33,6 +33,8 @@ import {
 } from "@/lib/messages/system-events";
 import { dispatchOrganizationWebhook } from "@/lib/api/webhooks";
 import { isCreatorPortalRole } from "@/lib/team";
+import { mapOpportunityRow } from "@/lib/opportunities";
+import { scheduleSameOrgOpportunityEmails } from "@/lib/notifications/opportunities";
 
 async function logOpportunityActivity(
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>,
@@ -138,7 +140,7 @@ export async function createOpportunity(input: OpportunityInput) {
       organization_id: organizationId,
       ...toOpportunityPayload(input),
     })
-    .select("id")
+    .select("*, sponsors ( company_name )")
     .single();
 
   if (insertError) return { error: insertError.message };
@@ -149,6 +151,8 @@ export async function createOpportunity(input: OpportunityInput) {
     summary: "Opportunity created",
     detail: input.title.trim(),
   });
+
+  scheduleSameOrgOpportunityEmails(mapOpportunityRow(data));
 
   revalidatePath("/opportunities");
   revalidatePath("/");
@@ -199,6 +203,18 @@ export async function updateOpportunity(id: string, input: OpportunityInput) {
   if (updateError) return { error: updateError.message };
 
   const statusChanged = existing.status !== input.status;
+
+  if (existing.status !== "open" && input.status === "open") {
+    const { data: opened } = await supabase
+      .from("opportunities")
+      .select("*, sponsors ( company_name )")
+      .eq("id", id)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (opened) {
+      scheduleSameOrgOpportunityEmails(mapOpportunityRow(opened));
+    }
+  }
 
   await logOpportunityActivity(supabase, organizationId, {
     entityId: id,

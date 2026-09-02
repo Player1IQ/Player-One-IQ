@@ -39,7 +39,7 @@ const creatorTour: OnboardingTourItem[] = [
   {
     title: "Deliverables",
     description:
-      "See sponsored content due dates, upload proof, and stay on top of campaign obligations.",
+      "See sponsored content due dates, mark items complete, and stay on top of campaign obligations.",
     href: "/portal/deliverables",
     icon: "file-text",
   },

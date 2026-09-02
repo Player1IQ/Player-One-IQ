@@ -24,7 +24,8 @@ function isConnectableOAuthPlatform(platform: OAuthPlatformUi["platform"]): bool
     platform === "YouTube" ||
     platform === "Twitch" ||
     platform === "Instagram" ||
-    platform === "TikTok"
+    platform === "TikTok" ||
+    platform === "Kick"
   );
 }
 

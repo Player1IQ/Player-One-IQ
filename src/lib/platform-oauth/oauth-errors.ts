@@ -31,6 +31,9 @@ function normalizeOAuthErrorCode(error: string): string {
   if (lower === "youtube_not_configured") {
     return "youtube_not_configured";
   }
+  if (lower === "kick_not_configured") {
+    return "kick_not_configured";
+  }
   if (lower === "invalid_state") {
     return "invalid_state";
   }
@@ -94,6 +97,14 @@ export function formatPlatformOAuthError(
         title: "YouTube connection unavailable",
         message:
           "YouTube OAuth is not configured on this environment yet. Try another platform or add your handle manually.",
+      };
+    case "kick_not_configured":
+      return {
+        title: "Kick connection unavailable",
+        message:
+          "Kick OAuth is not configured on this environment yet. Try another platform or add your handle manually.",
+        adminHint:
+          "Create a Kick developer app, set KICK_CLIENT_ID and KICK_CLIENT_SECRET on Vercel, and register https://www.playeroneiq.com/api/platform-oauth/kick/callback.",
       };
     case "invalid_state":
       return {

@@ -9,15 +9,16 @@ import {
   type OAuthPlatform,
 } from "./config";
 import { createOAuthState, verifyOAuthState } from "./state";
+import { createPkcePair } from "./pkce";
 import {
   exchangeInstagramCode,
   getInstagramAuthorizeUrl,
 } from "./instagram";
 import {
   exchangeTikTokCode,
-  createTikTokPkcePair,
   getTikTokAuthorizeUrl,
 } from "./tiktok";
+import { exchangeKickCode, getKickAuthorizeUrl } from "./kick";
 import { exchangeTwitchCode, getTwitchAuthorizeUrl } from "./twitch";
 import { exchangeYouTubeCode, getYouTubeAuthorizeUrl } from "./youtube";
 import { syncCreatorPlatformAccountById } from "./sync-account";
@@ -44,7 +45,7 @@ function sanitizeOAuthReturnTo(returnTo: string | null | undefined): string | nu
 async function getAuthorizeUrl(
   platform: OAuthPlatform,
   state: string,
-  tiktokCodeChallenge?: string
+  pkceChallenge?: string
 ) {
   switch (platform) {
     case "YouTube":
@@ -54,10 +55,15 @@ async function getAuthorizeUrl(
     case "Instagram":
       return getInstagramAuthorizeUrl(state);
     case "TikTok":
-      if (!tiktokCodeChallenge) {
+      if (!pkceChallenge) {
         throw new Error("TikTok OAuth requires PKCE.");
       }
-      return getTikTokAuthorizeUrl(state, tiktokCodeChallenge);
+      return getTikTokAuthorizeUrl(state, pkceChallenge);
+    case "Kick":
+      if (!pkceChallenge) {
+        throw new Error("Kick OAuth requires PKCE.");
+      }
+      return getKickAuthorizeUrl(state, pkceChallenge);
   }
 }
 
@@ -78,6 +84,11 @@ async function exchangeCode(
         throw new Error("TikTok OAuth session expired. Please try again.");
       }
       return exchangeTikTokCode(code, pkceVerifier);
+    case "Kick":
+      if (!pkceVerifier) {
+        throw new Error("Kick OAuth session expired. Please try again.");
+      }
+      return exchangeKickCode(code, pkceVerifier);
   }
 }
 
@@ -135,8 +146,8 @@ export async function handlePlatformOAuthStart(
     return NextResponse.json({ error: "Creator not found." }, { status: 404 });
   }
 
-  const tiktokPkce =
-    platform === "TikTok" ? createTikTokPkcePair() : null;
+  const pkce =
+    platform === "TikTok" || platform === "Kick" ? createPkcePair() : null;
 
   try {
     assertPlatformCredentials(platform);
@@ -152,7 +163,7 @@ export async function handlePlatformOAuthStart(
     creatorId,
     organizationId,
     platform,
-    pkceVerifier: tiktokPkce?.codeVerifier,
+    pkceVerifier: pkce?.codeVerifier,
     returnTo: returnTo ?? undefined,
   });
 
@@ -175,7 +186,7 @@ export async function handlePlatformOAuthStart(
     const authorizeUrl = await getAuthorizeUrl(
       platform,
       state,
-      tiktokPkce?.codeChallenge
+      pkce?.codeChallenge
     );
     return NextResponse.redirect(authorizeUrl);
   } catch (err) {

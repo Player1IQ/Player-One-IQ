@@ -16,6 +16,7 @@ const MIDDLEWARE_PUBLIC_PREFIX_ROUTES = [
   ...PUBLIC_PREFIX_ROUTES,
   "/api/billing/webhook",
   "/api/health",
+  "/api/cron",
   "/api/v1",
 ];
 

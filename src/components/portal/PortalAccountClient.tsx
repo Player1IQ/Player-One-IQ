@@ -15,7 +15,9 @@ import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { ReplayOnboardingButton } from "@/components/onboarding/ReplayOnboardingButton";
 import { ReplayPortalTourButton } from "@/components/onboarding/ReplayPortalTourButton";
 import { ProfilePhotoUpload } from "@/components/account/ProfilePhotoUpload";
+import { NotificationPreferencesForm } from "@/components/settings/NotificationPreferencesForm";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
+import type { NotificationPreferences } from "@/lib/notifications/types";
 
 interface PortalAccountClientProps {
   organizationName: string;
@@ -26,6 +28,8 @@ interface PortalAccountClientProps {
   userId: string;
   avatarUrl?: string | null;
   isWorkspaceFounder?: boolean;
+  notificationPreferences: NotificationPreferences;
+  showOpportunityEmails?: boolean;
 }
 
 export function PortalAccountClient({
@@ -37,6 +41,8 @@ export function PortalAccountClient({
   userId,
   avatarUrl,
   isWorkspaceFounder = false,
+  notificationPreferences,
+  showOpportunityEmails = false,
 }: PortalAccountClientProps) {
   const tLang = useTranslations("language");
   const t = useTranslations("portal.account");
@@ -122,6 +128,16 @@ export function PortalAccountClient({
               {profileLabel}
             </Link>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="pt-6">
+          <NotificationPreferencesForm
+            initial={notificationPreferences}
+            compact
+            showOpportunityEmails={showOpportunityEmails}
+          />
         </CardContent>
       </Card>
 

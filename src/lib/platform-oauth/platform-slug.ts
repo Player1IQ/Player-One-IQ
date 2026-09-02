@@ -5,6 +5,7 @@ const platformSlugs: Record<OAuthPlatform, string> = {
   Twitch: "twitch",
   Instagram: "instagram",
   TikTok: "tiktok",
+  Kick: "kick",
 };
 
 export function getOAuthPlatformSlug(platform: OAuthPlatform): string {

@@ -7,6 +7,7 @@ export const contentCoachPlatforms: ContentCoachPlatform[] = [
   "Twitch",
   "Instagram",
   "TikTok",
+  "Kick",
 ];
 
 export type ContentItemType = "video" | "stream" | "clip" | "post" | "reel";

@@ -32,7 +32,14 @@
   },
   "notifications": {
     "title": "Notificaciones",
-    "description": "Las notificaciones de mensajes nuevos aparecen abajo a la derecha mientras trabajas en el panel. Los contadores de no leídos se actualizan automáticamente en la barra lateral."
+    "description": "Los avisos en la app siguen apareciendo mientras trabajas. Usa estos interruptores para elegir qué correos recibes.",
+    "dealDeadlines": "Fechas límite de deals y entregables",
+    "dealDeadlinesDescription": "Correo cuando un entregable vence en 3 días o 1 día, o un deal termina en 7 días.",
+    "newOpportunities": "Oportunidades que encajan",
+    "newOpportunitiesDescription": "Correo cuando una oportunidad nueva encaja con tu perfil de creador.",
+    "newMessages": "Mensajes nuevos",
+    "newMessagesDescription": "Correo cuando alguien te escribe. Como máximo un correo por conversación cada 15 minutos.",
+    "saved": "Preferencias guardadas."
   },
   "development": {
     "title": "Desarrollo"

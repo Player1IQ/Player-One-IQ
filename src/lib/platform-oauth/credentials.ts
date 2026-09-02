@@ -56,6 +56,18 @@ export function getTikTokClientCredentials():
   return { clientKey, clientSecret };
 }
 
+export function getKickClientCredentials():
+  | { clientId: string; clientSecret: string }
+  | null {
+  const clientId = trimEnv(process.env.KICK_CLIENT_ID);
+  const clientSecret = trimEnv(process.env.KICK_CLIENT_SECRET);
+  if (!clientId || !clientSecret) return null;
+  if (PLACEHOLDER_PATTERN.test(clientId) || PLACEHOLDER_PATTERN.test(clientSecret)) {
+    return null;
+  }
+  return { clientId, clientSecret };
+}
+
 export function isTikTokClientKeyWellFormed(clientKey: string): boolean {
   return /^[a-zA-Z0-9]{8,64}$/.test(clientKey);
 }
@@ -87,6 +99,12 @@ export function assertPlatformCredentials(platform: OAuthPlatform): void {
       }
       if (!isTikTokClientKeyWellFormed(creds.clientKey)) {
         throw new Error("tiktok_invalid_client_key");
+      }
+      return;
+    }
+    case "Kick": {
+      if (!getKickClientCredentials()) {
+        throw new Error("kick_not_configured");
       }
       return;
     }

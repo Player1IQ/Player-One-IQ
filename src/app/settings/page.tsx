@@ -33,6 +33,8 @@ import { isSeedEnabled } from "@/lib/seed/constants";
 import { getCreators } from "@/lib/creators/queries";
 import { getPayoutRecipientsForOrg } from "@/lib/payments/queries";
 import { PayoutSettingsSection } from "@/components/payments/PayoutSettingsSection";
+import { NotificationPreferencesForm } from "@/components/settings/NotificationPreferencesForm";
+import { getMyNotificationPreferences } from "@/app/notifications/actions";
 import { getMyAvatarUrl } from "@/app/account/actions";
 import { formatDate } from "@/lib/i18n/format";
 
@@ -62,7 +64,17 @@ async function getOAuthConnectedAccountCount(): Promise<number> {
 
 export default async function SettingsPage() {
   const t = await getTranslations("pages.settings");
-  const [organization, membership, role, memberCount, oauthConnectedCount, payoutRecipients, creators, avatarUrl] =
+  const [
+    organization,
+    membership,
+    role,
+    memberCount,
+    oauthConnectedCount,
+    payoutRecipients,
+    creators,
+    avatarUrl,
+    notificationPreferences,
+  ] =
     await Promise.all([
       getOrganizationForUser(),
       getCurrentUserMembership(),
@@ -72,6 +84,7 @@ export default async function SettingsPage() {
       getPayoutRecipientsForOrg(),
       getCreators(),
       getMyAvatarUrl(),
+      getMyNotificationPreferences(),
     ]);
 
   const isWorkspaceFounder = membership?.isWorkspaceFounder ?? false;
@@ -136,6 +149,14 @@ export default async function SettingsPage() {
               creatorRecipients={creatorRecipients}
               creators={creators}
               canEdit={canEdit}
+            />
+          ) : undefined
+        }
+        notificationPreferences={
+          canView ? (
+            <NotificationPreferencesForm
+              initial={notificationPreferences}
+              showOpportunityEmails={false}
             />
           ) : undefined
         }

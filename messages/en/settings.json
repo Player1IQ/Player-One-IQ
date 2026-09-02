@@ -32,7 +32,14 @@
   },
   "notifications": {
     "title": "Notifications",
-    "description": "New message toasts appear in the bottom-right while you work in the dashboard. Unread counts update in the sidebar automatically."
+    "description": "In-app toasts still appear while you work. Use these toggles to choose which emails you receive.",
+    "dealDeadlines": "Deal and deliverable deadlines",
+    "dealDeadlinesDescription": "Email when a deliverable is due in 3 days or 1 day, or a deal ends in 7 days.",
+    "newOpportunities": "Matching opportunities",
+    "newOpportunitiesDescription": "Email when a new opportunity fits your creator profile.",
+    "newMessages": "New messages",
+    "newMessagesDescription": "Email when someone messages you. At most one email per conversation every 15 minutes.",
+    "saved": "Preferences saved."
   },
   "development": {
     "title": "Development"

@@ -1,5 +1,12 @@
 import { headers } from "next/headers";
 
+export function getConfiguredAppUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ??
+    "https://www.playeroneiq.com"
+  );
+}
+
 export async function getAppOrigin(): Promise<string> {
   const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
   if (configured) return configured;
