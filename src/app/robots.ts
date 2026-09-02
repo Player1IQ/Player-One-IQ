@@ -28,6 +28,7 @@ export default function robots(): MetadataRoute.Robots {
         "/reports",
         "/ai",
         "/invite/",
+        "/kit/",
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,

@@ -10,6 +10,7 @@ const PUBLIC_PREFIX_ROUTES = [
   "/welcome",
   "/invite",
   "/founding",
+  "/kit",
 ];
 
 const MIDDLEWARE_PUBLIC_PREFIX_ROUTES = [
