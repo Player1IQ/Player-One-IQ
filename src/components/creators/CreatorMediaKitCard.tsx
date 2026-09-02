@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Copy, Link2, Loader2, RefreshCw, RotateCcw } from "lucide-react";
 import {
   saveCreatorMediaKit,
@@ -50,9 +50,15 @@ const SECTION_TOGGLES: Array<{
   },
 ];
 
-function kitUrl(token: string): string {
-  if (typeof window === "undefined") return `/kit/${token}`;
-  return `${window.location.origin}/kit/${token}`;
+function formatUtcTimestamp(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
 }
 
 export function CreatorMediaKitCard({
@@ -78,6 +84,15 @@ export function CreatorMediaKitCard({
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [origin, setOrigin] = useState("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  function kitUrl(kitToken: string): string {
+    return origin ? `${origin}/kit/${kitToken}` : `/kit/${kitToken}`;
+  }
 
   function applyKit(kit: MediaKitRecord) {
     setEnabled(kit.enabled);
@@ -158,7 +173,7 @@ export function CreatorMediaKitCard({
   }
 
   const lastUpdated = snapshotUpdatedAt
-    ? new Date(snapshotUpdatedAt).toLocaleString()
+    ? formatUtcTimestamp(snapshotUpdatedAt)
     : null;
 
   return (
