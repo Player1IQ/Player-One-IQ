@@ -20,6 +20,8 @@ import { isCreatorPortalRole, isPortalRole } from "@/lib/team";
 import { getOAuthPlatformUi } from "@/lib/platform-oauth/config";
 import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
+import { createClient } from "@/lib/supabase/server";
+import { loadMediaKitForCreator } from "@/lib/media-kit/store";
 import {
   creatorContentAnalysisFeatureKeys,
   hasAnyFeature,
@@ -87,6 +89,12 @@ export default async function CreatorDetailPage({
   const canWriteRevenue =
     hasFullAccess(role, "creators") ||
     (isCreatorPortalRole(role) && membership?.linkedCreatorId === id);
+  const canManageMediaKit = canWriteRevenue;
+  const supabase = canManageMediaKit ? await createClient() : null;
+  const mediaKit =
+    canManageMediaKit && supabase && organizationId
+      ? await loadMediaKitForCreator(supabase, id, organizationId)
+      : null;
 
   return (
     <DashboardLayout title={creator.name} description={subtitle}>
@@ -100,6 +108,8 @@ export default async function CreatorDetailPage({
         oauthError={oauthError ?? null}
         canWrite={hasFullAccess(role, "creators")}
         canWriteRevenue={canWriteRevenue}
+        canManageMediaKit={canManageMediaKit}
+        mediaKit={mediaKit}
         isPortalUser={isPortalUser}
         isContentCreator={isCreatorPortalRole(role)}
         canUseContentAi={hasAnyFeature(

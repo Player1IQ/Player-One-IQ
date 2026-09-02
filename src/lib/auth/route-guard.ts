@@ -68,7 +68,13 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
     redirect(`/invite/${pendingInvite.token}`);
   }
 
-  if (!hasOrganization && !isOrgSetup && !isInviteRoute && !isOnboarding) {
+  if (
+    !hasOrganization &&
+    !isOrgSetup &&
+    !isInviteRoute &&
+    !isOnboarding &&
+    !isPublicRoute
+  ) {
     redirect("/organization-setup");
   }
 

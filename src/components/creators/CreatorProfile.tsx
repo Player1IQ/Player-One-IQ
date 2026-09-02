@@ -43,7 +43,9 @@ import {
 import { CreatorOAuthBanner } from "./CreatorOAuthBanner";
 import { CreatorContentCoach } from "./CreatorContentCoach";
 import { CreatorAudienceGrowth } from "./CreatorAudienceGrowth";
+import { CreatorMediaKitCard } from "./CreatorMediaKitCard";
 import type { CreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
+import type { MediaKitRecord } from "@/lib/media-kit/types";
 import type { ContractPayment } from "@/lib/payments/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -68,6 +70,8 @@ interface CreatorProfileProps {
   periodMonth?: string;
   payments?: ContractPayment[];
   canWriteRevenue?: boolean;
+  canManageMediaKit?: boolean;
+  mediaKit?: MediaKitRecord | null;
 }
 
 function Section({
@@ -112,6 +116,8 @@ export function CreatorProfile({
   periodMonth,
   payments = [],
   canWriteRevenue = false,
+  canManageMediaKit = false,
+  mediaKit = null,
 }: CreatorProfileProps) {
   const connectedOAuthPlatforms = platformAccounts
     .filter((account) => account.connectionStatus === "connected_oauth")
@@ -286,6 +292,14 @@ export function CreatorProfile({
         canViewAnalytics={canViewAnalytics}
         canViewAdvancedAnalytics={canViewAdvancedAnalytics}
       />
+
+      {canManageMediaKit ? (
+        <CreatorMediaKitCard
+          creatorId={creator.id}
+          initialKit={mediaKit}
+          isPortalUser={isPortalUser}
+        />
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title={isPortalUser ? "Your information" : "Creator Information"}>
