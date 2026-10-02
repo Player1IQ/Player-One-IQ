@@ -2,7 +2,11 @@
 
 import { Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { formatPlanPrice, planRequiresStripeCheckout } from "@/lib/subscription/plans";
+import {
+  formatPlanPrice,
+  getPlanCardHighlights,
+  planRequiresStripeCheckout,
+} from "@/lib/subscription/plans";
 import { PLATFORM_TRIAL_DAYS } from "@/lib/subscription/trials";
 import type { BillingInterval, PlanCode, SubscriptionPlan } from "@/lib/subscription/types";
 
@@ -32,10 +36,26 @@ export function SubscriptionPlanCard({
   trialUsed = false,
 }: SubscriptionPlanCardProps) {
   const t = useTranslations("subscription");
-  const highlights = {
-    tagline: t(`plans.${plan.code}.tagline`),
-    bullets: t.raw(`plans.${plan.code}.bullets`) as string[],
-  };
+  const fallback = getPlanCardHighlights(plan);
+  let highlights = fallback;
+  try {
+    const raw = t.raw(`plans.${plan.code}`) as {
+      tagline?: unknown;
+      bullets?: unknown;
+    };
+    const bullets = Array.isArray(raw?.bullets)
+      ? raw.bullets.filter((item): item is string => typeof item === "string")
+      : fallback.bullets;
+    highlights = {
+      tagline:
+        typeof raw?.tagline === "string" && raw.tagline.trim()
+          ? raw.tagline
+          : fallback.tagline,
+      bullets,
+    };
+  } catch {
+    highlights = fallback;
+  }
   const priceCents =
     billingInterval === "yearly" && plan.priceYearlyCents !== null
       ? plan.priceYearlyCents

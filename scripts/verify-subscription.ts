@@ -17,7 +17,8 @@ import type { FeatureKey } from "../src/lib/subscription/types";
 // Default plan mapping
 assert.equal(getDefaultPlanForOrgType("Creator Organization"), "free_creator");
 assert.equal(getDefaultPlanForOrgType("Brand / Sponsor"), "sponsor");
-assert.equal(getDefaultPlanForOrgType("Gaming Agency"), "agency");
+assert.equal(getDefaultPlanForOrgType("Gaming Agency"), "agency_starter");
+assert.equal(getDefaultPlanForOrgType("Other"), "agency_starter");
 
 // Limits parsing
 assert.deepEqual(parsePlanLimits({ creators: 1, team_members: 0, ai_requests: 50 }), {

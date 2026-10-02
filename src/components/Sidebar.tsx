@@ -133,6 +133,7 @@ export function Sidebar({
         {items.map((item) => {
           const isActive = item.href === activeHref;
           const Icon = navIcons[item.icon];
+          if (!Icon) return null;
 
           return (
             <Link

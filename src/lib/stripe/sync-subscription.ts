@@ -1,6 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
-import type { BillingInterval, SubscriptionStatus } from "@/lib/subscription/types";
+import { findPlanCodeForTestStripePriceId } from "@/lib/stripe/test-prices";
+import { getPostTrialPlanCode } from "@/lib/subscription/trials";
+import type {
+  BillingInterval,
+  PlanCode,
+  SubscriptionStatus,
+} from "@/lib/subscription/types";
 
 function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
   switch (status) {
@@ -73,17 +79,107 @@ async function findPlanIdByStripePriceId(
   return data?.id ?? null;
 }
 
+async function findPlanIdByCode(
+  supabase: SupabaseClient,
+  planCode: string
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("subscription_plans")
+    .select("id")
+    .eq("code", planCode)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
+async function findPlanIdForStripeSubscription(
+  supabase: SupabaseClient,
+  priceId: string,
+  metadataPlanCode: string | undefined
+): Promise<string | null> {
+  const byPrice = await findPlanIdByStripePriceId(supabase, priceId);
+  if (byPrice) return byPrice;
+
+  const testPlanCode = findPlanCodeForTestStripePriceId(priceId);
+  if (testPlanCode) {
+    const byTestPrice = await findPlanIdByCode(supabase, testPlanCode);
+    if (byTestPrice) return byTestPrice;
+  }
+
+  if (metadataPlanCode) {
+    return findPlanIdByCode(supabase, metadataPlanCode);
+  }
+
+  return null;
+}
+
+function isEndedStripeSubscription(
+  stripeSubscription: Stripe.Subscription
+): boolean {
+  return (
+    stripeSubscription.status === "canceled" ||
+    stripeSubscription.status === "incomplete_expired"
+  );
+}
+
 export async function syncOrganizationSubscriptionFromStripe(
   supabase: SupabaseClient,
   organizationId: string,
   stripeSubscription: Stripe.Subscription
 ): Promise<{ error?: string }> {
+  const customerId =
+    typeof stripeSubscription.customer === "string"
+      ? stripeSubscription.customer
+      : stripeSubscription.customer.id;
+
+  if (isEndedStripeSubscription(stripeSubscription)) {
+    const paidPlanCode = stripeSubscription.metadata?.plan_code as
+      | PlanCode
+      | undefined;
+    const starterCode = paidPlanCode
+      ? getPostTrialPlanCode(paidPlanCode)
+      : "agency_starter";
+    const starterPlanId = await findPlanIdByCode(supabase, starterCode);
+    if (!starterPlanId) {
+      return { error: `No plan mapped for ${starterCode}.` };
+    }
+
+    const now = new Date();
+    const periodEnd = new Date(now);
+    periodEnd.setUTCMonth(periodEnd.getUTCMonth() + 1);
+
+    const { error } = await supabase.from("organization_subscriptions").upsert(
+      {
+        organization_id: organizationId,
+        plan_id: starterPlanId,
+        status: "active",
+        billing_interval: "monthly",
+        current_period_start: now.toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        trial_ends_at: null,
+        canceled_at: stripeSubscription.canceled_at
+          ? new Date(stripeSubscription.canceled_at * 1000).toISOString()
+          : now.toISOString(),
+        stripe_customer_id: customerId,
+        stripe_subscription_id: null,
+        updated_at: now.toISOString(),
+      },
+      { onConflict: "organization_id" }
+    );
+
+    if (error) return { error: error.message };
+    return {};
+  }
+
   const priceId = stripeSubscription.items.data[0]?.price?.id;
   if (!priceId) {
     return { error: "Stripe subscription has no price item." };
   }
 
-  const planId = await findPlanIdByStripePriceId(supabase, priceId);
+  const planId = await findPlanIdForStripeSubscription(
+    supabase,
+    priceId,
+    stripeSubscription.metadata?.plan_code
+  );
   if (!planId) {
     return { error: `No plan mapped for Stripe price ${priceId}.` };
   }
@@ -92,11 +188,6 @@ export async function syncOrganizationSubscriptionFromStripe(
   if (!billingPeriod) {
     return { error: "Stripe subscription has no billing period." };
   }
-
-  const customerId =
-    typeof stripeSubscription.customer === "string"
-      ? stripeSubscription.customer
-      : stripeSubscription.customer.id;
 
   const { error } = await supabase.from("organization_subscriptions").upsert(
     {
@@ -115,7 +206,9 @@ export async function syncOrganizationSubscriptionFromStripe(
         : null,
       canceled_at: stripeSubscription.canceled_at
         ? new Date(stripeSubscription.canceled_at * 1000).toISOString()
-        : null,
+        : stripeSubscription.cancel_at_period_end
+          ? new Date().toISOString()
+          : null,
       stripe_customer_id: customerId,
       stripe_subscription_id: stripeSubscription.id,
       updated_at: new Date().toISOString(),

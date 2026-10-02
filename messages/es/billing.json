@@ -3,12 +3,16 @@
   "pageDescription": "Gestiona tu plan de suscripción y uso",
   "checkout": {
     "success": "Pago exitoso. Tu plan se actualizará en unos segundos.",
-    "canceled": "Pago cancelado. No se realizaron cambios."
+    "canceled": "Pago cancelado. No se realizaron cambios.",
+    "portalReturned": "Datos de facturación actualizados.",
+    "subscriptionCanceled": "Tu suscripción fue cancelada.",
+    "alreadyCanceling": "Esta suscripción ya está programada para cancelarse al final del período de facturación."
   },
   "currentPlan": "Plan actual",
   "usage": "Uso",
   "aiUsage": "Uso de IA",
   "manageBilling": "Gestionar facturación",
+  "cancelSubscription": "Cancelar suscripción",
   "upgradePlan": "Mejorar plan",
   "startTrial": "Iniciar prueba",
   "selectPlan": "Seleccionar plan",

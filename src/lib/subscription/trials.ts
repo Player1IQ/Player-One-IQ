@@ -1,3 +1,8 @@
+import {
+  agencyOrganizationTypes,
+  creatorPlayerOrgType,
+  sponsorBrandOrgType,
+} from "@/lib/organization";
 import type { PlanCode, PlanLimits, SubscriptionPlan } from "./types";
 
 /** Platform trial length for new workspaces (no Stripe subscription yet). */
@@ -17,16 +22,9 @@ export function supportsPlatformTrial(planCode: PlanCode): boolean {
 
 /** Paid entry plan each org type starts on during signup trial. */
 export function getTrialPlanForOrgType(orgType: string): PlanCode {
-  if (orgType === "Brand / Sponsor") return "sponsor_pro";
-  if (orgType === "Creator / Player") return "creator_pro";
-  if (
-    [
-      "Gaming Agency",
-      "Esports Team",
-      "Multi-Channel Network",
-      "Talent Management Firm",
-    ].includes(orgType)
-  ) {
+  if (orgType === sponsorBrandOrgType) return "sponsor_pro";
+  if (orgType === creatorPlayerOrgType) return "creator_pro";
+  if ((agencyOrganizationTypes as readonly string[]).includes(orgType)) {
     return "agency";
   }
   return "creator_pro";

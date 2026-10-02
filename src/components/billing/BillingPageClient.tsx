@@ -10,10 +10,13 @@ import {
   Zap,
   Crown,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
+  openStripeCancelPortal,
   openStripeCustomerPortal,
   selectBillingPlan,
+  syncCheckoutSession,
+  syncCurrentStripeSubscription,
 } from "@/lib/billing/stripe-actions";
 import { SubscriptionPlanCard } from "@/components/subscription/SubscriptionPlanCard";
 import { UsageMeter } from "@/components/subscription/UsageMeter";
@@ -58,6 +61,7 @@ export function BillingPageClient({
 }: BillingPageClientProps) {
   const t = useTranslations("billing");
   const locale = useLocale();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [billingInterval, setBillingInterval] =
     useState<BillingInterval>("monthly");
@@ -72,15 +76,51 @@ export function BillingPageClient({
 
   const currentPlan = subscription?.plan;
   const hasStripeCustomer = Boolean(subscription?.stripeCustomerId);
+  const hasStripeSubscription = Boolean(subscription?.stripeSubscriptionId);
 
   useEffect(() => {
     const checkout = searchParams.get("checkout");
+    const sessionId = searchParams.get("session_id");
+    const portalReturn = searchParams.get("portal") === "return";
+    const subscriptionCanceled =
+      searchParams.get("subscription") === "canceled";
+
     if (checkout === "success") {
       setMessage(t("checkout.success"));
-    } else if (checkout === "canceled") {
-      setMessage(t("checkout.canceled"));
+      if (canManage && sessionId) {
+        void syncCheckoutSession(sessionId).then((result) => {
+          if ("error" in result && result.error) {
+            setError(result.error);
+            return;
+          }
+          router.refresh();
+        });
+      }
+      return;
     }
-  }, [searchParams, t]);
+
+    if (checkout === "canceled") {
+      setMessage(t("checkout.canceled"));
+      return;
+    }
+
+    if (portalReturn || subscriptionCanceled) {
+      setMessage(
+        subscriptionCanceled
+          ? t("checkout.subscriptionCanceled")
+          : t("checkout.portalReturned")
+      );
+      if (canManage) {
+        void syncCurrentStripeSubscription().then((result) => {
+          if ("error" in result && result.error) {
+            setError(result.error);
+            return;
+          }
+          router.refresh();
+        });
+      }
+    }
+  }, [canManage, router, searchParams, t]);
 
   function runPlanAction(
     planCode: PlanCode,
@@ -136,6 +176,25 @@ export function BillingPageClient({
       const result = await openStripeCustomerPortal();
       if ("error" in result && result.error) {
         setError(result.error);
+        return;
+      }
+      if ("portalUrl" in result && result.portalUrl) {
+        window.location.href = result.portalUrl;
+      }
+    });
+  }
+
+  function handleCancelSubscription() {
+    setError("");
+    startPortalTransition(async () => {
+      const result = await openStripeCancelPortal();
+      if ("error" in result && result.error) {
+        setError(result.error);
+        return;
+      }
+      if ("alreadyCanceled" in result && result.alreadyCanceled) {
+        setMessage(t("checkout.alreadyCanceling"));
+        router.refresh();
         return;
       }
       if ("portalUrl" in result && result.portalUrl) {
@@ -217,16 +276,32 @@ export function BillingPageClient({
                 </p>
               )}
             </div>
-            {canManage && hasStripeCustomer && (
-              <Button
-                variant="secondary"
-                onClick={handleManageBilling}
-                disabled={portalPending}
-              >
-                <CreditCard className="h-4 w-4" />
-                {portalPending ? "..." : t("manageBilling")}
-              </Button>
-            )}
+            {canManage && hasStripeCustomer ? (
+              <div className="flex flex-col gap-2 sm:items-end">
+                <Button
+                  variant="secondary"
+                  onClick={handleManageBilling}
+                  disabled={portalPending}
+                >
+                  <CreditCard className="h-4 w-4" />
+                  {portalPending ? "..." : t("manageBilling")}
+                </Button>
+                {hasStripeSubscription && !subscription?.canceledAt ? (
+                  <button
+                    type="button"
+                    onClick={handleCancelSubscription}
+                    disabled={portalPending}
+                    className="text-sm text-gray-500 hover:text-red-400"
+                  >
+                    {t("cancelSubscription")}
+                  </button>
+                ) : hasStripeSubscription && subscription?.canceledAt ? (
+                  <p className="text-xs text-amber-200/80">
+                    {t("checkout.alreadyCanceling")}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
       </GlowCard>

@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   agencyOrganizationTypes,
   creatorPlayerOrgType,
+  sponsorBrandOrgType,
   type SignupAccountType,
 } from "@/lib/organization";
 import { platforms, type Platform } from "@/lib/creators";
@@ -15,8 +16,6 @@ import { setupCreatorPlayerWorkspace } from "@/lib/organization/creator-setup";
 import { beginOnboarding } from "@/app/onboarding/actions";
 import { markOnboardingStartedClient } from "@/lib/onboarding/client";
 import { AuthInput } from "./AuthInput";
-
-const agencyAndCreatorTypes = [creatorPlayerOrgType, ...agencyOrganizationTypes];
 
 export function OrganizationSetupForm({
   accountType = "agency",
@@ -26,13 +25,13 @@ export function OrganizationSetupForm({
   const t = useTranslations("onboarding.organizationSetupForm");
   const router = useRouter();
   const isSponsor = accountType === "sponsor";
+  const isCreator = accountType === "creator";
   const typeOptions = isSponsor
-    ? (["Brand / Sponsor"] as const)
-    : agencyAndCreatorTypes;
-  const defaultType =
-    accountType === "creator" || !isSponsor
-      ? creatorPlayerOrgType
-      : typeOptions[0];
+    ? ([sponsorBrandOrgType] as const)
+    : isCreator
+      ? ([creatorPlayerOrgType] as const)
+      : agencyOrganizationTypes;
+  const defaultType = typeOptions[0];
   const [name, setName] = useState("");
   const [type, setType] = useState<string>(defaultType);
   const [primaryPlatform, setPrimaryPlatform] = useState<Platform>("YouTube");

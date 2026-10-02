@@ -1,4 +1,9 @@
 import enSubscription from "../../../messages/en/subscription.json";
+import {
+  agencyOrganizationTypes,
+  creatorPlayerOrgType,
+  sponsorBrandOrgType,
+} from "@/lib/organization";
 import type {
   FeatureKey,
   PlanCode,
@@ -115,6 +120,18 @@ export const planHighlights: Record<
   sponsor_pro: enSubscription.plans.sponsor_pro,
 };
 
+export function getPlanCardHighlights(plan: Pick<SubscriptionPlan, "code" | "description">): {
+  tagline: string;
+  bullets: string[];
+} {
+  return (
+    planHighlights[plan.code] ?? {
+      tagline: plan.description,
+      bullets: [],
+    }
+  );
+}
+
 export const upgradePaths: Record<PlanCode, PlanCode[]> = {
   free_creator: ["creator_pro"],
   creator_pro: [],
@@ -126,16 +143,9 @@ export const upgradePaths: Record<PlanCode, PlanCode[]> = {
 };
 
 export function getDefaultPlanForOrgType(orgType: string): PlanCode {
-  if (orgType === "Brand / Sponsor") return "sponsor";
-  if (orgType === "Creator / Player") return "free_creator";
-  if (
-    [
-      "Gaming Agency",
-      "Esports Team",
-      "Multi-Channel Network",
-      "Talent Management Firm",
-    ].includes(orgType)
-  ) {
+  if (orgType === sponsorBrandOrgType) return "sponsor";
+  if (orgType === creatorPlayerOrgType) return "free_creator";
+  if ((agencyOrganizationTypes as readonly string[]).includes(orgType)) {
     return "agency_starter";
   }
   return "free_creator";
