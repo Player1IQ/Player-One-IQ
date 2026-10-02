@@ -143,51 +143,61 @@ const marketplaceDeals = sampleOpportunities;
 
 const plans = [
   {
-    name: "Creator",
-    monthlyPrice: 29,
-    annualPrice: 23,
-    description: "For solo creators building their brand",
-    features: ["1 creator profile", "Basic analytics dashboard", "5 active deal slots", "Contract templates", "Email support"],
-    cta: "Start Free Trial",
-    featured: false,
-    badge: null,
-  },
-  {
     name: "Creator Pro",
-    monthlyPrice: 79,
-    annualPrice: 63,
+    monthlyPrice: 29,
+    annualPrice: 278,
     description: "For serious creators scaling fast",
-    features: ["1 creator profile", "Advanced analytics", "Unlimited active deals", "AI Growth Assistant", "Opportunity Marketplace", "Priority support"],
+    features: [
+      "Unlimited opportunities",
+      "Advanced analytics",
+      "50 AI requests/month included",
+      "Revenue forecasting & monthly reports",
+    ],
     cta: "Start Free Trial",
     featured: false,
     badge: null,
   },
   {
     name: "Agency",
-    monthlyPrice: 299,
-    annualPrice: 239,
+    monthlyPrice: 99,
+    annualPrice: 950,
     description: "For boutique agencies managing creators",
-    features: ["Up to 25 creators", "Team collaboration tools", "Sponsor CRM", "Contract management", "Revenue analytics", "Dedicated onboarding"],
+    features: [
+      "Up to 25 creators",
+      "Team, contracts & sponsor CRM",
+      "200 AI requests/month included",
+      "Contract summaries",
+    ],
     cta: "Start Free Trial",
     featured: false,
     badge: null,
   },
   {
     name: "Agency Pro",
-    monthlyPrice: 699,
-    annualPrice: 559,
+    monthlyPrice: 249,
+    annualPrice: 2390,
     description: "The complete agency operating system",
-    features: ["Up to 100 creators", "All 4 AI assistants", "Full marketplace access", "White-label reports", "Custom integrations", "SLA & dedicated CSM"],
+    features: [
+      "Unlimited creators & team",
+      "500 AI requests/month included",
+      "AI forecasting & deal recommendations",
+      "White-label options & API access",
+    ],
     cta: "Start Free Trial",
     featured: true,
     badge: "Most Popular",
   },
   {
-    name: "Sponsor",
-    monthlyPrice: 499,
-    annualPrice: 399,
+    name: "Sponsor Pro",
+    monthlyPrice: 199,
+    annualPrice: 1910,
     description: "For brands managing creator campaigns",
-    features: ["Unlimited campaigns", "Creator discovery engine", "ROI tracking dashboard", "Contract automation", "Brand safety tools", "Campaign analytics"],
+    features: [
+      "Unlimited campaigns",
+      "75 AI requests/month included",
+      "AI creator discovery & campaign recommendations",
+      "AI ROI forecasting & advanced reporting",
+    ],
     cta: "Start Free Trial",
     featured: false,
     badge: null,
@@ -197,7 +207,14 @@ const plans = [
     monthlyPrice: null,
     annualPrice: null,
     description: "Custom solution for large organizations",
-    features: ["Unlimited everything", "Custom AI model training", "Enterprise SSO", "Audit logs & compliance", "Dedicated infrastructure", "White-glove service"],
+    features: [
+      "Unlimited everything",
+      "Custom AI model training",
+      "Enterprise SSO",
+      "Audit logs & compliance",
+      "Dedicated infrastructure",
+      "White-glove service",
+    ],
     cta: "Contact Sales",
     featured: false,
     badge: "Custom",
@@ -1277,12 +1294,12 @@ function PricingSection() {
             </span>
           </h2>
           <p className="text-white/40 text-base max-w-2xl mx-auto mt-5 leading-relaxed">
-            Founding members receive complimentary access during pre-launch. Plans below
-            are for reference —{" "}
+            Workspaces start on a free plan. Paid plans below match live Stripe billing.
+            Founding members can also{" "}
             <Link href={FOUNDING_ROSTER_PATH} className="text-violet-400 hover:text-violet-300">
               apply to the Founding Roster
             </Link>{" "}
-            to get started.
+            for complimentary pre-launch access.
           </p>
 
           {/* Toggle */}
@@ -1361,9 +1378,14 @@ function PricingSection() {
                 {plan.monthlyPrice !== null ? (
                   <div className="flex items-baseline gap-1">
                     <span className="font-display text-4xl font-extrabold text-white">
-                      ${annual ? plan.annualPrice : plan.monthlyPrice}
+                      $
+                      {annual
+                        ? plan.annualPrice.toLocaleString("en-US")
+                        : plan.monthlyPrice}
                     </span>
-                    <span className="text-white/30 text-sm">/mo</span>
+                    <span className="text-white/30 text-sm">
+                      {annual ? "/yr" : "/mo"}
+                    </span>
                   </div>
                 ) : (
                   <div className="font-display text-3xl font-extrabold text-white">Custom</div>

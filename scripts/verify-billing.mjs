@@ -49,13 +49,13 @@ const requiredEvents = [
 
 const priceIds = {
   creator_pro_monthly: "price_1ThuXdHRtLHXdGBBFA4vL7i5",
-  creator_pro_yearly: "price_1ThuZKHRtLHXdGBBE1hjVhGy",
+  creator_pro_yearly: "price_1UM8VAHRtLHXdGBBK34Cylt7",
   agency_monthly: "price_1ThuWNHRtLHXdGBBlsPAm8aD",
-  agency_yearly: "price_1ThucaHRtLHXdGBBVozTY3Zu",
+  agency_yearly: "price_1UM8VAHRtLHXdGBB5IpWvrU9",
   agency_pro_monthly: "price_1ThuaGHRtLHXdGBBKUP8b4Hj",
-  agency_pro_yearly: "price_1ThuamHRtLHXdGBBsuwvu8fI",
+  agency_pro_yearly: "price_1UM8VAHRtLHXdGBBdk88Ylfs",
   sponsor_pro_monthly: "price_1ThubXHRtLHXdGBBWKYsvvt5",
-  sponsor_pro_yearly: "price_1Thuc0HRtLHXdGBBpsBSiz5I",
+  sponsor_pro_yearly: "price_1UM8VAHRtLHXdGBBNbQpuP7K",
 };
 
 async function main() {

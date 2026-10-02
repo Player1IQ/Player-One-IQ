@@ -39,10 +39,10 @@ export function SubscriptionPlanCard({
   const fallback = getPlanCardHighlights(plan);
   let highlights = fallback;
   try {
-    const raw = t.raw(`plans.${plan.code}`) as {
-      tagline?: unknown;
-      bullets?: unknown;
-    };
+    const allPlans = (
+      t as unknown as { raw: (key: string) => unknown }
+    ).raw("plans") as Record<string, { tagline?: unknown; bullets?: unknown }>;
+    const raw = allPlans?.[plan.code];
     const bullets = Array.isArray(raw?.bullets)
       ? raw.bullets.filter((item): item is string => typeof item === "string")
       : fallback.bullets;
