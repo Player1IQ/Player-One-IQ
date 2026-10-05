@@ -12,13 +12,13 @@ import {
 import {
   Users, TrendingUp, FileText, ShoppingBag, Brain, BarChart2,
   MessageSquare, Zap, DollarSign, Sparkles, ArrowRight,
-  Check, Activity, Play,
+  Check, Activity,
   ChevronRight, Target, Shield,
 } from "lucide-react";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { FOUNDING_ROSTER_PATH } from "@/lib/marketing/config";
+import { FOUNDING_ROSTER_PATH, FOUNDER_VIDEO_SRC } from "@/lib/marketing/config";
 import { trackMarketingEvent } from "@/lib/marketing/analytics";
 
 const revenueData = [
@@ -49,9 +49,9 @@ const heroMiniData = [
 ];
 
 const sampleOpportunities = [
-  { brand: "Brand partner", creator: "Creator A", value: "Pipeline", category: "Sponsorship", match: 92, status: "Active" as const },
-  { brand: "Brand partner", creator: "Creator B", value: "In review", category: "Partnership", match: 89, status: "Active" as const },
-  { brand: "Brand partner", creator: "Creator C", value: "In pipeline", category: "Partnership", match: 91, status: "Pending" as const },
+  { brand: "Brand partner", creator: "Creator A", value: "Pipeline", category: "Sponsorship", status: "Active" as const },
+  { brand: "Brand partner", creator: "Creator B", value: "In review", category: "Partnership", status: "Active" as const },
+  { brand: "Brand partner", creator: "Creator C", value: "In pipeline", category: "Partnership", status: "Pending" as const },
 ];
 
 const features = [
@@ -168,6 +168,7 @@ const plans = [
       "Revenue forecasting & monthly reports",
     ],
     cta: "Start Free Trial",
+    href: "/signup?account=creator",
     featured: false,
     badge: null,
   },
@@ -183,6 +184,7 @@ const plans = [
       "Contract summaries",
     ],
     cta: "Start Free Trial",
+    href: "/signup?account=agency",
     featured: false,
     badge: null,
   },
@@ -195,9 +197,10 @@ const plans = [
       "Unlimited creators & team",
       "500 AI requests/month included",
       "AI forecasting & deal recommendations",
-      "Hide portal branding & API access (/api/v1)",
+      "Hide portal branding & API access",
     ],
     cta: "Start Free Trial",
+    href: "/signup?account=agency",
     featured: false,
     badge: "Most Popular",
   },
@@ -205,14 +208,15 @@ const plans = [
     name: "Sponsor Pro",
     monthlyPrice: 199,
     annualPrice: 1910,
-    description: "For brands managing creator campaigns",
+    description: "Campaign workspace for brands working with creators they already know",
     features: [
-      "Unlimited campaigns",
-      "75 AI requests/month included",
-      "Workspace AI matching & campaign recs",
-      "Workspace AI ROI forecasts & campaign reporting",
+      "Campaigns, contracts, and messaging with your partners",
+      "Review applicants to your listings — not a public creator catalog",
+      "Workspace AI notes from your campaign data (75 requests/month)",
+      "Unlimited campaigns and reporting in your workspace",
     ],
-    cta: "Start Free Trial",
+    cta: "Request early access",
+    href: "mailto:Admin@playeroneIQ.com?subject=Sponsor%20Pro%20early%20access",
     featured: false,
     badge: null,
   },
@@ -229,6 +233,7 @@ const plans = [
       "White-glove onboarding",
     ],
     cta: "Contact Sales",
+    href: "mailto:Admin@playeroneIQ.com?subject=Enterprise%20inquiry",
     featured: false,
     badge: "Custom",
   },
@@ -449,7 +454,7 @@ function HeroDashboard() {
           {/* Recent deals */}
           <div>
             <div className="text-[9px] font-semibold uppercase tracking-widest text-white/25 mb-2">
-              Recent Opportunities
+              Sample opportunities
             </div>
             {sampleOpportunities.slice(0, 3).map((deal, i) => (
               <div
@@ -637,23 +642,22 @@ function HeroSection() {
                 boxShadow: "0 24px 80px rgba(124,58,237,0.18)",
               }}
             >
-              <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
-                <span className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-400">
-                  {tVideo("label")}
-                </span>
-                <button
-                  type="button"
-                  className="mb-4 flex h-16 w-16 items-center justify-center rounded-full text-white"
-                  style={{
-                    background: "linear-gradient(135deg, #7c3aed, #2563eb)",
-                    boxShadow: "0 8px 32px rgba(124,58,237,0.45)",
-                  }}
+              {FOUNDER_VIDEO_SRC ? (
+                <video
+                  className="h-full w-full object-cover"
+                  src={FOUNDER_VIDEO_SRC}
+                  controls
+                  playsInline
+                  preload="metadata"
                   aria-label={tVideo("play")}
-                >
-                  <Play className="h-6 w-6 translate-x-0.5" />
-                </button>
-                <p className="max-w-sm text-sm text-white/50">{tVideo("coming")}</p>
-              </div>
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center px-8 text-center">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-400">
+                    {tVideo("label")}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="hidden lg:block">
               <HeroDashboard />
@@ -1280,11 +1284,11 @@ function MarketplaceSection() {
                       {deal.creator}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-white/30">{deal.category}</span>
-                      <span className="text-[10px] text-white/15">·</span>
-                      <span className="text-[10px] text-violet-400 font-semibold">
-                        {deal.match}% match
+                      <span className="text-[10px] font-semibold uppercase tracking-wide text-violet-400/80">
+                        Sample
                       </span>
+                      <span className="text-[10px] text-white/15">·</span>
+                      <span className="text-[10px] text-white/30">{deal.category}</span>
                     </div>
                   </div>
                 </div>
@@ -1412,11 +1416,7 @@ function PricingSection() {
                 ? tPricing(plan.badgeKey as "featuredBadge")
                 : plan.badge;
             const href =
-              "href" in plan && plan.href
-                ? plan.href
-                : plan.cta === "Contact Sales"
-                  ? "mailto:Admin@playeroneIQ.com?subject=Enterprise%20inquiry"
-                  : "/signup";
+              "href" in plan && plan.href ? plan.href : "/signup";
 
             return (
             <motion.div

@@ -82,12 +82,12 @@
       ]
     },
     "sponsor_pro": {
-      "tagline": "Maximize campaign ROI",
+      "tagline": "Campaign workspace for partnered creators",
       "bullets": [
-        "Unlimited campaigns",
-        "75 AI requests/month included",
-        "Workspace AI matching & campaign recs",
-        "Workspace AI ROI forecasts & campaign reporting"
+        "Campaigns, contracts, and messaging with your partners",
+        "Review applicants to your listings (no public creator catalog)",
+        "Workspace AI notes from your campaign data",
+        "Unlimited campaigns; 75 AI requests/month"
       ]
     }
   },
