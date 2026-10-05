@@ -70,7 +70,7 @@ const features = [
   {
     icon: FileText,
     title: "Contract Management",
-    description: "Generate, sign, and manage contracts with built-in AI review and compliance checks.",
+    description: "Create, track, and manage contracts and deliverables. Agency plans include AI summaries; e-signature integration coming soon.",
     large: false,
     color: "sky",
   },
@@ -84,21 +84,21 @@ const features = [
   {
     icon: Brain,
     title: "AI Growth Assistant",
-    description: "Your always-on strategic advisor analyzes trends, identifies opportunities, and tells you exactly what to do next to grow faster.",
+    description: "Ask the Growth Coach about trends, opportunities, and next steps — a workspace assistant that works from your roster data.",
     large: true,
     color: "violet",
   },
   {
     icon: BarChart2,
     title: "Revenue Analytics",
-    description: "Creator-level P&L, campaign attribution, and sponsor ROI so every decision is data-backed.",
+    description: "Creator-level revenue, campaign tracking, and sponsor reporting so every decision is data-backed.",
     large: false,
     color: "emerald",
   },
   {
     icon: MessageSquare,
     title: "Team Collaboration",
-    description: "Shared pipelines, internal notes, task assignments, and unified inboxes — built for agencies.",
+    description: "Shared pipelines, internal notes, and team messaging — built for agencies.",
     large: false,
     color: "blue",
   },
@@ -114,12 +114,12 @@ const aiAssistants = [
     response: "Your top 3 creator contracts are up for renewal in 45 days. Based on recent performance trends, I've drafted renegotiation briefs with recommended talking points — want me to send them for review?",
   },
   {
-    name: "Content Strategist",
+    name: "Content Coach",
     icon: Sparkles,
-    role: "Content Intelligence",
+    role: "Per-creator coaching",
     color: "sky",
-    prompt: "What content formats are performing best right now?",
-    response: "Short-form reaction content is gaining traction in gaming this month. Several creators on your roster have strong audience fit. I can draft a campaign brief for each — ready in a few minutes.",
+    prompt: "What should this creator post next?",
+    response: "I look at this creator's schedule, recent performance, and audience notes — then suggest formats and talking points you can use in their next session.",
   },
   {
     name: "Sponsorship Hunter",
@@ -148,7 +148,7 @@ const plans = [
     annualPrice: 278,
     description: "For serious creators scaling fast",
     features: [
-      "Unlimited opportunities",
+      "Opportunity applications (marketplace coming soon)",
       "Advanced analytics",
       "50 AI requests/month included",
       "Revenue forecasting & monthly reports",
@@ -181,7 +181,7 @@ const plans = [
       "Unlimited creators & team",
       "500 AI requests/month included",
       "AI forecasting & deal recommendations",
-      "White-label options & API access",
+      "Portal white-label branding & API access",
     ],
     cta: "Start Free Trial",
     featured: true,
@@ -195,8 +195,8 @@ const plans = [
     features: [
       "Unlimited campaigns",
       "75 AI requests/month included",
-      "AI creator discovery & campaign recommendations",
-      "AI ROI forecasting & advanced reporting",
+      "AI creator matching & campaign recommendations",
+      "AI ROI forecasts & campaign reporting",
     ],
     cta: "Start Free Trial",
     featured: false,
@@ -208,12 +208,11 @@ const plans = [
     annualPrice: null,
     description: "Custom solution for large organizations",
     features: [
-      "Unlimited everything",
-      "Custom AI model training",
-      "Enterprise SSO",
-      "Audit logs & compliance",
-      "Dedicated infrastructure",
-      "White-glove service",
+      "Custom limits and support",
+      "Custom AI setup — available on request",
+      "SSO & audit logs — available on request",
+      "Dedicated infrastructure — available on request",
+      "White-glove onboarding",
     ],
     cta: "Contact Sales",
     featured: false,
@@ -812,8 +811,8 @@ function AISection() {
             </span>
           </h2>
           <p className="text-white/40 text-lg max-w-xl mx-auto">
-            Four specialized AI assistants that know your business, your creators, and the
-            market — working around the clock so you don&apos;t have to.
+            Three workspace assistants for growth, sponsorships, and revenue — plus per-creator
+            content coaching.
           </p>
         </motion.div>
 
@@ -994,7 +993,7 @@ function AnalyticsSection() {
             </span>
           </h2>
           <p className="text-white/40 text-lg max-w-xl mx-auto">
-            Real-time dashboards, creator-level P&amp;L, campaign attribution, and sponsor ROI
+            Dashboards, creator-level revenue, campaign tracking, and sponsor reporting
             — every decision backed by data you can actually trust.
           </p>
         </motion.div>
@@ -1005,7 +1004,7 @@ function AnalyticsSection() {
             { label: "Unified revenue", value: "One view", icon: DollarSign, delta: "All streams" },
             { label: "Creator profiles", value: "Per creator", icon: Users, delta: "P&L & metrics" },
             { label: "Campaign tracking", value: "End-to-end", icon: Activity, delta: "Pipeline to close" },
-            { label: "Sponsor ROI", value: "Measurable", icon: TrendingUp, delta: "Per campaign" },
+            { label: "Sponsor reporting", value: "Per sponsor", icon: TrendingUp, delta: "By campaign" },
           ].map((s, i) => {
             const Icon = s.icon;
             return (
@@ -1253,10 +1252,13 @@ function MarketplaceSection() {
             ))}
 
             <div className="text-center pt-3">
-              <button className="text-sm text-violet-400 hover:text-violet-300 transition-colors font-semibold flex items-center gap-1.5 mx-auto">
-                Explore the opportunity marketplace
+              <Link
+                href={FOUNDING_ROSTER_PATH}
+                className="text-sm text-violet-400 hover:text-violet-300 transition-colors font-semibold flex items-center gap-1.5 mx-auto"
+              >
+                Join the Founding Roster
                 <ChevronRight className="w-4 h-4" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -1411,7 +1413,11 @@ function PricingSection() {
               </ul>
 
               <Link
-                href={plan.cta === "Contact Sales" ? "/login" : "/signup"}
+                href={
+                  plan.cta === "Contact Sales"
+                    ? "mailto:Admin@playeroneIQ.com?subject=Enterprise%20inquiry"
+                    : "/signup"
+                }
                 className="block w-full py-3 rounded-xl text-sm font-bold text-center transition-all duration-200 hover:opacity-90"
                 style={
                   plan.featured
@@ -1520,7 +1526,7 @@ function FinalCTASection() {
             {[
               { icon: Shield, text: "Founding access open" },
               { icon: Check, text: "Founding Roster applications reviewed personally" },
-              { icon: Activity, text: "Pricing available when you're ready" },
+              { icon: Activity, text: "Public plans listed above" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-1.5 text-xs text-white/25 font-medium">
                 <Icon className="w-3.5 h-3.5" />

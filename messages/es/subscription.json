@@ -19,12 +19,12 @@
     "ai_contract_summaries": "Resúmenes de contratos con IA",
     "ai_forecasting": "Pronósticos con IA",
     "ai_deal_recommendations": "Recomendaciones de acuerdos con IA",
-    "white_label": "Opciones white-label",
+    "white_label": "Marca blanca en el portal",
     "api_access": "Acceso a API",
     "review_creators": "Revisar creadores",
     "messaging": "Mensajería",
     "campaign_tracking": "Seguimiento de campañas",
-    "ai_creator_discovery": "Descubrimiento de creadores con IA",
+    "ai_creator_discovery": "Emparejamiento de creadores con IA",
     "ai_campaign_recommendations": "Recomendaciones de campañas con IA",
     "ai_roi_forecasting": "Pronóstico de ROI con IA",
     "advanced_reporting": "Informes avanzados"
@@ -41,7 +41,7 @@
     "creator_pro": {
       "tagline": "Crece más rápido con IA",
       "bullets": [
-        "Oportunidades ilimitadas",
+        "Postúlate a oportunidades (marketplace próximamente)",
         "Analíticas avanzadas",
         "50 solicitudes de IA/mes incluidas",
         "Pronóstico de ingresos e informes mensuales"
@@ -70,7 +70,7 @@
         "Creadores y equipo ilimitados",
         "500 solicitudes de IA/mes incluidas",
         "Pronósticos con IA y recomendaciones de acuerdos",
-        "Opciones white-label y acceso a API"
+        "Marca blanca en el portal y acceso a API"
       ]
     },
     "sponsor": {
@@ -86,8 +86,8 @@
       "bullets": [
         "Campañas ilimitadas",
         "75 solicitudes de IA/mes incluidas",
-        "Descubrimiento de creadores y recomendaciones de campañas con IA",
-        "Pronóstico de ROI con IA e informes avanzados"
+        "Emparejamiento de creadores y recomendaciones de campañas con IA",
+        "Pronósticos de ROI con IA e informes de campañas"
       ]
     }
   },
