@@ -52,6 +52,17 @@ export const signupAccountOptions: Array<{
   },
 ];
 
+/** Public self-serve signup. Sponsor Pro is request-only; invited sponsors use /invite. */
+export const publicSignupAccountOptions = signupAccountOptions.filter(
+  (option) => option.id !== "sponsor"
+);
+
+export function isPublicSignupAccountType(
+  value: string | null | undefined
+): value is Exclude<SignupAccountType, "sponsor"> {
+  return value === "creator" || value === "agency";
+}
+
 export interface Organization {
   id: string;
   user_id: string;

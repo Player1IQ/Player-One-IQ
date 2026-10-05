@@ -6,7 +6,7 @@ import { getOrganizationId } from "@/lib/organization/queries";
 import { requireBillingManageAccess } from "@/lib/permissions";
 import { changeSubscriptionPlan, startPlatformTrial } from "@/lib/subscription/actions";
 import { getSubscriptionPlans } from "@/lib/subscription/queries";
-import { planRequiresStripeCheckout } from "@/lib/subscription/plans";
+import { planRequiresStripeCheckout, isSelfServeCheckoutPlan, SPONSOR_PRO_REQUEST_ONLY_MESSAGE } from "@/lib/subscription/plans";
 import type { BillingInterval, PlanCode } from "@/lib/subscription/types";
 import { getStripeClient } from "@/lib/stripe/client";
 import { isStripeConfigured } from "@/lib/stripe/config";
@@ -55,6 +55,10 @@ export async function startStripeCheckout(
   const plans = await getSubscriptionPlans();
   const plan = plans.find((p) => p.code === planCode);
   if (!plan) return { error: "Invalid plan selected." };
+
+  if (!isSelfServeCheckoutPlan(planCode)) {
+    return { error: SPONSOR_PRO_REQUEST_ONLY_MESSAGE };
+  }
 
   if (!planRequiresStripeCheckout(plan, billingInterval)) {
     return changeSubscriptionPlan(planCode, billingInterval);
@@ -365,6 +369,10 @@ export async function selectBillingPlan(
   const plans = await getSubscriptionPlans();
   const plan = plans.find((p) => p.code === planCode);
   if (!plan) return { error: "Invalid plan selected." };
+
+  if (!isSelfServeCheckoutPlan(planCode)) {
+    return { error: SPONSOR_PRO_REQUEST_ONLY_MESSAGE };
+  }
 
   if (!planRequiresStripeCheckout(plan, billingInterval)) {
     return changeSubscriptionPlan(planCode, billingInterval);

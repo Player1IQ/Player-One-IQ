@@ -8,12 +8,11 @@ import type { PlanCode, PlanLimits, SubscriptionPlan } from "./types";
 /** Platform trial length for new workspaces (no Stripe subscription yet). */
 export const PLATFORM_TRIAL_DAYS = 14;
 
-/** Every paid catalog plan can be tried once per workspace without Stripe. */
+/** Paid catalog plans that can be tried once per workspace without Stripe. */
 export const PLATFORM_TRIAL_PLANS: PlanCode[] = [
   "creator_pro",
   "agency",
   "agency_pro",
-  "sponsor_pro",
 ];
 
 export function supportsPlatformTrial(planCode: PlanCode): boolean {
@@ -22,7 +21,7 @@ export function supportsPlatformTrial(planCode: PlanCode): boolean {
 
 /** Paid entry plan each org type starts on during signup trial. */
 export function getTrialPlanForOrgType(orgType: string): PlanCode {
-  if (orgType === sponsorBrandOrgType) return "sponsor_pro";
+  if (orgType === sponsorBrandOrgType) return "sponsor";
   if (orgType === creatorPlayerOrgType) return "creator_pro";
   if ((agencyOrganizationTypes as readonly string[]).includes(orgType)) {
     return "agency";

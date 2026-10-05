@@ -159,6 +159,10 @@ export function SubscriptionPlanCard({
         <p className="mt-6 text-center text-xs text-gray-500">
           Active on your workspace
         </p>
+      ) : plan.code === "sponsor_pro" ? (
+        <p className="mt-6 text-center text-xs text-gray-500">
+          Available by request. Email Admin@playeroneIQ.com for early access.
+        </p>
       ) : null}
     </div>
   );

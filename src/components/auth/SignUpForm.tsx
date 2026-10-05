@@ -11,8 +11,12 @@ import { getErrorMessage } from "@/lib/safe-action";
 import { AuthInput } from "./AuthInput";
 import { InviteAuthBanner } from "./InviteAuthContext";
 import { SignupAccountTypePicker } from "./SignupAccountTypePicker";
-import type { SignupAccountType } from "@/lib/organization";
+import {
+  isPublicSignupAccountType,
+  type SignupAccountType,
+} from "@/lib/organization";
 import { trackMarketingEvent } from "@/lib/marketing/analytics";
+import { SPONSOR_PRO_EARLY_ACCESS_HREF } from "@/lib/marketing/config";
 
 function buildAuthQuery(params: {
   redirect?: string | null;
@@ -36,12 +40,11 @@ export function SignUpForm() {
   const inviteEmail = searchParams.get("email");
   const inviteOrg = searchParams.get("org");
   const accountParam = searchParams.get("account");
+  const inviteRedirect = Boolean(redirect?.startsWith("/invite/"));
+  const showSponsorEarlyAccess =
+    accountParam === "sponsor" && !inviteEmail && !inviteRedirect;
   const lockedAccountType: SignupAccountType | null =
-    accountParam === "creator" ||
-    accountParam === "agency" ||
-    accountParam === "sponsor"
-      ? accountParam
-      : null;
+    isPublicSignupAccountType(accountParam) ? accountParam : null;
   const [accountType, setAccountType] = useState<SignupAccountType>(
     lockedAccountType ?? "creator"
   );
@@ -114,6 +117,36 @@ export function SignUpForm() {
       setError(formatAuthError(getErrorMessage(err)));
       setLoading(false);
     }
+  }
+
+  if (showSponsorEarlyAccess) {
+    return (
+      <div className="space-y-5">
+        <div className="rounded-xl border border-accent/20 bg-accent/5 px-4 py-4">
+          <h2 className="text-base font-semibold text-white">
+            {t("sponsorEarlyAccessTitle")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            {t("sponsorEarlyAccessBody")}
+          </p>
+        </div>
+        <a
+          href={SPONSOR_PRO_EARLY_ACCESS_HREF}
+          className="flex w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
+        >
+          {t("sponsorEarlyAccessCta")}
+        </a>
+        <p className="text-center text-sm text-gray-500">
+          {t("hasAccount")}{" "}
+          <Link
+            href={loginHref}
+            className="font-medium text-accent-light transition-colors hover:text-white"
+          >
+            {t("signIn")}
+          </Link>
+        </p>
+      </div>
+    );
   }
 
   return (

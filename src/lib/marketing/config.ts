@@ -5,3 +5,6 @@ export const SOCIAL_X_URL =
 
 /** Public MP4/HLS URL for the homepage founder note. Leave null to keep the silent slot (no "video coming" copy). */
 export const FOUNDER_VIDEO_SRC: string | null = null;
+
+export const SPONSOR_PRO_EARLY_ACCESS_HREF =
+  "mailto:Admin@playeroneIQ.com?subject=Sponsor%20Pro%20early%20access";

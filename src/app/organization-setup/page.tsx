@@ -27,6 +27,10 @@ export default async function OrganizationSetupPage({
   const accountType = parseAccountType(account);
   const isCreator = accountType === "creator";
 
+  if (accountType === "sponsor") {
+    redirect("/signup?account=sponsor");
+  }
+
   if (isCreator) {
     const bootstrap = await autoBootstrapCreatorWorkspace();
     if ("redirectTo" in bootstrap) {

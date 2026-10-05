@@ -183,6 +183,14 @@ export function planRequiresStripeCheckout(
   return planPriceCents(plan, billingInterval) > 0;
 }
 
+/** Sponsor Pro stays in Stripe but is not sold from public signup or Billing. */
+export function isSelfServeCheckoutPlan(planCode: PlanCode): boolean {
+  return planCode !== "sponsor_pro";
+}
+
+export const SPONSOR_PRO_REQUEST_ONLY_MESSAGE =
+  "Sponsor Pro is available by request. Email Admin@playeroneIQ.com for early access.";
+
 export function plansInTierGroup(
   plans: SubscriptionPlan[],
   tierGroup: TierGroup

@@ -29,7 +29,7 @@ import type {
   SubscriptionPlan,
   UsageSnapshot,
 } from "@/lib/subscription/types";
-import { formatPlanPrice } from "@/lib/subscription/plans";
+import { formatPlanPrice, isSelfServeCheckoutPlan } from "@/lib/subscription/plans";
 import {
   formatTrialCountdown,
   hasTrialedPlan,
@@ -366,12 +366,12 @@ export function BillingPageClient({
                 isCurrent={plan.code === currentPlan?.code}
                 billingInterval={billingInterval}
                 onStartTrial={
-                  canManage
+                  canManage && isSelfServeCheckoutPlan(plan.code)
                     ? (code) => runPlanAction(code, "trial")
                     : undefined
                 }
                 onSubscribe={
-                  canManage
+                  canManage && isSelfServeCheckoutPlan(plan.code)
                     ? (code) => runPlanAction(code, "subscribe")
                     : undefined
                 }

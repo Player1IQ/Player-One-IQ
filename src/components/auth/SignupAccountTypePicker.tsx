@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import {
-  signupAccountOptions,
+  publicSignupAccountOptions,
   type SignupAccountType,
 } from "@/lib/organization";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,7 @@ export function SignupAccountTypePicker({
     <div className="space-y-2">
       <p className="text-sm font-medium text-gray-300">{t("accountTypeLabel")}</p>
       <div className="grid gap-2">
-        {signupAccountOptions.map((option) => {
+        {publicSignupAccountOptions.map((option) => {
           const selected = value === option.id;
 
           return (

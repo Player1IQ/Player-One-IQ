@@ -18,7 +18,7 @@ import {
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { FOUNDING_ROSTER_PATH, FOUNDER_VIDEO_SRC } from "@/lib/marketing/config";
+import { FOUNDING_ROSTER_PATH, FOUNDER_VIDEO_SRC, SPONSOR_PRO_EARLY_ACCESS_HREF } from "@/lib/marketing/config";
 import { trackMarketingEvent } from "@/lib/marketing/analytics";
 
 const revenueData = [
@@ -197,7 +197,7 @@ const plans = [
       "Unlimited creators & team",
       "500 AI requests/month included",
       "AI forecasting & deal recommendations",
-      "Hide portal branding & API access",
+      "Hide portal branding & API access (beta)",
     ],
     cta: "Start Free Trial",
     href: "/signup?account=agency",
@@ -216,7 +216,7 @@ const plans = [
       "Unlimited campaigns and reporting in your workspace",
     ],
     cta: "Request early access",
-    href: "mailto:Admin@playeroneIQ.com?subject=Sponsor%20Pro%20early%20access",
+    href: SPONSOR_PRO_EARLY_ACCESS_HREF,
     featured: false,
     badge: null,
   },
