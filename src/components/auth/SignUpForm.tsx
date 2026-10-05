@@ -12,6 +12,7 @@ import { AuthInput } from "./AuthInput";
 import { InviteAuthBanner } from "./InviteAuthContext";
 import { SignupAccountTypePicker } from "./SignupAccountTypePicker";
 import type { SignupAccountType } from "@/lib/organization";
+import { trackMarketingEvent } from "@/lib/marketing/analytics";
 
 function buildAuthQuery(params: {
   redirect?: string | null;
@@ -34,6 +35,16 @@ export function SignUpForm() {
   const redirect = searchParams.get("redirect");
   const inviteEmail = searchParams.get("email");
   const inviteOrg = searchParams.get("org");
+  const accountParam = searchParams.get("account");
+  const lockedAccountType: SignupAccountType | null =
+    accountParam === "creator" ||
+    accountParam === "agency" ||
+    accountParam === "sponsor"
+      ? accountParam
+      : null;
+  const [accountType, setAccountType] = useState<SignupAccountType>(
+    lockedAccountType ?? "creator"
+  );
   const loginHref = `/login${buildAuthQuery({
     redirect,
     email: inviteEmail,
@@ -42,7 +53,6 @@ export function SignUpForm() {
   const [email, setEmail] = useState(inviteEmail ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [accountType, setAccountType] = useState<SignupAccountType>("creator");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,11 +101,13 @@ export function SignUpForm() {
       }
 
       if (data.user && !data.session) {
+        trackMarketingEvent("signup");
         setNotice(tErrors("accountCreatedCheckEmail"));
         setLoading(false);
         return;
       }
 
+      trackMarketingEvent("signup");
       router.push(nextPath);
       router.refresh();
     } catch (err) {
@@ -127,7 +139,7 @@ export function SignUpForm() {
         </p>
       )}
 
-      {inviteEmail ? null : (
+      {inviteEmail || lockedAccountType ? null : (
         <SignupAccountTypePicker
           value={accountType}
           onChange={setAccountType}

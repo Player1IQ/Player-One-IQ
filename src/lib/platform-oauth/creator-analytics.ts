@@ -240,7 +240,7 @@ function buildContentTrendPoints(
   );
 }
 
-async function fetchPlatformAudienceSize(
+export async function fetchPlatformAudienceSize(
   platform: OAuthPlatform,
   accessToken: string
 ): Promise<number | null> {

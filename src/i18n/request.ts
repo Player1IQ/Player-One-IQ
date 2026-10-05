@@ -31,6 +31,7 @@ async function loadMessages(locale: AppLocale) {
     legal,
     errors,
     emails,
+    marketing,
   ] = await Promise.all([
     import(`../../messages/${locale}/common.json`),
     import(`../../messages/${locale}/nav.json`),
@@ -59,6 +60,7 @@ async function loadMessages(locale: AppLocale) {
     import(`../../messages/${locale}/legal.json`),
     import(`../../messages/${locale}/errors.json`),
     import(`../../messages/${locale}/emails.json`),
+    import(`../../messages/${locale}/marketing.json`),
   ]);
 
   return {
@@ -89,6 +91,7 @@ async function loadMessages(locale: AppLocale) {
     legal: legal.default,
     errors: errors.default,
     emails: emails.default,
+    marketing: marketing.default,
   };
 }
 

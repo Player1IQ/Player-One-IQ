@@ -1,0 +1,59 @@
+{
+  "nav": {
+    "product": "Producto",
+    "features": "Funciones",
+    "foundingRoster": "Roster fundador",
+    "pricing": "Precios",
+    "signIn": "Iniciar sesión",
+    "getStarted": "Empezar"
+  },
+  "hero": {
+    "eyebrow": "Creator Snapshot gratis — sin postulación ni tarjeta",
+    "titleLead": "Sabe tu próximo",
+    "titleMid": "paso como",
+    "titleAccent": "creador.",
+    "subtitle": "Conecta Twitch o Kick y obtén al instante audiencia, rendimiento reciente y un plan de la primera semana. Hecho para creadores y para quienes los gestionan.",
+    "creatorDoor": "Soy creador",
+    "creatorDoorHint": "Snapshot gratis al conectar un canal",
+    "orgDoor": "Gestiono creadores",
+    "orgDoorHint": "Workspace de agencia para roster, deals y contratos",
+    "foundingSecondary": "Postulación al Roster fundador",
+    "statGrowth": "Crecimiento",
+    "statGrowthHint": "Analítica e insights",
+    "statRevenue": "Ingresos",
+    "statRevenueHint": "Contratos y deals",
+    "statFree": "Gratis",
+    "statFreeHint": "Creator Snapshot"
+  },
+  "video": {
+    "label": "Nota del fundador",
+    "coming": "Video pronto — aquí irá una nota corta del fundador.",
+    "play": "Reproducir video del fundador"
+  },
+  "foundingStrip": {
+    "kicker": "El Roster fundador sigue abierto",
+    "body": "¿Prefieres postularte en lugar de empezar gratis? El Roster fundador es un grupo pequeño que ayuda a dar forma a Player One IQ antes del lanzamiento público. Las postulaciones existentes no cambian.",
+    "cta": "Postularse al Roster fundador"
+  },
+  "pricing": {
+    "freeName": "Gratis",
+    "freeDescription": "Creator Snapshot para empezar",
+    "freeFeature1": "Conecta Twitch o Kick",
+    "freeFeature2": "Snapshot instantáneo de audiencia y rendimiento",
+    "freeFeature3": "Plan de la primera semana con tus datos reales",
+    "freeFeature4": "Sin postulación ni pago",
+    "freeCta": "Obtén tu snapshot gratis",
+    "perMonth": "/mes",
+    "perYear": "/año",
+    "featuredBadge": "Empieza aquí"
+  },
+  "finalCta": {
+    "kicker": "Empieza gratis y crece con nosotros",
+    "titleLead": "¿Listo para tu",
+    "titleAccent": "Creator Snapshot?",
+    "body": "Regístrate, conecta Twitch o Kick y ve tus números en una sola sesión. Las agencias pueden abrir un workspace por la misma puerta.",
+    "creator": "Soy creador",
+    "org": "Gestiono creadores",
+    "founding": "O postúlate al Roster fundador"
+  }
+}

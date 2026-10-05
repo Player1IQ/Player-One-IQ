@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isPlatformOAuthFeatureEnabled } from "@/lib/platform-oauth/config";
 import { syncAllOAuthPlatformAccounts } from "@/lib/platform-oauth/sync-account";
+import { recordAllConnectedPlatformMetricSnapshots } from "@/lib/platform-oauth/metric-history";
 import { createServiceClient } from "@/lib/supabase/admin";
 
 export async function GET(request: Request) {
@@ -34,11 +35,14 @@ export async function GET(request: Request) {
   }
 
   const result = await syncAllOAuthPlatformAccounts(supabase);
+  const metrics = await recordAllConnectedPlatformMetricSnapshots(supabase);
 
   return NextResponse.json({
     success: true,
     synced: result.synced,
     failed: result.failed,
     errors: result.errors.slice(0, 10),
+    metricsRecorded: metrics.recorded,
+    metricsFailed: metrics.failed,
   });
 }

@@ -3,6 +3,8 @@
 import type { OAuthPlatformUi } from "@/lib/platform-oauth/types";
 import { getPlatformOAuthStartUrl } from "@/lib/platform-oauth/start-url";
 import { storeOnboardingStepClient } from "@/lib/onboarding/client";
+import { trackMarketingEvent } from "@/lib/marketing/analytics";
+import { cn } from "@/lib/utils";
 
 interface OAuthPlatformActionsProps {
   creatorId: string;
@@ -54,14 +56,28 @@ export function OAuthPlatformActions({
   return (
     <div className="space-y-2">
       <div className={containerClass}>
-        {oauthEntries.map(({ platform, status }) =>
+        {oauthEntries.map(({ platform, status, prominence, note }) =>
           status === "available" ? (
             <a
               key={platform}
               href={oauthStartUrl(platform, creatorId, returnTo)}
-              onClick={() => persistOnboardingConnectStep(returnTo)}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-sm text-gray-200 transition-colors hover:border-accent/30 hover:text-white"
-            >              Connect {platform}
+              onClick={() => {
+                persistOnboardingConnectStep(returnTo);
+                trackMarketingEvent("connect_started", { platform });
+              }}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors",
+                prominence === "primary"
+                  ? "border-accent/40 bg-accent/10 text-white hover:border-accent/60"
+                  : "border-white/[0.08] bg-white/[0.03] text-gray-200 hover:border-accent/30 hover:text-white"
+              )}
+            >
+              Connect {platform}
+              {note === "youtube_unverified" ? (
+                <span className="rounded-full bg-surface-overlay px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-300">
+                  Testers only
+                </span>
+              ) : null}
             </a>
           ) : (
             <span
@@ -70,9 +86,15 @@ export function OAuthPlatformActions({
               title={`${platform} OAuth credentials are not configured yet`}
             >
               Connect {platform}
-              <span className="rounded-full bg-surface-overlay px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
-                Setup required
-              </span>
+              {note === "youtube_unverified" ? (
+                <span className="rounded-full bg-surface-overlay px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-300/80">
+                  Testers only
+                </span>
+              ) : (
+                <span className="rounded-full bg-surface-overlay px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                  Setup required
+                </span>
+              )}
             </span>
           )
         )}

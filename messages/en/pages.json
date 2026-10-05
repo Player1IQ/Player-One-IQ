@@ -67,6 +67,10 @@
     "title": "Growth",
     "description": "Platform performance and audience insights"
   },
+  "portalSnapshot": {
+    "title": "Creator Snapshot",
+    "description": "Audience, recent performance, and your first-week plan"
+  },
   "portalDeliverables": {
     "title": "Deliverables",
     "description": "Track sponsorship deliverables across your deals"

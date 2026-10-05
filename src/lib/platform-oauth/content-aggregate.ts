@@ -10,6 +10,36 @@ import { fetchTwitchRecentContent } from "./twitch-content";
 import { fetchYouTubeRecentVideos } from "./youtube-content";
 import { fetchKickRecentContent } from "./kick-content";
 
+export async function fetchPlatformContentWithToken(
+  platform: OAuthPlatform,
+  accessToken: string
+): Promise<PlatformContentSnapshot> {
+  let items;
+  if (platform === "YouTube") {
+    items = (await fetchYouTubeRecentVideos(accessToken)).map((video) => ({
+      id: video.videoId,
+      title: video.title,
+      publishedAt: video.publishedAt,
+      contentType: "video" as const,
+      viewCount: video.viewCount,
+      likeCount: video.likeCount,
+      commentCount: video.commentCount,
+    }));
+  } else if (platform === "Twitch") {
+    items = await fetchTwitchRecentContent(accessToken);
+  } else if (platform === "Instagram") {
+    items = await fetchInstagramRecentContent(accessToken);
+  } else if (platform === "TikTok") {
+    items = await fetchTikTokRecentContent(accessToken);
+  } else if (platform === "Kick") {
+    items = await fetchKickRecentContent(accessToken);
+  } else {
+    return { platform, items: [], connectedViaOAuth: false };
+  }
+
+  return { platform, items, connectedViaOAuth: true };
+}
+
 async function fetchOAuthPlatformContent(
   creatorId: string,
   platform: OAuthPlatform
@@ -20,32 +50,7 @@ async function fetchOAuthPlatformContent(
       return { platform, items: [], connectedViaOAuth: false };
     }
 
-    let items;
-    if (platform === "YouTube") {
-      items = (await fetchYouTubeRecentVideos(tokenResult.accessToken)).map(
-        (video) => ({
-          id: video.videoId,
-          title: video.title,
-          publishedAt: video.publishedAt,
-          contentType: "video" as const,
-          viewCount: video.viewCount,
-          likeCount: video.likeCount,
-          commentCount: video.commentCount,
-        })
-      );
-    } else if (platform === "Twitch") {
-      items = await fetchTwitchRecentContent(tokenResult.accessToken);
-    } else if (platform === "Instagram") {
-      items = await fetchInstagramRecentContent(tokenResult.accessToken);
-    } else if (platform === "TikTok") {
-      items = await fetchTikTokRecentContent(tokenResult.accessToken);
-    } else if (platform === "Kick") {
-      items = await fetchKickRecentContent(tokenResult.accessToken);
-    } else {
-      return { platform, items: [], connectedViaOAuth: false };
-    }
-
-    return { platform, items, connectedViaOAuth: true };
+    return fetchPlatformContentWithToken(platform, tokenResult.accessToken);
   } catch {
     return { platform, items: [], connectedViaOAuth: false };
   }

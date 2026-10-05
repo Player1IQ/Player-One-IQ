@@ -5,6 +5,7 @@ import { isPublicAppPath, isPublicMiddlewarePath } from "@/lib/auth/public-route
 test("cron routes bypass login so Vercel can send CRON_SECRET", () => {
   assert.equal(isPublicMiddlewarePath("/api/cron/notification-emails"), true);
   assert.equal(isPublicMiddlewarePath("/api/cron/sync-platform-revenue"), true);
+  assert.equal(isPublicMiddlewarePath("/api/marketing/funnel"), true);
   assert.equal(isPublicMiddlewarePath("/settings"), false);
 });
 

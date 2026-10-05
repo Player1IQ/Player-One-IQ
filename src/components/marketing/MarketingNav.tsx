@@ -2,29 +2,27 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Menu, X } from "lucide-react";
 import { BrandLogoLink } from "@/components/brand/BrandLogo";
 import { FOUNDING_ROSTER_PATH } from "@/lib/marketing/config";
-
-const NAV_ITEMS = [
-  { label: "Product", href: "/#product" },
-  { label: "Features", href: "/#features" },
-  { label: "Founding Roster", href: FOUNDING_ROSTER_PATH },
-  { label: "Pricing", href: "/#pricing" },
-];
-
-const MOBILE_NAV_ITEMS = [
-  ...NAV_ITEMS,
-  { label: "Sign in", href: "/login" },
-];
 
 interface MarketingNavProps {
   activePath?: string;
 }
 
 export function MarketingNav({ activePath }: MarketingNavProps) {
+  const t = useTranslations("marketing.nav");
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navItems = [
+    { label: t("product"), href: "/#product" },
+    { label: t("features"), href: "/#features" },
+    { label: t("foundingRoster"), href: FOUNDING_ROSTER_PATH },
+    { label: t("pricing"), href: "/#pricing" },
+  ];
+  const mobileNavItems = [...navItems, { label: t("signIn"), href: "/login" }];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 30);
@@ -50,7 +48,7 @@ export function MarketingNav({ activePath }: MarketingNavProps) {
         <BrandLogoLink href="/" size="lg" priority />
 
         <div className="hidden md:flex items-center gap-8">
-          {NAV_ITEMS.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
@@ -70,17 +68,17 @@ export function MarketingNav({ activePath }: MarketingNavProps) {
             href="/login"
             className="hidden md:block text-sm text-white/55 hover:text-white transition-colors font-medium"
           >
-            Sign in
+            {t("signIn")}
           </Link>
           <Link
-            href={FOUNDING_ROSTER_PATH}
+            href="/signup"
             className="text-sm px-5 py-2.5 rounded-xl font-semibold text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
             style={{
               background: "linear-gradient(135deg, #7c3aed, #2563eb)",
               boxShadow: "0 4px 20px rgba(124,58,237,0.3)",
             }}
           >
-            Join the Founding Roster
+            {t("getStarted")}
           </Link>
           <button
             type="button"
@@ -101,7 +99,7 @@ export function MarketingNav({ activePath }: MarketingNavProps) {
             border: "1px solid rgba(255,255,255,0.08)",
           }}
         >
-          {MOBILE_NAV_ITEMS.map((item) => (
+          {mobileNavItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}

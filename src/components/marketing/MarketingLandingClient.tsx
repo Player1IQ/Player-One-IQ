@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import type { ReactNode, CSSProperties } from "react";
 import { motion } from "motion/react";
 import {
@@ -18,6 +19,7 @@ import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { MarketingNav } from "@/components/marketing/MarketingNav";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { FOUNDING_ROSTER_PATH } from "@/lib/marketing/config";
+import { trackMarketingEvent } from "@/lib/marketing/analytics";
 
 const revenueData = [
   { month: "Jan", revenue: 8, deals: 2 },
@@ -143,6 +145,18 @@ const marketplaceDeals = sampleOpportunities;
 
 const plans = [
   {
+    nameKey: "freeName",
+    descriptionKey: "freeDescription",
+    monthlyPrice: 0,
+    annualPrice: 0,
+    featureKeys: ["freeFeature1", "freeFeature2", "freeFeature3", "freeFeature4"],
+    features: [],
+    ctaKey: "freeCta",
+    href: "/signup?account=creator",
+    featured: true,
+    badgeKey: "featuredBadge",
+  },
+  {
     name: "Creator Pro",
     monthlyPrice: 29,
     annualPrice: 278,
@@ -184,7 +198,7 @@ const plans = [
       "Portal white-label branding & API access",
     ],
     cta: "Start Free Trial",
-    featured: true,
+    featured: false,
     badge: "Most Popular",
   },
   {
@@ -475,6 +489,9 @@ function HeroDashboard() {
 // ─── Hero Section ─────────────────────────────────────────────────────────────
 
 function HeroSection() {
+  const t = useTranslations("marketing.hero");
+  const tVideo = useTranslations("marketing.video");
+
   return (
     <section id="product" className="relative min-h-screen flex items-center pt-28 pb-24 overflow-hidden">
       {/* Background orbs */}
@@ -518,7 +535,7 @@ function HeroSection() {
             >
               <span className="w-1.5 h-1.5 rounded-full bg-violet-400 inline-block" />
               <span className="text-violet-400 font-medium text-xs">
-                Founding access now open
+                {t("eyebrow")}
               </span>
             </motion.div>
 
@@ -528,9 +545,9 @@ function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.75, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              The Operating
+              {t("titleLead")}
               <br />
-              System for the
+              {t("titleMid")}
               <br />
               <span
                 style={{
@@ -540,7 +557,7 @@ function HeroSection() {
                   backgroundClip: "text",
                 }}
               >
-                Creator Economy.
+                {t("titleAccent")}
               </span>
             </motion.h1>
 
@@ -550,36 +567,41 @@ function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.35 }}
             >
-              One place to manage your growth, revenue, partnerships, contracts,
-              team, and creator business.
+              {t("subtitle")}
             </motion.p>
 
             <motion.div
-              className="flex flex-wrap gap-4 mb-14"
+              className="grid sm:grid-cols-2 gap-3 mb-5"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.48 }}
             >
               <Link
-                href={FOUNDING_ROSTER_PATH}
-                className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:scale-[1.03] hover:shadow-2xl"
+                href="/signup?account=creator"
+                className="rounded-xl px-5 py-4 text-left transition-all duration-200 hover:scale-[1.02]"
                 style={{
                   background: "linear-gradient(135deg, #7c3aed, #2563eb)",
                   boxShadow: "0 8px 32px rgba(124,58,237,0.4)",
                 }}
               >
-                Join the Founding Roster
-                <ArrowRight className="w-4 h-4" />
+                <p className="text-sm font-bold text-white">{t("creatorDoor")}</p>
+                <p className="mt-1 text-xs text-white/70">{t("creatorDoorHint")}</p>
               </Link>
-              <a
-                href="#product"
-                className="flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white/75 hover:text-white transition-all duration-200 hover:border-white/20"
+              <Link
+                href="/signup?account=agency"
+                className="rounded-xl px-5 py-4 text-left transition-all duration-200 hover:border-white/20"
                 style={{ border: "1px solid rgba(255,255,255,0.12)" }}
               >
-                <Play className="w-4 h-4" />
-                Explore Player One IQ
-              </a>
+                <p className="text-sm font-bold text-white">{t("orgDoor")}</p>
+                <p className="mt-1 text-xs text-white/50">{t("orgDoorHint")}</p>
+              </Link>
             </motion.div>
+            <Link
+              href={FOUNDING_ROSTER_PATH}
+              className="inline-block mb-10 text-sm text-white/40 hover:text-violet-300 transition-colors"
+            >
+              {t("foundingSecondary")}
+            </Link>
 
             <motion.div
               className="flex items-center gap-10"
@@ -588,9 +610,9 @@ function HeroSection() {
               transition={{ duration: 0.6, delay: 0.62 }}
             >
               {[
-                { value: "Growth", label: "Analytics & insights" },
-                { value: "Revenue", label: "Contracts & deals" },
-                { value: "Founding", label: "Access now open" },
+                { value: t("statGrowth"), label: t("statGrowthHint") },
+                { value: t("statRevenue"), label: t("statRevenueHint") },
+                { value: t("statFree"), label: t("statFreeHint") },
               ].map((stat, i) => (
                 <div key={i} className={i > 0 ? "border-l pl-10" : ""} style={i > 0 ? { borderColor: "rgba(255,255,255,0.08)" } : {}}>
                   <div className="font-display text-2xl font-bold text-white">{stat.value}</div>
@@ -602,12 +624,40 @@ function HeroSection() {
 
           {/* Right */}
           <motion.div
-            className="relative hidden lg:block"
+            className="relative"
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <HeroDashboard />
+            <div
+              className="relative mb-6 aspect-video w-full overflow-hidden rounded-2xl"
+              style={{
+                background: "rgba(10,10,24,0.95)",
+                border: "1px solid rgba(255,255,255,0.09)",
+                boxShadow: "0 24px 80px rgba(124,58,237,0.18)",
+              }}
+            >
+              <div className="absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+                <span className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-400">
+                  {tVideo("label")}
+                </span>
+                <button
+                  type="button"
+                  className="mb-4 flex h-16 w-16 items-center justify-center rounded-full text-white"
+                  style={{
+                    background: "linear-gradient(135deg, #7c3aed, #2563eb)",
+                    boxShadow: "0 8px 32px rgba(124,58,237,0.45)",
+                  }}
+                  aria-label={tVideo("play")}
+                >
+                  <Play className="h-6 w-6 translate-x-0.5" />
+                </button>
+                <p className="max-w-sm text-sm text-white/50">{tVideo("coming")}</p>
+              </div>
+            </div>
+            <div className="hidden lg:block">
+              <HeroDashboard />
+            </div>
 
             {/* Floating stat cards */}
             <motion.div
@@ -683,25 +733,24 @@ function HeroSection() {
 // ─── Trusted By ────────────────────────────────────────────────────────────────
 
 function FoundingAccessStrip() {
+  const t = useTranslations("marketing.foundingStrip");
   return (
     <section
       className="py-16 overflow-hidden"
       style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
     >
       <p className="text-center text-[10px] font-bold uppercase tracking-[0.22em] text-white/25 mb-6 px-6">
-        Now selecting founding creators &amp; organizations
+        {t("kicker")}
       </p>
       <div className="text-center px-6">
         <p className="text-white/40 text-sm max-w-xl mx-auto mb-6 leading-relaxed">
-          Player One IQ is assembling its Founding Roster to shape the platform before
-          public launch. Gaming creators and organizations are our entry wedge —
-          the vision is the full creator economy.
+          {t("body")}
         </p>
         <Link
           href={FOUNDING_ROSTER_PATH}
           className="inline-flex items-center gap-2 text-sm font-semibold text-violet-400 hover:text-violet-300 transition-colors"
         >
-          Join the Founding Roster
+          {t("cta")}
           <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
@@ -1271,6 +1320,7 @@ function MarketplaceSection() {
 
 function PricingSection() {
   const [annual, setAnnual] = useState(false);
+  const tPricing = useTranslations("marketing.pricing");
 
   return (
     <section
@@ -1338,9 +1388,39 @@ function PricingSection() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {plans.map((plan, i) => (
+          {plans.map((plan, i) => {
+            const name =
+              "nameKey" in plan && plan.nameKey
+                ? tPricing(plan.nameKey as "freeName")
+                : plan.name;
+            const description =
+              "descriptionKey" in plan && plan.descriptionKey
+                ? tPricing(plan.descriptionKey as "freeDescription")
+                : plan.description;
+            const features =
+              "featureKeys" in plan && plan.featureKeys
+                ? plan.featureKeys.map((key) =>
+                    tPricing(key as "freeFeature1")
+                  )
+                : plan.features;
+            const cta =
+              "ctaKey" in plan && plan.ctaKey
+                ? tPricing(plan.ctaKey as "freeCta")
+                : plan.cta;
+            const badge =
+              "badgeKey" in plan && plan.badgeKey
+                ? tPricing(plan.badgeKey as "featuredBadge")
+                : plan.badge;
+            const href =
+              "href" in plan && plan.href
+                ? plan.href
+                : plan.cta === "Contact Sales"
+                  ? "mailto:Admin@playeroneIQ.com?subject=Enterprise%20inquiry"
+                  : "/signup";
+
+            return (
             <motion.div
-              key={plan.name}
+              key={name}
               className="relative rounded-2xl p-7 flex flex-col"
               style={
                 plan.featured
@@ -1356,7 +1436,7 @@ function PricingSection() {
               }
               {...stagger(i)}
             >
-              {plan.badge && (
+              {badge ? (
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                   <span
                     className="px-3 py-1 rounded-full text-[11px] font-bold text-white"
@@ -1366,14 +1446,14 @@ function PricingSection() {
                         : "rgba(255,255,255,0.08)",
                     }}
                   >
-                    {plan.badge}
+                    {badge}
                   </span>
                 </div>
-              )}
+              ) : null}
 
               <div className="mb-6">
-                <h3 className="font-display text-base font-bold text-white mb-1">{plan.name}</h3>
-                <p className="text-xs text-white/30">{plan.description}</p>
+                <h3 className="font-display text-base font-bold text-white mb-1">{name}</h3>
+                <p className="text-xs text-white/30">{description}</p>
               </div>
 
               <div className="mb-8">
@@ -1382,11 +1462,11 @@ function PricingSection() {
                     <span className="font-display text-4xl font-extrabold text-white">
                       $
                       {annual
-                        ? plan.annualPrice.toLocaleString("en-US")
+                        ? (plan.annualPrice ?? 0).toLocaleString("en-US")
                         : plan.monthlyPrice}
                     </span>
                     <span className="text-white/30 text-sm">
-                      {annual ? "/yr" : "/mo"}
+                      {annual ? tPricing("perYear") : tPricing("perMonth")}
                     </span>
                   </div>
                 ) : (
@@ -1395,7 +1475,7 @@ function PricingSection() {
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((f) => (
+                {features.map((f) => (
                   <li key={f} className="flex items-start gap-2.5">
                     <div
                       className="w-4 h-4 rounded-full flex items-center justify-center mt-0.5 flex-shrink-0"
@@ -1413,11 +1493,7 @@ function PricingSection() {
               </ul>
 
               <Link
-                href={
-                  plan.cta === "Contact Sales"
-                    ? "mailto:Admin@playeroneIQ.com?subject=Enterprise%20inquiry"
-                    : "/signup"
-                }
+                href={href}
                 className="block w-full py-3 rounded-xl text-sm font-bold text-center transition-all duration-200 hover:opacity-90"
                 style={
                   plan.featured
@@ -1432,10 +1508,11 @@ function PricingSection() {
                       }
                 }
               >
-                {plan.cta}
+                {cta}
               </Link>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1445,6 +1522,8 @@ function PricingSection() {
 // ─── Final CTA ─────────────────────────────────────────────────────────────────
 
 function FinalCTASection() {
+  const t = useTranslations("marketing.finalCta");
+
   return (
     <section
       className="py-32 relative overflow-hidden"
@@ -1478,11 +1557,11 @@ function FinalCTASection() {
             }}
           >
             <Zap className="w-3 h-3" />
-            The future of creator business management
+            {t("kicker")}
           </div>
 
           <h2 className="font-display text-[4rem] lg:text-[5.5rem] font-extrabold text-white tracking-[-0.03em] mb-6 leading-[1.02]">
-            Ready to run your
+            {t("titleLead")}
             <br />
             <span
               style={{
@@ -1492,35 +1571,40 @@ function FinalCTASection() {
                 backgroundClip: "text",
               }}
             >
-              creator empire?
+              {t("titleAccent")}
             </span>
           </h2>
 
           <p className="text-white/40 text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-            Apply to the Founding Roster and help shape the operating system for
-            the creator economy before public launch.
+            {t("body")}
           </p>
 
           <div className="flex flex-wrap justify-center gap-5 mb-8">
             <Link
-              href={FOUNDING_ROSTER_PATH}
+              href="/signup?account=creator"
               className="flex items-center gap-2 px-8 py-4 rounded-xl text-base font-bold text-white transition-all duration-200 hover:scale-[1.03]"
               style={{
                 background: "linear-gradient(135deg, #7c3aed, #2563eb)",
                 boxShadow: "0 12px 48px rgba(124,58,237,0.45)",
               }}
             >
-              Join the Founding Roster
+              {t("creator")}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href="/login"
+              href="/signup?account=agency"
               className="flex items-center gap-2 px-8 py-4 rounded-xl text-base font-semibold text-white/70 hover:text-white transition-all duration-200 hover:border-white/20"
               style={{ border: "1px solid rgba(255,255,255,0.12)" }}
             >
-              Sign in
+              {t("org")}
             </Link>
           </div>
+          <Link
+            href={FOUNDING_ROSTER_PATH}
+            className="text-sm text-white/40 hover:text-violet-300 transition-colors"
+          >
+            {t("founding")}
+          </Link>
 
           <div className="flex flex-wrap justify-center gap-6">
             {[
@@ -1549,6 +1633,10 @@ function Footer() {
 // ─── App ───────────────────────────────────────────────────────────────────────
 
 export function MarketingLandingClient() {
+  useEffect(() => {
+    trackMarketingEvent("visit");
+  }, []);
+
   return (
     <div className="marketing-landing min-h-screen overflow-x-hidden scrollbar-hide"
       style={{ background: "#06060f", color: "#f1f5f9" }}

@@ -1,6 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { creatorPlayerOrgType } from "@/lib/organization";
-import { onboardingPendingMetadata } from "@/lib/onboarding/state";
+import {
+  fastCreatorOnboardingMetadata,
+  onboardingPendingMetadata,
+} from "@/lib/onboarding/state";
 import { platforms, type Platform } from "@/lib/creators";
 export interface SetupCreatorPlayerWorkspaceInput {
   userId: string;
@@ -21,7 +24,7 @@ function formatBootstrapError(message: string): string {
 
 export async function setupCreatorPlayerWorkspace(
   supabase: SupabaseClient,
-  input: SetupCreatorPlayerWorkspaceInput
+  input: SetupCreatorPlayerWorkspaceInput & { skipOnboardingWizard?: boolean }
 ): Promise<{ success: true } | { error: string }> {
   const creatorName = input.creatorName.trim();
 
@@ -64,7 +67,9 @@ export async function setupCreatorPlayerWorkspace(
   const metadata = {
     organization_name: creatorName,
     organization_type: creatorPlayerOrgType,
-    ...onboardingPendingMetadata(),
+    ...(input.skipOnboardingWizard
+      ? fastCreatorOnboardingMetadata()
+      : onboardingPendingMetadata()),
   };
 
   const { error: metadataError } = await supabase.auth.updateUser({

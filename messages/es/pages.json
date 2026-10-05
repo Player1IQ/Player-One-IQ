@@ -67,6 +67,10 @@
     "title": "Crecimiento",
     "description": "Rendimiento de plataforma e insights de audiencia"
   },
+  "portalSnapshot": {
+    "title": "Creator Snapshot",
+    "description": "Audiencia, rendimiento reciente y tu plan de la primera semana"
+  },
   "portalDeliverables": {
     "title": "Entregables",
     "description": "Rastrea entregables de patrocinio en tus deals"

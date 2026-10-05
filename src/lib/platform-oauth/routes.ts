@@ -22,6 +22,7 @@ import { exchangeKickCode, getKickAuthorizeUrl } from "./kick";
 import { exchangeTwitchCode, getTwitchAuthorizeUrl } from "./twitch";
 import { exchangeYouTubeCode, getYouTubeAuthorizeUrl } from "./youtube";
 import { syncCreatorPlatformAccountById } from "./sync-account";
+import { recordCreatorPlatformMetricSnapshot } from "./metric-history";
 import { getAppOrigin } from "@/lib/email/app-url";
 import { assertPlatformCredentials } from "./credentials";
 import { toOAuthErrorQueryValue } from "./oauth-errors";
@@ -276,6 +277,13 @@ export async function handlePlatformOAuthCallback(
         appendQueryParam(redirectBase, "oauth_error", syncResult.error)
       );
     }
+
+    await recordCreatorPlatformMetricSnapshot({
+      organizationId: payload.organizationId,
+      creatorId: payload.creatorId,
+      platform,
+      platformAccountId: account.id,
+    });
 
     return NextResponse.redirect(
       appendQueryParam(redirectBase, "oauth_success", platform)

@@ -6,14 +6,12 @@ import { Gamepad2, Loader2 } from "lucide-react";
 import { platforms, type Platform } from "@/lib/creators";
 import { createClient } from "@/lib/supabase/client";
 import { setupCreatorPlayerWorkspace } from "@/lib/organization/creator-setup";
-import { beginOnboarding } from "@/app/onboarding/actions";
-import { markOnboardingStartedClient } from "@/lib/onboarding/client";
 import { AuthInput } from "./AuthInput";
 
 export function CreatorSetupForm() {
   const router = useRouter();
   const [creatorName, setCreatorName] = useState("");
-  const [primaryPlatform, setPrimaryPlatform] = useState<Platform>("YouTube");
+  const [primaryPlatform, setPrimaryPlatform] = useState<Platform>("Twitch");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -47,6 +45,7 @@ export function CreatorSetupForm() {
       userEmail: user.email,
       creatorName,
       primaryPlatform,
+      skipOnboardingWizard: true,
     });
 
     if ("error" in result) {
@@ -55,15 +54,7 @@ export function CreatorSetupForm() {
       return;
     }
 
-    const beginResult = await beginOnboarding();
-    if ("error" in beginResult && beginResult.error) {
-      setError(beginResult.error);
-      setLoading(false);
-      return;
-    }
-
-    markOnboardingStartedClient();
-    router.push("/onboarding");
+    router.push("/portal/snapshot");
     router.refresh();
   }
 

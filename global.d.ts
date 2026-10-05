@@ -25,6 +25,7 @@ import type founding from "./messages/en/founding.json";
 import type legal from "./messages/en/legal.json";
 import type errors from "./messages/en/errors.json";
 import type emails from "./messages/en/emails.json";
+import type marketing from "./messages/en/marketing.json";
 
 type AppMessages = typeof common & {
   nav: typeof nav;
@@ -53,6 +54,7 @@ type AppMessages = typeof common & {
   legal: typeof legal;
   errors: typeof errors;
   emails: typeof emails;
+  marketing: typeof marketing;
 };
 
 declare module "next-intl" {

@@ -8,6 +8,7 @@ import {
 import {
   isOAuthPlatform,
   launchOAuthPlatforms,
+  connectOAuthPlatformOrder,
   oauthPlatforms,
   type OAuthPlatform,
   type OAuthPlatformUi,
@@ -15,7 +16,7 @@ import {
 } from "./types";
 
 export type { OAuthPlatform, OAuthPlatformUi, OAuthPlatformUiStatus } from "./types";
-export { isOAuthPlatform, launchOAuthPlatforms, oauthPlatforms };
+export { isOAuthPlatform, launchOAuthPlatforms, oauthPlatforms, connectOAuthPlatformOrder };
 
 export function isPlatformOAuthFeatureEnabled(): boolean {
   return process.env.PLATFORM_OAUTH_ENABLED === "true";
@@ -63,7 +64,10 @@ export function isPlatformOAuthAvailable(platform: OAuthPlatform): boolean {
   }
 
   return (
-    platform === "Instagram" || platform === "TikTok" || platform === "Kick"
+    platform === "YouTube" ||
+    platform === "Instagram" ||
+    platform === "TikTok" ||
+    platform === "Kick"
   );
 }
 
@@ -77,9 +81,12 @@ export function getConfiguredOAuthPlatforms(): OAuthPlatform[] {
 }
 
 export function getOAuthPlatformUi(): OAuthPlatformUi[] {
-  return oauthPlatforms.map((platform) => ({
+  return [...connectOAuthPlatformOrder].map((platform) => ({
     platform,
     status: getOAuthPlatformUiStatus(platform),
+    prominence:
+      platform === "Twitch" || platform === "Kick" ? "primary" : "secondary",
+    note: platform === "YouTube" ? "youtube_unverified" : undefined,
   }));
 }
 
@@ -92,7 +99,7 @@ function getOAuthPlatformUiStatus(platform: OAuthPlatform): OAuthPlatformUiStatu
     return isPlatformOAuthConfigured(platform) ? "available" : "coming_soon";
   }
 
-  if (platform === "Instagram" || platform === "TikTok" || platform === "Kick") {
+  if (platform === "YouTube" || platform === "Instagram" || platform === "TikTok" || platform === "Kick") {
     return isPlatformOAuthConfigured(platform) ? "available" : "coming_soon";
   }
 

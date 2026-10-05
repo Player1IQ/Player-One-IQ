@@ -62,6 +62,15 @@ export function onboardingCompletedMetadata(): Record<string, unknown> {
   };
 }
 
+export function fastCreatorOnboardingMetadata(): Record<string, unknown> {
+  return {
+    onboarding_pending: false,
+    onboarding_completed_at: new Date().toISOString(),
+    onboarding_version: ONBOARDING_VERSION,
+    portal_tour_pending: false,
+  };
+}
+
 export function portalTourCompletedMetadata(): Record<string, unknown> {
   return {
     portal_tour_pending: false,

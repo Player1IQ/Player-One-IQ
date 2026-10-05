@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { MarketingLanding } from "@/components/marketing/MarketingLanding";
 
 export const metadata: Metadata = {
-  title: "Player One IQ — Creator economy management",
+  title: "Player One IQ — Creator Snapshot and creator operations",
   description:
-    "The operating system for the creator economy. Apply to the Founding Roster and help shape professional infrastructure for creators, teams, and organizations.",
+    "Connect Twitch or Kick for a free Creator Snapshot, or open an agency workspace. Founding Roster applications remain open as a secondary path.",
   openGraph: {
     title: "Player One IQ",
     description:

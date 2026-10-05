@@ -1,0 +1,59 @@
+{
+  "nav": {
+    "product": "Product",
+    "features": "Features",
+    "foundingRoster": "Founding Roster",
+    "pricing": "Pricing",
+    "signIn": "Sign in",
+    "getStarted": "Get started"
+  },
+  "hero": {
+    "eyebrow": "Free Creator Snapshot — no application, no card",
+    "titleLead": "Know your next",
+    "titleMid": "move as a",
+    "titleAccent": "creator.",
+    "subtitle": "Connect Twitch or Kick, then get an instant snapshot of audience, recent performance, and a first-week plan. Built for creators and the people who manage them.",
+    "creatorDoor": "I'm a creator",
+    "creatorDoorHint": "Free snapshot after you connect a channel",
+    "orgDoor": "I manage creators",
+    "orgDoorHint": "Agency workspace for roster, deals, and contracts",
+    "foundingSecondary": "Founding Roster application",
+    "statGrowth": "Growth",
+    "statGrowthHint": "Analytics & insights",
+    "statRevenue": "Revenue",
+    "statRevenueHint": "Contracts & deals",
+    "statFree": "Free",
+    "statFreeHint": "Creator Snapshot"
+  },
+  "video": {
+    "label": "Founder note",
+    "coming": "Video coming — a short note from the founder will live here.",
+    "play": "Play founder video"
+  },
+  "foundingStrip": {
+    "kicker": "Founding Roster still open",
+    "body": "Prefer to apply instead of starting free? The Founding Roster is a small group helping shape Player One IQ before public launch. Existing applications are unchanged.",
+    "cta": "Apply to the Founding Roster"
+  },
+  "pricing": {
+    "freeName": "Free",
+    "freeDescription": "Creator Snapshot to get started",
+    "freeFeature1": "Connect Twitch or Kick",
+    "freeFeature2": "Instant audience & performance snapshot",
+    "freeFeature3": "First-week plan from your real data",
+    "freeFeature4": "No application or payment",
+    "freeCta": "Get your free snapshot",
+    "perMonth": "/mo",
+    "perYear": "/yr",
+    "featuredBadge": "Start here"
+  },
+  "finalCta": {
+    "kicker": "Start free, then grow with us",
+    "titleLead": "Ready for your",
+    "titleAccent": "Creator Snapshot?",
+    "body": "Sign up, connect Twitch or Kick, and see your numbers in one sitting. Agencies can open a workspace from the same door.",
+    "creator": "I'm a creator",
+    "org": "I manage creators",
+    "founding": "Or apply to the Founding Roster"
+  }
+}

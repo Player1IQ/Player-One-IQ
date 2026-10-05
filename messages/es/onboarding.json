@@ -71,9 +71,9 @@
     },
     "connect": {
       "title": "Conecta tus plataformas",
-      "subtitle": "Vincula YouTube, Twitch, Instagram, TikTok o Kick para desbloquear analítica de crecimiento, seguimiento de ingresos y un perfil de creador más fuerte para patrocinadores.",
-      "oauthHeading": "Conexiones OAuth en un clic",
-      "betaNote": "Durante la beta, YouTube usa inicio de sesión de Google. Si Google bloquea el acceso, el admin de tu workspace debe agregar tu Gmail como usuario de prueba OAuth. TikTok requiere Login Kit configurado para esta app.",
+      "subtitle": "Empieza con Twitch o Kick. YouTube está disponible para testers hasta que Google verifique la app.",
+      "oauthHeading": "Conecta Twitch o Kick",
+      "betaNote": "Google aún no ha verificado nuestra app de YouTube (límite de 100 usuarios y aviso de app no verificada). Prioriza Twitch o Kick. TikTok requiere Login Kit configurado para esta app.",
       "profileLink": "Puedes agregar más plataformas o ingresar handles manualmente después desde <link>tu perfil de creador</link>.",
       "linkingFallbackTitle": "Conecta tus plataformas",
       "linkingFallbackBody": "Tu perfil de creador aún se está vinculando. Puedes conectar plataformas desde tu perfil del portal justo después de la configuración."

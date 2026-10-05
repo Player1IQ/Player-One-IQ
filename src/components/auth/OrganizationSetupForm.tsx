@@ -34,7 +34,7 @@ export function OrganizationSetupForm({
   const defaultType = typeOptions[0];
   const [name, setName] = useState("");
   const [type, setType] = useState<string>(defaultType);
-  const [primaryPlatform, setPrimaryPlatform] = useState<Platform>("YouTube");
+  const [primaryPlatform, setPrimaryPlatform] = useState<Platform>("Twitch");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -69,6 +69,7 @@ export function OrganizationSetupForm({
         userEmail: user.email,
         creatorName: name,
         primaryPlatform,
+        skipOnboardingWizard: true,
       });
 
       if ("error" in result) {
@@ -78,15 +79,7 @@ export function OrganizationSetupForm({
       }
 
       await supabase.auth.refreshSession();
-      const beginResult = await beginOnboarding();
-      if ("error" in beginResult && beginResult.error) {
-        setError(beginResult.error);
-        setLoading(false);
-        return;
-      }
-
-      markOnboardingStartedClient();
-      router.push("/onboarding");
+      router.push("/portal/snapshot");
       router.refresh();
       return;
     }

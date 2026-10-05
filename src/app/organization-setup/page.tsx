@@ -4,6 +4,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { OrganizationSetupForm } from "@/components/auth/OrganizationSetupForm";
 import { getPendingInvitationForUser } from "@/lib/team/queries";
 import type { SignupAccountType } from "@/lib/organization";
+import { autoBootstrapCreatorWorkspace } from "./actions";
 
 function parseAccountType(value: string | undefined): SignupAccountType {
   if (value === "creator" || value === "agency" || value === "sponsor") {
@@ -25,6 +26,14 @@ export default async function OrganizationSetupPage({
   const { account } = await searchParams;
   const accountType = parseAccountType(account);
   const isCreator = accountType === "creator";
+
+  if (isCreator) {
+    const bootstrap = await autoBootstrapCreatorWorkspace();
+    if ("redirectTo" in bootstrap) {
+      redirect(bootstrap.redirectTo);
+    }
+  }
+
   const t = await getTranslations("onboarding.organizationSetup");
 
   return (

@@ -89,6 +89,28 @@
     "upgradeHint": "Conecta tus plataformas y mejora tu plan para desbloquear analítica de crecimiento completa.",
     "connectOnProfile": "Conectar plataformas en tu perfil"
   },
+  "snapshot": {
+    "oauthConnected": "{platform} conectado. Los números de abajo salen de esa cuenta — no inventamos estadísticas faltantes.",
+    "connectHeading": "Conecta Twitch o Kick",
+    "connectBody": "Carga un Creator Snapshot en vivo, sin postulación ni pago. YouTube es solo para testers hasta que Google verifique la app.",
+    "connectedHeading": "Cuentas conectadas",
+    "connectedBody": "Agrega otra plataforma cuando quieras. Twitch y Kick son la ruta soportada; YouTube sigue disponible para testers.",
+    "audienceLabel": "Audiencia actual",
+    "recentViewsLabel": "Vistas de contenido reciente",
+    "wowSinceLastCapture": "{percent} vs el último snapshot guardado",
+    "wowHidden": "El crecimiento semana a semana aparece después de guardar un segundo snapshot diario.",
+    "recentTitle": "Rendimiento reciente",
+    "recentEmpty": "Aún no hay VODs o videos recientes. Lo dejamos vacío en lugar de mostrar contenido de ejemplo.",
+    "views": "vistas",
+    "bestDaysTitle": "Mejores días",
+    "bestDaysEmpty": "Hacen falta unos 8 posts recientes antes de inferir días típicos.",
+    "bestTimesTitle": "Mejores horarios para streamear",
+    "bestTimesEmpty": "Hacen falta unos 8 streams o videos con fecha antes de destacar una hora (UTC).",
+    "insightsTitle": "Tres insights",
+    "planTitle": "Plan de la primera semana",
+    "planSubtitle": "Próximos pasos deterministas desde tus datos conectados. Sin métricas inventadas.",
+    "openGrowth": "Abrir analítica de crecimiento completa"
+  },
   "deliverables": {
     "open": "Abiertos",
     "overdue": "Vencidos",

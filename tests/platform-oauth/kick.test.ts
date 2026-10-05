@@ -13,5 +13,7 @@ test("Kick is a first-class OAuth platform", () => {
   assert.ok(oauthPlatforms.includes("Kick"));
   assert.equal(getOAuthPlatformSlug("Kick"), "kick");
   assert.equal(KICK_OAUTH_SCOPES, "user:read channel:read");
-  assert.equal(launchOAuthPlatforms.includes("Kick"), false);
+  assert.equal(launchOAuthPlatforms.includes("Kick"), true);
+  assert.equal(launchOAuthPlatforms.includes("Twitch"), true);
+  assert.equal(launchOAuthPlatforms.includes("YouTube"), false);
 });
