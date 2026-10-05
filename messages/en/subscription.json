@@ -19,12 +19,12 @@
     "ai_contract_summaries": "AI contract summaries",
     "ai_forecasting": "AI forecasting",
     "ai_deal_recommendations": "AI deal recommendations",
-    "white_label": "Portal white-label branding",
+    "white_label": "Hide portal branding",
     "api_access": "API access",
     "review_creators": "Review creators",
     "messaging": "Messaging",
     "campaign_tracking": "Campaign tracking",
-    "ai_creator_discovery": "AI creator matching",
+    "ai_creator_discovery": "Workspace AI creator matching",
     "ai_campaign_recommendations": "AI campaign recommendations",
     "ai_roi_forecasting": "AI ROI forecasting",
     "advanced_reporting": "Advanced reporting"
@@ -34,7 +34,7 @@
       "tagline": "Start your creator journey",
       "bullets": [
         "1 creator profile",
-        "Apply to opportunities",
+        "Apply to opportunities (marketplace coming soon)",
         "Limited analytics"
       ]
     },
@@ -70,7 +70,7 @@
         "Unlimited creators & team",
         "500 AI requests/month included",
         "AI forecasting & deal recommendations",
-        "Portal white-label branding & API access"
+        "Hide portal branding & API access"
       ]
     },
     "sponsor": {
@@ -86,8 +86,8 @@
       "bullets": [
         "Unlimited campaigns",
         "75 AI requests/month included",
-        "AI creator matching & campaign recommendations",
-        "AI ROI forecasts & campaign reporting"
+        "Workspace AI matching & campaign recs",
+        "Workspace AI ROI forecasts & campaign reporting"
       ]
     }
   },

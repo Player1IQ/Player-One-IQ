@@ -58,14 +58,14 @@ const features = [
   {
     icon: Users,
     title: "Creator Management",
-    description: "Manage your entire roster with rich creator profiles, performance tracking, and relationship intelligence. Every deal, note, and interaction — organized in one place.",
+    description: "Manage your entire roster with creator profiles, performance tracking, and deal history. Every deal and note — organized in one place.",
     large: true,
     color: "violet",
   },
   {
     icon: DollarSign,
     title: "Sponsor CRM",
-    description: "Track every brand relationship, pitch status, and renewal pipeline from one intelligent workspace.",
+    description: "Track brand relationships, pitch status, and renewal pipeline from one workspace.",
     large: false,
     color: "blue",
   },
@@ -100,7 +100,7 @@ const features = [
   {
     icon: MessageSquare,
     title: "Team Collaboration",
-    description: "Shared pipelines, internal notes, and team messaging — built for agencies.",
+    description: "Shared pipelines, internal notes, and workspace messaging — built for agencies.",
     large: false,
     color: "blue",
   },
@@ -113,7 +113,7 @@ const aiAssistants = [
     role: "Strategic Advisor",
     color: "violet",
     prompt: "What should I focus on to grow revenue this quarter?",
-    response: "Your top 3 creator contracts are up for renewal in 45 days. Based on recent performance trends, I've drafted renegotiation briefs with recommended talking points — want me to send them for review?",
+    response: "Your top contracts up for renewal show in the workspace. I can draft talking points from recent performance — you review them before anything goes out.",
   },
   {
     name: "Content Coach",
@@ -126,18 +126,18 @@ const aiAssistants = [
   {
     name: "Sponsorship Hunter",
     icon: Target,
-    role: "Deal Prospector",
+    role: "Workspace matching",
     color: "blue",
     prompt: "Find new brand opportunities for our gaming roster.",
-    response: "I found brand opportunities that may match creators on your roster. I drafted intro emails for the strongest pairings — want me to send them for review?",
+    response: "I can suggest brand pairings from your roster and workspace data, then draft intro language for you to send.",
   },
   {
     name: "Revenue Optimizer",
     icon: DollarSign,
-    role: "Financial Intelligence",
+    role: "Workspace forecasts",
     color: "emerald",
     prompt: "Are we leaving money on the table with current pricing?",
-    response: "A few sponsorships on your roster may be priced below comparable market rates. I pulled benchmarks from similar deals — here is a rate card you can use in your next negotiation.",
+    response: "I can compare deal values in your workspace and flag contracts that look light relative to your own recent deals.",
   },
 ];
 
@@ -190,12 +190,12 @@ const plans = [
     name: "Agency Pro",
     monthlyPrice: 249,
     annualPrice: 2390,
-    description: "The complete agency operating system",
+    description: "For agencies running a full roster",
     features: [
       "Unlimited creators & team",
       "500 AI requests/month included",
       "AI forecasting & deal recommendations",
-      "Portal white-label branding & API access",
+      "Hide portal branding & API access (/api/v1)",
     ],
     cta: "Start Free Trial",
     featured: false,
@@ -209,8 +209,8 @@ const plans = [
     features: [
       "Unlimited campaigns",
       "75 AI requests/month included",
-      "AI creator matching & campaign recommendations",
-      "AI ROI forecasts & campaign reporting",
+      "Workspace AI matching & campaign recs",
+      "Workspace AI ROI forecasts & campaign reporting",
     ],
     cta: "Start Free Trial",
     featured: false,
@@ -223,7 +223,7 @@ const plans = [
     description: "Custom solution for large organizations",
     features: [
       "Custom limits and support",
-      "Custom AI setup — available on request",
+      "Custom AI / model training — available on request",
       "SSO & audit logs — available on request",
       "Dedicated infrastructure — available on request",
       "White-glove onboarding",
@@ -718,10 +718,10 @@ function HeroSection() {
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.6 }}
             >
               <div className="text-[9px] text-white/30 mb-1.5 font-semibold uppercase tracking-wide">
-                Sponsor ROI
+                Campaigns
               </div>
-              <div className="font-display text-2xl font-bold text-white">Built-in</div>
-              <div className="text-[10px] text-sky-400 font-medium mt-0.5">Per campaign</div>
+              <div className="font-display text-2xl font-bold text-white">Reporting</div>
+              <div className="text-[10px] text-sky-400 font-medium mt-0.5">In workspace</div>
             </motion.div>
           </motion.div>
         </div>
@@ -856,7 +856,7 @@ function AISection() {
                 backgroundClip: "text",
               }}
             >
-              never sleeps.
+              in your workspace.
             </span>
           </h2>
           <p className="text-white/40 text-lg max-w-xl mx-auto">
@@ -1051,7 +1051,7 @@ function AnalyticsSection() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           {[
             { label: "Unified revenue", value: "One view", icon: DollarSign, delta: "All streams" },
-            { label: "Creator profiles", value: "Per creator", icon: Users, delta: "P&L & metrics" },
+            { label: "Creator profiles", value: "Per creator", icon: Users, delta: "Revenue & metrics" },
             { label: "Campaign tracking", value: "End-to-end", icon: Activity, delta: "Pipeline to close" },
             { label: "Sponsor reporting", value: "Per sponsor", icon: TrendingUp, delta: "By campaign" },
           ].map((s, i) => {

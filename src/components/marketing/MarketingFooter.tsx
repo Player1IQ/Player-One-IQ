@@ -20,7 +20,7 @@ export function MarketingFooter() {
       links: [
         { label: "Founding Roster", href: FOUNDING_ROSTER_PATH },
         { label: "Sign in", href: "/login" },
-        { label: "Contact", href: FOUNDING_ROSTER_PATH },
+        { label: "Contact", href: "mailto:Admin@playeroneIQ.com?subject=Contact" },
       ],
     },
     {
@@ -41,9 +41,8 @@ export function MarketingFooter() {
               <BrandLogoLink href="/" size="md" />
             </div>
             <p className="text-white/30 text-sm leading-relaxed max-w-xs mb-6">
-              The operating system for the creator economy — professional
-              infrastructure for growth, revenue, partnerships, and your creator
-              business.
+              Snapshot, roster, deals, and contracts — for creators and the
+              people who manage them.
             </p>
             <div className="flex gap-2.5">
               {SOCIAL_X_URL ? (
