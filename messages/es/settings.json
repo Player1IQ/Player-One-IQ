@@ -39,6 +39,8 @@
     "newOpportunitiesDescription": "Correo cuando una oportunidad nueva encaja con tu perfil de creador.",
     "newMessages": "Mensajes nuevos",
     "newMessagesDescription": "Correo cuando alguien te escribe. Como máximo un correo por conversación cada 15 minutos.",
+    "weeklyBrief": "Números semanales",
+    "weeklyBriefDescription": "Correo del lunes con tu audiencia y vistas almacenadas. El crecimiento solo aparece cuando hay dos puntos de historial.",
     "saved": "Preferencias guardadas."
   },
   "development": {

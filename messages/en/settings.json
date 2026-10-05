@@ -39,6 +39,8 @@
     "newOpportunitiesDescription": "Email when a new opportunity fits your creator profile.",
     "newMessages": "New messages",
     "newMessagesDescription": "Email when someone messages you. At most one email per conversation every 15 minutes.",
+    "weeklyBrief": "Weekly numbers",
+    "weeklyBriefDescription": "Monday email with your stored audience and view totals. Growth is included only after two history points exist.",
     "saved": "Preferences saved."
   },
   "development": {

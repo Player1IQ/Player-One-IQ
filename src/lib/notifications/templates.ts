@@ -35,3 +35,24 @@ export function buildDeadlineEmail(params: {
   });
   return { subject: params.subject, text, html };
 }
+
+export function buildWeeklyBriefEmail(params: {
+  heading: string;
+  subject: string;
+  lines: string[];
+  actionUrl: string;
+  actionLabel: string;
+}): { subject: string; text: string; html: string } {
+  const briefFooter = `Manage email notifications: ${getConfiguredAppUrl()}/portal/account#notifications`;
+  const text = [...params.lines, "", briefFooter].join("\n");
+  const html = wrapTransactionalEmailHtml({
+    heading: params.heading,
+    bodyHtml: params.lines
+      .map((line) => `<p style="margin:0 0 8px;font-size:14px;color:#d1d5db;">${escapeHtml(line)}</p>`)
+      .join(""),
+    actionUrl: params.actionUrl,
+    actionLabel: params.actionLabel,
+    footer: briefFooter,
+  });
+  return { subject: params.subject, text, html };
+}

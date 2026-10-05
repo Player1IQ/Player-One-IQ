@@ -10,6 +10,7 @@ interface PreferenceRow {
   email_deal_deadlines: boolean;
   email_new_opportunities: boolean;
   email_new_messages: boolean;
+  email_weekly_brief?: boolean;
 }
 
 export function mapPreferenceRow(row: PreferenceRow | null): NotificationPreferences {
@@ -18,6 +19,7 @@ export function mapPreferenceRow(row: PreferenceRow | null): NotificationPrefere
     emailDealDeadlines: row.email_deal_deadlines,
     emailNewOpportunities: row.email_new_opportunities,
     emailNewMessages: row.email_new_messages,
+    emailWeeklyBrief: row.email_weekly_brief !== false,
   };
 }
 
@@ -29,7 +31,7 @@ export async function getNotificationPreferencesForUser(
   const { data } = await supabase
     .from("notification_preferences")
     .select(
-      "email_deal_deadlines, email_new_opportunities, email_new_messages"
+      "email_deal_deadlines, email_new_opportunities, email_new_messages, email_weekly_brief"
     )
     .eq("user_id", userId)
     .eq("organization_id", organizationId)
@@ -44,6 +46,7 @@ export function preferenceAllowsKind(
 ): boolean {
   if (kind === "message") return prefs.emailNewMessages;
   if (kind === "opportunity") return prefs.emailNewOpportunities;
+  if (kind === "weekly_brief") return prefs.emailWeeklyBrief;
   return prefs.emailDealDeadlines;
 }
 

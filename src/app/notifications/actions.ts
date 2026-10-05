@@ -24,7 +24,7 @@ export async function getMyNotificationPreferences(): Promise<NotificationPrefer
   const { data } = await supabase
     .from("notification_preferences")
     .select(
-      "email_deal_deadlines, email_new_opportunities, email_new_messages"
+      "email_deal_deadlines, email_new_opportunities, email_new_messages, email_weekly_brief"
     )
     .eq("user_id", user.id)
     .eq("organization_id", organizationId)
@@ -54,6 +54,7 @@ export async function saveMyNotificationPreferences(
       email_deal_deadlines: input.emailDealDeadlines,
       email_new_opportunities: input.emailNewOpportunities,
       email_new_messages: input.emailNewMessages,
+      email_weekly_brief: input.emailWeeklyBrief,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "organization_id,user_id" }
