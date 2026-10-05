@@ -25,11 +25,13 @@ export default async function OrganizationSetupPage({
 
   const { account } = await searchParams;
   const accountType = parseAccountType(account);
-  const isCreator = accountType === "creator";
 
   if (accountType === "sponsor") {
     redirect("/signup?account=sponsor");
   }
+
+  const isCreator = accountType === "creator";
+  const workspaceAccountType = isCreator ? "creator" : "agency";
 
   if (isCreator) {
     const bootstrap = await autoBootstrapCreatorWorkspace();
@@ -42,22 +44,10 @@ export default async function OrganizationSetupPage({
 
   return (
     <AuthLayout
-      title={
-        isCreator
-          ? t("creatorTitle")
-          : accountType === "sponsor"
-            ? t("sponsorTitle")
-            : t("agencyTitle")
-      }
-      subtitle={
-        isCreator
-          ? t("creatorSubtitle")
-          : accountType === "sponsor"
-            ? t("sponsorSubtitle")
-            : t("agencySubtitle")
-      }
+      title={isCreator ? t("creatorTitle") : t("agencyTitle")}
+      subtitle={isCreator ? t("creatorSubtitle") : t("agencySubtitle")}
     >
-      <OrganizationSetupForm accountType={accountType} />
+      <OrganizationSetupForm accountType={workspaceAccountType} />
     </AuthLayout>
   );
 }
