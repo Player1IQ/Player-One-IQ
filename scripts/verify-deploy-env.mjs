@@ -138,6 +138,11 @@ const checks = [
     required: false,
     hint: "Optional extra secret for Agency Pro API key hashing",
   },
+  {
+    key: "WEEKLY_BRIEF_ENABLED",
+    required: false,
+    hint: "Set to true on Vercel Production to send Monday weekly briefs. Default off.",
+  },
 ];
 
 let failed = 0;

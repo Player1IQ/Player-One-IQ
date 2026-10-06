@@ -4,15 +4,21 @@ import { getConfiguredAppUrl } from "@/lib/email/app-url";
 import { isAppLocale, type AppLocale } from "@/i18n/config";
 import {
   listCreatorMetricHistory,
-  pickGrowthPair,
   weekOverWeekPercent,
   type MetricHistoryPoint,
 } from "@/lib/platform-oauth/metric-history";
-import { isMondayUtc, weeklyBriefWindowKey } from "./dates";
 import {
-  claimEmailSend,
+  addUtcDays,
+  daysBetweenUtcDays,
+  isMondayUtc,
+  utcDateFromIsoDay,
+  utcDateOnly,
+  weeklyBriefWindowKey,
+} from "./dates";
+import {
   getNotificationPreferencesForUser,
   preferenceAllowsKind,
+  claimEmailSend,
   releaseEmailSend,
   toRecipient,
 } from "./store";
@@ -22,6 +28,15 @@ import enEmails from "../../../messages/en/emails.json";
 import esEmails from "../../../messages/es/emails.json";
 
 const CREATOR_BRIEF_ROLES = ["player", "content_creator"] as const;
+
+export const WEEKLY_BRIEF_LOOKBACK_TARGET_DAYS = 7;
+export const WEEKLY_BRIEF_LOOKBACK_MIN_DAYS = 5;
+export const WEEKLY_BRIEF_LOOKBACK_MAX_DAYS = 9;
+
+export function isWeeklyBriefEnabled(): boolean {
+  const raw = process.env.WEEKLY_BRIEF_ENABLED?.trim().toLowerCase();
+  return raw === "true" || raw === "1" || raw === "on" || raw === "yes";
+}
 
 export interface WeeklyBriefStats {
   creatorName: string;
@@ -34,27 +49,61 @@ export interface WeeklyBriefStats {
   historyPointCount: number;
 }
 
+export function pickWeeklyComparisonPoint(
+  points: MetricHistoryPoint[],
+  sendDate: string,
+  currentDate: string
+): MetricHistoryPoint | null {
+  const send = utcDateFromIsoDay(sendDate);
+  const minDate = addUtcDays(send, -WEEKLY_BRIEF_LOOKBACK_MAX_DAYS);
+  const maxDate = addUtcDays(send, -WEEKLY_BRIEF_LOOKBACK_MIN_DAYS);
+  const targetDate = addUtcDays(send, -WEEKLY_BRIEF_LOOKBACK_TARGET_DAYS);
+
+  const candidates = points.filter(
+    (point) =>
+      point.capturedOn >= minDate &&
+      point.capturedOn <= maxDate &&
+      point.capturedOn !== currentDate
+  );
+  if (candidates.length === 0) return null;
+
+  return [...candidates].sort((left, right) => {
+    const leftDelta = Math.abs(daysBetweenUtcDays(left.capturedOn, targetDate));
+    const rightDelta = Math.abs(daysBetweenUtcDays(right.capturedOn, targetDate));
+    if (leftDelta !== rightDelta) return leftDelta - rightDelta;
+    return right.capturedOn.localeCompare(left.capturedOn);
+  })[0] ?? null;
+}
+
 export function buildWeeklyBriefStats(input: {
   creatorName: string;
   points: MetricHistoryPoint[];
+  sendDate?: string;
 }): WeeklyBriefStats | null {
   if (input.points.length < 1) return null;
 
-  const pair = pickGrowthPair(input.points);
-  const latest = pair?.current ?? input.points[input.points.length - 1];
-  if (!latest) return null;
+  const sendDate = input.sendDate ?? utcDateOnly();
+  const sorted = [...input.points].sort((left, right) =>
+    left.capturedOn.localeCompare(right.capturedOn)
+  );
+  const current =
+    [...sorted].reverse().find((point) => point.capturedOn <= sendDate) ??
+    sorted[sorted.length - 1];
+  if (!current) return null;
+
+  const previous = pickWeeklyComparisonPoint(sorted, sendDate, current.capturedOn);
 
   return {
     creatorName: input.creatorName,
-    asOfDate: latest.capturedOn,
-    previousDate: pair?.previous.capturedOn ?? null,
-    audienceSize: latest.audienceSize,
-    viewTotal: latest.viewTotal,
-    audienceChangePercent: pair
-      ? weekOverWeekPercent(pair.current.audienceSize, pair.previous.audienceSize)
+    asOfDate: current.capturedOn,
+    previousDate: previous?.capturedOn ?? null,
+    audienceSize: current.audienceSize,
+    viewTotal: current.viewTotal,
+    audienceChangePercent: previous
+      ? weekOverWeekPercent(current.audienceSize, previous.audienceSize)
       : null,
-    viewsChangePercent: pair
-      ? weekOverWeekPercent(pair.current.viewTotal, pair.previous.viewTotal)
+    viewsChangePercent: previous
+      ? weekOverWeekPercent(current.viewTotal, previous.viewTotal)
       : null,
     historyPointCount: input.points.length,
   };
@@ -100,6 +149,12 @@ export function buildWeeklyBriefCopy(
   const audienceChange = formatSignedPercent(stats.audienceChangePercent);
   const viewsChange = formatSignedPercent(stats.viewsChangePercent);
   if (stats.previousDate && (audienceChange || viewsChange)) {
+    lines.push(
+      interpolate(copy.comparedRange, {
+        fromDate: stats.previousDate,
+        toDate: stats.asOfDate,
+      })
+    );
     const since = interpolate(copy.changeSince, { date: stats.previousDate });
     if (audienceChange) lines.push(`${copy.audience} ${since}: ${audienceChange}`);
     if (viewsChange) lines.push(`${copy.views} ${since}: ${viewsChange}`);
@@ -179,10 +234,15 @@ export async function sendWeeklyBriefEmails(
   supabase: SupabaseClient,
   now = new Date()
 ): Promise<{ sent: number; skipped: number; reason?: string }> {
+  if (!isWeeklyBriefEnabled()) {
+    return { sent: 0, skipped: 0, reason: "disabled" };
+  }
+
   if (!isMondayUtc(now)) {
     return { sent: 0, skipped: 0, reason: "not_monday" };
   }
 
+  const sendDate = utcDateOnly(now);
   const windowKey = weeklyBriefWindowKey(now);
   const origin = getConfiguredAppUrl();
   const actionUrl = `${origin}/portal/snapshot`;
@@ -228,7 +288,11 @@ export async function sendWeeklyBriefEmails(
     }
 
     const points = await listCreatorMetricHistory(candidate.creatorId, supabase);
-    const stats = buildWeeklyBriefStats({ creatorName, points });
+    const stats = buildWeeklyBriefStats({
+      creatorName,
+      points,
+      sendDate,
+    });
     if (!stats) {
       skipped += 1;
       continue;
@@ -256,4 +320,45 @@ export async function sendWeeklyBriefEmails(
   }
 
   return { sent, skipped };
+}
+
+export async function sendTestWeeklyBrief(input: {
+  supabase: SupabaseClient;
+  recipient: NotificationRecipient;
+  creatorId: string;
+  creatorName: string;
+  locale?: AppLocale;
+}): Promise<{ sent: true } | { sent: false; error: string }> {
+  const points = await listCreatorMetricHistory(input.creatorId, input.supabase);
+  const stats = buildWeeklyBriefStats({
+    creatorName: input.creatorName,
+    points,
+    sendDate: utcDateOnly(),
+  });
+  if (!stats) {
+    return {
+      sent: false,
+      error: "No stored snapshot yet for this linked creator.",
+    };
+  }
+
+  const locale = input.locale ?? "en";
+  const copy = buildWeeklyBriefCopy(stats, locale);
+  const origin = getConfiguredAppUrl();
+  const email = buildWeeklyBriefEmail({
+    heading: copy.heading,
+    subject: `[TEST] ${copy.subject}`,
+    lines: copy.lines,
+    actionUrl: `${origin}/portal/snapshot`,
+    actionLabel: copy.actionLabel,
+  });
+
+  const result = await sendTransactionalEmail({
+    to: input.recipient.email,
+    ...email,
+  });
+  if (!result.sent) {
+    return { sent: false, error: result.error };
+  }
+  return { sent: true };
 }

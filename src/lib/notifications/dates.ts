@@ -17,6 +17,16 @@ export function addUtcDays(date: Date, days: number): string {
   return next.toISOString().slice(0, 10);
 }
 
+export function utcDateFromIsoDay(isoDay: string): Date {
+  return new Date(`${isoDay}T00:00:00.000Z`);
+}
+
+export function daysBetweenUtcDays(laterIsoDay: string, earlierIsoDay: string): number {
+  const later = utcDateFromIsoDay(laterIsoDay).getTime();
+  const earlier = utcDateFromIsoDay(earlierIsoDay).getTime();
+  return Math.round((later - earlier) / 86_400_000);
+}
+
 export function deliverableDueWindowKeys(now = new Date()): Array<{
   dueDate: string;
   windowKey: string;
