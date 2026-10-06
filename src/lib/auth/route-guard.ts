@@ -49,16 +49,42 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
   if (!bootstrap) return;
 
   const { supabase, user, memberOrgIds, hasOrganization } = bootstrap;
+  const isHome = pathname === MARKETING_HOME_PATH;
+  const needsFullGuard =
+    !isPublicRoute ||
+    isHome ||
+    AUTH_ONLY_ROUTES.includes(pathname) ||
+    isOrgSetup ||
+    isOnboarding ||
+    isInviteRoute;
 
-  const { data: pendingInvite } = await supabase
-    .from("team_invitations")
-    .select("token, organization_id")
-    .eq("status", "pending")
-    .ilike("email", user.email ?? "")
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  if (!needsFullGuard) return;
+
+  const cookieStore = await cookies();
+  const startedOnboardingCookie =
+    cookieStore.get(ONBOARDING_STARTED_COOKIE)?.value === "1";
+  const inviteEmail = user.email?.trim() ?? "";
+
+  const [pendingInviteResult, membership, onboardingRequired] =
+    await Promise.all([
+      inviteEmail
+        ? supabase
+            .from("team_invitations")
+            .select("token, organization_id")
+            .eq("status", "pending")
+            .ilike("email", inviteEmail)
+            .gt("expires_at", new Date().toISOString())
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+      getCurrentUserMembership(),
+      resolveOnboardingRequired(supabase, user, {
+        startedCookie: startedOnboardingCookie,
+      }),
+    ]);
+
+  const pendingInvite = pendingInviteResult.data;
 
   const needsToAcceptInvite =
     pendingInvite?.token &&
@@ -78,14 +104,6 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
     redirect("/organization-setup");
   }
 
-  const cookieStore = await cookies();
-  const startedOnboardingCookie =
-    cookieStore.get(ONBOARDING_STARTED_COOKIE)?.value === "1";
-
-  const onboardingRequired = await resolveOnboardingRequired(supabase, user, {
-    startedCookie: startedOnboardingCookie,
-  });
-
   if (
     hasOrganization &&
     onboardingRequired &&
@@ -98,7 +116,6 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
     redirect("/onboarding");
   }
 
-  const membership = await getCurrentUserMembership();
   const role = membership?.role ?? null;
 
   if (

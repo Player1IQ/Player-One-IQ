@@ -33,7 +33,7 @@ export default function Error({
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-dark"
           >
             <RotateCcw className="h-4 w-4" />
-            Try again
+            Retry
           </button>
           <Link
             href={STAFF_DASHBOARD_PATH}

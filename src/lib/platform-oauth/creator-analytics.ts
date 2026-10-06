@@ -5,6 +5,7 @@ import {
 } from "./content-aggregate";
 import type { PlatformContentSnapshot } from "./content-performance";
 import type { OAuthPlatform } from "./types";
+import { withTimeout } from "@/lib/observability/timing";
 
 export interface PlatformBreakdownMetric {
   platform: string;
@@ -244,6 +245,17 @@ export async function fetchPlatformAudienceSize(
   platform: OAuthPlatform,
   accessToken: string
 ): Promise<number | null> {
+  return withTimeout(
+    () => fetchPlatformAudienceSizeUncapped(platform, accessToken),
+    5000,
+    null
+  );
+}
+
+async function fetchPlatformAudienceSizeUncapped(
+  platform: OAuthPlatform,
+  accessToken: string
+): Promise<number | null> {
   try {
     if (platform === "YouTube") {
       const response = await fetch(
@@ -357,10 +369,23 @@ export function buildCreatorAudienceAnalytics(
 export async function getCreatorAudienceAnalytics(
   creatorId: string
 ): Promise<CreatorAudienceAnalytics> {
-  const [snapshots, audienceSizes] = await Promise.all([
-    fetchCreatorContentSnapshots(creatorId),
-    fetchAudienceSizesForCreator(creatorId),
-  ]);
+  try {
+    const [snapshots, audienceSizes] = await Promise.all([
+      fetchCreatorContentSnapshots(creatorId),
+      fetchAudienceSizesForCreator(creatorId),
+    ]);
 
-  return buildCreatorAudienceAnalytics(snapshots, audienceSizes);
+    return buildCreatorAudienceAnalytics(snapshots, audienceSizes);
+  } catch (error) {
+    console.error("[oauth] audience analytics failed:", error);
+    return {
+      platformBreakdown: [],
+      contentTrend: [],
+      weeklyViewsTrend: [],
+      totalViews: 0,
+      totalContent: 0,
+      hasOAuthContent: false,
+      connectedOAuthCount: 0,
+    };
+  }
 }
