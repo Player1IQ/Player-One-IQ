@@ -5,7 +5,7 @@ import {
   parseCachedContentItems,
   platformNeedsReconnect,
   platformsNeedingFirstFetch,
-} from "@/lib/platform-oauth/content-cache";
+} from "@/lib/platform-oauth/content-cache-client";
 
 describe("platformsNeedingFirstFetch", () => {
   it("returns connected platforms that have no stored cache row", () => {

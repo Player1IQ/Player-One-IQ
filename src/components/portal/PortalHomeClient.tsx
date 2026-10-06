@@ -32,7 +32,7 @@ import { PortalRecommendedOpportunities } from "@/components/portal/PortalRecomm
 import { PortalProfileReadiness } from "@/components/portal/PortalProfileReadiness";
 import { TodayScheduleCard } from "@/components/schedule/TodayScheduleCard";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
-import type { PlatformAnalyticsStatus } from "@/lib/platform-oauth/content-cache";
+import type { PlatformAnalyticsStatus } from "@/lib/platform-oauth/content-cache-client";
 import type { CreatorPortalBenefits } from "@/lib/creators/portal-benefits";
 import type { ScheduleEvent } from "@/lib/schedule";
 import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";

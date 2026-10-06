@@ -8,7 +8,7 @@ import { refreshCreatorAudienceAction } from "@/lib/platform-oauth/refresh-actio
 import {
   formatAnalyticsUpdatedLabel,
   type PlatformAnalyticsStatus,
-} from "@/lib/platform-oauth/content-cache";
+} from "@/lib/platform-oauth/content-cache-client";
 
 const BACKGROUND_REFRESH_MS = 15 * 60 * 1000;
 
