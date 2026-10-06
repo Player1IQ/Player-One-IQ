@@ -4,6 +4,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { getLocaleDirection, defaultLocale, isAppLocale } from "@/i18n/config";
 import { enforceAuthenticatedRouteAccess } from "@/lib/auth/route-guard";
+import { logServerTiming } from "@/lib/observability/timing";
+import { headers } from "next/headers";
 import {
   BRAND_FAVICON_PATH,
   BRAND_FAVICON_VERSION,
@@ -79,17 +81,23 @@ export const metadata: Metadata = {
   applicationName: BRAND_NAME,
 };
 
+export const preferredRegion = ["iad1"];
+export const maxDuration = 15;
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const startedAt = Date.now();
   await enforceAuthenticatedRouteAccess();
 
   const resolvedLocale = await getLocale();
   const locale = isAppLocale(resolvedLocale) ? resolvedLocale : defaultLocale;
   const messages = await getMessages();
   const direction = getLocaleDirection(locale);
+  const pathname = (await headers()).get("x-pathname") ?? "unknown";
+  logServerTiming(`layout ${pathname}`, startedAt);
 
   return (
     <html lang={locale} dir={direction} className="dark">

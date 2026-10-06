@@ -210,6 +210,9 @@ function getResendJson(pathname: string, apiKey: string): Promise<{
       }
     );
     req.on("error", reject);
+    req.setTimeout(4000, () => {
+      req.destroy(new Error("Resend domains lookup timed out"));
+    });
     req.end();
   });
 }

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getOAuthAccessTokenForCreator } from "./account-access";
 import type {
   ContentAnalysisScope,
@@ -9,6 +10,9 @@ import { fetchTikTokRecentContent } from "./tiktok-content";
 import { fetchTwitchRecentContent } from "./twitch-content";
 import { fetchYouTubeRecentVideos } from "./youtube-content";
 import { fetchKickRecentContent } from "./kick-content";
+import { logServerTiming, withTimeout } from "@/lib/observability/timing";
+
+const PLATFORM_FETCH_TIMEOUT_MS = 5000;
 
 export async function fetchPlatformContentWithToken(
   platform: OAuthPlatform,
@@ -44,31 +48,44 @@ async function fetchOAuthPlatformContent(
   creatorId: string,
   platform: OAuthPlatform
 ): Promise<PlatformContentSnapshot> {
+  const empty: PlatformContentSnapshot = {
+    platform,
+    items: [],
+    connectedViaOAuth: false,
+  };
+  const startedAt = Date.now();
   try {
-    const tokenResult = await getOAuthAccessTokenForCreator(creatorId, platform);
-    if (!tokenResult) {
-      return { platform, items: [], connectedViaOAuth: false };
-    }
-
-    return fetchPlatformContentWithToken(platform, tokenResult.accessToken);
+    const snapshot = await withTimeout(async () => {
+      const tokenResult = await getOAuthAccessTokenForCreator(
+        creatorId,
+        platform
+      );
+      if (!tokenResult) return empty;
+      return fetchPlatformContentWithToken(platform, tokenResult.accessToken);
+    }, PLATFORM_FETCH_TIMEOUT_MS, empty);
+    logServerTiming(`oauth-content ${platform}`, startedAt);
+    return snapshot;
   } catch {
-    return { platform, items: [], connectedViaOAuth: false };
+    logServerTiming(`oauth-content ${platform} failed`, startedAt);
+    return empty;
   }
 }
 
-export async function fetchCreatorContentSnapshots(
-  creatorId: string,
-  scope: ContentAnalysisScope = "all"
-): Promise<PlatformContentSnapshot[]> {
-  const platformsToFetch: OAuthPlatform[] =
-    scope === "all" ? [...oauthPlatforms] : [scope];
+export const fetchCreatorContentSnapshots = cache(
+  async (
+    creatorId: string,
+    scope: ContentAnalysisScope = "all"
+  ): Promise<PlatformContentSnapshot[]> => {
+    const platformsToFetch: OAuthPlatform[] =
+      scope === "all" ? [...oauthPlatforms] : [scope];
 
-  return Promise.all(
-    platformsToFetch.map((platform) =>
-      fetchOAuthPlatformContent(creatorId, platform)
-    )
-  );
-}
+    return Promise.all(
+      platformsToFetch.map((platform) =>
+        fetchOAuthPlatformContent(creatorId, platform)
+      )
+    );
+  }
+);
 
 export function getAnalyzablePlatforms(
   snapshots: PlatformContentSnapshot[]
