@@ -8,6 +8,11 @@ import {
   type NotificationPreferences,
 } from "@/lib/notifications/types";
 import { mapPreferenceRow } from "@/lib/notifications/store";
+import { sendTestWeeklyBrief } from "@/lib/notifications/weekly-brief";
+import { createServiceClient } from "@/lib/supabase/admin";
+import { getCurrentUserMembership } from "@/lib/permissions";
+import { getCreatorById } from "@/lib/creators/queries";
+import { resolveLocale } from "@/lib/i18n/locale";
 
 export async function getMyNotificationPreferences(): Promise<NotificationPreferences> {
   const supabase = await createClient();
@@ -64,5 +69,73 @@ export async function saveMyNotificationPreferences(
 
   revalidatePath("/settings");
   revalidatePath("/portal/account");
+  return { success: true };
+}
+
+export async function canSendWeeklyBriefTest(): Promise<boolean> {
+  const supabase = await createClient();
+  if (!supabase) return false;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const membership = await getCurrentUserMembership();
+  if (!membership) return false;
+  if (membership.role === "owner" || membership.role === "admin") return true;
+
+  const organizationId = await getOrganizationId();
+  if (!organizationId) return false;
+  const { data: organization } = await supabase
+    .from("organizations")
+    .select("user_id")
+    .eq("id", organizationId)
+    .maybeSingle();
+  return organization?.user_id === user.id;
+}
+
+export async function sendTestWeeklyBriefToMe(): Promise<
+  { success: true } | { error: string }
+> {
+  const allowed = await canSendWeeklyBriefTest();
+  if (!allowed) {
+    return { error: "Only an owner or admin can send a test weekly brief." };
+  }
+
+  const supabase = await createClient();
+  if (!supabase) return { error: "Supabase is not configured." };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return { error: "Not authenticated." };
+
+  const membership = await getCurrentUserMembership();
+  const organizationId = await getOrganizationId();
+  if (!membership || !organizationId) {
+    return { error: "Organization not found." };
+  }
+  if (!membership.linkedCreatorId) {
+    return { error: "Link a creator to your membership to send a test brief." };
+  }
+
+  const creator = await getCreatorById(membership.linkedCreatorId);
+  if (!creator) return { error: "Linked creator not found." };
+
+  const service = createServiceClient();
+  if (!service) return { error: "Service client is not configured." };
+
+  const locale = await resolveLocale();
+  const result = await sendTestWeeklyBrief({
+    supabase: service,
+    recipient: {
+      userId: user.id,
+      organizationId,
+      email: user.email,
+    },
+    creatorId: creator.id,
+    creatorName: creator.name,
+    locale,
+  });
+  if (!result.sent) return { error: result.error };
   return { success: true };
 }

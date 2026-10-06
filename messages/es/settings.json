@@ -40,7 +40,11 @@
     "newMessages": "Mensajes nuevos",
     "newMessagesDescription": "Correo cuando alguien te escribe. Como máximo un correo por conversación cada 15 minutos.",
     "weeklyBrief": "Números semanales",
-    "weeklyBriefDescription": "Correo del lunes con tu audiencia y vistas almacenadas. El crecimiento solo aparece cuando hay dos puntos de historial.",
+    "weeklyBriefDescription": "Correo del lunes con tu audiencia y vistas almacenadas. El crecimiento usa un snapshot de hace 5–9 días.",
+    "testBrief": "Enviarme un brief de prueba",
+    "testBriefDescription": "Solo te llega a ti, con asunto [TEST], usando los números de tu creador vinculado. El envío del lunes sigue apagado hasta que WEEKLY_BRIEF_ENABLED esté activo.",
+    "testBriefCta": "Enviar correo de prueba",
+    "testBriefSent": "Brief de prueba enviado.",
     "saved": "Preferencias guardadas."
   },
   "development": {

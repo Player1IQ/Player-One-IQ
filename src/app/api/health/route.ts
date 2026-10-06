@@ -15,6 +15,7 @@ import {
   isStripeConfigured,
   getStripeWebhookSecret,
 } from "@/lib/stripe/config";
+import { isWeeklyBriefEnabled } from "@/lib/notifications/weekly-brief";
 
 export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? null;
@@ -54,6 +55,7 @@ export async function GET() {
     serviceRoleConfigured,
     apiV1AuthReady: serviceRoleConfigured,
     apiKeyPepperConfigured: Boolean(process.env.API_KEY_PEPPER?.trim()),
+    weeklyBriefEnabled: isWeeklyBriefEnabled(),
     stripeConfigured: isStripeConfigured(),
     stripeWebhookConfigured: Boolean(getStripeWebhookSecret()),
     resendConfigured: Boolean(

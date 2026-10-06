@@ -34,7 +34,7 @@ import { getCreators } from "@/lib/creators/queries";
 import { getPayoutRecipientsForOrg } from "@/lib/payments/queries";
 import { PayoutSettingsSection } from "@/components/payments/PayoutSettingsSection";
 import { NotificationPreferencesForm } from "@/components/settings/NotificationPreferencesForm";
-import { getMyNotificationPreferences } from "@/app/notifications/actions";
+import { getMyNotificationPreferences, canSendWeeklyBriefTest } from "@/app/notifications/actions";
 import { getMyAvatarUrl } from "@/app/account/actions";
 import { formatDate } from "@/lib/i18n/format";
 
@@ -74,6 +74,7 @@ export default async function SettingsPage() {
     creators,
     avatarUrl,
     notificationPreferences,
+    showTestWeeklyBrief,
   ] =
     await Promise.all([
       getOrganizationForUser(),
@@ -85,6 +86,7 @@ export default async function SettingsPage() {
       getCreators(),
       getMyAvatarUrl(),
       getMyNotificationPreferences(),
+      canSendWeeklyBriefTest(),
     ]);
 
   const isWorkspaceFounder = membership?.isWorkspaceFounder ?? false;
@@ -157,6 +159,7 @@ export default async function SettingsPage() {
             <NotificationPreferencesForm
               initial={notificationPreferences}
               showOpportunityEmails={false}
+              showTestWeeklyBrief={showTestWeeklyBrief}
             />
           ) : undefined
         }

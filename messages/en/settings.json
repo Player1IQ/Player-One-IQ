@@ -40,7 +40,11 @@
     "newMessages": "New messages",
     "newMessagesDescription": "Email when someone messages you. At most one email per conversation every 15 minutes.",
     "weeklyBrief": "Weekly numbers",
-    "weeklyBriefDescription": "Monday email with your stored audience and view totals. Growth is included only after two history points exist.",
+    "weeklyBriefDescription": "Monday email with your stored audience and view totals. Growth uses a snapshot from 5–9 days earlier.",
+    "testBrief": "Send me a test brief",
+    "testBriefDescription": "Emails only you, with a [TEST] subject, using your linked creator’s stored numbers. The Monday send stays off until WEEKLY_BRIEF_ENABLED is turned on.",
+    "testBriefCta": "Send test email",
+    "testBriefSent": "Test brief sent.",
     "saved": "Preferences saved."
   },
   "development": {

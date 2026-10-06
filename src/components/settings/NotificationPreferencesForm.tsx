@@ -4,18 +4,23 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Bell, Loader2 } from "lucide-react";
 import type { NotificationPreferences } from "@/lib/notifications/types";
-import { saveMyNotificationPreferences } from "@/app/notifications/actions";
+import {
+  saveMyNotificationPreferences,
+  sendTestWeeklyBriefToMe,
+} from "@/app/notifications/actions";
 
 interface NotificationPreferencesFormProps {
   initial: NotificationPreferences;
   compact?: boolean;
   showOpportunityEmails?: boolean;
+  showTestWeeklyBrief?: boolean;
 }
 
 export function NotificationPreferencesForm({
   initial,
   compact = false,
   showOpportunityEmails = true,
+  showTestWeeklyBrief = false,
 }: NotificationPreferencesFormProps) {
   const t = useTranslations("settings.notifications");
   const [prefs, setPrefs] = useState(initial);
@@ -113,6 +118,32 @@ export function NotificationPreferencesForm({
           </li>
         ))}
       </ul>
+
+      {showTestWeeklyBrief ? (
+        <div className="mt-4 rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
+          <p className="text-sm font-medium text-white">{t("testBrief")}</p>
+          <p className="mt-1 text-xs text-gray-500">{t("testBriefDescription")}</p>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              setMessage("");
+              setError("");
+              startTransition(async () => {
+                const result = await sendTestWeeklyBriefToMe();
+                if ("error" in result) {
+                  setError(result.error);
+                  return;
+                }
+                setMessage(t("testBriefSent"));
+              });
+            }}
+            className="mt-3 inline-flex items-center rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent/90 disabled:opacity-50"
+          >
+            {t("testBriefCta")}
+          </button>
+        </div>
+      ) : null}
 
       <div className="mt-3 flex min-h-[1.25rem] items-center gap-2 text-sm">
         {isPending ? <Loader2 className="h-4 w-4 animate-spin text-gray-500" /> : null}

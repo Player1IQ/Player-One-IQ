@@ -15,7 +15,7 @@ import {
 } from "@/lib/portal/guard";
 import { roleLabels, isPortalRole, isSponsorPortalRole } from "@/lib/team";
 import { getMyAvatarUrl } from "@/app/account/actions";
-import { getMyNotificationPreferences } from "@/app/notifications/actions";
+import { getMyNotificationPreferences, canSendWeeklyBriefTest } from "@/app/notifications/actions";
 
 export default async function PortalAccountPage() {
   const membership = await getCurrentUserMembership();
@@ -23,12 +23,13 @@ export default async function PortalAccountPage() {
     redirect(STAFF_DASHBOARD_PATH);
   }
 
-  const [organization, email, avatarUrl, userId, notificationPreferences] = await Promise.all([
+  const [organization, email, avatarUrl, userId, notificationPreferences, showTestWeeklyBrief] = await Promise.all([
     getOrganizationForUser(),
     getUserEmail(),
     getMyAvatarUrl(),
     getUserId(),
     getMyNotificationPreferences(),
+    canSendWeeklyBriefTest(),
   ]);
 
   if (!userId) {
@@ -54,6 +55,7 @@ export default async function PortalAccountPage() {
           userId={userId}
           avatarUrl={avatarUrl}
           notificationPreferences={notificationPreferences}
+          showTestWeeklyBrief={showTestWeeklyBrief}
         />
       </DashboardLayout>
     );
@@ -83,6 +85,7 @@ export default async function PortalAccountPage() {
           isWorkspaceFounder={membership.isWorkspaceFounder}
           notificationPreferences={notificationPreferences}
           showOpportunityEmails
+          showTestWeeklyBrief={showTestWeeklyBrief}
         />
         <CreatorPortalPayoutSection
           creatorId={linkedCreatorId}

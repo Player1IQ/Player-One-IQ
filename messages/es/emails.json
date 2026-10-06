@@ -19,8 +19,9 @@
     "intro": "Esto es lo que almacenamos para {creatorName} al {asOfDate}.",
     "audience": "Audiencia",
     "views": "Vistas recientes",
+    "comparedRange": "Comparado {fromDate} con {toDate}.",
     "changeSince": "cambio desde {date}",
-    "noGrowthYet": "El crecimiento permanece oculto hasta que guardemos un segundo snapshot diario.",
+    "noGrowthYet": "No hay un snapshot de hace 5–9 días, así que este correo muestra solo los números actuales.",
     "cta": "Abrir tu snapshot"
   },
   "scheduleInvite": {

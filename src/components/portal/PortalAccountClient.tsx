@@ -30,6 +30,7 @@ interface PortalAccountClientProps {
   isWorkspaceFounder?: boolean;
   notificationPreferences: NotificationPreferences;
   showOpportunityEmails?: boolean;
+  showTestWeeklyBrief?: boolean;
 }
 
 export function PortalAccountClient({
@@ -43,6 +44,7 @@ export function PortalAccountClient({
   isWorkspaceFounder = false,
   notificationPreferences,
   showOpportunityEmails = false,
+  showTestWeeklyBrief = false,
 }: PortalAccountClientProps) {
   const tLang = useTranslations("language");
   const t = useTranslations("portal.account");
@@ -137,6 +139,7 @@ export function PortalAccountClient({
             initial={notificationPreferences}
             compact
             showOpportunityEmails={showOpportunityEmails}
+            showTestWeeklyBrief={showTestWeeklyBrief}
           />
         </CardContent>
       </Card>
