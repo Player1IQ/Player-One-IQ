@@ -18,7 +18,7 @@ import {
 } from "@/lib/permissions";
 import { isCreatorPortalRole, isPortalRole } from "@/lib/team";
 import { getOAuthPlatformUi } from "@/lib/platform-oauth/config";
-import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
+import { getCreatorAudiencePageData } from "@/lib/platform-oauth/audience-page-data";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { createClient } from "@/lib/supabase/server";
 import { loadMediaKitForCreator } from "@/lib/media-kit/store";
@@ -56,7 +56,7 @@ export default async function CreatorDetailPage({
     platformAccounts,
     revenueEntries,
     subscription,
-    audienceAnalytics,
+    audiencePage,
     payments,
   ] = await Promise.all([
     getCreatorById(id),
@@ -66,7 +66,7 @@ export default async function CreatorDetailPage({
     getCreatorPlatformAccounts(id),
     getCreatorRevenueEntries(id, periodMonth),
     getSubscriptionContext(),
-    getCreatorAudienceAnalytics(id),
+    getCreatorAudiencePageData(id),
     getCreatorPaidContractPaymentsForMonth(id, periodMonth),
   ]);
 
@@ -117,7 +117,9 @@ export default async function CreatorDetailPage({
           creatorContentAnalysisFeatureKeys
         )}
         aiMode={aiLive ? "live" : "demo"}
-        audienceAnalytics={audienceAnalytics}
+        audienceAnalytics={audiencePage.analytics}
+        audienceUpdatedAt={audiencePage.updatedAt}
+        audiencePlatforms={audiencePage.platforms}
         canViewAnalytics={hasAnyFeature(subscription.features, [
           "limited_analytics",
           "advanced_analytics",

@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { CommandPaletteProvider, CommandPaletteTrigger } from "@/components/search/CommandPalette";
 import { MessageNotificationBell } from "@/components/messages/MessageNotificationBell";
 import { PresenceHeartbeat } from "@/components/presence/PresenceHeartbeat";
+import { SessionExpiryGate } from "@/components/auth/SessionExpiryGate";
 import { PortalGuidedTour } from "@/components/onboarding/PortalGuidedTour";
 import { Sidebar } from "./Sidebar";
 import type { FeatureKey } from "@/lib/subscription/types";
@@ -51,6 +52,9 @@ export function DashboardShell({
     <CommandPaletteProvider>
       <div className="min-h-screen bg-surface">
       <PresenceHeartbeat />
+      <Suspense fallback={null}>
+        <SessionExpiryGate />
+      </Suspense>
       {/* Mobile overlay */}
       {mobileOpen && (
         <div

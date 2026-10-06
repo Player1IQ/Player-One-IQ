@@ -43,6 +43,9 @@ import {
 import { CreatorOAuthBanner } from "./CreatorOAuthBanner";
 import { CreatorContentCoach } from "./CreatorContentCoach";
 import { CreatorAudienceGrowth } from "./CreatorAudienceGrowth";
+import { PlatformAnalyticsToolbar } from "./PlatformAnalyticsToolbar";
+import type { CreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
+import type { PlatformAnalyticsStatus } from "@/lib/platform-oauth/content-cache";
 import { CreatorMediaKitCard } from "./CreatorMediaKitCard";
 import type { CreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
 import type { MediaKitRecord } from "@/lib/media-kit/types";
@@ -65,6 +68,8 @@ interface CreatorProfileProps {
   canUseContentAi?: boolean;
   aiMode?: "live" | "demo";
   audienceAnalytics?: CreatorAudienceAnalytics;
+  audienceUpdatedAt?: string | null;
+  audiencePlatforms?: PlatformAnalyticsStatus[];
   canViewAnalytics?: boolean;
   canViewAdvancedAnalytics?: boolean;
   periodMonth?: string;
@@ -111,6 +116,8 @@ export function CreatorProfile({
   canUseContentAi = false,
   aiMode = "demo",
   audienceAnalytics,
+  audienceUpdatedAt = null,
+  audiencePlatforms = [],
   canViewAnalytics = false,
   canViewAdvancedAnalytics = false,
   periodMonth,
@@ -276,6 +283,12 @@ export function CreatorProfile({
           iconColor="text-amber-400"
         />
       </div>
+
+      <PlatformAnalyticsToolbar
+        creatorId={creator.id}
+        updatedAt={audienceUpdatedAt}
+        platforms={audiencePlatforms}
+      />
 
       <CreatorAudienceGrowth
         analytics={

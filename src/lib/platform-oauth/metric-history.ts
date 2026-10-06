@@ -2,6 +2,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { fetchPlatformAudienceSize } from "./creator-analytics";
 import { fetchPlatformContentWithToken } from "./content-aggregate";
+import { saveCreatorPlatformContentCache } from "./content-cache";
+import { withTimeout } from "@/lib/observability/timing";
 import {
   isOAuthPlatform,
   type OAuthPlatform,
@@ -89,21 +91,24 @@ export async function recordCreatorPlatformMetricSnapshot(input: {
     input.platform
   );
 
+  const emptySnapshot = {
+    platform: input.platform,
+    items: [] as Awaited<
+      ReturnType<typeof fetchPlatformContentWithToken>
+    >["items"],
+    connectedViaOAuth: false,
+  };
   const [audienceSize, snapshot] = await Promise.all([
     accessToken
       ? fetchPlatformAudienceSize(input.platform, accessToken)
       : Promise.resolve(null),
     accessToken
-      ? fetchPlatformContentWithToken(input.platform, accessToken).catch(() => ({
-          platform: input.platform,
-          items: [],
-          connectedViaOAuth: false,
-        }))
-      : Promise.resolve({
-          platform: input.platform,
-          items: [],
-          connectedViaOAuth: false,
-        }),
+      ? withTimeout(
+          () => fetchPlatformContentWithToken(input.platform, accessToken),
+          5000,
+          emptySnapshot
+        )
+      : Promise.resolve(emptySnapshot),
   ]);
 
   const viewTotal = snapshot.items.reduce((sum, item) => sum + item.viewCount, 0);
@@ -126,6 +131,22 @@ export async function recordCreatorPlatformMetricSnapshot(input: {
   );
 
   if (error) return { error: error.message };
+
+  await saveCreatorPlatformContentCache({
+    organizationId: input.organizationId,
+    creatorId: input.creatorId,
+    platform: input.platform,
+    platformAccountId: accountId,
+    items: snapshot.items,
+    audienceSize,
+    lastError: !accessToken
+      ? "Reconnect this platform to refresh stats."
+      : !snapshot.connectedViaOAuth && snapshot.items.length === 0
+        ? "This platform did not return stats in time. Try Refresh, or reconnect if it keeps failing."
+        : null,
+    supabase,
+  });
+
   return { ok: true };
 }
 

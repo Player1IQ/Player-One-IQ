@@ -87,7 +87,11 @@
     "connectMore": "Connect more platforms",
     "viewAnalytics": "View full analytics",
     "upgradeHint": "Connect your platforms and upgrade your plan to unlock full growth analytics.",
-    "connectOnProfile": "Connect platforms on your profile"
+    "connectOnProfile": "Connect platforms on your profile",
+    "updatedUnknown": "No stored platform stats yet",
+    "refresh": "Refresh",
+    "reconnectTitle": "Reconnect {platform}",
+    "openProfile": "Open profile"
   },
   "snapshot": {
     "oauthConnected": "{platform} connected. Numbers below are from that account — we do not invent missing stats.",
