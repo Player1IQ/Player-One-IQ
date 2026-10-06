@@ -71,7 +71,7 @@ const checks = [
   {
     key: "INVITE_EMAIL_FROM",
     required: false,
-    hint: "Verified sender in Resend",
+    hint: "Verified sender on your domain, e.g. Player One IQ <Admin@playeroneiq.com> — never onboarding@resend.dev",
   },
   {
     key: "PLATFORM_OAUTH_ENABLED",

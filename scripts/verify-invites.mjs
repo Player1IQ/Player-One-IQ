@@ -65,11 +65,11 @@ async function main() {
     failed += 1;
   } else {
     console.log(`✓ INVITE_EMAIL_FROM (${from.split("<")[0].trim() || "configured"})`);
-    if (from.includes("onboarding@resend.dev")) {
+    if (from.includes("onboarding@resend.dev") || senderDomain(from) === "resend.dev") {
       console.log(
-        "⚠ Using Resend sandbox sender — verify a custom domain before public launch."
+        "✗ INVITE_EMAIL_FROM uses Resend's test sender — production cannot send to anyone except the Resend account owner."
       );
-      warned += 1;
+      failed += 1;
     }
   }
 

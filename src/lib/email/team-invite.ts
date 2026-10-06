@@ -1,9 +1,13 @@
 import { getTranslations } from "next-intl/server";
 import { resolveLocale } from "@/lib/i18n/locale";
 import { roleLabels, type TeamRole } from "@/lib/team";
+import {
+  isTransactionalEmailConfigured,
+  sendTransactionalEmail,
+} from "@/lib/email/send";
 
 export function isInviteEmailConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY && process.env.INVITE_EMAIL_FROM);
+  return isTransactionalEmailConfigured();
 }
 
 interface TeamInviteEmailParams {
@@ -103,13 +107,10 @@ function escapeHtml(value: string): string {
 export async function sendTeamInviteEmail(
   params: TeamInviteEmailParams
 ): Promise<{ sent: boolean; error?: string }> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.INVITE_EMAIL_FROM;
-
   const locale = await resolveLocale();
   const t = await getTranslations({ locale, namespace: "emails.teamInvite" });
 
-  if (!apiKey || !from) {
+  if (!isInviteEmailConfigured()) {
     return {
       sent: false,
       error: t("notConfigured"),
@@ -133,31 +134,14 @@ export async function sendTeamInviteEmail(
     ? t("subjectResend", { organizationName: params.organizationName })
     : t("subject", { organizationName: params.organizationName });
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [params.to],
-      subject,
-      html: await buildInviteEmailHtml(params, copy),
-      text: buildInviteEmailText(params, copy),
-    }),
+  const result = await sendTransactionalEmail({
+    to: params.to,
+    subject,
+    html: await buildInviteEmailHtml(params, copy),
+    text: buildInviteEmailText(params, copy),
   });
-
-  if (!response.ok) {
-    let errorMessage = "Failed to send invitation email.";
-    try {
-      const body = (await response.json()) as { message?: string };
-      if (body.message) errorMessage = body.message;
-    } catch {
-      // Keep default message.
-    }
-    return { sent: false, error: errorMessage };
+  if (!result.sent) {
+    return { sent: false, error: result.error };
   }
-
   return { sent: true };
 }

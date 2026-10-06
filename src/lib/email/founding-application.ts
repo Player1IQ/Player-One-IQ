@@ -1,4 +1,5 @@
 import type { FoundingApplicationInput } from "@/lib/founding/types";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 export function isFoundingApplicationEmailConfigured(): boolean {
   return Boolean(
@@ -113,11 +114,9 @@ function buildApplicationHtml(input: FoundingApplicationInput): string {
 export async function sendFoundingApplicationNotification(
   input: FoundingApplicationInput
 ): Promise<{ sent: boolean; error?: string }> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.INVITE_EMAIL_FROM;
   const notifyTo = process.env.FOUNDING_APPLICATION_NOTIFY_EMAIL?.trim();
 
-  if (!apiKey || !from || !notifyTo) {
+  if (!isFoundingApplicationEmailConfigured() || !notifyTo) {
     return {
       sent: false,
       error:
@@ -138,43 +137,15 @@ export async function sendFoundingApplicationNotification(
     input.applicantType === "organization" ? "Organization" : "Creator";
   const subject = `New Founding Roster application: ${input.name} (${typeLabel})`;
 
-  let response: Response;
-  try {
-    response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from,
-        to: recipients,
-        subject,
-        html: buildApplicationHtml(input),
-        text: buildApplicationSummary(input),
-        reply_to: input.email.trim().toLowerCase(),
-      }),
-    });
-  } catch (error) {
-    return {
-      sent: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to reach the email service.",
-    };
+  const result = await sendTransactionalEmail({
+    to: recipients,
+    subject,
+    html: buildApplicationHtml(input),
+    text: buildApplicationSummary(input),
+    replyTo: input.email.trim().toLowerCase(),
+  });
+  if (!result.sent) {
+    return { sent: false, error: result.error };
   }
-
-  if (!response.ok) {
-    let errorMessage = "Failed to send founding application notification.";
-    try {
-      const body = (await response.json()) as { message?: string };
-      if (body.message) errorMessage = body.message;
-    } catch {
-      // Keep default message.
-    }
-    return { sent: false, error: errorMessage };
-  }
-
   return { sent: true };
 }
