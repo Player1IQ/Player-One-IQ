@@ -32,6 +32,7 @@ import { PortalRecommendedOpportunities } from "@/components/portal/PortalRecomm
 import { PortalProfileReadiness } from "@/components/portal/PortalProfileReadiness";
 import { TodayScheduleCard } from "@/components/schedule/TodayScheduleCard";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
+import type { PlatformAnalyticsStatus } from "@/lib/platform-oauth/content-cache";
 import type { CreatorPortalBenefits } from "@/lib/creators/portal-benefits";
 import type { ScheduleEvent } from "@/lib/schedule";
 import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
@@ -55,6 +56,8 @@ interface PortalHomeClientProps {
   pendingApplicationCount?: number;
   deliverableMetrics: PortalDeliverableMetrics;
   platformSummary?: CreatorPlatformSummary | null;
+  audienceUpdatedAt?: string | null;
+  audiencePlatforms?: PlatformAnalyticsStatus[];
   portalBenefits?: CreatorPortalBenefits | null;
   todaySchedule?: ScheduleEvent[];
   coachSnapshot?: CreatorCoachSnapshot | null;
@@ -79,6 +82,8 @@ export function PortalHomeClient({
   pendingApplicationCount = 0,
   deliverableMetrics,
   platformSummary = null,
+  audienceUpdatedAt = null,
+  audiencePlatforms = [],
   portalBenefits = null,
   todaySchedule = [],
   coachSnapshot = null,
@@ -298,7 +303,12 @@ export function PortalHomeClient({
       ) : null}
 
       {platformSummary ? (
-        <PortalGrowthPanel creatorId={creator.id} summary={platformSummary} />
+        <PortalGrowthPanel
+          creatorId={creator.id}
+          summary={platformSummary}
+          updatedAt={audienceUpdatedAt}
+          platforms={audiencePlatforms}
+        />
       ) : null}
 
       {portalBenefits ? (

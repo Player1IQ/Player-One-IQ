@@ -4,7 +4,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { CreatorAudienceGrowth } from "@/components/creators/CreatorAudienceGrowth";
 import { getCreatorById } from "@/lib/creators/queries";
 import { getCreatorPlatformSummary } from "@/lib/creators/platform-summary";
-import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
+import { getCreatorAudiencePageData } from "@/lib/platform-oauth/audience-page-data";
 import { requireCreatorPortalUser } from "@/lib/portal/guard";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasAnyFeature, hasFeature } from "@/lib/subscription/features";
@@ -17,11 +17,11 @@ export default async function PortalGrowthPage() {
   const tPortal = await getTranslations("portal.growth");
   const { linkedCreatorId } = await requireCreatorPortalUser();
 
-  const [creator, platformSummary, audienceAnalytics, subscription] =
+  const [creator, platformSummary, audiencePage, subscription] =
     await Promise.all([
       getCreatorById(linkedCreatorId),
       getCreatorPlatformSummary(linkedCreatorId),
-      getCreatorAudienceAnalytics(linkedCreatorId),
+      getCreatorAudiencePageData(linkedCreatorId),
       getSubscriptionContext(),
     ]);
 
@@ -41,11 +41,16 @@ export default async function PortalGrowthPage() {
   return (
     <DashboardLayout title={t("title")} description={t("description")}>
       <div className="space-y-6 animate-fade-in">
-        <PortalGrowthPanel creatorId={creator.id} summary={platformSummary} />
+        <PortalGrowthPanel
+          creatorId={creator.id}
+          summary={platformSummary}
+          updatedAt={audiencePage.updatedAt}
+          platforms={audiencePage.platforms}
+        />
 
         {canViewAnalytics ? (
           <CreatorAudienceGrowth
-            analytics={audienceAnalytics}
+            analytics={audiencePage.analytics}
             canViewAnalytics={canViewAnalytics}
             canViewAdvancedAnalytics={canViewAdvancedAnalytics}
           />

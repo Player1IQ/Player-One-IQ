@@ -31,6 +31,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? STAFF_DASHBOARD_PATH;
+  const expired = searchParams.get("expired") === "1";
   const inviteEmail = searchParams.get("email");
   const inviteOrg = searchParams.get("org");
   const signupHref = `/signup${buildAuthQuery({
@@ -79,6 +80,12 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <InviteAuthBanner />
+
+      {expired ? (
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+          {t("sessionExpired")}
+        </div>
+      ) : null}
 
       {error && (
         <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">

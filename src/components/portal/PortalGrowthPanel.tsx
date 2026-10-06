@@ -4,12 +4,16 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { BarChart3, Link2, TrendingUp } from "lucide-react";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
+import { PlatformAnalyticsToolbar } from "@/components/creators/PlatformAnalyticsToolbar";
+import type { PlatformAnalyticsStatus } from "@/lib/platform-oauth/content-cache";
 import { PlatformBadge } from "@/components/creators/PlatformBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 
 interface PortalGrowthPanelProps {
   creatorId: string;
   summary: CreatorPlatformSummary;
+  updatedAt?: string | null;
+  platforms?: PlatformAnalyticsStatus[];
 }
 
 function formatViews(views: number): string {
@@ -22,7 +26,12 @@ function formatViews(views: number): string {
   return String(views);
 }
 
-export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps) {
+export function PortalGrowthPanel({
+  creatorId,
+  summary,
+  updatedAt = null,
+  platforms = [],
+}: PortalGrowthPanelProps) {
   const t = useTranslations("portal.growth");
   const profileHref = `/creators/${creatorId}`;
 
@@ -38,6 +47,12 @@ export function PortalGrowthPanel({ creatorId, summary }: PortalGrowthPanelProps
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 pt-0">
+        <PlatformAnalyticsToolbar
+          creatorId={creatorId}
+          updatedAt={updatedAt}
+          platforms={platforms}
+          profileHref={`/creators/${creatorId}`}
+        />
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-gray-500">

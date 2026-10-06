@@ -20,8 +20,7 @@ import {
   getOpenOpportunitiesForPortal,
 } from "@/lib/opportunities/queries";
 import { getApplicationStats } from "@/lib/opportunities";
-import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
-import { fetchCreatorContentSnapshots } from "@/lib/platform-oauth/content-aggregate";
+import { getCreatorAudiencePageData } from "@/lib/platform-oauth/audience-page-data";
 import { creatorHasScheduleBlocks, getTodayScheduleEvents } from "@/lib/schedule/queries";
 import type { CoachContext, CreatorCoachSnapshot } from "@/lib/creator-coach/types";
 import type { CoachProfile } from "@/lib/creator-coach/profile-types";
@@ -55,8 +54,7 @@ export async function loadPortalCoachPageData(
     marketplaceOpportunities,
     todaySchedule,
     hasScheduleBlock,
-    audienceAnalytics,
-    contentSnapshots,
+    audiencePage,
     userId,
     coachProfile,
   ] = await Promise.all([
@@ -72,8 +70,7 @@ export async function loadPortalCoachPageData(
     getMarketplaceOpportunities(),
     getTodayScheduleEvents(),
     creatorHasScheduleBlocks(linkedCreatorId),
-    getCreatorAudienceAnalytics(linkedCreatorId).catch(() => null),
-    fetchCreatorContentSnapshots(linkedCreatorId).catch(() => []),
+    getCreatorAudiencePageData(linkedCreatorId).catch(() => null),
     getCurrentUserId(),
     getCurrentUserId().then((id) =>
       id ? getCoachProfile(id, linkedCreatorId) : Promise.resolve(null)
@@ -108,8 +105,8 @@ export async function loadPortalCoachPageData(
     openOpportunityCount: openOpportunities.length,
     pendingApplicationCount: opportunityApplicationStats.needsAction,
     revenueEntryCount: revenueEntries.length,
-    analytics: audienceAnalytics,
-    contentSnapshots,
+    analytics: audiencePage?.analytics ?? null,
+    contentSnapshots: audiencePage?.snapshots ?? [],
     coachProfile,
   });
 
@@ -131,7 +128,7 @@ export async function loadPortalCoachPageData(
     coachContext,
     coachProfile,
     creatorId: linkedCreatorId,
-    audienceAnalytics: audienceAnalytics ?? null,
-    contentSnapshots,
+    audienceAnalytics: audiencePage?.analytics ?? null,
+    contentSnapshots: audiencePage?.snapshots ?? [],
   };
 }

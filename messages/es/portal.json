@@ -87,7 +87,11 @@
     "connectMore": "Conectar más plataformas",
     "viewAnalytics": "Ver analítica completa",
     "upgradeHint": "Conecta tus plataformas y mejora tu plan para desbloquear analítica de crecimiento completa.",
-    "connectOnProfile": "Conectar plataformas en tu perfil"
+    "connectOnProfile": "Conectar plataformas en tu perfil",
+    "updatedUnknown": "Aún no hay estadísticas de plataforma guardadas",
+    "refresh": "Actualizar",
+    "reconnectTitle": "Vuelve a conectar {platform}",
+    "openProfile": "Abrir perfil"
   },
   "snapshot": {
     "oauthConnected": "{platform} conectado. Los números de abajo salen de esa cuenta — no inventamos estadísticas faltantes.",

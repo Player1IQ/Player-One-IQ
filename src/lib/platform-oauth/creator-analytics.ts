@@ -1,6 +1,5 @@
 import { getOAuthAccessTokenForCreator, getConnectedOAuthPlatformsForCreator } from "./account-access";
 import {
-  fetchCreatorContentSnapshots,
   getAnalyzablePlatforms,
 } from "./content-aggregate";
 import type { PlatformContentSnapshot } from "./content-performance";
@@ -370,12 +369,8 @@ export async function getCreatorAudienceAnalytics(
   creatorId: string
 ): Promise<CreatorAudienceAnalytics> {
   try {
-    const [snapshots, audienceSizes] = await Promise.all([
-      fetchCreatorContentSnapshots(creatorId),
-      fetchAudienceSizesForCreator(creatorId),
-    ]);
-
-    return buildCreatorAudienceAnalytics(snapshots, audienceSizes);
+    const { getCreatorAudiencePageData } = await import("./audience-page-data");
+    return (await getCreatorAudiencePageData(creatorId)).analytics;
   } catch (error) {
     console.error("[oauth] audience analytics failed:", error);
     return {

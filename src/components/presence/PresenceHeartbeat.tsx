@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { heartbeatPresence } from "@/lib/presence/actions";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { notifySessionExpired } from "@/components/auth/SessionExpiryGate";
 
 const HEARTBEAT_MS = 60 * 1000;
 
@@ -15,7 +16,11 @@ export function PresenceHeartbeat() {
     async function beat() {
       if (cancelled) return;
       try {
-        await heartbeatPresence();
+        const result = await heartbeatPresence();
+        if (result && "error" in result && result.error === "Not signed in.") {
+          notifySessionExpired();
+          return;
+        }
       } catch {
         // Old tab after a deploy: the server action id no longer exists.
         window.location.reload();

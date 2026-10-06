@@ -44,8 +44,7 @@ import { syncPortalUserToSponsorDealRooms } from "@/app/messages/actions";
 import { getSubscriptionContext } from "@/lib/subscription/queries";
 import { hasFeature } from "@/lib/subscription/features";
 import { getTodayScheduleEvents, creatorHasScheduleBlocks } from "@/lib/schedule/queries";
-import { getCreatorAudienceAnalytics } from "@/lib/platform-oauth/creator-analytics";
-import { fetchCreatorContentSnapshots } from "@/lib/platform-oauth/content-aggregate";
+import { getCreatorAudiencePageData } from "@/lib/platform-oauth/audience-page-data";
 import {
   buildCreatorCoachContext,
   buildCreatorCoachSnapshot,
@@ -156,8 +155,7 @@ export default async function PortalHomePage() {
     marketplaceOpportunities,
     todaySchedule,
     hasScheduleBlock,
-    audienceAnalytics,
-    contentSnapshots,
+    audiencePage,
     userId,
     creatorPayments,
   ] = await Promise.all([
@@ -178,8 +176,7 @@ export default async function PortalHomePage() {
     showOpportunities ? getMarketplaceOpportunities() : Promise.resolve([]),
     getTodayScheduleEvents(),
     creatorHasScheduleBlocks(membership.linkedCreatorId),
-    getCreatorAudienceAnalytics(membership.linkedCreatorId).catch(() => null),
-    fetchCreatorContentSnapshots(membership.linkedCreatorId).catch(() => []),
+    getCreatorAudiencePageData(membership.linkedCreatorId).catch(() => null),
     getCurrentUserId(),
     getCreatorPaidContractPaymentsForMonth(
       membership.linkedCreatorId,
@@ -216,6 +213,9 @@ export default async function PortalHomePage() {
     hasScheduleBlock,
     creatorPayments
   );
+
+  const audienceAnalytics = audiencePage?.analytics ?? null;
+  const contentSnapshots = audiencePage?.snapshots ?? [];
 
   const coachProfile = userId
     ? await getCoachProfile(userId, membership.linkedCreatorId)
@@ -293,6 +293,8 @@ export default async function PortalHomePage() {
         pendingApplicationCount={opportunityApplicationStats.needsAction}
         deliverableMetrics={deliverableMetrics}
         platformSummary={platformSummary}
+        audienceUpdatedAt={audiencePage?.updatedAt ?? null}
+        audiencePlatforms={audiencePage?.platforms ?? []}
         portalBenefits={portalBenefits}
         todaySchedule={todaySchedule}
         coachSnapshot={coachSnapshot}
