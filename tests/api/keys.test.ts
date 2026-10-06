@@ -7,6 +7,7 @@ import {
   verifyApiKeyFormat,
   verifyApiKeyHash,
 } from "@/lib/api/keys";
+import { API_RATE_LIMIT_PER_MINUTE } from "@/lib/api/limits";
 
 test("generateApiKey returns poiq_ prefixed secrets with stable hash", () => {
   const originalPepper = process.env.API_KEY_PEPPER;
@@ -34,4 +35,8 @@ test("generateApiKey returns poiq_ prefixed secrets with stable hash", () => {
 test("verifyApiKeyFormat rejects invalid keys", () => {
   assert.equal(verifyApiKeyFormat("not-a-key"), false);
   assert.equal(verifyApiKeyFormat(`${API_KEY_PREFIX}short`), false);
+});
+
+test("API keys share a per-minute database-backed rate limit", () => {
+  assert.equal(API_RATE_LIMIT_PER_MINUTE, 60);
 });

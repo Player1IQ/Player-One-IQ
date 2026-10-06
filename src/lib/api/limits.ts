@@ -1,0 +1,1 @@
+export const API_RATE_LIMIT_PER_MINUTE = 60;
