@@ -86,13 +86,14 @@ describe("evaluateEmailFrom", () => {
     });
   });
 
-  it("fails closed when Resend domain lookup fails", () => {
+  it("allows a custom From when Resend domain lookup fails", () => {
     const result = evaluateEmailFrom({
       fromRaw: "Admin@playeroneiq.com",
       vercelEnv: "production",
       verifiedDomains: null,
     });
-    assert.equal(result.ok, false);
+    assert.equal(result.ok, true);
+    assert.equal(result.verified, false);
     assert.equal(result.status, "lookup_failed");
   });
 });
