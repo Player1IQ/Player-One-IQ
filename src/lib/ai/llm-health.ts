@@ -7,6 +7,7 @@ import { isAiLlmConfigured } from "./config";
 import { isRecoverableLlmError } from "./llm-errors";
 import { probeLlmConfig } from "./llm";
 import type { AiLlmSource } from "./providers/types";
+import { withTimeout } from "@/lib/observability/timing";
 
 export const AI_LLM_HEALTH_CACHE_TAG = "ai-llm-health";
 
@@ -48,7 +49,11 @@ async function probeResolvedConfig(
   }
 
   try {
-    const probe = await probeLlmConfig(config);
+    const probe = await withTimeout(
+      () => probeLlmConfig(config),
+      5000,
+      { ok: false as const, error: "LLM health probe timed out" }
+    );
     if (probe.ok) {
       return {
         health: "available",

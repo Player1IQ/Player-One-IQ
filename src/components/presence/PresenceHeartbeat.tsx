@@ -14,7 +14,12 @@ export function PresenceHeartbeat() {
 
     async function beat() {
       if (cancelled) return;
-      await heartbeatPresence();
+      try {
+        await heartbeatPresence();
+      } catch {
+        // Old tab after a deploy: the server action id no longer exists.
+        window.location.reload();
+      }
     }
 
     void beat();

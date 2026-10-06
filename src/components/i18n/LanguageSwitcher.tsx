@@ -27,10 +27,14 @@ export function LanguageSwitcher({
 
     startTransition(async () => {
       setError(null);
-      const result = await setPreferredLocale(nextLocale);
-      if (result.error) {
-        setError(result.error);
-        return;
+      try {
+        const result = await setPreferredLocale(nextLocale);
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
+      } catch {
+        // Old tab after a deploy: the server action id no longer exists.
       }
       window.location.reload();
     });
