@@ -85,6 +85,7 @@ export async function recordCreatorPlatformMetricSnapshot(input: {
     return { error: "Connected platform account not found." };
   }
 
+  try {
   const accessToken = await getFreshAccessToken(
     accountId,
     input.organizationId,
@@ -148,6 +149,11 @@ export async function recordCreatorPlatformMetricSnapshot(input: {
   });
 
   return { ok: true };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Snapshot failed.",
+    };
+  }
 }
 
 export async function recordAllConnectedPlatformMetricSnapshots(
@@ -193,6 +199,39 @@ export async function recordAllConnectedPlatformMetricSnapshots(
   }
 
   return { recorded, failed, errors };
+}
+
+export interface LatestPlatformMetric {
+  audienceSize: number | null;
+  viewTotal: number | null;
+  contentCount: number | null;
+  capturedOn: string;
+}
+
+export async function listLatestCreatorPlatformMetrics(
+  creatorId: string,
+  supabaseClient?: SupabaseClient
+): Promise<Map<string, LatestPlatformMetric>> {
+  const supabase = supabaseClient ?? createServiceClient();
+  if (!supabase) return new Map();
+
+  const { data } = await supabase
+    .from("creator_platform_metric_snapshots")
+    .select("platform, captured_on, audience_size, view_total, content_count")
+    .eq("creator_id", creatorId)
+    .order("captured_on", { ascending: false });
+
+  const latest = new Map<string, LatestPlatformMetric>();
+  for (const row of data ?? []) {
+    if (latest.has(row.platform)) continue;
+    latest.set(row.platform, {
+      audienceSize: (row.audience_size as number | null) ?? null,
+      viewTotal: (row.view_total as number | null) ?? null,
+      contentCount: (row.content_count as number | null) ?? null,
+      capturedOn: row.captured_on as string,
+    });
+  }
+  return latest;
 }
 
 export async function listCreatorMetricHistory(

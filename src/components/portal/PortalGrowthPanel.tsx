@@ -14,6 +14,7 @@ interface PortalGrowthPanelProps {
   summary: CreatorPlatformSummary;
   updatedAt?: string | null;
   platforms?: PlatformAnalyticsStatus[];
+  needsFirstFetch?: boolean;
 }
 
 function formatViews(views: number): string {
@@ -31,6 +32,7 @@ export function PortalGrowthPanel({
   summary,
   updatedAt = null,
   platforms = [],
+  needsFirstFetch = false,
 }: PortalGrowthPanelProps) {
   const t = useTranslations("portal.growth");
   const profileHref = `/creators/${creatorId}`;
@@ -52,6 +54,7 @@ export function PortalGrowthPanel({
           updatedAt={updatedAt}
           platforms={platforms}
           profileHref={`/creators/${creatorId}`}
+          needsFirstFetch={needsFirstFetch}
         />
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
           <div>

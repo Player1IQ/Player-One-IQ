@@ -70,6 +70,7 @@ interface CreatorProfileProps {
   audienceAnalytics?: CreatorAudienceAnalytics;
   audienceUpdatedAt?: string | null;
   audiencePlatforms?: PlatformAnalyticsStatus[];
+  audienceNeedsFirstFetch?: boolean;
   canViewAnalytics?: boolean;
   canViewAdvancedAnalytics?: boolean;
   periodMonth?: string;
@@ -118,6 +119,7 @@ export function CreatorProfile({
   audienceAnalytics,
   audienceUpdatedAt = null,
   audiencePlatforms = [],
+  audienceNeedsFirstFetch = false,
   canViewAnalytics = false,
   canViewAdvancedAnalytics = false,
   periodMonth,
@@ -288,6 +290,7 @@ export function CreatorProfile({
         creatorId={creator.id}
         updatedAt={audienceUpdatedAt}
         platforms={audiencePlatforms}
+        needsFirstFetch={audienceNeedsFirstFetch}
       />
 
       <CreatorAudienceGrowth

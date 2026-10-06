@@ -295,6 +295,7 @@ export default async function PortalHomePage() {
         platformSummary={platformSummary}
         audienceUpdatedAt={audiencePage?.updatedAt ?? null}
         audiencePlatforms={audiencePage?.platforms ?? []}
+        audienceNeedsFirstFetch={audiencePage?.needsFirstFetch ?? false}
         portalBenefits={portalBenefits}
         todaySchedule={todaySchedule}
         coachSnapshot={coachSnapshot}

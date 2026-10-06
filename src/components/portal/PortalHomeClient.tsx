@@ -58,6 +58,7 @@ interface PortalHomeClientProps {
   platformSummary?: CreatorPlatformSummary | null;
   audienceUpdatedAt?: string | null;
   audiencePlatforms?: PlatformAnalyticsStatus[];
+  audienceNeedsFirstFetch?: boolean;
   portalBenefits?: CreatorPortalBenefits | null;
   todaySchedule?: ScheduleEvent[];
   coachSnapshot?: CreatorCoachSnapshot | null;
@@ -84,6 +85,7 @@ export function PortalHomeClient({
   platformSummary = null,
   audienceUpdatedAt = null,
   audiencePlatforms = [],
+  audienceNeedsFirstFetch = false,
   portalBenefits = null,
   todaySchedule = [],
   coachSnapshot = null,
@@ -308,6 +310,7 @@ export function PortalHomeClient({
           summary={platformSummary}
           updatedAt={audienceUpdatedAt}
           platforms={audiencePlatforms}
+          needsFirstFetch={audienceNeedsFirstFetch}
         />
       ) : null}
 

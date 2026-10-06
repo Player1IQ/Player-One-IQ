@@ -17,6 +17,7 @@ interface PlatformAnalyticsToolbarProps {
   updatedAt: string | null;
   platforms: PlatformAnalyticsStatus[];
   profileHref?: string;
+  needsFirstFetch?: boolean;
 }
 
 export function PlatformAnalyticsToolbar({
@@ -24,6 +25,7 @@ export function PlatformAnalyticsToolbar({
   updatedAt,
   platforms,
   profileHref,
+  needsFirstFetch = false,
 }: PlatformAnalyticsToolbarProps) {
   const t = useTranslations("portal.growth");
   const router = useRouter();
@@ -39,7 +41,10 @@ export function PlatformAnalyticsToolbar({
 
   useEffect(() => {
     if (didBackgroundRefresh.current || !canRefresh) return;
-    if (updatedAt) {
+    const missingCache = platforms.some(
+      (platform) => platform.connectedViaOAuth && !platform.hasStoredCache
+    );
+    if (!needsFirstFetch && !missingCache && updatedAt) {
       const age = Date.now() - new Date(updatedAt).getTime();
       if (Number.isFinite(age) && age < BACKGROUND_REFRESH_MS) return;
     }
@@ -51,7 +56,7 @@ export function PlatformAnalyticsToolbar({
         router.refresh();
       }
     });
-  }, [canRefresh, creatorId, router, updatedAt]);
+  }, [canRefresh, creatorId, needsFirstFetch, platforms, router, updatedAt]);
 
   async function handleRefresh() {
     startTransition(async () => {
