@@ -179,8 +179,12 @@ export async function listVerifiedResendDomains(
   }
 
   try {
-    const response = await fetch("https://api.resend.com/domains?limit=100", {
-      headers: { Authorization: `Bearer ${apiKey}` },
+    const response = await fetch("https://api.resend.com/domains", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: "application/json",
+      },
       cache: "no-store",
     });
     if (!response.ok) {
