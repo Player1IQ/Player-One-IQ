@@ -46,6 +46,7 @@ export default async function PortalGrowthPage() {
           summary={platformSummary}
           updatedAt={audiencePage.updatedAt}
           platforms={audiencePage.platforms}
+          needsFirstFetch={audiencePage.needsFirstFetch}
         />
 
         {canViewAnalytics ? (

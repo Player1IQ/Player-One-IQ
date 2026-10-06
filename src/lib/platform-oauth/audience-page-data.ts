@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { getCreatorPlatformAccounts } from "@/lib/creator-revenue/queries";
-import { isOAuthPlatform, type OAuthPlatform } from "./types";
+import { isOAuthPlatform } from "./types";
 import {
   audienceSizesFromCache,
   buildPlatformAnalyticsStatuses,
@@ -16,7 +16,7 @@ import {
   type CreatorAudienceAnalytics,
 } from "./creator-analytics";
 import type { PlatformContentSnapshot } from "./content-performance";
-import { recordCreatorPlatformMetricSnapshot } from "./metric-history";
+import { listLatestCreatorPlatformMetrics } from "./metric-history";
 
 export const EMPTY_CREATOR_AUDIENCE_ANALYTICS: CreatorAudienceAnalytics = {
   platformBreakdown: [],
@@ -33,6 +33,7 @@ export interface CreatorAudiencePageData {
   snapshots: PlatformContentSnapshot[];
   updatedAt: string | null;
   platforms: PlatformAnalyticsStatus[];
+  needsFirstFetch: boolean;
 }
 
 export const getCreatorAudiencePageData = cache(
@@ -41,28 +42,10 @@ export const getCreatorAudiencePageData = cache(
   const connected = accounts.filter(
     (account) => account.connectionStatus === "connected_oauth"
   );
-  let cacheRows = await loadCreatorPlatformContentCache(creatorId);
-
-  const missing = platformsNeedingFirstFetch(
-    connected.map((account) => account.platform),
-    cacheRows.map((row) => row.platform)
-  ).filter((platform): platform is OAuthPlatform => isOAuthPlatform(platform));
-
-  if (missing.length > 0) {
-    await Promise.all(
-      missing.map(async (platform) => {
-        const account = connected.find((row) => row.platform === platform);
-        if (!account) return;
-        await recordCreatorPlatformMetricSnapshot({
-          organizationId: account.organizationId,
-          creatorId,
-          platform,
-          platformAccountId: account.id,
-        });
-      })
-    );
-    cacheRows = await loadCreatorPlatformContentCache(creatorId);
-  }
+  const [cacheRows, latestMetrics] = await Promise.all([
+    loadCreatorPlatformContentCache(creatorId),
+    listLatestCreatorPlatformMetrics(creatorId),
+  ]);
 
   const cacheByPlatform = new Map<string, StoredPlatformCache>();
   for (const row of cacheRows) {
@@ -70,22 +53,67 @@ export const getCreatorAudiencePageData = cache(
   }
 
   const snapshots = snapshotsFromCache(cacheRows);
-  const analytics = buildCreatorAudienceAnalytics(
-    snapshots,
-    audienceSizesFromCache(cacheRows)
+  const audienceSizes = audienceSizesFromCache(cacheRows);
+
+  for (const account of connected) {
+    if (!isOAuthPlatform(account.platform)) continue;
+    if (cacheByPlatform.has(account.platform)) continue;
+    snapshots.push({
+      platform: account.platform,
+      items: [],
+      connectedViaOAuth: true,
+    });
+    const metric = latestMetrics.get(account.platform);
+    audienceSizes.set(account.platform, metric?.audienceSize ?? null);
+  }
+
+  const analytics = buildCreatorAudienceAnalytics(snapshots, audienceSizes);
+
+  for (const row of analytics.platformBreakdown) {
+    if (row.contentCount > 0) continue;
+    const metric = latestMetrics.get(row.platform);
+    if (!metric) continue;
+    row.contentCount = metric.contentCount ?? 0;
+    row.totalViews = metric.viewTotal ?? 0;
+    row.avgViews =
+      row.contentCount > 0
+        ? Math.round((metric.viewTotal ?? 0) / row.contentCount)
+        : 0;
+    if (row.audienceSize == null) {
+      row.audienceSize = metric.audienceSize;
+    }
+  }
+
+  analytics.totalViews = analytics.platformBreakdown.reduce(
+    (sum, row) => sum + row.totalViews,
+    0
+  );
+  analytics.totalContent = analytics.platformBreakdown.reduce(
+    (sum, row) => sum + row.contentCount,
+    0
+  );
+  analytics.connectedOAuthCount = Math.max(
+    analytics.connectedOAuthCount,
+    connected.length
   );
 
+  const latestMetricOn = [...latestMetrics.values()]
+    .map((row) => row.capturedOn)
+    .sort()
+    .at(-1);
+
   return {
-    analytics: {
-      ...analytics,
-      connectedOAuthCount: Math.max(
-        analytics.connectedOAuthCount,
-        connected.length
-      ),
-    },
+    analytics,
     snapshots,
-    updatedAt: latestCacheTimestamp(cacheRows),
+    updatedAt:
+      latestCacheTimestamp(cacheRows) ??
+      (latestMetricOn ? `${latestMetricOn}T12:00:00.000Z` : null),
     platforms: buildPlatformAnalyticsStatuses(accounts, cacheByPlatform),
+    needsFirstFetch:
+      platformsNeedingFirstFetch(
+        connected.map((account) => account.platform),
+        cacheRows.map((row) => row.platform)
+      ).length > 0,
   };
   }
 );

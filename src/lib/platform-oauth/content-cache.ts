@@ -16,6 +16,7 @@ export interface PlatformAnalyticsStatus {
   needsReconnect: boolean;
   reconnectReason: string | null;
   updatedAt: string | null;
+  hasStoredCache: boolean;
 }
 
 export interface StoredPlatformCache {
@@ -112,6 +113,7 @@ export function buildPlatformAnalyticsStatuses(
           "Reconnect this platform to refresh stats."
         : null,
       updatedAt: cached?.fetchedAt ?? account.lastSyncedAt,
+      hasStoredCache: Boolean(cached),
     };
   });
 }

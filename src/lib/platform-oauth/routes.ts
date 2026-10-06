@@ -278,12 +278,20 @@ export async function handlePlatformOAuthCallback(
       );
     }
 
-    await recordCreatorPlatformMetricSnapshot({
-      organizationId: payload.organizationId,
-      creatorId: payload.creatorId,
-      platform,
-      platformAccountId: account.id,
-    });
+    try {
+      await recordCreatorPlatformMetricSnapshot({
+        organizationId: payload.organizationId,
+        creatorId: payload.creatorId,
+        platform,
+        platformAccountId: account.id,
+      });
+    } catch (error) {
+      console.error(
+        "[oauth] first snapshot failed",
+        platform,
+        error instanceof Error ? error.message : error
+      );
+    }
 
     return NextResponse.redirect(
       appendQueryParam(redirectBase, "oauth_success", platform)

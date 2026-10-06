@@ -1,7 +1,4 @@
-import { getOAuthAccessTokenForCreator, getConnectedOAuthPlatformsForCreator } from "./account-access";
-import {
-  getAnalyzablePlatforms,
-} from "./content-aggregate";
+import { getAnalyzablePlatforms } from "./content-aggregate";
 import type { PlatformContentSnapshot } from "./content-performance";
 import type { OAuthPlatform } from "./types";
 import { withTimeout } from "@/lib/observability/timing";
@@ -305,34 +302,6 @@ async function fetchPlatformAudienceSizeUncapped(
   } catch {
     return null;
   }
-}
-
-async function fetchAudienceSizesForCreator(
-  creatorId: string
-): Promise<Map<string, number | null>> {
-  const sizes = new Map<string, number | null>();
-  const connectedPlatforms = await getConnectedOAuthPlatformsForCreator(creatorId);
-
-  await Promise.all(
-    connectedPlatforms.map(async (platform) => {
-      try {
-        const tokenResult = await getOAuthAccessTokenForCreator(creatorId, platform);
-        if (!tokenResult) {
-          sizes.set(platform, null);
-          return;
-        }
-        const size = await fetchPlatformAudienceSize(
-          platform,
-          tokenResult.accessToken
-        );
-        sizes.set(platform, size);
-      } catch {
-        sizes.set(platform, null);
-      }
-    })
-  );
-
-  return sizes;
 }
 
 export function buildCreatorAudienceAnalytics(

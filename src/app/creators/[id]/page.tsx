@@ -120,6 +120,7 @@ export default async function CreatorDetailPage({
         audienceAnalytics={audiencePage.analytics}
         audienceUpdatedAt={audiencePage.updatedAt}
         audiencePlatforms={audiencePage.platforms}
+        audienceNeedsFirstFetch={audiencePage.needsFirstFetch}
         canViewAnalytics={hasAnyFeature(subscription.features, [
           "limited_analytics",
           "advanced_analytics",
