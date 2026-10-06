@@ -71,9 +71,22 @@ export function domainIsVerified(
   });
 }
 
+export type EmailFromStatus =
+  | "verified"
+  | "resend_test_domain"
+  | "unverified_domain"
+  | "lookup_failed"
+  | "invalid_from";
+
 export type EmailFromEvaluation =
-  | { ok: true; from: string; domain: string; verified: true }
-  | { ok: false; error: string; verified: false; domain: string | null };
+  | { ok: true; from: string; domain: string; verified: true; status: "verified" }
+  | {
+      ok: false;
+      error: string;
+      verified: false;
+      domain: string | null;
+      status: Exclude<EmailFromStatus, "verified">;
+    };
 
 export function evaluateEmailFrom(input: {
   fromRaw: string | undefined;
@@ -86,6 +99,7 @@ export function evaluateEmailFrom(input: {
       ok: false,
       verified: false,
       domain: null,
+      status: "invalid_from",
       error:
         "INVITE_EMAIL_FROM is missing or is not a valid From address. Use Name <you@your-verified-domain>.",
     };
@@ -97,6 +111,7 @@ export function evaluateEmailFrom(input: {
       ok: false,
       verified: false,
       domain: parsed.domain,
+      status: "resend_test_domain",
       error: production
         ? "Production refuses Resend's test sender (resend.dev). Set INVITE_EMAIL_FROM to an address on a verified domain."
         : "INVITE_EMAIL_FROM uses Resend's test domain resend.dev, which only delivers to the Resend account owner.",
@@ -108,6 +123,7 @@ export function evaluateEmailFrom(input: {
       ok: false,
       verified: false,
       domain: parsed.domain,
+      status: "lookup_failed",
       error: "Could not confirm INVITE_EMAIL_FROM against Resend verified domains.",
     };
   }
@@ -117,6 +133,7 @@ export function evaluateEmailFrom(input: {
       ok: false,
       verified: false,
       domain: parsed.domain,
+      status: "unverified_domain",
       error: `INVITE_EMAIL_FROM domain ${parsed.domain} is not verified in Resend. Mail was not sent.`,
     };
   }
@@ -125,6 +142,7 @@ export function evaluateEmailFrom(input: {
     ok: true,
     verified: true,
     domain: parsed.domain,
+    status: "verified",
     from: formatFromAddress(parsed),
   };
 }

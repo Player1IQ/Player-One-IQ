@@ -48,7 +48,7 @@ describe("evaluateEmailFrom", () => {
     });
     assert.equal(result.ok, false);
     assert.equal(result.verified, false);
-    assert.match(result.error, /Production refuses Resend's test sender/);
+    assert.equal(result.status, "resend_test_domain");
   });
 
   it("refuses resend.dev even when it is the only configured From", () => {
@@ -81,6 +81,7 @@ describe("evaluateEmailFrom", () => {
       ok: true,
       verified: true,
       domain: "playeroneiq.com",
+      status: "verified",
       from: "Player One IQ <Admin@playeroneiq.com>",
     });
   });
@@ -92,7 +93,7 @@ describe("evaluateEmailFrom", () => {
       verifiedDomains: null,
     });
     assert.equal(result.ok, false);
-    assert.match(result.error, /Could not confirm/);
+    assert.equal(result.status, "lookup_failed");
   });
 });
 
