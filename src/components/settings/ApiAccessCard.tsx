@@ -89,12 +89,25 @@ export function ApiAccessCard({
 
           <div className="mt-4 rounded-xl border border-white/[0.06] bg-surface px-4 py-3">
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
-              Quick start
+              API reference
             </p>
             <p className="mt-2 text-sm text-gray-400">
-              Send your key as a Bearer token or{" "}
+              Base URL:{" "}
               <code className="rounded bg-white/5 px-1 py-0.5 text-xs text-gray-300">
-                Authorization: ApiKey &lt;key&gt;
+                {baseUrl}/api/v1
+              </code>
+              . Authenticate every request with{" "}
+              <code className="rounded bg-white/5 px-1 py-0.5 text-xs text-gray-300">
+                Authorization: Bearer poiq_…
+              </code>{" "}
+              or{" "}
+              <code className="rounded bg-white/5 px-1 py-0.5 text-xs text-gray-300">
+                Authorization: ApiKey poiq_…
+              </code>
+              . Keys are organization-scoped. Limit: 60 requests per key per UTC
+              minute. Over-limit responses include{" "}
+              <code className="rounded bg-white/5 px-1 py-0.5 text-xs text-gray-300">
+                Retry-After: 60
               </code>
               .
             </p>
@@ -102,7 +115,10 @@ export function ApiAccessCard({
 {`curl -H "Authorization: Bearer poiq_your_key" \\
   ${baseUrl}/api/v1/creators`}
             </pre>
-            <div className="mt-3 space-y-1 text-sm text-gray-400">
+            <div className="mt-4 space-y-1 text-sm text-gray-400">
+              <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                Endpoints
+              </p>
               <p>
                 <span className="font-medium text-gray-300">GET</span>{" "}
                 <code className="text-xs text-accent-light">/api/v1/creators</code>{" "}
@@ -145,16 +161,53 @@ export function ApiAccessCard({
               </p>
             </div>
             <p className="mt-3 text-xs text-gray-500">
-              Responses use{" "}
+              Success:{" "}
               <code className="rounded bg-white/5 px-1 py-0.5">
                 {"{ data, meta: { organization_id } }"}
               </code>
-              . Errors return{" "}
+              . Errors:{" "}
               <code className="rounded bg-white/5 px-1 py-0.5">
                 {"{ error, code }"}
               </code>
               .
             </p>
+            <div className="mt-3 space-y-1 text-xs text-gray-500">
+              <p className="font-medium uppercase tracking-wide text-gray-500">
+                Error codes
+              </p>
+              <p>
+                <code className="text-gray-300">invalid_api_key</code> 401 — missing
+                or unknown key
+              </p>
+              <p>
+                <code className="text-gray-300">api_access_required</code> 403 —
+                workspace is not on Agency Pro
+              </p>
+              <p>
+                <code className="text-gray-300">rate_limited</code> 429 — more than
+                60 requests in the current UTC minute
+              </p>
+              <p>
+                <code className="text-gray-300">invalid_json</code> /{" "}
+                <code className="text-gray-300">invalid_body</code> /{" "}
+                <code className="text-gray-300">invalid_input</code> /{" "}
+                <code className="text-gray-300">payload_too_large</code> 400
+              </p>
+              <p>
+                <code className="text-gray-300">not_found</code> 404
+              </p>
+              <p>
+                <code className="text-gray-300">invalid_transition</code> /{" "}
+                <code className="text-gray-300">opportunity_closed</code> /{" "}
+                <code className="text-gray-300">invalid_creator</code> /{" "}
+                <code className="text-gray-300">duplicate_application</code> 400
+              </p>
+              <p>
+                <code className="text-gray-300">update_failed</code> /{" "}
+                <code className="text-gray-300">create_failed</code> /{" "}
+                <code className="text-gray-300">service_unavailable</code> 503
+              </p>
+            </div>
           </div>
 
           {canManage ? (

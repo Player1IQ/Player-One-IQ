@@ -2,6 +2,20 @@ import { NextResponse } from "next/server";
 import { authenticateApiRequest } from "./auth";
 import { apiError, apiSuccess } from "./responses";
 
+function authErrorResponse(auth: {
+  ok: false;
+  status: number;
+  code: string;
+  error: string;
+}) {
+  if (auth.status === 429) {
+    return apiError(auth.status, auth.code, auth.error, {
+      "Retry-After": "60",
+    });
+  }
+  return apiError(auth.status, auth.code, auth.error);
+}
+
 const MAX_API_BODY_BYTES = 64 * 1024;
 
 export type ApiMutationResult<T> =
@@ -64,7 +78,7 @@ async function handleAuthenticatedApiMutation<T>(
 ): Promise<NextResponse> {
   const auth = await authenticateApiRequest(request);
   if (!auth.ok) {
-    return apiError(auth.status, auth.code, auth.error);
+    return authErrorResponse(auth);
   }
 
   const parsed = await parseJsonBody(request);
@@ -89,7 +103,7 @@ export async function handleAuthenticatedApiGet<T>(
 ): Promise<NextResponse> {
   const auth = await authenticateApiRequest(request);
   if (!auth.ok) {
-    return apiError(auth.status, auth.code, auth.error);
+    return authErrorResponse(auth);
   }
 
   const data = await handler(auth.organizationId);
@@ -103,7 +117,7 @@ export async function handleAuthenticatedApiGetById<T>(
 ): Promise<NextResponse> {
   const auth = await authenticateApiRequest(request);
   if (!auth.ok) {
-    return apiError(auth.status, auth.code, auth.error);
+    return authErrorResponse(auth);
   }
 
   const data = await handler(auth.organizationId);

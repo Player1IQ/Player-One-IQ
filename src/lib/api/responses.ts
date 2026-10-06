@@ -7,6 +7,11 @@ export function apiSuccess<T>(organizationId: string, data: T) {
   });
 }
 
-export function apiError(status: number, code: string, error: string) {
-  return NextResponse.json({ error, code }, { status });
+export function apiError(
+  status: number,
+  code: string,
+  error: string,
+  headers?: HeadersInit
+) {
+  return NextResponse.json({ error, code }, { status, headers });
 }
