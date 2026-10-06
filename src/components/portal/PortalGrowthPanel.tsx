@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { BarChart3, Link2, TrendingUp } from "lucide-react";
 import type { CreatorPlatformSummary } from "@/lib/creators/platform-summary";
 import { PlatformAnalyticsToolbar } from "@/components/creators/PlatformAnalyticsToolbar";
-import type { PlatformAnalyticsStatus } from "@/lib/platform-oauth/content-cache";
+import type { PlatformAnalyticsStatus } from "@/lib/platform-oauth/content-cache-client";
 import { PlatformBadge } from "@/components/creators/PlatformBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 

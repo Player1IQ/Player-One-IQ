@@ -34,7 +34,12 @@ export function SessionExpiryGate() {
     window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
 
     async function check() {
-      const { data: userData } = await supabase.auth.getUser();
+      const current = createClient();
+      if (!current) {
+        markExpired();
+        return;
+      }
+      const { data: userData } = await current.auth.getUser();
       if (!userData.user) markExpired();
     }
 
