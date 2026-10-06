@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/admin";
 import { isTransactionalEmailConfigured } from "@/lib/email/send";
 import { sendDeadlineEmails } from "@/lib/notifications/deadlines";
 import { sendMarketplaceOpportunityDigest } from "@/lib/notifications/opportunities";
+import { sendWeeklyBriefEmails } from "@/lib/notifications/weekly-brief";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -35,14 +36,16 @@ export async function GET(request: Request) {
   }
 
   const since = new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString();
-  const [deadlines, marketplace] = await Promise.all([
+  const [deadlines, marketplace, weeklyBrief] = await Promise.all([
     sendDeadlineEmails(supabase),
     sendMarketplaceOpportunityDigest(supabase, since),
+    sendWeeklyBriefEmails(supabase),
   ]);
 
   return NextResponse.json({
     success: true,
     deadlines,
     marketplace,
+    weeklyBrief,
   });
 }

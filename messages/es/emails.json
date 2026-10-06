@@ -13,6 +13,16 @@
     "ignore": "Si no esperabas esta invitación, puedes ignorar este correo.",
     "notConfigured": "El correo de invitación no está configurado. Agrega RESEND_API_KEY e INVITE_EMAIL_FROM."
   },
+  "weeklyBrief": {
+    "subject": "Tus números semanales — {creatorName}",
+    "heading": "Tus números semanales",
+    "intro": "Esto es lo que almacenamos para {creatorName} al {asOfDate}.",
+    "audience": "Audiencia",
+    "views": "Vistas recientes",
+    "changeSince": "cambio desde {date}",
+    "noGrowthYet": "El crecimiento permanece oculto hasta que guardemos un segundo snapshot diario.",
+    "cta": "Abrir tu snapshot"
+  },
   "scheduleInvite": {
     "subject": "Estás invitado a un bloque de schedule en Player One IQ",
     "heading": "Invitación de schedule",

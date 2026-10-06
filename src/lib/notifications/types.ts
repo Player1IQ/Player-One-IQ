@@ -2,18 +2,21 @@ export type NotificationEmailKind =
   | "deliverable_due"
   | "contract_ending"
   | "opportunity"
-  | "message";
+  | "message"
+  | "weekly_brief";
 
 export interface NotificationPreferences {
   emailDealDeadlines: boolean;
   emailNewOpportunities: boolean;
   emailNewMessages: boolean;
+  emailWeeklyBrief: boolean;
 }
 
 export const defaultNotificationPreferences: NotificationPreferences = {
   emailDealDeadlines: true,
   emailNewOpportunities: true,
   emailNewMessages: true,
+  emailWeeklyBrief: true,
 };
 
 export interface NotificationRecipient {

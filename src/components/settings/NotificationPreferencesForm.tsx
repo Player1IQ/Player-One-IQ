@@ -64,6 +64,11 @@ export function NotificationPreferencesForm({
       label: t("newMessages"),
       description: t("newMessagesDescription"),
     },
+    {
+      key: "emailWeeklyBrief",
+      label: t("weeklyBrief"),
+      description: t("weeklyBriefDescription"),
+    },
   ];
 
   return (

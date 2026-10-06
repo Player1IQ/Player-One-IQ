@@ -2,6 +2,14 @@ export function utcDateOnly(date = new Date()): string {
   return date.toISOString().slice(0, 10);
 }
 
+export function isMondayUtc(date = new Date()): boolean {
+  return date.getUTCDay() === 1;
+}
+
+export function weeklyBriefWindowKey(date = new Date()): string {
+  return `week-${utcDateOnly(date)}`;
+}
+
 export function addUtcDays(date: Date, days: number): string {
   const next = new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + days)
