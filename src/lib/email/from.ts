@@ -1,3 +1,5 @@
+import { request as httpsRequest } from "node:https";
+
 const VERIFIED_DOMAIN_CACHE_MS = 60_000;
 
 export interface ParsedFromAddress {
@@ -81,6 +83,13 @@ export type EmailFromStatus =
 export type EmailFromEvaluation =
   | { ok: true; from: string; domain: string; verified: true; status: "verified" }
   | {
+      ok: true;
+      from: string;
+      domain: string;
+      verified: false;
+      status: "lookup_failed";
+    }
+  | {
       ok: false;
       error: string;
       verified: false;
@@ -119,12 +128,15 @@ export function evaluateEmailFrom(input: {
   }
 
   if (input.verifiedDomains == null) {
+    console.error(
+      "[email] Could not list Resend verified domains; refusing resend.dev only. Confirm INVITE_EMAIL_FROM on a verified domain."
+    );
     return {
-      ok: false,
+      ok: true,
       verified: false,
-      domain: parsed.domain,
       status: "lookup_failed",
-      error: "Could not confirm INVITE_EMAIL_FROM against Resend verified domains.",
+      domain: parsed.domain,
+      from: formatFromAddress(parsed),
     };
   }
 
@@ -166,6 +178,42 @@ export function clearVerifiedDomainCache(): void {
   verifiedDomainCache = { at: 0, domains: null };
 }
 
+function getResendJson(pathname: string, apiKey: string): Promise<{
+  status: number;
+  body: unknown;
+}> {
+  return new Promise((resolve, reject) => {
+    const req = httpsRequest(
+      {
+        hostname: "api.resend.com",
+        path: pathname,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: "application/json",
+        },
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (chunk) => chunks.push(chunk as Buffer));
+        res.on("end", () => {
+          const text = Buffer.concat(chunks).toString("utf8");
+          try {
+            resolve({
+              status: res.statusCode ?? 0,
+              body: text ? JSON.parse(text) : {},
+            });
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+    );
+    req.on("error", reject);
+    req.end();
+  });
+}
+
 export async function listVerifiedResendDomains(
   apiKey = process.env.RESEND_API_KEY?.trim()
 ): Promise<string[] | null> {
@@ -179,23 +227,13 @@ export async function listVerifiedResendDomains(
   }
 
   try {
-    const response = await fetch("https://api.resend.com/domains", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      console.error(
-        "[email] Resend domains lookup failed:",
-        response.status
-      );
+    const response = await getResendJson("/domains", apiKey);
+    if (response.status < 200 || response.status >= 300) {
+      console.error("[email] Resend domains lookup failed:", response.status);
       verifiedDomainCache = { at: now, domains: null };
       return null;
     }
-    const body = (await response.json()) as {
+    const body = response.body as {
       data?: Array<{ name?: string; status?: string }>;
     };
     const domains = (body.data ?? [])
@@ -224,5 +262,5 @@ export async function resolveTransactionalFrom(): Promise<EmailFromEvaluation> {
 
 export async function isEmailFromVerified(): Promise<boolean> {
   const resolved = await resolveTransactionalFrom();
-  return resolved.ok;
+  return resolved.verified;
 }

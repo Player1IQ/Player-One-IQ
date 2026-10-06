@@ -64,7 +64,7 @@ export async function GET() {
     resendConfigured: Boolean(
       process.env.RESEND_API_KEY && process.env.INVITE_EMAIL_FROM
     ),
-    emailFromVerified: emailFrom.ok,
+    emailFromVerified: emailFrom.verified,
     emailFromStatus: emailFrom.status,
     foundingApplicationNotifyConfigured: Boolean(
       process.env.RESEND_API_KEY &&
