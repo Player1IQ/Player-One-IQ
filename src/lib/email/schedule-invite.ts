@@ -3,9 +3,13 @@ import {
   type ScheduleEventType,
 } from "@/lib/schedule";
 import { formatScheduleWhen } from "@/lib/schedule/helpers";
+import {
+  isTransactionalEmailConfigured,
+  sendTransactionalEmail,
+} from "@/lib/email/send";
 
 export function isScheduleEmailConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY && process.env.INVITE_EMAIL_FROM);
+  return isTransactionalEmailConfigured();
 }
 
 interface ScheduleEmailBaseParams {
@@ -184,39 +188,19 @@ async function sendScheduleEmail(options: {
   html: string;
   text: string;
 }): Promise<{ sent: boolean; error?: string }> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.INVITE_EMAIL_FROM;
-
-  if (!apiKey || !from) {
+  if (!isScheduleEmailConfigured()) {
     return { sent: false };
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [options.to],
-      subject: options.subject,
-      html: options.html,
-      text: options.text,
-    }),
+  const result = await sendTransactionalEmail({
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+    text: options.text,
   });
-
-  if (!response.ok) {
-    let errorMessage = "Failed to send schedule email.";
-    try {
-      const body = (await response.json()) as { message?: string };
-      if (body.message) errorMessage = body.message;
-    } catch {
-      // Keep default message.
-    }
-    return { sent: false, error: errorMessage };
+  if (!result.sent) {
+    return { sent: false, error: result.error };
   }
-
   return { sent: true };
 }
 

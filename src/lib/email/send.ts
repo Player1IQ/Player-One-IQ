@@ -1,19 +1,38 @@
+import {
+  getAdminReplyTo,
+  resolveTransactionalFrom,
+} from "./from";
+
 export function isTransactionalEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.INVITE_EMAIL_FROM);
 }
 
 export async function sendTransactionalEmail(params: {
-  to: string;
+  to: string | string[];
   subject: string;
   text: string;
   html: string;
+  replyTo?: string;
 }): Promise<{ sent: true } | { sent: false; error: string }> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.INVITE_EMAIL_FROM?.trim();
-  if (!apiKey || !from) {
+  if (!apiKey) {
     return { sent: false, error: "Transactional email is not configured." };
   }
 
+  const resolved = await resolveTransactionalFrom();
+  if (!resolved.ok) {
+    console.error("[email]", resolved.error);
+    return { sent: false, error: resolved.error };
+  }
+
+  const recipients = (Array.isArray(params.to) ? params.to : [params.to])
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (recipients.length === 0) {
+    return { sent: false, error: "No email recipients." };
+  }
+
+  const replyTo = params.replyTo?.trim() || getAdminReplyTo();
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -21,11 +40,12 @@ export async function sendTransactionalEmail(params: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from,
-      to: [params.to],
+      from: resolved.from,
+      to: recipients,
       subject: params.subject,
       html: params.html,
       text: params.text,
+      ...(replyTo ? { reply_to: replyTo } : {}),
     }),
   });
 
@@ -37,6 +57,7 @@ export async function sendTransactionalEmail(params: {
     } catch {
       // Keep default.
     }
+    console.error("[email] Resend send failed:", response.status, errorMessage);
     return { sent: false, error: errorMessage };
   }
 

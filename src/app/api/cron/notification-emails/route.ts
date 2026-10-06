@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { isTransactionalEmailConfigured } from "@/lib/email/send";
+import { resolveTransactionalFrom } from "@/lib/email/from";
 import { sendDeadlineEmails } from "@/lib/notifications/deadlines";
 import { sendMarketplaceOpportunityDigest } from "@/lib/notifications/opportunities";
 import { sendWeeklyBriefEmails } from "@/lib/notifications/weekly-brief";
@@ -24,6 +25,15 @@ export async function GET(request: Request) {
     return NextResponse.json({
       skipped: true,
       reason: "Transactional email is not configured.",
+    });
+  }
+
+  const emailFrom = await resolveTransactionalFrom();
+  if (!emailFrom.ok) {
+    return NextResponse.json({
+      skipped: true,
+      reason: emailFrom.error,
+      emailFromVerified: false,
     });
   }
 

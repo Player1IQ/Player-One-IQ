@@ -38,30 +38,20 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 const inviteUrl = `${appUrl.replace(/\/$/, "")}/invite/test-token-123`;
 
 async function main() {
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      subject: "Player One IQ — invite email test",
-      html: `<p>Test invite link: <a href="${inviteUrl}">${inviteUrl}</a></p>`,
-      text: `Test invite link: ${inviteUrl}`,
-    }),
+  const { sendTransactionalEmail } = await import("../src/lib/email/send");
+  const result = await sendTransactionalEmail({
+    to,
+    subject: "Player One IQ — invite email test",
+    html: `<p>Test invite link: <a href="${inviteUrl}">${inviteUrl}</a></p>`,
+    text: `Test invite link: ${inviteUrl}`,
   });
 
-  const body = await response.text();
-
-  if (!response.ok) {
-    console.error("Resend API error:", response.status, body);
+  if (!result.sent) {
+    console.error("Invite test email was not sent:", result.error);
     process.exit(1);
   }
 
   console.log("Invite test email sent successfully to", to);
-  console.log(body);
 }
 
 main().catch((err) => {

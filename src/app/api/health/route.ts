@@ -16,6 +16,7 @@ import {
   getStripeWebhookSecret,
 } from "@/lib/stripe/config";
 import { isWeeklyBriefEnabled } from "@/lib/notifications/weekly-brief";
+import { isEmailFromVerified } from "@/lib/email/from";
 
 export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? null;
@@ -61,6 +62,7 @@ export async function GET() {
     resendConfigured: Boolean(
       process.env.RESEND_API_KEY && process.env.INVITE_EMAIL_FROM
     ),
+    emailFromVerified: await isEmailFromVerified(),
     foundingApplicationNotifyConfigured: Boolean(
       process.env.RESEND_API_KEY &&
         process.env.INVITE_EMAIL_FROM &&
