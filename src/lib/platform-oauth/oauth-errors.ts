@@ -131,3 +131,14 @@ export function toOAuthErrorQueryValue(error: unknown): string {
   }
   return normalizeOAuthErrorCode(String(error));
 }
+
+const BENIGN_OAUTH_ALERT_CODES = new Set([
+  "google_access_denied",
+  "invalid_state",
+  "tiktok_scope_not_authorized",
+  "tiktok_https_redirect_required",
+]);
+
+export function shouldAlertOAuthFailure(error: string): boolean {
+  return !BENIGN_OAUTH_ALERT_CODES.has(normalizeOAuthErrorCode(error));
+}

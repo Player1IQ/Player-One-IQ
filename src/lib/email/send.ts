@@ -13,15 +13,19 @@ export async function sendTransactionalEmail(params: {
   text: string;
   html: string;
   replyTo?: string;
+  skipOpsAlert?: boolean;
 }): Promise<{ sent: true } | { sent: false; error: string }> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) {
-    return { sent: false, error: "Transactional email is not configured." };
+    const error = "Transactional email is not configured.";
+    await reportEmailFailure(params, error);
+    return { sent: false, error };
   }
 
   const resolved = await resolveTransactionalFrom();
   if (!resolved.ok) {
     console.error("[email]", resolved.error);
+    await reportEmailFailure(params, resolved.error);
     return { sent: false, error: resolved.error };
   }
 
@@ -58,10 +62,28 @@ export async function sendTransactionalEmail(params: {
       // Keep default.
     }
     console.error("[email] Resend send failed:", response.status, errorMessage);
+    await reportEmailFailure(params, errorMessage);
     return { sent: false, error: errorMessage };
   }
 
   return { sent: true };
+}
+
+async function reportEmailFailure(
+  params: { subject: string; skipOpsAlert?: boolean },
+  error: string
+): Promise<void> {
+  if (params.skipOpsAlert) return;
+  try {
+    const { reportOpsAlert } = await import("@/lib/ops/alerts");
+    await reportOpsAlert({
+      kind: "email",
+      title: "Transactional email failed",
+      detail: `${params.subject}\n${error}`,
+    });
+  } catch {
+    // Monitoring must never break mail.
+  }
 }
 
 export function escapeHtml(value: string): string {
