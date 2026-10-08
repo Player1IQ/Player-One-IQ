@@ -3,8 +3,9 @@ import { describe, it } from "node:test";
 import {
   evaluateHealthUptimeCheck,
   opsAlertFingerprint,
+  resolveOpsAlertIngestUrl,
   shouldSendOpsAlert,
-} from "@/lib/ops/alerts";
+} from "@/lib/ops/alerts-config";
 import { shouldAlertOAuthFailure } from "@/lib/platform-oauth/oauth-errors";
 
 describe("opsAlertFingerprint", () => {
@@ -60,6 +61,18 @@ describe("evaluateHealthUptimeCheck", () => {
   it("fails on a non-200", () => {
     const result = evaluateHealthUptimeCheck({ status: 500, body: { ok: true } });
     assert.equal(result.ok, false);
+  });
+});
+
+describe("resolveOpsAlertIngestUrl", () => {
+  it("prefers NEXT_PUBLIC_APP_URL", () => {
+    assert.equal(
+      resolveOpsAlertIngestUrl({
+        NEXT_PUBLIC_APP_URL: "https://www.playeroneiq.com/",
+        VERCEL_URL: "player-one-iq.vercel.app",
+      } as NodeJS.ProcessEnv),
+      "https://www.playeroneiq.com/api/ops/alert"
+    );
   });
 });
 

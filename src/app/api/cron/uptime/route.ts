@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { getConfiguredAppUrl } from "@/lib/email/app-url";
-import {
-  evaluateHealthUptimeCheck,
-  reportOpsAlert,
-} from "@/lib/ops/alerts";
+import { evaluateHealthUptimeCheck } from "@/lib/ops/alerts-config";
+import { reportOpsAlert } from "@/lib/ops/alerts";
 
 export const maxDuration = 15;
 
