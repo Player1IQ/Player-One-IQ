@@ -30,6 +30,7 @@ interface HealthResponse {
   stripeConfigured: boolean;
   stripeWebhookConfigured: boolean;
   resendConfigured: boolean;
+  opsAlertsConfigured?: boolean;
   openAiConfigured?: boolean;
   openAiHealth?: "unconfigured" | "available" | "quota_exceeded" | "unavailable";
   aiCredentialsEncryptionConfigured?: boolean;
@@ -127,6 +128,10 @@ export function DeployChecklistCard({
     {
       label: "Team invite email (Resend)",
       done: health?.resendConfigured ?? false,
+    },
+    {
+      label: "Ops email alerts (errors, cron, OAuth, /api/health)",
+      done: health?.opsAlertsConfigured ?? false,
     },
     {
       label: "AI key encryption (AI_CREDENTIALS_ENCRYPTION_KEY)",

@@ -17,6 +17,7 @@ import {
 } from "@/lib/stripe/config";
 import { isWeeklyBriefEnabled } from "@/lib/notifications/weekly-brief";
 import { resolveTransactionalFrom } from "@/lib/email/from";
+import { isOpsAlertsConfigured } from "@/lib/ops/alerts-config";
 
 export async function GET() {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? null;
@@ -71,6 +72,7 @@ export async function GET() {
         process.env.INVITE_EMAIL_FROM &&
         process.env.FOUNDING_APPLICATION_NOTIFY_EMAIL?.trim()
     ),
+    opsAlertsConfigured: isOpsAlertsConfigured(),
     openAiConfigured,
     openAiHealth,
     aiCredentialsEncryptionConfigured,

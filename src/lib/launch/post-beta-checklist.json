@@ -96,7 +96,7 @@
         {
           "id": "error-monitoring",
           "label": "Error monitoring and uptime alerts configured",
-          "detail": "e.g. Sentry or Vercel monitoring; alert on /api/health failures."
+          "detail": "In-app email alerts to FOUNDING_APPLICATION_NOTIFY_EMAIL for server errors, failed crons, failed emails, OAuth failures, and /api/health uptime (every 5 minutes)."
         },
         {
           "id": "supabase-backups",

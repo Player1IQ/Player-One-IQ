@@ -25,7 +25,11 @@ import { syncCreatorPlatformAccountById } from "./sync-account";
 import { recordCreatorPlatformMetricSnapshot } from "./metric-history";
 import { getAppOrigin } from "@/lib/email/app-url";
 import { assertPlatformCredentials } from "./credentials";
-import { toOAuthErrorQueryValue } from "./oauth-errors";
+import {
+  shouldAlertOAuthFailure,
+  toOAuthErrorQueryValue,
+} from "./oauth-errors";
+import { reportOpsAlert } from "@/lib/ops/alerts";
 import { createServiceClient } from "@/lib/supabase/admin";
 
 function appendQueryParam(base: string, key: string, value: string): string {
@@ -153,9 +157,17 @@ export async function handlePlatformOAuthStart(
   try {
     assertPlatformCredentials(platform);
   } catch (err) {
+    const code = toOAuthErrorQueryValue(err);
+    if (shouldAlertOAuthFailure(code)) {
+      void reportOpsAlert({
+        kind: "oauth",
+        title: `OAuth failed: ${platform}`,
+        detail: code,
+      });
+    }
     return NextResponse.redirect(
       `${await getAppOrigin()}/creators/${creatorId}?oauth_error=${encodeURIComponent(
-        toOAuthErrorQueryValue(err)
+        code
       )}`
     );
   }
@@ -191,9 +203,17 @@ export async function handlePlatformOAuthStart(
     );
     return NextResponse.redirect(authorizeUrl);
   } catch (err) {
+    const code = toOAuthErrorQueryValue(err);
+    if (shouldAlertOAuthFailure(code)) {
+      void reportOpsAlert({
+        kind: "oauth",
+        title: `OAuth failed: ${platform}`,
+        detail: code,
+      });
+    }
     return NextResponse.redirect(
       `${await getAppOrigin()}/creators/${creatorId}?oauth_error=${encodeURIComponent(
-        toOAuthErrorQueryValue(err)
+        code
       )}`
     );
   }
@@ -220,12 +240,16 @@ export async function handlePlatformOAuthCallback(
       : `${origin}/creators`;
 
   if (oauthError) {
+    const code = toOAuthErrorQueryValue(oauthError);
+    if (shouldAlertOAuthFailure(code)) {
+      void reportOpsAlert({
+        kind: "oauth",
+        title: `OAuth failed: ${platform}`,
+        detail: code,
+      });
+    }
     return NextResponse.redirect(
-      appendQueryParam(
-        redirectBase,
-        "oauth_error",
-        toOAuthErrorQueryValue(oauthError)
-      )
+      appendQueryParam(redirectBase, "oauth_error", code)
     );
   }
 
@@ -273,6 +297,13 @@ export async function handlePlatformOAuthCallback(
     );
 
     if ("error" in syncResult) {
+      if (shouldAlertOAuthFailure(syncResult.error)) {
+        void reportOpsAlert({
+          kind: "oauth",
+          title: `OAuth failed: ${platform}`,
+          detail: syncResult.error,
+        });
+      }
       return NextResponse.redirect(
         appendQueryParam(redirectBase, "oauth_error", syncResult.error)
       );
@@ -299,6 +330,14 @@ export async function handlePlatformOAuthCallback(
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Platform authorization failed.";
+
+    if (shouldAlertOAuthFailure(message)) {
+      void reportOpsAlert({
+        kind: "oauth",
+        title: `OAuth failed: ${platform}`,
+        detail: message,
+      });
+    }
 
     const errorClient = await createClient();
     if (errorClient) {
