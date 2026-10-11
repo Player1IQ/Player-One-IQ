@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { hardNavigate } from "@/lib/navigation/hard-navigate";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { Building2, Gamepad2, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -23,7 +24,6 @@ export function OrganizationSetupForm({
   accountType?: SignupAccountType;
 }) {
   const t = useTranslations("onboarding.organizationSetupForm");
-  const router = useRouter();
   const isSponsor = accountType === "sponsor";
   const isCreator = accountType === "creator";
   const typeOptions = isSponsor
@@ -60,7 +60,7 @@ export function OrganizationSetupForm({
       if (!user) {
         setError(t("mustBeSignedInCreator"));
         setLoading(false);
-        router.push("/login");
+        hardNavigate("/login");
         return;
       }
 
@@ -79,8 +79,7 @@ export function OrganizationSetupForm({
       }
 
       await supabase.auth.refreshSession();
-      router.push("/portal/snapshot");
-      router.refresh();
+      hardNavigate("/portal/snapshot");
       return;
     }
 
@@ -98,7 +97,7 @@ export function OrganizationSetupForm({
     if (!user) {
       setError(t("mustBeSignedInOrg"));
       setLoading(false);
-      router.push("/login");
+      hardNavigate("/login");
       return;
     }
 
@@ -110,8 +109,7 @@ export function OrganizationSetupForm({
 
     if (insertError) {
       if (insertError.code === "23505") {
-        router.push("/");
-        router.refresh();
+        hardNavigate(STAFF_DASHBOARD_PATH);
         return;
       }
       setError(insertError.message);
@@ -137,8 +135,7 @@ export function OrganizationSetupForm({
     }
 
     markOnboardingStartedClient();
-    router.push("/onboarding");
-    router.refresh();
+    hardNavigate("/onboarding");
   }
 
   return (

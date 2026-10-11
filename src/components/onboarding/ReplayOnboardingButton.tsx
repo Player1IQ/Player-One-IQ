@@ -1,9 +1,9 @@
 "use client";
 
 import { Loader2, RotateCcw } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { replayOnboarding } from "@/app/onboarding/actions";
+import { hardNavigate } from "@/lib/navigation/hard-navigate";
 import {
   clearOnboardingStepClient,
   markOnboardingStartedClient,
@@ -16,7 +16,6 @@ interface ReplayOnboardingButtonProps {
 export function ReplayOnboardingButton({
   variant = "card",
 }: ReplayOnboardingButtonProps) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -34,11 +33,10 @@ export function ReplayOnboardingButton({
     }
 
     if ("redirectTo" in result) {
-      router.push(result.redirectTo ?? "/onboarding?step=welcome");
+      hardNavigate(result.redirectTo ?? "/onboarding?step=welcome");
     } else {
-      router.push("/onboarding?step=welcome");
+      hardNavigate("/onboarding?step=welcome");
     }
-    router.refresh();
   }
 
   if (variant === "inline") {
