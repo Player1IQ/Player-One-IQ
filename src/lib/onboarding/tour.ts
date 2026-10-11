@@ -211,7 +211,7 @@ export function getOnboardingFlow(role: TeamRole | null): OnboardingFlow {
       audience: "agency",
       steps: ["welcome", "finish"],
       tourItems: agencyTour,
-      finishHref: "/",
+      finishHref: STAFF_DASHBOARD_PATH,
       finishLabel: "Go to dashboard",
     };
   }
@@ -220,7 +220,7 @@ export function getOnboardingFlow(role: TeamRole | null): OnboardingFlow {
     audience: "agency",
     steps: ["welcome", "finish"],
     tourItems: agencyTour,
-    finishHref: "/",
+    finishHref: STAFF_DASHBOARD_PATH,
     finishLabel: "Go to dashboard",
   };
 }

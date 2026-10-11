@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { completeOnboarding } from "@/app/onboarding/actions";
+import { hardNavigate } from "@/lib/navigation/hard-navigate";
 import { formatPlatformOAuthError } from "@/lib/platform-oauth/oauth-errors";
 import { OnboardingConnectStep } from "@/components/onboarding/OnboardingConnectStep";
 import { BrandLogo } from "@/components/brand/BrandLogo";
@@ -131,8 +132,7 @@ export function OnboardingWizard({
 
     clearOnboardingStepClient();
 
-    router.push(result.redirectTo ?? `${flow.finishHref}?tour=1`);
-    router.refresh();
+    hardNavigate(result.redirectTo ?? `${flow.finishHref}?tour=1`);
   }
 
   function navigateToStep(index: number) {

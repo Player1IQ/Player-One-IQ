@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { hardNavigate } from "@/lib/navigation/hard-navigate";
 import { Gamepad2, Loader2 } from "lucide-react";
 import { platforms, type Platform } from "@/lib/creators";
 import { createClient } from "@/lib/supabase/client";
@@ -9,7 +9,6 @@ import { setupCreatorPlayerWorkspace } from "@/lib/organization/creator-setup";
 import { AuthInput } from "./AuthInput";
 
 export function CreatorSetupForm() {
-  const router = useRouter();
   const [creatorName, setCreatorName] = useState("");
   const [primaryPlatform, setPrimaryPlatform] = useState<Platform>("Twitch");
   const [error, setError] = useState("");
@@ -36,7 +35,7 @@ export function CreatorSetupForm() {
     if (!user) {
       setError("You must be signed in to complete setup.");
       setLoading(false);
-      router.push("/login");
+      hardNavigate("/login");
       return;
     }
 
@@ -54,8 +53,7 @@ export function CreatorSetupForm() {
       return;
     }
 
-    router.push("/portal/snapshot");
-    router.refresh();
+    hardNavigate("/portal/snapshot");
   }
 
   return (

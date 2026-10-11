@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -17,6 +17,7 @@ import {
 } from "@/lib/organization";
 import { trackMarketingEvent } from "@/lib/marketing/analytics";
 import { SPONSOR_PRO_EARLY_ACCESS_HREF } from "@/lib/marketing/config";
+import { hardNavigate } from "@/lib/navigation/hard-navigate";
 
 function buildAuthQuery(params: {
   redirect?: string | null;
@@ -34,7 +35,6 @@ function buildAuthQuery(params: {
 export function SignUpForm() {
   const t = useTranslations("auth.signup");
   const tErrors = useTranslations("auth.errors");
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
   const inviteEmail = searchParams.get("email");
@@ -111,8 +111,7 @@ export function SignUpForm() {
       }
 
       trackMarketingEvent("signup");
-      router.push(nextPath);
-      router.refresh();
+      hardNavigate(nextPath);
     } catch (err) {
       setError(formatAuthError(getErrorMessage(err)));
       setLoading(false);
