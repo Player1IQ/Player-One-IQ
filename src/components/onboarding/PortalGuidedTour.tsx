@@ -316,7 +316,7 @@ export function PortalGuidedTour({
           <button
             type="button"
             onClick={() => void finishTour()}
-            className="rounded-lg p-1 text-gray-500 transition-colors hover:bg-white/[0.06] hover:text-gray-300"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 text-gray-500 transition-colors hover:bg-white/[0.06] hover:text-gray-300"
             aria-label="Skip tour"
           >
             <X className="h-4 w-4" />
@@ -329,7 +329,7 @@ export function PortalGuidedTour({
           <button
             type="button"
             onClick={() => void finishTour()}
-            className="text-xs text-gray-500 transition-colors hover:text-gray-300"
+            className="inline-flex min-h-11 items-center text-xs text-gray-500 transition-colors hover:text-gray-300"
           >
             Skip tour
           </button>
@@ -338,7 +338,7 @@ export function PortalGuidedTour({
               <button
                 type="button"
                 onClick={() => setStepIndex((index) => Math.max(index - 1, 0))}
-                className="inline-flex items-center gap-1 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-gray-300 hover:bg-white/[0.04]"
+                className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-gray-300 hover:bg-white/[0.04]"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
                 Back
@@ -354,7 +354,7 @@ export function PortalGuidedTour({
                 setStepIndex((index) => Math.min(index + 1, visibleSteps.length - 1));
               }}
               disabled={finishing}
-              className="inline-flex items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-dark disabled:opacity-50"
+              className="inline-flex min-h-11 items-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-white hover:bg-accent-dark disabled:opacity-50"
             >
               {isLastStep ? "Done" : "Next"}
               {!isLastStep ? <ChevronRight className="h-3.5 w-3.5" /> : null}

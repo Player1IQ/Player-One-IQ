@@ -96,7 +96,7 @@ export function CreatorSetupForm() {
           onChange={(event) =>
             setPrimaryPlatform(event.target.value as Platform)
           }
-          className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+          className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
         >
           {platforms.map((platform) => (
             <option key={platform} value={platform}>
@@ -109,7 +109,7 @@ export function CreatorSetupForm() {
       <button
         type="submit"
         disabled={loading || !creatorName.trim()}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
       >
         {loading ? (
           <>

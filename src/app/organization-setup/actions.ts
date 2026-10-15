@@ -109,7 +109,11 @@ export async function autoBootstrapCreatorWorkspace(): Promise<
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(FUNNEL_SESSION_COOKIE)?.value;
   if (sessionId && isFunnelSessionId(sessionId)) {
-    await insertFunnelEvent({ sessionId, event: "signup" });
+    await insertFunnelEvent({
+      sessionId,
+      event: "signup",
+      email: user.email,
+    });
   }
 
   revalidatePath("/portal");

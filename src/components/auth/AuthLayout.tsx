@@ -52,7 +52,7 @@ export async function AuthLayout({ children, title, subtitle }: AuthLayoutProps)
         </div>
       </div>
 
-      <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2 lg:px-16">
+      <div className="flex w-full flex-col justify-center overflow-x-clip px-4 py-12 sm:px-6 lg:w-1/2 lg:px-16">
         <div className="mx-auto w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <BrandLogoLink href="/login" size="md" />

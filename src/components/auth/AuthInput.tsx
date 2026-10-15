@@ -16,7 +16,7 @@ export function AuthInput({ label, error, id, ...props }: AuthInputProps) {
       </label>
       <input
         id={inputId}
-        className={`w-full rounded-lg border bg-surface px-3 py-2.5 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none focus:ring-1 ${
+        className={`min-h-11 w-full rounded-lg border bg-surface px-3 py-2.5 text-sm text-gray-200 placeholder:text-gray-600 focus:outline-none focus:ring-1 ${
           error
             ? "border-red-500/50 focus:border-red-500/50 focus:ring-red-500/30"
             : "border-border focus:border-accent/50 focus:ring-accent/30"

@@ -72,7 +72,7 @@ export function MarketingNav({ activePath }: MarketingNavProps) {
           </Link>
           <Link
             href="/signup"
-            className="text-sm px-5 py-2.5 rounded-xl font-semibold text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
+            className="inline-flex min-h-11 items-center text-sm px-5 py-2.5 rounded-xl font-semibold text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
             style={{
               background: "linear-gradient(135deg, #7c3aed, #2563eb)",
               boxShadow: "0 4px 20px rgba(124,58,237,0.3)",
@@ -82,7 +82,7 @@ export function MarketingNav({ activePath }: MarketingNavProps) {
           </Link>
           <button
             type="button"
-            className="md:hidden text-white/50 hover:text-white transition-colors"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center md:hidden text-white/50 hover:text-white transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
@@ -103,7 +103,7 @@ export function MarketingNav({ activePath }: MarketingNavProps) {
             <Link
               key={item.label}
               href={item.href}
-              className="block text-sm text-white/60 hover:text-white py-2 border-b border-white/[0.05] last:border-0 transition-colors"
+              className="flex min-h-11 items-center text-sm text-white/60 hover:text-white py-2 border-b border-white/[0.05] last:border-0 transition-colors"
               onClick={() => setMobileOpen(false)}
             >
               {item.label}

@@ -7,8 +7,12 @@
     @apply border-border;
   }
 
+  html {
+    overflow-x: clip;
+  }
+
   body {
-    @apply bg-surface text-gray-100 antialiased;
+    @apply bg-surface text-gray-100 antialiased overflow-x-clip;
     background-image: radial-gradient(
         at 40% 20%,
         rgba(124, 58, 237, 0.06) 0px,

@@ -11,6 +11,11 @@ import { MarketingNav } from "@/components/marketing/MarketingNav";
 import type { FoundingApplicantType } from "@/lib/founding/types";
 import { trackMarketingEvent } from "@/lib/marketing/analytics";
 import { FOUNDING_ROSTER_PATH, SOCIAL_X_URL } from "@/lib/marketing/config";
+import {
+  FOUNDING_CREATOR_CAP,
+  FOUNDING_ORG_CAP,
+  FOUNDING_TOTAL_CAP,
+} from "@/lib/founding/caps";
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -169,9 +174,9 @@ export function FoundingRosterClient() {
             {...fadeUp}
           >
             {[
-              { value: "25", label: t("hero.stats.creators") },
-              { value: "5", label: t("hero.stats.organizations") },
-              { value: "30", label: t("hero.stats.total") },
+              { value: String(FOUNDING_CREATOR_CAP), label: t("hero.stats.creators") },
+              { value: String(FOUNDING_ORG_CAP), label: t("hero.stats.organizations") },
+              { value: String(FOUNDING_TOTAL_CAP), label: t("hero.stats.total") },
             ].map((item) => (
               <div
                 key={item.label}

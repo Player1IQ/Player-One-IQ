@@ -24,7 +24,9 @@ export default async function OnboardingPage({
     redirect("/login?redirect=/onboarding");
   }
 
-  if (!context.required) {
+  // Creators can skip onboarding. Do not bounce them to another authenticated
+  // route from this page — that redirect raced client navigations and rendered blank.
+  if (!context.required && context.flow.audience === "agency") {
     redirect(context.flow.finishHref);
   }
 

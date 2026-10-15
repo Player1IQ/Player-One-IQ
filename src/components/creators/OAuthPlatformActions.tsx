@@ -66,7 +66,7 @@ export function OAuthPlatformActions({
                 trackMarketingEvent("connect_started", { platform });
               }}
               className={cn(
-                "inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors",
+                "inline-flex min-h-11 items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors",
                 prominence === "primary"
                   ? "border-accent/40 bg-accent/10 text-white hover:border-accent/60"
                   : "border-white/[0.08] bg-white/[0.03] text-gray-200 hover:border-accent/30 hover:text-white"

@@ -65,7 +65,10 @@ export function DashboardShell({
 
       {/* Sidebar — drawer on mobile, fixed on desktop */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 lg:translate-x-0 ${
+        role={mobileOpen ? "dialog" : undefined}
+        aria-modal={mobileOpen ? true : undefined}
+        aria-label="Navigation"
+        className={`fixed inset-y-0 left-0 z-50 w-64 max-w-[85vw] transition-transform duration-300 lg:translate-x-0 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -78,6 +81,8 @@ export function DashboardShell({
           teamRole={teamRole}
           isWorkspaceFounder={isWorkspaceFounder}
           onNavigate={() => setMobileOpen(false)}
+          onClose={() => setMobileOpen(false)}
+          showCloseButton
         />
       </div>
 
@@ -86,7 +91,7 @@ export function DashboardShell({
         <div className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-white/[0.06] bg-surface/90 px-4 backdrop-blur-xl lg:hidden">
           <button
             onClick={() => setMobileOpen((o) => !o)}
-            className="rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
             {mobileOpen ? (
@@ -108,7 +113,7 @@ export function DashboardShell({
         </div>
 
         {header}
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="overflow-x-clip p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
 
       {portalTourSteps.length > 0 ? (

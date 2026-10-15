@@ -15,7 +15,7 @@ import {
   isPublicSignupAccountType,
   type SignupAccountType,
 } from "@/lib/organization";
-import { trackMarketingEvent } from "@/lib/marketing/analytics";
+import { markQaTestClient, trackMarketingEvent } from "@/lib/marketing/analytics";
 import { SPONSOR_PRO_EARLY_ACCESS_HREF } from "@/lib/marketing/config";
 import { hardNavigate } from "@/lib/navigation/hard-navigate";
 
@@ -104,12 +104,14 @@ export function SignUpForm() {
       }
 
       if (data.user && !data.session) {
+        markQaTestClient(email.trim());
         trackMarketingEvent("signup");
         setNotice(tErrors("accountCreatedCheckEmail"));
         setLoading(false);
         return;
       }
 
+      markQaTestClient(email.trim());
       trackMarketingEvent("signup");
       hardNavigate(nextPath);
     } catch (err) {
@@ -131,7 +133,7 @@ export function SignUpForm() {
         </div>
         <a
           href={SPONSOR_PRO_EARLY_ACCESS_HREF}
-          className="flex w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
+          className="flex min-h-11 w-full items-center justify-center rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark"
         >
           {t("sponsorEarlyAccessCta")}
         </a>
@@ -211,7 +213,7 @@ export function SignUpForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
       >
         {loading ? (
           <>

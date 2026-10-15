@@ -33,14 +33,18 @@ export function getOnboardingMetadata(
 
 export function shouldShowOnboarding(
   metadata: Record<string, unknown> | null | undefined,
-  options?: { startedCookie?: boolean; recentWorkspace?: boolean }
+  options?: {
+    startedCookie?: boolean;
+    recentWorkspace?: boolean;
+    optional?: boolean;
+  }
 ): boolean {
-  if (options?.startedCookie) return true;
+  if (options?.optional) return false;
 
   const onboarding = getOnboardingMetadata(metadata);
   if (onboarding.onboarding_pending === true) return true;
   if (onboarding.onboarding_completed_at) return false;
-  if (options?.recentWorkspace) return true;
+  if (options?.startedCookie) return true;
 
   return false;
 }

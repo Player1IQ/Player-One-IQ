@@ -110,7 +110,7 @@ export function PortalGrowthPanel({
         <div className="flex flex-wrap gap-3">
           <Link
             href={profileHref}
-            className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-accent/40 hover:text-accent-light"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:border-accent/40 hover:text-accent-light"
           >
             <Link2 className="h-4 w-4" />
             {t("connectMore")}
@@ -118,7 +118,7 @@ export function PortalGrowthPanel({
           {summary.hasOAuthContent ? (
             <Link
               href="/portal/growth"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/[0.06] px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:border-accent/20 hover:text-gray-200"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/[0.06] px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:border-accent/20 hover:text-gray-200"
             >
               <BarChart3 className="h-4 w-4" />
               {t("viewAnalytics")}

@@ -171,7 +171,7 @@ export function OnboardingWizard({
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 py-10">
+    <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col overflow-x-clip px-4 py-8 sm:px-6 sm:py-10">
       <div className="mb-8 flex items-center gap-3">
         <BrandLogo size="md" />
         <div>
@@ -270,7 +270,7 @@ export function OnboardingWizard({
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] px-4 py-2.5 text-sm text-gray-300 transition-colors hover:bg-white/[0.04]"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/[0.08] px-4 py-2.5 text-sm text-gray-300 transition-colors hover:bg-white/[0.04]"
             >
               <ChevronLeft className="h-4 w-4" />
               {t("back")}
@@ -278,11 +278,11 @@ export function OnboardingWizard({
           ) : (
             <span />
           )}
-          {currentStep === "connect" ? (
+          {currentStep === "connect" || flow.audience !== "agency" ? (
             <button
               type="button"
-              onClick={goNext}
-              className="text-sm text-gray-500 transition-colors hover:text-gray-300"
+              onClick={isLastStep || currentStep === "connect" ? goNext : () => void handleFinish()}
+              className="inline-flex min-h-11 items-center px-3 text-sm text-gray-500 transition-colors hover:text-gray-300"
             >
               {t("skipForNow")}
             </button>
@@ -293,7 +293,7 @@ export function OnboardingWizard({
           type="button"
           onClick={goNext}
           disabled={loading}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
         >
           {loading ? (
             <>
