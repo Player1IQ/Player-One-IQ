@@ -7,6 +7,11 @@ import {
   parseFunnelPlatform,
   type FunnelEventName,
 } from "./funnel";
+import {
+  isQaTestEmail,
+  QA_TEST_COOKIE,
+  QA_TEST_STORAGE_KEY,
+} from "@/lib/qa/test-accounts";
 
 export type FoundingAnalyticsEvent =
   | "founding_page_view"
@@ -86,6 +91,28 @@ function shouldTrackWeeklyReturn(): boolean {
   }
 }
 
+export function markQaTestClient(email?: string | null): void {
+  if (typeof window === "undefined") return;
+  if (!isQaTestEmail(email)) return;
+
+  try {
+    window.localStorage.setItem(QA_TEST_STORAGE_KEY, "1");
+  } catch {
+    // Ignore private-mode quota errors.
+  }
+  document.cookie = `${QA_TEST_COOKIE}=1; Path=/; Max-Age=31536000; SameSite=Lax`;
+}
+
+function isQaTestClient(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    if (window.localStorage.getItem(QA_TEST_STORAGE_KEY) === "1") return true;
+  } catch {
+    // Ignore.
+  }
+  return document.cookie.split(";").some((part) => part.trim() === `${QA_TEST_COOKIE}=1`);
+}
+
 function persistFunnelEvent(
   event: FunnelEventName,
   payload?: AnalyticsPayload
@@ -105,6 +132,7 @@ function persistFunnelEvent(
       sessionId,
       event,
       platform,
+      qaTest: isQaTestClient(),
     }),
   }).catch(() => {
     // Funnel writes are best-effort.

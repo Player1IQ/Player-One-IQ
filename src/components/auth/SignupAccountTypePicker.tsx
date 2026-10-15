@@ -31,7 +31,7 @@ export function SignupAccountTypePicker({
               type="button"
               onClick={() => onChange(option.id)}
               className={cn(
-                "rounded-xl border px-4 py-3 text-left transition-colors",
+                "min-h-11 rounded-xl border px-4 py-3 text-left transition-colors",
                 selected
                   ? "border-accent/40 bg-accent/10 ring-1 ring-accent/30"
                   : "border-white/[0.08] bg-surface hover:border-white/[0.14]"

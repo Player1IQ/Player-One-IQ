@@ -1,5 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/admin";
 import type { OAuthPlatform } from "@/lib/platform-oauth/types";
+import { isQaTestEmail } from "@/lib/qa/test-accounts";
 
 export const FUNNEL_SESSION_COOKIE = "p1iq_funnel_sid";
 export const FUNNEL_SESSION_STORAGE_KEY = "p1iq_funnel_sid";
@@ -50,10 +51,14 @@ export async function insertFunnelEvent(input: {
   sessionId: string;
   event: FunnelEventName;
   platform?: OAuthPlatform | null;
+  email?: string | null;
+  qaTest?: boolean;
 }): Promise<{ ok: true } | { error: string; status: number }> {
   if (!isFunnelSessionId(input.sessionId)) {
     return { error: "Invalid session id.", status: 400 };
   }
+
+  const qaTest = Boolean(input.qaTest) || isQaTestEmail(input.email);
 
   const supabase = createServiceClient();
   if (!supabase) {
@@ -75,10 +80,18 @@ export async function insertFunnelEvent(input: {
     return { error: "Rate limited.", status: 429 };
   }
 
+  if (qaTest) {
+    await supabase
+      .from("marketing_funnel_events")
+      .update({ qa_test: true })
+      .eq("session_id", input.sessionId);
+  }
+
   const { error } = await supabase.from("marketing_funnel_events").insert({
     session_id: input.sessionId,
     event: input.event,
     platform: input.platform ?? null,
+    qa_test: qaTest,
   });
 
   if (error) {

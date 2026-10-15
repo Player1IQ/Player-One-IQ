@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentUserMembership } from "@/lib/permissions";
 import { getOnboardingFlow } from "./tour";
 import {
-  isRecentWorkspace,
   isPortalTourPending,
   ONBOARDING_STARTED_COOKIE,
   shouldShowOnboarding,
@@ -11,7 +10,7 @@ import {
 import type { OnboardingFlow } from "./types";
 
 export async function resolveOnboardingRequired(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   user: User,
   options?: { startedCookie?: boolean }
 ): Promise<boolean> {
@@ -23,30 +22,7 @@ export async function resolveOnboardingRequired(
     return true;
   }
 
-  if (user.user_metadata?.onboarding_completed_at) {
-    return false;
-  }
-
-  const { data: ownedOrg } = await supabase
-    .from("organizations")
-    .select("created_at")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (isRecentWorkspace(ownedOrg?.created_at)) {
-    return true;
-  }
-
-  const { data: membership } = await supabase
-    .from("team_members")
-    .select("joined_at")
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .order("joined_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  return isRecentWorkspace(membership?.joined_at);
+  return false;
 }
 
 export async function getOnboardingContext(options?: {

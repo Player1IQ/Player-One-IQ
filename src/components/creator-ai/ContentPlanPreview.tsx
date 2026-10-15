@@ -32,7 +32,7 @@ export function ContentPlanPreview({ plan }: ContentPlanPreviewProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 overflow-x-clip">
       {weeks.length > 1 ? (
         <div className="flex flex-wrap gap-1.5">
           {weeks.map((week, index) => (
@@ -41,7 +41,7 @@ export function ContentPlanPreview({ plan }: ContentPlanPreviewProps) {
               type="button"
               onClick={() => setActiveWeekIndex(index)}
               className={cn(
-                "rounded-full border px-2.5 py-1 text-[11px] transition-colors",
+                "inline-flex min-h-11 items-center rounded-full border px-3 py-1 text-[11px] transition-colors",
                 index === activeWeekIndex
                   ? "border-accent/40 bg-accent/10 text-accent-light"
                   : "border-white/[0.08] bg-white/[0.02] text-gray-400 hover:text-gray-200"

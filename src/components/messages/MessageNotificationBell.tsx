@@ -87,7 +87,7 @@ export function MessageNotificationBell({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.06] bg-surface-raised/60 text-gray-400 transition-colors hover:border-accent/30 hover:text-accent-light"
+        className="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-white/[0.06] bg-surface-raised/60 text-gray-400 transition-colors hover:border-accent/30 hover:text-accent-light"
         aria-label={
           totalCount > 0 ? `${totalCount} unread notifications` : "Notifications"
         }

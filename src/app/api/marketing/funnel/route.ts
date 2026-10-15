@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     "platform" in body && typeof body.platform === "string"
       ? body.platform
       : null;
+  const qaTest = "qaTest" in body && body.qaTest === true;
 
   if (!isFunnelSessionId(sessionId) || !isFunnelEventName(event)) {
     return NextResponse.json({ error: "Invalid event." }, { status: 400 });
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
     sessionId,
     event,
     platform: parseFunnelPlatform(platformRaw),
+    qaTest,
   });
 
   if ("error" in result) {

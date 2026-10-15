@@ -46,7 +46,7 @@
       {
         "num": "01",
         "title": "12 months of Player One IQ Pro",
-        "body": "Founding Creators receive complimentary Pro access during pre-launch plus 12 months beginning at public launch."
+        "body": "Founding Creators receive complimentary Pro access during pre-launch plus 12 months beginning at public launch. After month 12, the workspace continues at the public Creator Pro price unless you cancel."
       },
       {
         "num": "02",
@@ -97,10 +97,10 @@
   },
   "organizations": {
     "title": "Building a team?",
-    "description": "We're also selecting five Founding Organizations to help shape the organization side of Player One IQ.",
+    "description": "We're also selecting 25 Founding Organizations to help shape the organization side of Player One IQ.",
     "benefits": [
       "Complimentary pre-launch access",
-      "12 months of Organization Pro beginning at public launch",
+      "12 months of Organization Pro beginning at public launch, then the public Organization Pro price unless you cancel",
       "Up to 5 initial creator seats",
       "White-glove onboarding",
       "Direct founder access",

@@ -17,7 +17,7 @@ import {
 } from "@/lib/onboarding/queries";
 import { MARKETING_HOME_PATH, STAFF_DASHBOARD_PATH } from "@/lib/routes";
 
-const AUTH_ONLY_ROUTES = ["/login", "/signup", "/forgot-password"];
+const AUTH_ONLY_ROUTES = ["/login", "/forgot-password"];
 
 function isPortalRole(
   role: string | null | undefined
@@ -85,6 +85,8 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
     ]);
 
   const pendingInvite = pendingInviteResult.data;
+  const role = membership?.role ?? null;
+  const onboardingOptional = isPortalRole(role);
 
   const needsToAcceptInvite =
     pendingInvite?.token &&
@@ -107,6 +109,7 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
   if (
     hasOrganization &&
     onboardingRequired &&
+    !onboardingOptional &&
     !isOnboarding &&
     !isOrgSetup &&
     !isInviteRoute &&
@@ -116,13 +119,11 @@ export async function enforceAuthenticatedRouteAccess(): Promise<void> {
     redirect("/onboarding");
   }
 
-  const role = membership?.role ?? null;
-
   if (
     hasOrganization &&
     (isOrgSetup || AUTH_ONLY_ROUTES.includes(pathname))
   ) {
-    if (onboardingRequired) {
+    if (onboardingRequired && !onboardingOptional) {
       redirect("/onboarding");
     }
 

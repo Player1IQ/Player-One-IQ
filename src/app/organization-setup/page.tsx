@@ -4,7 +4,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { OrganizationSetupForm } from "@/components/auth/OrganizationSetupForm";
 import { getPendingInvitationForUser } from "@/lib/team/queries";
 import type { SignupAccountType } from "@/lib/organization";
-import { autoBootstrapCreatorWorkspace } from "./actions";
+import { autoBootstrapCreatorWorkspace } from "./bootstrap";
 
 function parseAccountType(value: string | undefined): SignupAccountType {
   if (value === "creator" || value === "agency" || value === "sponsor") {

@@ -320,7 +320,7 @@ export function CommandPaletteTrigger({
       <button
         type="button"
         onClick={open}
-        className="rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-gray-400 hover:bg-white/5 hover:text-white"
         aria-label={t("searchAriaLabel")}
       >
         <Search className="h-5 w-5" />

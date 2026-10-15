@@ -49,7 +49,7 @@ export function PublicMediaKit({ kit }: { kit: MediaKitRecord }) {
   const bio = snapshot.kitBio.trim() || kit.kitBio.trim();
 
   return (
-    <div className="min-h-screen bg-surface px-4 py-10 sm:px-6">
+    <div className="min-h-screen overflow-x-clip bg-surface px-4 py-10 sm:px-6">
       <div className="mx-auto w-full max-w-3xl space-y-6">
         <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/20 via-surface-raised to-surface" />

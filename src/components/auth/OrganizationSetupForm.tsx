@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { hardNavigate } from "@/lib/navigation/hard-navigate";
+import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
 import { Building2, Gamepad2, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -23,7 +24,6 @@ export function OrganizationSetupForm({
   accountType?: SignupAccountType;
 }) {
   const t = useTranslations("onboarding.organizationSetupForm");
-  const router = useRouter();
   const isSponsor = accountType === "sponsor";
   const isCreator = accountType === "creator";
   const typeOptions = isSponsor
@@ -60,7 +60,7 @@ export function OrganizationSetupForm({
       if (!user) {
         setError(t("mustBeSignedInCreator"));
         setLoading(false);
-        router.push("/login");
+        hardNavigate("/login");
         return;
       }
 
@@ -79,8 +79,7 @@ export function OrganizationSetupForm({
       }
 
       await supabase.auth.refreshSession();
-      router.push("/portal/snapshot");
-      router.refresh();
+      hardNavigate("/portal/snapshot");
       return;
     }
 
@@ -98,7 +97,7 @@ export function OrganizationSetupForm({
     if (!user) {
       setError(t("mustBeSignedInOrg"));
       setLoading(false);
-      router.push("/login");
+      hardNavigate("/login");
       return;
     }
 
@@ -110,8 +109,7 @@ export function OrganizationSetupForm({
 
     if (insertError) {
       if (insertError.code === "23505") {
-        router.push("/");
-        router.refresh();
+        hardNavigate(STAFF_DASHBOARD_PATH);
         return;
       }
       setError(insertError.message);
@@ -137,8 +135,7 @@ export function OrganizationSetupForm({
     }
 
     markOnboardingStartedClient();
-    router.push("/onboarding");
-    router.refresh();
+    hardNavigate("/onboarding");
   }
 
   return (
@@ -199,7 +196,7 @@ export function OrganizationSetupForm({
             id="org-type"
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+            className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
           >
             {typeOptions.map((orgType) => (
               <option key={orgType} value={orgType}>
@@ -224,7 +221,7 @@ export function OrganizationSetupForm({
             onChange={(e) =>
               setPrimaryPlatform(e.target.value as Platform)
             }
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
+            className="min-h-11 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-gray-200 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30"
           >
             {platforms.map((platform) => (
               <option key={platform} value={platform}>
@@ -238,7 +235,7 @@ export function OrganizationSetupForm({
       <button
         type="submit"
         disabled={loading || !name.trim()}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
       >
         {loading ? (
           <>

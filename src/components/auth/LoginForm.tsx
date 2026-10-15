@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { STAFF_DASHBOARD_PATH } from "@/lib/routes";
+import { hardNavigate } from "@/lib/navigation/hard-navigate";
 import { formatAuthError } from "@/lib/auth/errors";
 import { getErrorMessage } from "@/lib/safe-action";
 import { AuthInput } from "./AuthInput";
@@ -28,7 +29,6 @@ function buildAuthQuery(params: {
 export function LoginForm() {
   const t = useTranslations("auth.login");
   const tErrors = useTranslations("auth.errors");
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? STAFF_DASHBOARD_PATH;
   const expired = searchParams.get("expired") === "1";
@@ -69,8 +69,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push(redirect);
-      router.refresh();
+      hardNavigate(redirect);
     } catch (err) {
       setError(formatAuthError(getErrorMessage(err)));
       setLoading(false);
@@ -130,7 +129,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-accent/20 transition-colors hover:bg-accent-dark disabled:opacity-50"
       >
         {loading ? (
           <>

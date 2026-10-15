@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CheckCircle2, Circle, ExternalLink, Loader2 } from "lucide-react";
+import { sendTestOpsAlert } from "@/app/settings/ops-alert-actions";
 
 const PUBLIC_ROUTE_CHECKS = [
   { path: "/login", label: "Login page reachable" },
@@ -50,6 +51,10 @@ export function DeployChecklistCard({
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [routeChecks, setRouteChecks] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [testAlertState, setTestAlertState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const [testAlertError, setTestAlertError] = useState<string | null>(null);
 
   const [apiV1Reachable, setApiV1Reachable] = useState(false);
 
@@ -289,11 +294,53 @@ export function DeployChecklistCard({
         </div>
       ) : null}
 
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <button
+          type="button"
+          disabled={testAlertState === "sending"}
+          onClick={() => {
+            setTestAlertError(null);
+            setTestAlertState("sending");
+            void sendTestOpsAlert().then((result) => {
+              if ("error" in result) {
+                setTestAlertError(result.error);
+                setTestAlertState("error");
+                return;
+              }
+              setTestAlertState("sent");
+            });
+          }}
+          className="inline-flex min-h-11 items-center justify-center rounded-lg border border-accent/30 bg-accent/10 px-4 text-sm font-medium text-accent-light hover:bg-accent/20 disabled:opacity-50"
+        >
+          {testAlertState === "sending" ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Sending test alert…
+            </>
+          ) : testAlertState === "sent" ? (
+            "Test alert sent"
+          ) : (
+            "Send test ops alert"
+          )}
+        </button>
+        {testAlertError ? (
+          <p className="text-xs text-red-400">{testAlertError}</p>
+        ) : testAlertState === "sent" ? (
+          <p className="text-xs text-emerald-400">
+            Check {health?.opsAlertsConfigured ? "your ops inbox" : "ops alert configuration"}.
+          </p>
+        ) : (
+          <p className="text-xs text-gray-500">
+            Sends a one-off email to your ops alert recipients so you can confirm delivery.
+          </p>
+        )}
+      </div>
+
       <a
         href="https://vercel.com/docs/frameworks/nextjs"
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 inline-flex items-center gap-1 text-sm text-accent-light hover:text-white"
+        className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm text-accent-light hover:text-white"
       >
         Vercel Next.js docs
         <ExternalLink className="h-3.5 w-3.5" />

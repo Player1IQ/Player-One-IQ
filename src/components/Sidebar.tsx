@@ -18,6 +18,7 @@ import {
   Trophy,
   UserCog,
   Users,
+  X,
   Zap,
   type LucideIcon,
 } from "lucide-react";
@@ -60,6 +61,8 @@ interface SidebarProps {
   teamRole?: TeamRole | null;
   isWorkspaceFounder?: boolean;
   onNavigate?: () => void;
+  onClose?: () => void;
+  showCloseButton?: boolean;
 }
 
 export function Sidebar({
@@ -71,6 +74,8 @@ export function Sidebar({
   teamRole = null,
   isWorkspaceFounder = false,
   onNavigate,
+  onClose,
+  showCloseButton = false,
 }: SidebarProps) {
   const t = useTranslations("nav");
   const pathname = usePathname();
@@ -89,7 +94,7 @@ export function Sidebar({
       teamRole !== "sponsor");
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-white/[0.06] bg-surface-raised/95 backdrop-blur-xl">
+    <aside className="flex h-full w-full flex-col border-r border-white/[0.06] bg-surface-raised/95 backdrop-blur-xl">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-white/[0.06] px-5">
         {organizationLogoUrl ? (
@@ -120,6 +125,16 @@ export function Sidebar({
             </p>
           </div>
         )}
+        {showCloseButton ? (
+          <button
+            type="button"
+            onClick={onClose}
+            className="ml-auto inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white lg:hidden"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        ) : null}
       </div>
 
       {activeOrganizationId ? (
@@ -142,7 +157,7 @@ export function Sidebar({
               data-tour-nav={item.href}
               onClick={onNavigate}
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                "group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive
                   ? "nav-active-glow text-accent-light"
                   : "text-gray-400 hover:bg-white/[0.04] hover:text-gray-200"

@@ -19,6 +19,10 @@ function loadEnvLocal() {
 loadEnvLocal();
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const isRemoteBase =
+  /^https?:\/\//.test(baseURL) &&
+  !/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/i.test(baseURL);
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
 
 export default defineConfig({
   testDir: "./e2e",
@@ -30,13 +34,21 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "on-first-retry",
+    extraHTTPHeaders: bypassSecret
+      ? {
+          "x-vercel-protection-bypass": bypassSecret,
+          "x-vercel-set-bypass-cookie": "samesitenone",
+        }
+      : undefined,
   },
-  webServer: {
-    command: process.env.CI ? "npm run build && npm run start" : "npm run dev",
-    url: `${baseURL}/api/health`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-  },
+  webServer: isRemoteBase
+    ? undefined
+    : {
+        command: process.env.CI ? "npm run build && npm run start" : "npm run dev",
+        url: `${baseURL.replace(/\/$/, "")}/api/health`,
+        reuseExistingServer: !process.env.CI,
+        timeout: 180_000,
+      },
   projects: [
     {
       name: "chromium",
